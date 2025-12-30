@@ -241,7 +241,7 @@ describe('Integration: Plugin Content Validation', () => {
 
     const content = readFileSync(oraclePath, 'utf8');
     expect(content).toContain('name: oracle');
-    expect(content).toContain('7 Thinking Modes');
+    expect(content).toContain('Omega Thinking Modes');
   });
 
   it('feature command should be installed correctly', () => {
