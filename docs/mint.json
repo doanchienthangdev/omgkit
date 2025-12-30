@@ -306,11 +306,6 @@
   "footerSocials": {
     "github": "https://github.com/doanchienthangdev/omgkit"
   },
-  "analytics": {
-    "posthog": {
-      "apiKey": ""
-    }
-  },
   "feedback": {
     "thumbsRating": true,
     "suggestEdit": true,
