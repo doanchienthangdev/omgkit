@@ -1,519 +1,111 @@
 ---
-name: sequential-thinking
-description: Numbered thought sequences for complex problem decomposition and structured reasoning
+name: thinking-sequentially
+description: AI agent structures complex reasoning through numbered thought sequences with explicit dependencies. Use when facing multi-step problems, complex debugging, or architectural decisions.
 category: methodology
 triggers:
-  - complex problem
+  - sequential thinking
   - step by step
-  - think through
   - reasoning chain
-  - decompose
   - thought process
-  - break down problem
+  - complex problem
 ---
 
-# Sequential Thinking
-
-Master the art of **structured reasoning** through numbered thought sequences. This skill enables systematic problem decomposition, dependency tracking, and clear reasoning chains for complex challenges.
+# Thinking Sequentially
 
 ## Purpose
 
-Sequential thinking transforms chaotic problem-solving into organized, traceable reasoning. It's essential when:
+Structure complex reasoning through numbered thought sequences:
 
-- Problems have multiple interdependent components
-- Solutions require building on previous insights
-- Team communication needs clear reasoning trails
-- Debugging requires systematic elimination
-- Decisions need documented justification
-- Complex architectures require step-by-step design
-- AI agents need to show their work transparently
+- Decompose multi-step problems into traceable chains
+- Track dependencies between insights explicitly
+- Create checkpoints for periodic review
+- Enable revision when assumptions change
+- Support parallel hypothesis exploration
+
+## Quick Start
+
+1. **Define** - State the problem clearly as THOUGHT 1
+2. **Decompose** - Break into numbered thoughts with dependencies
+3. **Track** - Mark dependencies explicitly: "depends on THOUGHT 2"
+4. **Checkpoint** - Summarize every 5-10 thoughts
+5. **Revise** - Update thoughts when assumptions change, invalidate dependents
+6. **Branch** - Explore parallel hypotheses when needed
 
 ## Features
 
-### 1. Numbered Thought Chains
+| Feature | Description | Guide |
+|---------|-------------|-------|
+| Numbered Chains | Explicit THOUGHT 1, 2, 3... with IDs | Number every insight, never skip |
+| Dependencies | Mark what each thought relies on | `[THOUGHT 4] <- depends on [2, 3]` |
+| Checkpoints | Periodic summaries of findings | Every 5-10 thoughts, list key findings |
+| Revisions | Update previous thoughts with new data | Mark original as revised, create new |
+| Branching | Explore multiple hypotheses in parallel | Create named branches, select winner |
+| Visual Maps | Diagram thought relationships | ASCII diagrams for complex chains |
 
-The foundation of sequential thinking is explicit numbering with clear dependencies:
-
-```
-THOUGHT 1: Identify the core problem
-  - What exactly is failing?
-  - What is the expected behavior?
-
-THOUGHT 2: Establish constraints (depends on THOUGHT 1)
-  - What cannot change?
-  - What resources are available?
-
-THOUGHT 3: Generate hypotheses (depends on THOUGHT 1, 2)
-  - Hypothesis A: Configuration issue
-  - Hypothesis B: Data corruption
-  - Hypothesis C: Race condition
-```
-
-### 2. Dependency Tracking
+## Common Patterns
 
 ```
-[THOUGHT 4] ← depends on [THOUGHT 2, 3]
-This ensures we don't proceed without establishing prerequisites.
-Mark dependencies explicitly to enable:
-  - Parallel thinking on independent thoughts
-  - Clear revision paths when assumptions change
-  - Better collaboration handoffs
-```
-
-### 3. TypeScript Implementation
-
-```typescript
-interface Thought {
-  id: number;
-  content: string;
-  dependencies: number[];
-  status: 'active' | 'revised' | 'invalidated';
-  evidence: Evidence[];
-  conclusions: string[];
-  timestamp: Date;
-}
-
-interface ThoughtChain {
-  thoughts: Map<number, Thought>;
-  checkpoints: Checkpoint[];
-  currentBranch: string;
-}
-
-interface Evidence {
-  type: 'observation' | 'data' | 'assumption' | 'external';
-  content: string;
-  confidence: number; // 0-100
-  source?: string;
-}
-
-interface Checkpoint {
-  afterThought: number;
-  keyFindings: string[];
-  openQuestions: string[];
-  nextSteps: string[];
-  branchPoint?: boolean;
-}
-
-class SequentialThinkingEngine {
-  private chain: ThoughtChain;
-  private thoughtCounter: number = 0;
-
-  constructor() {
-    this.chain = {
-      thoughts: new Map(),
-      checkpoints: [],
-      currentBranch: 'main'
-    };
-  }
-
-  addThought(
-    content: string,
-    dependencies: number[] = []
-  ): Thought {
-    // Validate dependencies exist
-    for (const depId of dependencies) {
-      if (!this.chain.thoughts.has(depId)) {
-        throw new Error(`Dependency THOUGHT ${depId} not found`);
-      }
-      const dep = this.chain.thoughts.get(depId)!;
-      if (dep.status === 'invalidated') {
-        throw new Error(`Cannot depend on invalidated THOUGHT ${depId}`);
-      }
-    }
-
-    const thought: Thought = {
-      id: ++this.thoughtCounter,
-      content,
-      dependencies,
-      status: 'active',
-      evidence: [],
-      conclusions: [],
-      timestamp: new Date()
-    };
-
-    this.chain.thoughts.set(thought.id, thought);
-    return thought;
-  }
-
-  reviseThought(
-    id: number,
-    newContent: string,
-    reason: string
-  ): void {
-    const thought = this.chain.thoughts.get(id);
-    if (!thought) throw new Error(`THOUGHT ${id} not found`);
-
-    // Mark original as revised
-    thought.status = 'revised';
-
-    // Create revision thought
-    this.addThought(
-      `REVISION of THOUGHT ${id}: ${newContent}\nReason: ${reason}`,
-      [id]
-    );
-
-    // Invalidate dependent thoughts
-    this.invalidateDependents(id);
-  }
-
-  private invalidateDependents(thoughtId: number): void {
-    for (const [id, thought] of this.chain.thoughts) {
-      if (thought.dependencies.includes(thoughtId)) {
-        thought.status = 'invalidated';
-        this.invalidateDependents(id);
-      }
-    }
-  }
-
-  createCheckpoint(): Checkpoint {
-    const activeThoughts = Array.from(this.chain.thoughts.values())
-      .filter(t => t.status === 'active');
-
-    const checkpoint: Checkpoint = {
-      afterThought: this.thoughtCounter,
-      keyFindings: activeThoughts.flatMap(t => t.conclusions),
-      openQuestions: [],
-      nextSteps: []
-    };
-
-    this.chain.checkpoints.push(checkpoint);
-    return checkpoint;
-  }
-
-  getDependencyGraph(): string {
-    let graph = 'DEPENDENCY GRAPH:\n';
-    for (const [id, thought] of this.chain.thoughts) {
-      const deps = thought.dependencies.length > 0
-        ? ` ← [${thought.dependencies.join(', ')}]`
-        : ' (root)';
-      const status = thought.status !== 'active'
-        ? ` [${thought.status}]`
-        : '';
-      graph += `  THOUGHT ${id}${deps}${status}\n`;
-    }
-    return graph;
-  }
-}
-```
-
-### 4. Revision and Backtracking
-
-```
-REVISION: Updating THOUGHT 3 based on new evidence
-  - Original: Assumed single-threaded execution
-  - New insight: System uses worker threads
-  - Impact: Hypothesis C (race condition) now most likely
-
-BACKTRACK: Returning to THOUGHT 2
-  - Constraint we missed: 100ms timeout requirement
-  - This invalidates THOUGHT 5-7, need to restart from here
-```
-
-### 5. Checkpoint Summaries
-
-```
-=== CHECKPOINT after THOUGHT 10 ===
-KEY FINDINGS:
-1. Root cause identified: Memory leak in cache layer
-2. Two viable solutions identified
-3. Solution A preferred (lower risk)
-
-OPEN QUESTIONS:
-- Performance impact of Solution A?
-- Rollback strategy needed?
-
-NEXT STEPS:
-- THOUGHT 11: Benchmark Solution A
-- THOUGHT 12: Design rollback procedure
-===================================
-```
-
-### 6. Visual Thought Mapping
-
-```
-                    [THOUGHT 1: Problem Definition]
-                           |
-              +------------+------------+
-              |                         |
-    [THOUGHT 2: Constraints]  [THOUGHT 3: Context]
-              |                         |
-              +------------+------------+
-                           |
-                [THOUGHT 4: Hypotheses]
-                     /    |    \
-                   /      |      \
-            [T5: H1]  [T6: H2]  [T7: H3]
-                         |
-                   [THOUGHT 8: Solution]
-```
-
-### 7. Branching Strategy
-
-```typescript
-interface Branch {
-  name: string;
-  parentThought: number;
-  thoughts: number[];
-  status: 'exploring' | 'selected' | 'abandoned';
-  mergeResult?: string;
-}
-
-class BranchingThoughtEngine extends SequentialThinkingEngine {
-  private branches: Map<string, Branch> = new Map();
-
-  createBranch(name: string, parentThoughtId: number): void {
-    this.branches.set(name, {
-      name,
-      parentThought: parentThoughtId,
-      thoughts: [],
-      status: 'exploring'
-    });
-  }
-
-  exploreBranches(
-    hypotheses: string[]
-  ): Map<string, number[]> {
-    const results = new Map<string, number[]>();
-
-    for (let i = 0; i < hypotheses.length; i++) {
-      const branchName = `hypothesis-${i + 1}`;
-      this.createBranch(branchName, this.thoughtCounter);
-
-      // Add exploration thoughts for this hypothesis
-      const thought = this.addThought(
-        `Exploring: ${hypotheses[i]}`,
-        [this.thoughtCounter]
-      );
-
-      results.set(branchName, [thought.id]);
-    }
-
-    return results;
-  }
-
-  selectBranch(name: string, reason: string): void {
-    const branch = this.branches.get(name);
-    if (!branch) throw new Error(`Branch ${name} not found`);
-
-    branch.status = 'selected';
-
-    // Abandon other branches
-    for (const [branchName, b] of this.branches) {
-      if (branchName !== name && b.status === 'exploring') {
-        b.status = 'abandoned';
-      }
-    }
-
-    // Document decision
-    this.addThought(
-      `BRANCH SELECTION: Chose ${name}\nReason: ${reason}`,
-      branch.thoughts
-    );
-  }
-}
-```
-
-## Use Cases
-
-### Complex Algorithm Design
-
-```
-THOUGHT 1: Define the problem space
-  - Input: Unsorted array of N integers
-  - Output: K largest elements
-  - Constraint: O(N log K) time complexity
-
-THOUGHT 2: Evaluate known approaches
-  - Full sort: O(N log N) - too slow
-  - Min-heap of size K: O(N log K) - meets requirement
-  - QuickSelect: O(N) average - better but unstable
-
-THOUGHT 3: Select approach (depends on THOUGHT 2)
-  - Choose min-heap for guaranteed performance
-  - QuickSelect as optimization for large N
-
-THOUGHT 4: Design implementation (depends on THOUGHT 3)
-  - Initialize min-heap with first K elements
-  - For remaining elements, compare with heap root
-  - If larger, replace root and heapify
-```
-
-### System Architecture Decisions
-
-```
-THOUGHT 1: Identify scaling bottleneck
-  - Database reads: 10,000 QPS
-  - Current capacity: 2,000 QPS
-  - Gap: 5x improvement needed
-
-THOUGHT 2: List scaling options
-  - Read replicas
-  - Caching layer
-  - Database sharding
-  - Query optimization
-
-THOUGHT 3: Evaluate trade-offs (depends on THOUGHT 1, 2)
-  | Option          | Complexity | Time | Cost  |
-  |-----------------|------------|------|-------|
-  | Read replicas   | Low        | 1w   | $500  |
-  | Caching         | Medium     | 2w   | $200  |
-  | Sharding        | High       | 4w   | $1000 |
-  | Query optimize  | Low        | 3d   | $0    |
-
-THOUGHT 4: Recommendation
-  - Immediate: Query optimization (quick win)
-  - Short-term: Caching layer
-  - Long-term: Read replicas as traffic grows
-```
-
-### Debugging Multi-Component Issues
-
-```
-THOUGHT 1: Reproduce the issue
-  - Steps: Login → Dashboard → Click "Export"
-  - Result: 500 error after 30 seconds
-  - Frequency: 100% reproducible
-
-THOUGHT 2: Identify affected components
-  - Frontend: React dashboard
-  - API: Node.js Express server
-  - Database: PostgreSQL
-  - External: S3 for file storage
-
-THOUGHT 3: Isolate the failure point (depends on THOUGHT 2)
-  - Frontend logs: Request sent successfully
-  - API logs: Request received, DB query started
-  - DB logs: Query completed in 2 seconds
-  - API logs: S3 upload started... [timeout]
-
-  FINDING: Issue is S3 upload timeout
-
-THOUGHT 4: Root cause analysis (depends on THOUGHT 3)
-  - S3 region: us-east-1
-  - Server region: eu-west-1
-  - File size: 50MB
-  - Network latency: 150ms
-
-  ROOT CAUSE: Cross-region upload with large file
-```
-
-### AI Agent Task Decomposition
-
-```
-THOUGHT 1: Parse user request
-  - Goal: "Build a user authentication system"
-  - Implicit requirements: Security, scalability, UX
-  - Constraints: Existing tech stack (Next.js, PostgreSQL)
-
-THOUGHT 2: Identify subtasks (depends on THOUGHT 1)
-  1. Database schema for users/sessions
-  2. Authentication API endpoints
-  3. Password hashing implementation
-  4. Session management
-  5. Frontend login/signup forms
-  6. Password reset flow
-
-THOUGHT 3: Determine execution order (depends on THOUGHT 2)
-  - Sequential: 1 → 2 → 4 → 6 (data dependencies)
-  - Parallel: 3 can be done independently
-  - Parallel: 5 can start after 2 is defined
-
-THOUGHT 4: Dispatch to specialized agents
-  - Database Agent → Subtask 1
-  - API Agent → Subtasks 2, 4, 6
-  - Security Agent → Subtask 3
-  - Frontend Agent → Subtask 5 (waits for 2)
-```
-
-## Best Practices
-
-### Do's
-- **Number every thought explicitly** - Enables reference and revision
-- **Mark dependencies clearly** - "This depends on THOUGHT 3"
-- **Allow revision** - "REVISION: Updating THOUGHT 2 based on..."
-- **Summarize at checkpoints** - Every 5-10 thoughts
-- **Time-box thoughts** - Prevent infinite exploration
-- **Validate assumptions early** - Mark assumptions and test them
-- **Branch for exploration** - Create separate paths for different hypotheses
-
-### Don'ts
-- Don't skip numbering for "obvious" thoughts
-- Don't hide dependencies in prose
-- Don't delete invalid thoughts (strike through instead)
-- Don't exceed 20 thoughts without a checkpoint
-- Don't branch more than 3 levels deep
-- Don't ignore contradictory evidence
-- Don't proceed with invalidated dependencies
-
-### Templates
-
-**Problem Analysis Template:**
-```
+# Problem Analysis Pattern
 THOUGHT 1: Problem statement
 THOUGHT 2: Success criteria
 THOUGHT 3: Constraints
-THOUGHT 4: Assumptions (validate these!)
+THOUGHT 4: Assumptions (validate!)
 THOUGHT 5-N: Solution exploration
-CHECKPOINT: Summary and decision
-```
+=== CHECKPOINT ===
 
-**Decision Making Template:**
-```
+# Decision Making Pattern
 THOUGHT 1: Decision to make
 THOUGHT 2: Options identified
 THOUGHT 3-N: Evaluate each option
 THOUGHT N+1: Comparison matrix
-THOUGHT N+2: Recommendation with rationale
-```
+THOUGHT N+2: Recommendation
 
-**Investigation Template:**
-```
+# Investigation Pattern
 THOUGHT 1: What we observed
 THOUGHT 2: What we expected
 THOUGHT 3: Gap analysis
-THOUGHT 4-N: Hypothesis generation and testing
-CHECKPOINT: Root cause identified
-THOUGHT N+1: Solution design
+THOUGHT 4-N: Hypothesis testing
+=== CHECKPOINT: Root cause ===
 ```
+
+```
+# Visual thought mapping
+        [THOUGHT 1: Problem]
+               |
+    +----------+----------+
+    |                     |
+[THOUGHT 2]         [THOUGHT 3]
+    |                     |
+    +----------+----------+
+               |
+        [THOUGHT 4: Synthesis]
+```
+
+## Use Cases
+
+- Multi-step debugging requiring traceable reasoning chains
+- Architectural decisions with complex trade-off analysis
+- Code review requiring systematic examination of multiple concerns
+- Root cause analysis with hypothesis tracking
+- Complex refactoring requiring dependency-aware planning
+
+## Best Practices
+
+| Do | Avoid |
+|----|-------|
+| Number every thought explicitly | Skipping numbers for "obvious" thoughts |
+| Mark dependencies clearly | Hiding dependencies in prose |
+| Summarize at checkpoints | Exceeding 20 thoughts without checkpoint |
+| Allow revision with reason | Deleting invalid thoughts (strike through) |
+| Time-box each thought | Infinite exploration without bounds |
+| Branch for parallel exploration | Branching more than 3 levels deep |
+| Validate assumptions early | Proceeding with invalidated dependencies |
 
 ## Related Skills
 
-- **writing-plans** - Use sequential thinking to create detailed plans
-- **brainstorming** - Generate options in THOUGHT steps
-- **problem-solving** - Apply systematic approaches
-- **root-cause-tracing** - Use numbered investigation steps
-- **systematic-debugging** - Structure debugging as thought chain
-- **dispatching-parallel-agents** - Coordinate parallel exploration branches
+See also these related skill documents for complementary techniques:
 
-## Integration Example
-
-```markdown
-# Feature: User Authentication Redesign
-
-## Sequential Analysis
-
-THOUGHT 1: Current pain points
-- Session timeout too aggressive (15 min)
-- No "remember me" option
-- MFA required on every login
-
-THOUGHT 2: User research findings (external input)
-- 73% want "remember me"
-- 45% frustrated by frequent MFA
-- Security team requires MFA for sensitive actions
-
-THOUGHT 3: Design constraints (depends on THOUGHT 1, 2)
-- Must maintain SOC2 compliance
-- Cannot increase session beyond 24h
-- MFA must protect financial transactions
-
-THOUGHT 4: Proposed solution (depends on THOUGHT 3)
-- Implement "remember device" (30 days)
-- Step-up MFA only for sensitive actions
-- Extend session to 60 min with activity
-
-=== CHECKPOINT ===
-Solution balances security and UX.
-Next: Security review before implementation.
-==================
-```
+- **writing-plans** - Structure plans as numbered thought sequences
+- **debugging-systematically** - Apply sequential debugging steps
+- **tracing-root-causes** - Use numbered investigation chains
+- **brainstorming-ideas** - Generate options in thought steps

@@ -1,6 +1,6 @@
 ---
-name: mcp-development
-description: Create Model Context Protocol servers, tools, and resources for AI assistant integration
+name: Developing MCP Servers
+description: Creates Model Context Protocol servers with tools, resources, and prompts for AI assistant integration. Use when extending Claude with custom capabilities, building AI tool integrations, or exposing APIs to AI assistants.
 category: tools
 triggers:
   - mcp server
@@ -12,721 +12,98 @@ triggers:
   - tool creation
 ---
 
-# MCP Development
+# Developing MCP Servers
 
-Create **Model Context Protocol (MCP) servers** that extend AI assistants like Claude with custom tools, resources, and prompts. This skill covers server architecture, tool design, and production deployment patterns.
-
-## Purpose
-
-MCP enables AI assistants to interact with external systems securely and efficiently:
-
-- Create custom tools that AI can use during conversations
-- Expose data resources for AI to read and analyze
-- Define prompt templates for consistent AI interactions
-- Build integrations with databases, APIs, and services
-- Manage server lifecycle and error handling
-
-## Features
-
-### 1. FastMCP Server (Python)
+## Quick Start
 
 ```python
-# Basic MCP server with FastMCP
 from fastmcp import FastMCP
 
-# Initialize server
 mcp = FastMCP("my-service")
 
-# Define a simple tool
 @mcp.tool()
 def get_weather(city: str) -> str:
     """Get current weather for a city.
 
     Args:
         city: Name of the city to get weather for
-
-    Returns:
-        Weather information as a formatted string
     """
-    # Fetch from weather API
-    response = requests.get(f"https://api.weather.com/{city}")
-    data = response.json()
+    return f"Weather in {city}: 72F, Sunny"
 
-    return f"""
-    Weather in {city}:
-    Temperature: {data['temp']}°F
-    Conditions: {data['conditions']}
-    Humidity: {data['humidity']}%
-    """
-
-# Tool with complex parameters
-@mcp.tool()
-def search_database(
-    query: str,
-    table: str = "users",
-    limit: int = 10,
-    include_deleted: bool = False
-) -> list[dict]:
-    """Search the database with flexible parameters.
-
-    Args:
-        query: Search query string
-        table: Table to search (default: users)
-        limit: Maximum results to return (default: 10)
-        include_deleted: Include soft-deleted records
-
-    Returns:
-        List of matching records
-    """
-    sql = f"SELECT * FROM {table} WHERE content LIKE %s"
-    if not include_deleted:
-        sql += " AND deleted_at IS NULL"
-    sql += f" LIMIT {limit}"
-
-    return db.execute(sql, [f"%{query}%"]).fetchall()
-
-# Resource exposure
 @mcp.resource("config://settings")
 def get_settings() -> str:
     """Expose application settings as a resource."""
-    return json.dumps(load_settings(), indent=2)
+    return json.dumps({"theme": "dark", "language": "en"})
 
-# Dynamic resource with URI template
-@mcp.resource("user://{user_id}/profile")
-def get_user_profile(user_id: str) -> str:
-    """Get user profile data.
-
-    Args:
-        user_id: The user's unique identifier
-    """
-    user = db.get_user(user_id)
-    return json.dumps(user.to_dict())
-
-# Prompt template
 @mcp.prompt()
 def analyze_code(code: str, language: str = "python") -> str:
-    """Generate a prompt for code analysis.
+    """Generate a prompt for code analysis."""
+    return f"Analyze this {language} code:\n```{language}\n{code}\n```"
 
-    Args:
-        code: The code to analyze
-        language: Programming language
-    """
-    return f"""
-    Please analyze the following {language} code:
-
-    ```{language}
-    {code}
-    ```
-
-    Provide:
-    1. A brief summary of what the code does
-    2. Potential bugs or issues
-    3. Performance considerations
-    4. Security concerns
-    5. Suggested improvements
-    """
-
-# Run server
 if __name__ == "__main__":
     mcp.run()
 ```
 
-### 2. TypeScript MCP Server
+## Features
+
+| Feature | Description | Guide |
+|---------|-------------|-------|
+| Tool Definition | Create callable tools with typed parameters | Use @mcp.tool() decorator with docstrings |
+| Resource Exposure | Expose data resources for AI to read | Use @mcp.resource() with URI patterns |
+| Prompt Templates | Define reusable prompt templates | Use @mcp.prompt() for consistent prompts |
+| Dynamic Resources | Create parameterized resource URIs | Use URI templates like "user://{id}/profile" |
+| Progress Reporting | Report progress for long operations | Use ctx.report_progress() in async tools |
+| Streaming Results | Stream results for large outputs | Use AsyncGenerator return type |
+| Lifecycle Hooks | Manage server startup and shutdown | Use lifespan context manager |
+| Middleware | Add logging, rate limiting, auth | Implement middleware functions |
+| Error Handling | Return structured error responses | Use try/except with error codes |
+| Testing | Test tools and resources in isolation | Use MCPTestClient for unit tests |
+
+## Common Patterns
+
+### TypeScript MCP Server
 
 ```typescript
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  CallToolRequestSchema,
-  ListResourcesRequestSchema,
-  ListToolsRequestSchema,
-  ReadResourceRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
-import { z } from "zod";
 
-// Server configuration
 const server = new Server(
-  {
-    name: "my-mcp-server",
-    version: "1.0.0",
-  },
-  {
-    capabilities: {
-      tools: {},
-      resources: {},
-      prompts: {},
-    },
-  }
+  { name: "my-server", version: "1.0.0" },
+  { capabilities: { tools: {}, resources: {} } }
 );
 
-// Tool definitions with Zod schemas
-const FileSearchSchema = z.object({
-  query: z.string().describe("Search query"),
-  directory: z.string().optional().describe("Directory to search in"),
-  fileTypes: z.array(z.string()).optional().describe("File extensions to include"),
-  maxResults: z.number().optional().default(20).describe("Maximum results"),
-});
-
-const DatabaseQuerySchema = z.object({
-  sql: z.string().describe("SQL query to execute"),
-  params: z.array(z.unknown()).optional().describe("Query parameters"),
-});
-
-// Register tools
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [
-    {
-      name: "file_search",
-      description: "Search for files matching a query",
-      inputSchema: {
-        type: "object",
-        properties: {
-          query: { type: "string", description: "Search query" },
-          directory: { type: "string", description: "Directory to search" },
-          fileTypes: {
-            type: "array",
-            items: { type: "string" },
-            description: "File extensions",
-          },
-          maxResults: {
-            type: "number",
-            description: "Max results",
-            default: 20,
-          },
-        },
-        required: ["query"],
-      },
+  tools: [{
+    name: "search",
+    description: "Search the database",
+    inputSchema: {
+      type: "object",
+      properties: { query: { type: "string" } },
+      required: ["query"],
     },
-    {
-      name: "database_query",
-      description: "Execute a read-only database query",
-      inputSchema: {
-        type: "object",
-        properties: {
-          sql: { type: "string", description: "SQL query" },
-          params: { type: "array", description: "Query parameters" },
-        },
-        required: ["sql"],
-      },
-    },
-  ],
+  }],
 }));
 
-// Handle tool calls
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-
-  try {
-    switch (name) {
-      case "file_search": {
-        const params = FileSearchSchema.parse(args);
-        const results = await searchFiles(params);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(results, null, 2),
-            },
-          ],
-        };
-      }
-
-      case "database_query": {
-        const params = DatabaseQuerySchema.parse(args);
-        // Validate read-only
-        if (!isReadOnlyQuery(params.sql)) {
-          throw new Error("Only SELECT queries are allowed");
-        }
-        const results = await executeQuery(params.sql, params.params);
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(results, null, 2),
-            },
-          ],
-        };
-      }
-
-      default:
-        throw new Error(`Unknown tool: ${name}`);
-    }
-  } catch (error) {
-    return {
-      content: [
-        {
-          type: "text",
-          text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
-        },
-      ],
-      isError: true,
-    };
+  if (name === "search") {
+    const results = await searchDatabase(args.query);
+    return { content: [{ type: "text", text: JSON.stringify(results) }] };
   }
+  throw new Error(`Unknown tool: ${name}`);
 });
 
-// Resource handlers
-server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-  resources: [
-    {
-      uri: "config://app",
-      name: "Application Configuration",
-      description: "Current application configuration",
-      mimeType: "application/json",
-    },
-    {
-      uri: "schema://database",
-      name: "Database Schema",
-      description: "Database table definitions",
-      mimeType: "application/json",
-    },
-  ],
-}));
-
-server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-  const { uri } = request.params;
-
-  if (uri === "config://app") {
-    return {
-      contents: [
-        {
-          uri,
-          mimeType: "application/json",
-          text: JSON.stringify(getAppConfig(), null, 2),
-        },
-      ],
-    };
-  }
-
-  if (uri === "schema://database") {
-    return {
-      contents: [
-        {
-          uri,
-          mimeType: "application/json",
-          text: JSON.stringify(getDatabaseSchema(), null, 2),
-        },
-      ],
-    };
-  }
-
-  throw new Error(`Unknown resource: ${uri}`);
-});
-
-// Start server
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("MCP server running on stdio");
-}
-
-main().catch(console.error);
+const transport = new StdioServerTransport();
+await server.connect(transport);
 ```
 
-### 3. Advanced Tool Patterns
+### Database Integration Server
 
 ```python
-from fastmcp import FastMCP, Context
-from typing import AsyncGenerator
-import asyncio
-
-mcp = FastMCP("advanced-tools")
-
-# Context-aware tool
-@mcp.tool()
-async def analyze_file(ctx: Context, file_path: str) -> str:
-    """Analyze a file using context for progress reporting.
-
-    Args:
-        ctx: MCP context for progress updates
-        file_path: Path to the file to analyze
-    """
-    # Report progress
-    await ctx.report_progress(0, 100, "Starting analysis...")
-
-    content = await read_file(file_path)
-    await ctx.report_progress(25, 100, "File loaded")
-
-    # Perform analysis
-    syntax_check = await check_syntax(content)
-    await ctx.report_progress(50, 100, "Syntax checked")
-
-    security_scan = await scan_security(content)
-    await ctx.report_progress(75, 100, "Security scanned")
-
-    quality_metrics = await analyze_quality(content)
-    await ctx.report_progress(100, 100, "Analysis complete")
-
-    return json.dumps({
-        "syntax": syntax_check,
-        "security": security_scan,
-        "quality": quality_metrics,
-    }, indent=2)
-
-# Streaming tool for long operations
-@mcp.tool()
-async def stream_logs(
-    log_file: str,
-    filter_pattern: str | None = None,
-    follow: bool = False
-) -> AsyncGenerator[str, None]:
-    """Stream log file content with optional filtering.
-
-    Args:
-        log_file: Path to log file
-        filter_pattern: Regex pattern to filter logs
-        follow: Whether to follow new entries (like tail -f)
-
-    Yields:
-        Filtered log lines
-    """
-    pattern = re.compile(filter_pattern) if filter_pattern else None
-
-    async with aiofiles.open(log_file, 'r') as f:
-        # Read existing content
-        async for line in f:
-            if pattern is None or pattern.search(line):
-                yield line
-
-        # Follow new content if requested
-        if follow:
-            while True:
-                line = await f.readline()
-                if line:
-                    if pattern is None or pattern.search(line):
-                        yield line
-                else:
-                    await asyncio.sleep(0.1)
-
-# Tool with complex return type
-@mcp.tool()
-def query_with_pagination(
-    query: str,
-    page: int = 1,
-    page_size: int = 20
-) -> dict:
-    """Query data with pagination support.
-
-    Args:
-        query: Search query
-        page: Page number (1-indexed)
-        page_size: Items per page
-
-    Returns:
-        Paginated results with metadata
-    """
-    offset = (page - 1) * page_size
-    results = db.search(query, limit=page_size, offset=offset)
-    total = db.count(query)
-
-    return {
-        "data": results,
-        "pagination": {
-            "page": page,
-            "page_size": page_size,
-            "total_items": total,
-            "total_pages": (total + page_size - 1) // page_size,
-            "has_next": page * page_size < total,
-            "has_prev": page > 1,
-        }
-    }
-
-# Error handling wrapper
-@mcp.tool()
-def safe_operation(operation: str, params: dict) -> dict:
-    """Execute operation with comprehensive error handling.
-
-    Args:
-        operation: Operation name to execute
-        params: Operation parameters
-
-    Returns:
-        Operation result or error details
-    """
-    try:
-        result = execute_operation(operation, params)
-        return {
-            "success": True,
-            "data": result,
-            "timestamp": datetime.utcnow().isoformat(),
-        }
-    except ValidationError as e:
-        return {
-            "success": False,
-            "error": "validation_error",
-            "message": str(e),
-            "fields": e.errors(),
-        }
-    except PermissionError as e:
-        return {
-            "success": False,
-            "error": "permission_denied",
-            "message": str(e),
-        }
-    except Exception as e:
-        logger.exception("Operation failed")
-        return {
-            "success": False,
-            "error": "internal_error",
-            "message": "An unexpected error occurred",
-            "reference_id": generate_error_id(),
-        }
-```
-
-### 4. Resource Management
-
-```python
-from fastmcp import FastMCP
-from typing import Optional
-import yaml
-
-mcp = FastMCP("resource-server")
-
-# Static resource
-@mcp.resource("config://database")
-def database_config() -> str:
-    """Database configuration resource."""
-    return yaml.dump({
-        "host": os.getenv("DB_HOST", "localhost"),
-        "port": int(os.getenv("DB_PORT", 5432)),
-        "database": os.getenv("DB_NAME", "app"),
-        "pool_size": 10,
-    })
-
-# Dynamic resource with template
-@mcp.resource("table://{schema}/{table}/schema")
-def table_schema(schema: str, table: str) -> str:
-    """Get schema definition for a specific table.
-
-    Args:
-        schema: Database schema name
-        table: Table name
-    """
-    columns = db.get_table_schema(schema, table)
-    return json.dumps({
-        "schema": schema,
-        "table": table,
-        "columns": [
-            {
-                "name": col.name,
-                "type": col.type,
-                "nullable": col.nullable,
-                "default": col.default,
-                "primary_key": col.primary_key,
-            }
-            for col in columns
-        ],
-        "indexes": db.get_indexes(schema, table),
-        "foreign_keys": db.get_foreign_keys(schema, table),
-    }, indent=2)
-
-# Resource with MIME type
-@mcp.resource("file://{path}", mime_type="text/plain")
-def file_content(path: str) -> str:
-    """Read file content as resource.
-
-    Args:
-        path: File path relative to workspace
-    """
-    full_path = os.path.join(WORKSPACE_ROOT, path)
-
-    # Security: ensure path is within workspace
-    if not os.path.realpath(full_path).startswith(WORKSPACE_ROOT):
-        raise ValueError("Path outside workspace")
-
-    with open(full_path, 'r') as f:
-        return f.read()
-
-# Binary resource
-@mcp.resource("image://{image_id}", mime_type="image/png")
-def get_image(image_id: str) -> bytes:
-    """Get image data as binary resource.
-
-    Args:
-        image_id: Image identifier
-    """
-    return storage.get_image(image_id)
-
-# Aggregated resource
-@mcp.resource("project://overview")
-def project_overview() -> str:
-    """Get complete project overview."""
-    return json.dumps({
-        "name": project.name,
-        "version": project.version,
-        "dependencies": project.get_dependencies(),
-        "scripts": project.get_scripts(),
-        "structure": project.get_directory_tree(),
-        "recent_changes": project.get_recent_commits(10),
-    }, indent=2)
-```
-
-### 5. Server Lifecycle and Configuration
-
-```python
-from fastmcp import FastMCP
-from contextlib import asynccontextmanager
-
-# Server with lifecycle hooks
-@asynccontextmanager
-async def lifespan(server: FastMCP):
-    """Manage server lifecycle."""
-    # Startup
-    print("Starting MCP server...")
-    await database.connect()
-    await cache.connect()
-
-    yield  # Server is running
-
-    # Shutdown
-    print("Shutting down MCP server...")
-    await database.disconnect()
-    await cache.disconnect()
-
-mcp = FastMCP("lifecycle-server", lifespan=lifespan)
-
-# Configuration management
-class ServerConfig:
-    def __init__(self):
-        self.debug = os.getenv("DEBUG", "false").lower() == "true"
-        self.max_connections = int(os.getenv("MAX_CONNECTIONS", 100))
-        self.timeout = int(os.getenv("TIMEOUT", 30))
-        self.allowed_paths = os.getenv("ALLOWED_PATHS", ".").split(",")
-
-config = ServerConfig()
-
-# Middleware for logging
-@mcp.middleware
-async def logging_middleware(request, call_next):
-    """Log all tool calls."""
-    start_time = time.time()
-    logger.info(f"Tool call: {request.method} - {request.params}")
-
-    response = await call_next(request)
-
-    duration = time.time() - start_time
-    logger.info(f"Completed in {duration:.2f}s")
-
-    return response
-
-# Rate limiting middleware
-@mcp.middleware
-async def rate_limit_middleware(request, call_next):
-    """Apply rate limiting."""
-    client_id = request.context.get("client_id", "default")
-
-    if not rate_limiter.allow(client_id):
-        raise RateLimitError("Too many requests")
-
-    return await call_next(request)
-
-# Health check resource
-@mcp.resource("health://status")
-def health_status() -> str:
-    """Server health status."""
-    return json.dumps({
-        "status": "healthy",
-        "uptime": get_uptime(),
-        "connections": {
-            "database": database.is_connected(),
-            "cache": cache.is_connected(),
-        },
-        "metrics": {
-            "requests_total": metrics.requests_total,
-            "errors_total": metrics.errors_total,
-            "avg_response_time": metrics.avg_response_time,
-        },
-    })
-```
-
-### 6. Testing MCP Servers
-
-```python
-import pytest
-from fastmcp.testing import MCPTestClient
-
-@pytest.fixture
-def client():
-    """Create test client for MCP server."""
-    return MCPTestClient(mcp)
-
-class TestMCPServer:
-    async def test_tool_execution(self, client):
-        """Test basic tool execution."""
-        result = await client.call_tool("get_weather", {"city": "Seattle"})
-
-        assert result.success
-        assert "Temperature" in result.content
-        assert "Seattle" in result.content
-
-    async def test_tool_validation(self, client):
-        """Test parameter validation."""
-        result = await client.call_tool("get_weather", {})
-
-        assert not result.success
-        assert "city" in result.error.lower()
-
-    async def test_resource_access(self, client):
-        """Test resource retrieval."""
-        result = await client.read_resource("config://database")
-
-        assert result.success
-        data = json.loads(result.content)
-        assert "host" in data
-        assert "port" in data
-
-    async def test_dynamic_resource(self, client):
-        """Test dynamic resource with parameters."""
-        result = await client.read_resource("table://public/users/schema")
-
-        assert result.success
-        schema = json.loads(result.content)
-        assert schema["table"] == "users"
-        assert "columns" in schema
-
-    async def test_error_handling(self, client):
-        """Test error responses."""
-        result = await client.call_tool("safe_operation", {
-            "operation": "invalid",
-            "params": {},
-        })
-
-        assert result.content["success"] is False
-        assert "error" in result.content
-
-# Integration test with mock
-class TestMCPIntegration:
-    async def test_full_workflow(self, client, mock_db):
-        """Test complete workflow."""
-        # Setup test data
-        mock_db.insert_users([
-            {"id": 1, "name": "Alice"},
-            {"id": 2, "name": "Bob"},
-        ])
-
-        # Search users
-        result = await client.call_tool("search_database", {
-            "query": "Alice",
-            "table": "users",
-        })
-
-        assert result.success
-        users = json.loads(result.content)
-        assert len(users) == 1
-        assert users[0]["name"] == "Alice"
-```
-
-## Use Cases
-
-### 1. Database Integration Server
-
-```python
-# Complete database integration MCP server
 from fastmcp import FastMCP
 import asyncpg
 
 mcp = FastMCP("database-server")
-
-# Connection pool
 pool: asyncpg.Pool = None
 
 @mcp.tool()
@@ -743,38 +120,19 @@ async def query(sql: str, params: list = None) -> dict:
             "count": len(rows),
         }
 
-@mcp.tool()
-async def describe_table(table_name: str) -> dict:
-    """Get table structure."""
-    async with pool.acquire() as conn:
-        columns = await conn.fetch("""
-            SELECT column_name, data_type, is_nullable
-            FROM information_schema.columns
-            WHERE table_name = $1
-        """, table_name)
-
-        return {
-            "table": table_name,
-            "columns": [dict(col) for col in columns],
-        }
-
 @mcp.resource("schema://tables")
 async def list_tables() -> str:
     """List all database tables."""
     async with pool.acquire() as conn:
-        tables = await conn.fetch("""
-            SELECT table_name
-            FROM information_schema.tables
-            WHERE table_schema = 'public'
-        """)
+        tables = await conn.fetch(
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"
+        )
         return json.dumps([t["table_name"] for t in tables])
 ```
 
-### 2. File System Server
+### Secure File System Server
 
 ```python
-# Secure file system access server
-from fastmcp import FastMCP
 from pathlib import Path
 
 mcp = FastMCP("filesystem-server")
@@ -788,94 +146,63 @@ def validate_path(path: str) -> Path:
     return full_path
 
 @mcp.tool()
-def list_directory(path: str = ".") -> list[dict]:
-    """List directory contents."""
-    dir_path = validate_path(path)
-
-    return [
-        {
-            "name": item.name,
-            "type": "directory" if item.is_dir() else "file",
-            "size": item.stat().st_size if item.is_file() else None,
-            "modified": item.stat().st_mtime,
-        }
-        for item in dir_path.iterdir()
-    ]
-
-@mcp.tool()
 def read_file(path: str) -> str:
-    """Read file contents."""
+    """Read file contents safely."""
     file_path = validate_path(path)
     return file_path.read_text()
 
 @mcp.tool()
-def search_files(pattern: str, path: str = ".") -> list[str]:
-    """Search for files matching pattern."""
-    search_path = validate_path(path)
-    return [
-        str(p.relative_to(WORKSPACE))
-        for p in search_path.rglob(pattern)
-    ]
+def list_directory(path: str = ".") -> list[dict]:
+    """List directory contents."""
+    dir_path = validate_path(path)
+    return [{"name": f.name, "type": "dir" if f.is_dir() else "file"} for f in dir_path.iterdir()]
+```
+
+### Testing MCP Servers
+
+```python
+import pytest
+from fastmcp.testing import MCPTestClient
+
+@pytest.fixture
+def client():
+    return MCPTestClient(mcp)
+
+class TestMCPServer:
+    async def test_tool_execution(self, client):
+        result = await client.call_tool("get_weather", {"city": "Seattle"})
+        assert result.success
+        assert "Seattle" in result.content
+
+    async def test_resource_access(self, client):
+        result = await client.read_resource("config://settings")
+        assert result.success
+        data = json.loads(result.content)
+        assert "theme" in data
 ```
 
 ## Best Practices
 
-### Do's
-
-- **Document thoroughly** - Clear docstrings become tool descriptions
-- **Validate inputs** - Use type hints and validation
-- **Handle errors gracefully** - Return structured error responses
-- **Use async** - For I/O-bound operations
-- **Test comprehensively** - Use MCPTestClient for testing
-- **Follow MCP spec** - Adhere to protocol specification
-
-### Don'ts
-
-- Don't expose sensitive operations without authorization
-- Don't allow arbitrary code execution
-- Don't return unbounded data (use pagination)
-- Don't ignore rate limiting for resource-intensive tools
-- Don't skip input sanitization
-- Don't expose internal error details
-
-### Security Checklist
-
-```python
-# Security validation helper
-class SecurityValidator:
-    @staticmethod
-    def validate_sql(query: str) -> bool:
-        """Ensure SQL is read-only."""
-        dangerous = ["INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "TRUNCATE"]
-        upper = query.upper()
-        return not any(d in upper for d in dangerous)
-
-    @staticmethod
-    def validate_path(path: str, allowed_root: Path) -> Path:
-        """Ensure path is within allowed directory."""
-        resolved = (allowed_root / path).resolve()
-        if not str(resolved).startswith(str(allowed_root.resolve())):
-            raise SecurityError("Path traversal attempt detected")
-        return resolved
-
-    @staticmethod
-    def sanitize_output(data: dict) -> dict:
-        """Remove sensitive fields from output."""
-        sensitive_keys = {"password", "secret", "token", "api_key"}
-        return {
-            k: v for k, v in data.items()
-            if k.lower() not in sensitive_keys
-        }
-```
+| Do | Avoid |
+|----|-------|
+| Document tools thoroughly with clear docstrings | Vague or missing tool descriptions |
+| Validate all inputs with type hints | Trusting user input without validation |
+| Return structured error responses | Exposing internal error details |
+| Use async for I/O-bound operations | Blocking the event loop with sync I/O |
+| Implement pagination for large results | Returning unbounded data sets |
+| Add rate limiting for resource-intensive tools | Allowing unlimited API calls |
+| Test tools with MCPTestClient | Skipping unit tests for tools |
+| Follow MCP specification strictly | Deviating from protocol standards |
+| Sanitize paths and SQL queries | Allowing path traversal or SQL injection |
+| Log tool calls for debugging | Missing audit trail for operations |
 
 ## Related Skills
 
 - **python** - Primary language for FastMCP
 - **typescript** - MCP SDK for TypeScript
 - **api-architecture** - API design patterns
-- **backend-development** - Server development patterns
 
-## Reference Resources
+## References
 
 - [MCP Specification](https://spec.modelcontextprotocol.io/)
 - [FastMCP Documentation](https://github.com/jlowin/fastmcp)

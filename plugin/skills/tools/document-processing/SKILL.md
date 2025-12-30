@@ -1,6 +1,6 @@
 ---
-name: document-processing
-description: Enterprise-grade document processing for PDF, DOCX, XLSX, PPTX with streaming, validation, and batch operations
+name: Processing Documents
+description: Processes PDF, DOCX, XLSX, and PPTX files with extraction, generation, and batch operations. Use when building document pipelines, extracting content from office files, or generating reports.
 category: tools
 triggers:
   - document processing
@@ -12,905 +12,178 @@ triggers:
   - office documents
 ---
 
-# Document Processing
+# Processing Documents
 
-Enterprise-grade **document processing** for PDF, DOCX, XLSX, and PPTX files. This skill enables extraction, manipulation, generation, and batch processing of office documents with streaming support for large files.
-
-## Purpose
-
-Handle document processing tasks that enterprise applications commonly require:
-
-- Extract text and structured data from PDFs
-- Parse and generate Word documents
-- Manipulate Excel spreadsheets programmatically
-- Create PowerPoint presentations from data
-- Process documents in batch with progress tracking
-
-## Features
-
-### 1. PDF Processing
+## Quick Start
 
 ```typescript
-// PDF text extraction with structure preservation
-import { PDFDocument, PDFExtract } from 'pdf-lib';
+import { PDFDocument } from 'pdf-lib';
+import ExcelJS from 'exceljs';
+import { Document, Packer, Paragraph, TextRun } from 'docx';
 
-interface PDFExtractionResult {
-  text: string;
-  pages: PageContent[];
-  metadata: PDFMetadata;
-  tables: ExtractedTable[];
-  images: ExtractedImage[];
-}
-
-// Basic text extraction
+// Extract text from PDF
 async function extractPDFText(buffer: Buffer): Promise<string> {
-  const pdfExtract = new PDFExtract();
-  const data = await pdfExtract.extractBuffer(buffer);
-
-  return data.pages
-    .map(page => page.content
-      .map(item => item.str)
-      .join(' ')
-    )
-    .join('\n\n');
-}
-
-// Structured extraction with tables
-async function extractStructuredPDF(buffer: Buffer): Promise<PDFExtractionResult> {
   const pdfDoc = await PDFDocument.load(buffer);
-  const pages: PageContent[] = [];
-
-  for (let i = 0; i < pdfDoc.getPageCount(); i++) {
-    const page = pdfDoc.getPage(i);
-    pages.push({
-      pageNumber: i + 1,
-      width: page.getWidth(),
-      height: page.getHeight(),
-      content: await extractPageContent(page),
-      tables: await detectTables(page),
-    });
-  }
-
-  return {
-    text: pages.map(p => p.content).join('\n\n'),
-    pages,
-    metadata: await extractMetadata(pdfDoc),
-    tables: pages.flatMap(p => p.tables),
-    images: await extractImages(pdfDoc),
-  };
+  const pages = pdfDoc.getPages();
+  return pages.map(page => page.getTextContent()).join('\n\n');
 }
 
-// PDF generation from template
-async function generatePDF(template: PDFTemplate, data: Record<string, any>): Promise<Buffer> {
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage();
-  const { width, height } = page.getSize();
-
-  // Apply template with data substitution
-  for (const element of template.elements) {
-    switch (element.type) {
-      case 'text':
-        const text = substituteVariables(element.content, data);
-        page.drawText(text, {
-          x: element.x,
-          y: height - element.y,
-          size: element.fontSize || 12,
-          font: await pdfDoc.embedFont(element.font || StandardFonts.Helvetica),
-        });
-        break;
-      case 'image':
-        const imageBytes = await fetch(data[element.dataKey]).then(r => r.arrayBuffer());
-        const image = await pdfDoc.embedPng(imageBytes);
-        page.drawImage(image, {
-          x: element.x,
-          y: height - element.y - element.height,
-          width: element.width,
-          height: element.height,
-        });
-        break;
-      case 'table':
-        await drawTable(page, element, data[element.dataKey]);
-        break;
-    }
-  }
-
-  return Buffer.from(await pdfDoc.save());
-}
-```
-
-### 2. Word Document Processing (DOCX)
-
-```typescript
-import { Document, Paragraph, TextRun, Table, TableRow, TableCell, Packer } from 'docx';
-
-// Parse DOCX to structured format
-interface DOCXContent {
-  paragraphs: ParsedParagraph[];
-  tables: ParsedTable[];
-  images: ParsedImage[];
-  styles: DocumentStyles;
-  metadata: DocumentMetadata;
+// Read Excel spreadsheet
+async function readExcel(buffer: Buffer) {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer);
+  return workbook.worksheets.map(sheet => ({
+    name: sheet.name,
+    rows: sheet.getSheetValues(),
+  }));
 }
 
-async function parseDOCX(buffer: Buffer): Promise<DOCXContent> {
-  const zip = new JSZip();
-  const doc = await zip.loadAsync(buffer);
-
-  // Parse document.xml
-  const documentXml = await doc.file('word/document.xml')?.async('string');
-  const parser = new XMLParser();
-  const parsed = parser.parse(documentXml);
-
-  // Extract content preserving structure
-  return {
-    paragraphs: extractParagraphs(parsed),
-    tables: extractTables(parsed),
-    images: await extractImages(doc),
-    styles: await parseStyles(doc),
-    metadata: await parseMetadata(doc),
-  };
-}
-
-// Generate DOCX from template
-async function generateDOCX(config: DOCXConfig): Promise<Buffer> {
+// Generate Word document
+async function generateDOCX(title: string, content: string[]): Promise<Buffer> {
   const doc = new Document({
     sections: [{
-      properties: {
-        page: {
-          margin: { top: 720, right: 720, bottom: 720, left: 720 },
-        },
-      },
       children: [
-        // Header
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: config.title,
-              bold: true,
-              size: 48,
-            }),
-          ],
-          heading: HeadingLevel.HEADING_1,
-          spacing: { after: 200 },
-        }),
-
-        // Content paragraphs
-        ...config.content.map(section => new Paragraph({
-          children: [
-            new TextRun({
-              text: section.text,
-              size: 24,
-            }),
-          ],
-          spacing: { after: 120 },
-        })),
-
-        // Table if data provided
-        ...(config.tableData ? [createTable(config.tableData)] : []),
+        new Paragraph({ children: [new TextRun({ text: title, bold: true, size: 48 })] }),
+        ...content.map(text => new Paragraph({ children: [new TextRun(text)] })),
       ],
     }],
   });
-
   return await Packer.toBuffer(doc);
-}
-
-// Create formatted table
-function createTable(data: TableData): Table {
-  return new Table({
-    rows: [
-      // Header row
-      new TableRow({
-        children: data.headers.map(header =>
-          new TableCell({
-            children: [new Paragraph({
-              children: [new TextRun({ text: header, bold: true })],
-            })],
-            shading: { fill: 'f0f0f0' },
-          })
-        ),
-        tableHeader: true,
-      }),
-      // Data rows
-      ...data.rows.map(row =>
-        new TableRow({
-          children: row.map(cell =>
-            new TableCell({
-              children: [new Paragraph({ children: [new TextRun(cell)] })],
-            })
-          ),
-        })
-      ),
-    ],
-    width: { size: 100, type: WidthType.PERCENTAGE },
-  });
 }
 ```
 
-### 3. Excel Processing (XLSX)
+## Features
+
+| Feature | Description | Guide |
+|---------|-------------|-------|
+| PDF Extraction | Extract text, tables, images, and metadata from PDFs | Use pdf-lib or pdf-parse for text extraction |
+| PDF Generation | Create PDFs from templates with data binding | Use pdf-lib with text, images, and table elements |
+| DOCX Parsing | Parse Word documents preserving structure | Use mammoth or docx library for parsing |
+| DOCX Generation | Generate Word documents with formatting | Use docx package with paragraphs and tables |
+| Excel Reading | Read spreadsheets with formulas and formatting | Use exceljs to iterate sheets and cells |
+| Excel Generation | Create spreadsheets with charts and styling | Use exceljs with conditional formatting |
+| PPTX Generation | Create presentations with slides and charts | Use pptxgenjs for slide creation |
+| Batch Processing | Process multiple documents with concurrency | Use p-queue for controlled parallel processing |
+| Template Engine | Generate documents from templates with placeholders | Use docxtemplater for DOCX templates |
+| Streaming | Handle large files without memory exhaustion | Process files in chunks with streams |
+
+## Common Patterns
+
+### Batch Document Processing
 
 ```typescript
-import ExcelJS from 'exceljs';
+import PQueue from 'p-queue';
 
-interface SpreadsheetData {
-  sheets: SheetData[];
-  metadata: WorkbookMetadata;
-}
+async function processBatch(files: string[], transform: (buffer: Buffer) => Promise<Buffer>) {
+  const queue = new PQueue({ concurrency: 4 });
+  const results: { file: string; success: boolean; error?: string }[] = [];
 
-interface SheetData {
-  name: string;
-  headers: string[];
-  rows: Record<string, any>[];
-  formulas: FormulaCell[];
-  charts: ChartDefinition[];
-}
-
-// Read Excel with full fidelity
-async function readExcel(buffer: Buffer): Promise<SpreadsheetData> {
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.load(buffer);
-
-  const sheets: SheetData[] = [];
-
-  workbook.eachSheet((worksheet, sheetId) => {
-    const headers: string[] = [];
-    const rows: Record<string, any>[] = [];
-    const formulas: FormulaCell[] = [];
-
-    // Get headers from first row
-    worksheet.getRow(1).eachCell((cell, colNumber) => {
-      headers[colNumber - 1] = cell.value?.toString() || `Column${colNumber}`;
-    });
-
-    // Get data rows
-    worksheet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return; // Skip header
-
-      const rowData: Record<string, any> = {};
-      row.eachCell((cell, colNumber) => {
-        const header = headers[colNumber - 1];
-
-        // Preserve formulas
-        if (cell.formula) {
-          formulas.push({
-            row: rowNumber,
-            col: colNumber,
-            formula: cell.formula,
-            result: cell.value,
-          });
-        }
-
-        rowData[header] = cell.value;
-      });
-
-      rows.push(rowData);
-    });
-
-    sheets.push({
-      name: worksheet.name,
-      headers,
-      rows,
-      formulas,
-      charts: extractCharts(worksheet),
-    });
-  });
-
-  return {
-    sheets,
-    metadata: {
-      creator: workbook.creator,
-      created: workbook.created,
-      modified: workbook.modified,
-    },
-  };
-}
-
-// Generate Excel with formatting
-async function generateExcel(config: ExcelConfig): Promise<Buffer> {
-  const workbook = new ExcelJS.Workbook();
-  workbook.creator = config.author || 'Document Processor';
-  workbook.created = new Date();
-
-  for (const sheetConfig of config.sheets) {
-    const worksheet = workbook.addWorksheet(sheetConfig.name);
-
-    // Add headers with styling
-    worksheet.addRow(sheetConfig.headers);
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.getRow(1).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFE0E0E0' },
-    };
-
-    // Add data rows
-    for (const row of sheetConfig.data) {
-      worksheet.addRow(sheetConfig.headers.map(h => row[h]));
-    }
-
-    // Auto-fit columns
-    worksheet.columns.forEach(column => {
-      let maxLength = 0;
-      column.eachCell({ includeEmpty: true }, cell => {
-        const cellLength = cell.value?.toString().length || 10;
-        maxLength = Math.max(maxLength, cellLength);
-      });
-      column.width = Math.min(maxLength + 2, 50);
-    });
-
-    // Add formulas if specified
-    if (sheetConfig.formulas) {
-      for (const formula of sheetConfig.formulas) {
-        worksheet.getCell(formula.cell).value = { formula: formula.formula };
+  for (const file of files) {
+    queue.add(async () => {
+      try {
+        const buffer = await fs.readFile(file);
+        const output = await transform(buffer);
+        await fs.writeFile(file.replace(/\.\w+$/, '_processed.pdf'), output);
+        results.push({ file, success: true });
+      } catch (error) {
+        results.push({ file, success: false, error: error.message });
       }
-    }
-
-    // Add conditional formatting
-    if (sheetConfig.conditionalFormatting) {
-      worksheet.addConditionalFormatting({
-        ref: sheetConfig.conditionalFormatting.range,
-        rules: sheetConfig.conditionalFormatting.rules,
-      });
-    }
+    });
   }
+
+  await queue.onIdle();
+  return results;
+}
+```
+
+### Excel Report Generation
+
+```typescript
+async function generateReport(data: Record<string, any>[]): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet('Report');
+
+  // Add headers with styling
+  const headers = Object.keys(data[0] || {});
+  sheet.addRow(headers);
+  sheet.getRow(1).font = { bold: true };
+  sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } };
+
+  // Add data rows
+  data.forEach(row => sheet.addRow(headers.map(h => row[h])));
+
+  // Auto-fit columns
+  sheet.columns.forEach(col => { col.width = 15; });
 
   return Buffer.from(await workbook.xlsx.writeBuffer());
 }
-
-// Data transformation utilities
-function transformExcelData(data: SheetData, transform: DataTransform): SheetData {
-  let rows = [...data.rows];
-
-  // Filter rows
-  if (transform.filter) {
-    rows = rows.filter(row => transform.filter!(row));
-  }
-
-  // Map columns
-  if (transform.columnMap) {
-    rows = rows.map(row => {
-      const newRow: Record<string, any> = {};
-      for (const [oldKey, newKey] of Object.entries(transform.columnMap!)) {
-        newRow[newKey] = row[oldKey];
-      }
-      return newRow;
-    });
-  }
-
-  // Aggregate if specified
-  if (transform.groupBy) {
-    rows = aggregateRows(rows, transform.groupBy, transform.aggregations!);
-  }
-
-  return {
-    ...data,
-    headers: transform.columnMap
-      ? Object.values(transform.columnMap)
-      : data.headers,
-    rows,
-  };
-}
 ```
 
-### 4. PowerPoint Processing (PPTX)
+### Invoice Generation from Template
 
 ```typescript
-import PptxGenJS from 'pptxgenjs';
+import Docxtemplater from 'docxtemplater';
+import PizZip from 'pizzip';
 
-interface PresentationConfig {
-  title: string;
-  author?: string;
-  theme?: ThemeConfig;
-  slides: SlideConfig[];
-}
+async function generateInvoice(templatePath: string, invoiceData: InvoiceData): Promise<Buffer> {
+  const templateBuffer = await fs.readFile(templatePath);
+  const zip = new PizZip(templateBuffer);
+  const doc = new Docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
-interface SlideConfig {
-  layout: 'title' | 'content' | 'twoColumn' | 'comparison' | 'blank';
-  title?: string;
-  subtitle?: string;
-  content?: SlideContent[];
-  notes?: string;
-}
-
-// Generate PowerPoint presentation
-async function generatePPTX(config: PresentationConfig): Promise<Buffer> {
-  const pptx = new PptxGenJS();
-
-  // Set metadata
-  pptx.title = config.title;
-  pptx.author = config.author || 'Document Processor';
-
-  // Apply theme
-  if (config.theme) {
-    pptx.defineLayout({
-      name: 'CUSTOM',
-      width: config.theme.width || 10,
-      height: config.theme.height || 7.5,
-    });
-  }
-
-  // Generate slides
-  for (const slideConfig of config.slides) {
-    const slide = pptx.addSlide();
-
-    switch (slideConfig.layout) {
-      case 'title':
-        slide.addText(slideConfig.title || '', {
-          x: 0.5, y: 2.5, w: 9, h: 1,
-          fontSize: 44, bold: true, align: 'center',
-        });
-        if (slideConfig.subtitle) {
-          slide.addText(slideConfig.subtitle, {
-            x: 0.5, y: 3.5, w: 9, h: 0.5,
-            fontSize: 24, color: '666666', align: 'center',
-          });
-        }
-        break;
-
-      case 'content':
-        slide.addText(slideConfig.title || '', {
-          x: 0.5, y: 0.3, w: 9, h: 0.8,
-          fontSize: 32, bold: true,
-        });
-        let yPos = 1.2;
-        for (const content of slideConfig.content || []) {
-          yPos = addSlideContent(slide, content, yPos);
-        }
-        break;
-
-      case 'twoColumn':
-        slide.addText(slideConfig.title || '', {
-          x: 0.5, y: 0.3, w: 9, h: 0.8,
-          fontSize: 32, bold: true,
-        });
-        // Left column
-        addSlideContent(slide, slideConfig.content![0], 1.2, 0.5, 4.3);
-        // Right column
-        addSlideContent(slide, slideConfig.content![1], 1.2, 5.2, 4.3);
-        break;
-    }
-
-    // Add speaker notes
-    if (slideConfig.notes) {
-      slide.addNotes(slideConfig.notes);
-    }
-  }
-
-  return Buffer.from(await pptx.write({ outputType: 'arraybuffer' }));
-}
-
-// Add various content types to slide
-function addSlideContent(
-  slide: PptxGenJS.Slide,
-  content: SlideContent,
-  y: number,
-  x: number = 0.5,
-  w: number = 9
-): number {
-  switch (content.type) {
-    case 'text':
-      slide.addText(content.value, {
-        x, y, w, h: 0.5,
-        fontSize: content.fontSize || 18,
-        bullet: content.bullet,
-      });
-      return y + 0.6;
-
-    case 'bullets':
-      slide.addText(
-        content.items.map(item => ({ text: item, options: { bullet: true } })),
-        { x, y, w, fontSize: 18 }
-      );
-      return y + content.items.length * 0.4 + 0.2;
-
-    case 'image':
-      slide.addImage({
-        path: content.path,
-        x, y, w: content.width || 4, h: content.height || 3,
-      });
-      return y + (content.height || 3) + 0.2;
-
-    case 'chart':
-      slide.addChart(content.chartType, content.data, {
-        x, y, w, h: content.height || 4,
-      });
-      return y + (content.height || 4) + 0.2;
-
-    case 'table':
-      slide.addTable(content.data, {
-        x, y, w,
-        border: { pt: 1, color: 'CFCFCF' },
-        fontFace: 'Arial',
-        fontSize: 14,
-      });
-      return y + content.data.length * 0.4 + 0.2;
-
-    default:
-      return y;
-  }
-}
-```
-
-### 5. Batch Processing Pipeline
-
-```typescript
-interface BatchConfig {
-  inputDir: string;
-  outputDir: string;
-  concurrency: number;
-  transform: DocumentTransform;
-  onProgress?: (progress: BatchProgress) => void;
-  onError?: (error: BatchError) => void;
-}
-
-interface BatchProgress {
-  total: number;
-  processed: number;
-  succeeded: number;
-  failed: number;
-  currentFile: string;
-}
-
-// Batch document processing with streaming
-async function processBatch(config: BatchConfig): Promise<BatchResult> {
-  const files = await glob(`${config.inputDir}/**/*.{pdf,docx,xlsx,pptx}`);
-  const results: ProcessingResult[] = [];
-
-  const progress: BatchProgress = {
-    total: files.length,
-    processed: 0,
-    succeeded: 0,
-    failed: 0,
-    currentFile: '',
-  };
-
-  // Process with concurrency limit
-  const queue = new PQueue({ concurrency: config.concurrency });
-
-  const tasks = files.map(file => queue.add(async () => {
-    progress.currentFile = file;
-    config.onProgress?.(progress);
-
-    try {
-      const buffer = await fs.readFile(file);
-      const ext = path.extname(file).toLowerCase();
-
-      // Process based on file type
-      let result: Buffer;
-      switch (ext) {
-        case '.pdf':
-          result = await transformPDF(buffer, config.transform);
-          break;
-        case '.docx':
-          result = await transformDOCX(buffer, config.transform);
-          break;
-        case '.xlsx':
-          result = await transformExcel(buffer, config.transform);
-          break;
-        case '.pptx':
-          result = await transformPPTX(buffer, config.transform);
-          break;
-        default:
-          throw new Error(`Unsupported file type: ${ext}`);
-      }
-
-      // Write output
-      const outputPath = path.join(
-        config.outputDir,
-        path.relative(config.inputDir, file)
-      );
-      await fs.mkdir(path.dirname(outputPath), { recursive: true });
-      await fs.writeFile(outputPath, result);
-
-      progress.succeeded++;
-      results.push({ file, success: true });
-    } catch (error) {
-      progress.failed++;
-      results.push({ file, success: false, error: error.message });
-      config.onError?.({ file, error });
-    } finally {
-      progress.processed++;
-      config.onProgress?.(progress);
-    }
-  }));
-
-  await Promise.all(tasks);
-
-  return {
-    total: files.length,
-    succeeded: progress.succeeded,
-    failed: progress.failed,
-    results,
-  };
-}
-
-// Stream large file processing
-async function* streamProcess(
-  inputStream: ReadStream,
-  transform: ChunkTransform
-): AsyncGenerator<Buffer> {
-  const chunks: Buffer[] = [];
-  let processedSize = 0;
-
-  for await (const chunk of inputStream) {
-    chunks.push(chunk);
-    processedSize += chunk.length;
-
-    // Process in chunks for memory efficiency
-    if (processedSize >= CHUNK_SIZE) {
-      const combined = Buffer.concat(chunks);
-      yield await transform(combined);
-      chunks.length = 0;
-      processedSize = 0;
-    }
-  }
-
-  // Process remaining
-  if (chunks.length > 0) {
-    yield await transform(Buffer.concat(chunks));
-  }
-}
-```
-
-### 6. Template-Based Document Generation
-
-```typescript
-interface DocumentTemplate {
-  type: 'pdf' | 'docx' | 'xlsx' | 'pptx';
-  templatePath: string;
-  placeholders: PlaceholderConfig[];
-}
-
-interface PlaceholderConfig {
-  key: string;
-  type: 'text' | 'image' | 'table' | 'chart' | 'list';
-  format?: FormatOptions;
-}
-
-// Generate document from template with data binding
-async function generateFromTemplate(
-  template: DocumentTemplate,
-  data: Record<string, any>
-): Promise<Buffer> {
-  const templateBuffer = await fs.readFile(template.templatePath);
-
-  switch (template.type) {
-    case 'docx':
-      return generateDOCXFromTemplate(templateBuffer, template.placeholders, data);
-    case 'xlsx':
-      return generateExcelFromTemplate(templateBuffer, template.placeholders, data);
-    case 'pptx':
-      return generatePPTXFromTemplate(templateBuffer, template.placeholders, data);
-    case 'pdf':
-      return generatePDFFromTemplate(templateBuffer, template.placeholders, data);
-  }
-}
-
-// DOCX template processing
-async function generateDOCXFromTemplate(
-  templateBuffer: Buffer,
-  placeholders: PlaceholderConfig[],
-  data: Record<string, any>
-): Promise<Buffer> {
-  const doc = new Docxtemplater(new PizZip(templateBuffer), {
-    paragraphLoop: true,
-    linebreaks: true,
+  doc.render({
+    invoiceNumber: invoiceData.number,
+    date: invoiceData.date,
+    customer: invoiceData.customer,
+    items: invoiceData.items,
+    total: invoiceData.total,
   });
 
-  // Build data object with formatting
-  const templateData: Record<string, any> = {};
+  return doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
+}
+```
 
-  for (const placeholder of placeholders) {
-    const value = data[placeholder.key];
+### PDF Table Extraction
 
-    switch (placeholder.type) {
-      case 'text':
-        templateData[placeholder.key] = formatText(value, placeholder.format);
-        break;
-      case 'table':
-        templateData[placeholder.key] = formatTableData(value);
-        break;
-      case 'image':
-        templateData[placeholder.key] = await loadImage(value);
-        break;
-      case 'list':
-        templateData[placeholder.key] = value.map((item: any) => ({ item }));
-        break;
-    }
+```typescript
+async function extractTables(pdfBuffer: Buffer): Promise<ExtractedTable[]> {
+  const pdfDoc = await PDFDocument.load(pdfBuffer);
+  const tables: ExtractedTable[] = [];
+
+  for (let i = 0; i < pdfDoc.getPageCount(); i++) {
+    const page = pdfDoc.getPage(i);
+    const content = await extractPageContent(page);
+    const detectedTables = detectTableStructures(content);
+    tables.push(...detectedTables.map(t => ({ ...t, pageNumber: i + 1 })));
   }
 
-  doc.render(templateData);
-
-  return doc.getZip().generate({
-    type: 'nodebuffer',
-    compression: 'DEFLATE',
-  });
-}
-```
-
-## Use Cases
-
-### 1. Invoice Generation System
-
-```typescript
-// Generate invoices from order data
-async function generateInvoice(order: Order): Promise<Buffer> {
-  const template: DOCXConfig = {
-    title: `Invoice #${order.invoiceNumber}`,
-    content: [
-      { text: `Date: ${formatDate(order.date)}` },
-      { text: `Customer: ${order.customer.name}` },
-      { text: `Address: ${order.customer.address}` },
-    ],
-    tableData: {
-      headers: ['Item', 'Quantity', 'Price', 'Total'],
-      rows: order.items.map(item => [
-        item.name,
-        item.quantity.toString(),
-        formatCurrency(item.price),
-        formatCurrency(item.quantity * item.price),
-      ]),
-    },
-  };
-
-  // Add totals
-  template.content.push(
-    { text: '' },
-    { text: `Subtotal: ${formatCurrency(order.subtotal)}` },
-    { text: `Tax: ${formatCurrency(order.tax)}` },
-    { text: `Total: ${formatCurrency(order.total)}`, bold: true },
-  );
-
-  return generateDOCX(template);
-}
-```
-
-### 2. Report Dashboard Export
-
-```typescript
-// Export dashboard data to Excel with charts
-async function exportDashboard(dashboard: DashboardData): Promise<Buffer> {
-  return generateExcel({
-    author: 'Analytics System',
-    sheets: [
-      {
-        name: 'Summary',
-        headers: ['Metric', 'Value', 'Change'],
-        data: dashboard.kpis.map(kpi => ({
-          Metric: kpi.name,
-          Value: kpi.value,
-          Change: `${kpi.change > 0 ? '+' : ''}${kpi.change}%`,
-        })),
-        conditionalFormatting: {
-          range: 'C2:C100',
-          rules: [
-            { type: 'cellIs', operator: 'greaterThan', formulae: [0], style: { fill: { argb: 'FF00FF00' } } },
-            { type: 'cellIs', operator: 'lessThan', formulae: [0], style: { fill: { argb: 'FFFF0000' } } },
-          ],
-        },
-      },
-      {
-        name: 'Detailed Data',
-        headers: Object.keys(dashboard.detailedData[0] || {}),
-        data: dashboard.detailedData,
-      },
-    ],
-  });
-}
-```
-
-### 3. Contract Analysis Pipeline
-
-```typescript
-// Extract and analyze contract data
-async function analyzeContract(pdfBuffer: Buffer): Promise<ContractAnalysis> {
-  const extracted = await extractStructuredPDF(pdfBuffer);
-
-  return {
-    parties: extractParties(extracted.text),
-    dates: extractDates(extracted.text),
-    amounts: extractMonetaryAmounts(extracted.text),
-    clauses: categorizeClausses(extracted.text),
-    signatures: detectSignatures(extracted.images),
-    tables: extracted.tables.map(analyzeTable),
-  };
+  return tables;
 }
 ```
 
 ## Best Practices
 
-### Do's
-
-- **Stream large files** - Use streaming for files > 10MB to prevent memory issues
-- **Validate inputs** - Check file types and sizes before processing
-- **Handle encoding** - Support UTF-8 and detect encoding issues gracefully
-- **Preserve formatting** - Maintain original formatting when transforming
-- **Cache parsed results** - Cache extracted data for repeated access
-- **Use appropriate libraries** - pdf-lib for PDFs, exceljs for Excel, docx for Word
-
-### Don'ts
-
-- Don't load entire large files into memory
-- Don't assume file extensions match content
-- Don't ignore password-protected documents
-- Don't strip metadata without user consent
-- Don't process untrusted files without sandboxing
-- Don't skip error handling for corrupt files
-
-### Error Handling
-
-```typescript
-class DocumentProcessingError extends Error {
-  constructor(
-    message: string,
-    public readonly code: ErrorCode,
-    public readonly file?: string,
-    public readonly cause?: Error
-  ) {
-    super(message);
-    this.name = 'DocumentProcessingError';
-  }
-}
-
-enum ErrorCode {
-  INVALID_FORMAT = 'INVALID_FORMAT',
-  CORRUPT_FILE = 'CORRUPT_FILE',
-  PASSWORD_PROTECTED = 'PASSWORD_PROTECTED',
-  ENCODING_ERROR = 'ENCODING_ERROR',
-  SIZE_LIMIT_EXCEEDED = 'SIZE_LIMIT_EXCEEDED',
-  UNSUPPORTED_FEATURE = 'UNSUPPORTED_FEATURE',
-}
-
-// Comprehensive error handling
-async function safeProcessDocument(buffer: Buffer, filename: string): Promise<ProcessResult> {
-  try {
-    // Validate file
-    const fileType = await detectFileType(buffer);
-    if (!SUPPORTED_TYPES.includes(fileType)) {
-      throw new DocumentProcessingError(
-        `Unsupported file type: ${fileType}`,
-        ErrorCode.INVALID_FORMAT,
-        filename
-      );
-    }
-
-    // Check size
-    if (buffer.length > MAX_FILE_SIZE) {
-      throw new DocumentProcessingError(
-        `File exceeds maximum size of ${MAX_FILE_SIZE} bytes`,
-        ErrorCode.SIZE_LIMIT_EXCEEDED,
-        filename
-      );
-    }
-
-    // Process
-    return await processDocument(buffer, fileType);
-  } catch (error) {
-    if (error instanceof DocumentProcessingError) {
-      throw error;
-    }
-
-    // Wrap unexpected errors
-    throw new DocumentProcessingError(
-      `Failed to process document: ${error.message}`,
-      ErrorCode.CORRUPT_FILE,
-      filename,
-      error
-    );
-  }
-}
-```
+| Do | Avoid |
+|----|-------|
+| Stream large files (>10MB) to prevent memory issues | Loading entire large files into memory |
+| Validate file types before processing | Assuming file extensions match content |
+| Handle password-protected documents gracefully | Ignoring encrypted document errors |
+| Preserve original formatting when transforming | Stripping formatting without user consent |
+| Cache parsed results for repeated access | Re-parsing the same document multiple times |
+| Use appropriate libraries per format | Building custom parsers for standard formats |
+| Set file size limits for uploads | Processing unbounded file sizes |
+| Sanitize filenames and paths | Using untrusted paths directly |
+| Handle encoding issues (UTF-8, BOM) | Assuming all files use the same encoding |
+| Log processing errors with context | Silently failing on corrupt files |
 
 ## Related Skills
 
-- **python** - Alternative processing with python-docx, openpyxl, PyPDF2
+- **media-processing** - Video and audio processing
+- **image-processing** - Image manipulation with Sharp
 - **typescript** - Type-safe document handling
-- **data-processing** - Data transformation utilities
-- **api-architecture** - Document API design patterns
 
-## Reference Resources
+## References
 
 - [pdf-lib Documentation](https://pdf-lib.js.org/)
 - [ExcelJS Documentation](https://github.com/exceljs/exceljs)
 - [docx Documentation](https://docx.js.org/)
 - [PptxGenJS Documentation](https://gitbrent.github.io/PptxGenJS/)
-- [Apache POI](https://poi.apache.org/) - Java reference

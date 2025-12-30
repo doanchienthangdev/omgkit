@@ -1,1035 +1,167 @@
 ---
-name: react
-description: React development with modern patterns, hooks, state management, and performance optimization
-category: frameworks
-triggers:
-  - react
-  - react component
-  - react hooks
-  - useState
-  - useEffect
-  - jsx
-  - tsx
-  - react app
+name: building-react-apps
+description: Builds production React applications with hooks, TypeScript, state management, and performance optimization. Use when creating React SPAs, component systems, or interactive UIs.
 ---
 
 # React
 
-Modern **React development** following industry best practices. This skill covers functional components, hooks, state management, performance optimization, and testing patterns used by top engineering teams.
-
-## Purpose
-
-Build maintainable React applications with confidence:
-
-- Write clean, reusable functional components
-- Master React hooks for state and side effects
-- Implement efficient state management patterns
-- Optimize performance with memoization
-- Handle forms and validation elegantly
-- Create accessible, responsive UIs
-- Test components effectively
-
-## Features
-
-### 1. Functional Components with TypeScript
+## Quick Start
 
 ```tsx
-// Well-typed component with props interface
-interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
-  disabled?: boolean;
-  loading?: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-}
+import { useState } from 'react';
 
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  disabled = false,
-  loading = false,
-  onClick,
-  children,
-}: ButtonProps) {
-  const baseStyles = 'rounded font-medium transition-colors focus:outline-none focus:ring-2';
-
-  const variantStyles = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
-    secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-  };
-
-  const sizeStyles = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
-  };
+function Counter() {
+  const [count, setCount] = useState(0);
 
   return (
-    <button
-      type="button"
-      disabled={disabled || loading}
-      onClick={onClick}
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${
-        disabled || loading ? 'opacity-50 cursor-not-allowed' : ''
-      }`}
-    >
-      {loading ? (
-        <span className="flex items-center gap-2">
-          <Spinner size={size} />
-          Loading...
-        </span>
-      ) : (
-        children
-      )}
+    <button onClick={() => setCount(c => c + 1)}>
+      Count: {count}
     </button>
   );
 }
-
-// Card component with composition pattern
-interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-interface CardHeaderProps {
-  title: string;
-  subtitle?: string;
-  action?: React.ReactNode;
-}
-
-export function Card({ children, className = '' }: CardProps) {
-  return (
-    <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-Card.Header = function CardHeader({ title, subtitle, action }: CardHeaderProps) {
-  return (
-    <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
-      </div>
-      {action && <div>{action}</div>}
-    </div>
-  );
-};
-
-Card.Body = function CardBody({ children, className = '' }: CardProps) {
-  return <div className={`px-6 py-4 ${className}`}>{children}</div>;
-};
-
-Card.Footer = function CardFooter({ children, className = '' }: CardProps) {
-  return (
-    <div className={`px-6 py-4 bg-gray-50 border-t border-gray-200 ${className}`}>
-      {children}
-    </div>
-  );
-};
 ```
 
-### 2. Essential Hooks Patterns
+## Features
+
+| Feature | Description | Guide |
+|---------|-------------|-------|
+| Hooks | useState, useEffect, custom hooks | [HOOKS.md](HOOKS.md) |
+| TypeScript | Props, state, event typing | [TYPESCRIPT.md](TYPESCRIPT.md) |
+| State | Zustand, Context, useReducer | [STATE.md](STATE.md) |
+| Forms | React Hook Form, Zod validation | [FORMS.md](FORMS.md) |
+| Testing | Vitest, Testing Library | [TESTING.md](TESTING.md) |
+| Performance | memo, useMemo, useCallback, Suspense | [PERFORMANCE.md](PERFORMANCE.md) |
+
+## Common Patterns
+
+### Typed Component with Props
 
 ```tsx
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-
-// useState with complex state
-interface FormState {
-  name: string;
-  email: string;
-  errors: Record<string, string>;
-  isSubmitting: boolean;
+interface UserCardProps {
+  user: { id: string; name: string; email: string };
+  onEdit: (user: UserCardProps['user']) => void;
+  onDelete: (id: string) => void;
 }
 
-function useForm(initialValues: Partial<FormState>) {
-  const [state, setState] = useState<FormState>({
-    name: '',
-    email: '',
-    errors: {},
-    isSubmitting: false,
-    ...initialValues,
-  });
-
-  const setField = useCallback((field: keyof FormState, value: unknown) => {
-    setState(prev => ({ ...prev, [field]: value }));
-  }, []);
-
-  const setError = useCallback((field: string, error: string) => {
-    setState(prev => ({
-      ...prev,
-      errors: { ...prev.errors, [field]: error },
-    }));
-  }, []);
-
-  const clearErrors = useCallback(() => {
-    setState(prev => ({ ...prev, errors: {} }));
-  }, []);
-
-  return { state, setField, setError, clearErrors };
+function UserCard({ user, onEdit, onDelete }: UserCardProps) {
+  return (
+    <div className="user-card">
+      <h3>{user.name}</h3>
+      <p>{user.email}</p>
+      <button onClick={() => onEdit(user)}>Edit</button>
+      <button onClick={() => onDelete(user.id)}>Delete</button>
+    </div>
+  );
 }
+```
 
-// useEffect patterns
-function UserProfile({ userId }: { userId: string }) {
-  const [user, setUser] = useState<User | null>(null);
+### Custom Hook for Data Fetching
+
+```tsx
+function useFetch<T>(url: string) {
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchUser() {
-      setLoading(true);
-      setError(null);
-
+    async function fetchData() {
       try {
-        const response = await fetch(`/api/users/${userId}`);
-        if (!response.ok) throw new Error('Failed to fetch user');
-
-        const data = await response.json();
-        if (!cancelled) {
-          setUser(data);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err : new Error('Unknown error'));
-        }
+        const res = await fetch(url);
+        const json = await res.json();
+        if (!cancelled) setData(json);
+      } catch (e) {
+        if (!cancelled) setError(e as Error);
       } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+        if (!cancelled) setLoading(false);
       }
     }
 
-    fetchUser();
-
-    // Cleanup function prevents state updates after unmount
-    return () => {
-      cancelled = true;
-    };
-  }, [userId]);
-
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage error={error} />;
-  if (!user) return null;
-
-  return <UserCard user={user} />;
-}
-
-// useCallback for stable function references
-function SearchResults({ query }: { query: string }) {
-  const [results, setResults] = useState<SearchResult[]>([]);
-
-  // Memoize the search function to prevent unnecessary re-fetches
-  const performSearch = useCallback(async (searchQuery: string) => {
-    if (!searchQuery.trim()) {
-      setResults([]);
-      return;
-    }
-
-    const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}`);
-    const data = await response.json();
-    setResults(data.results);
-  }, []);
-
-  // Debounce search with useEffect
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      performSearch(query);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [query, performSearch]);
-
-  return (
-    <ul>
-      {results.map(result => (
-        <SearchResultItem key={result.id} result={result} />
-      ))}
-    </ul>
-  );
-}
-
-// useMemo for expensive computations
-function DataTable({ data, filters }: { data: DataItem[]; filters: Filters }) {
-  // Only recompute when data or filters change
-  const filteredData = useMemo(() => {
-    return data
-      .filter(item => {
-        if (filters.status && item.status !== filters.status) return false;
-        if (filters.search && !item.name.toLowerCase().includes(filters.search.toLowerCase())) {
-          return false;
-        }
-        return true;
-      })
-      .sort((a, b) => {
-        const direction = filters.sortDirection === 'asc' ? 1 : -1;
-        return a[filters.sortBy] > b[filters.sortBy] ? direction : -direction;
-      });
-  }, [data, filters]);
-
-  const stats = useMemo(() => ({
-    total: filteredData.length,
-    active: filteredData.filter(d => d.status === 'active').length,
-    inactive: filteredData.filter(d => d.status === 'inactive').length,
-  }), [filteredData]);
-
-  return (
-    <div>
-      <StatsBar stats={stats} />
-      <Table data={filteredData} />
-    </div>
-  );
-}
-
-// useRef for DOM access and mutable values
-function AutoFocusInput() {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const renderCount = useRef(0);
-
-  useEffect(() => {
-    // Focus input on mount
-    inputRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    // Track renders without causing re-renders
-    renderCount.current += 1;
-  });
-
-  return (
-    <div>
-      <input ref={inputRef} placeholder="I'm auto-focused" />
-      <p>Render count: {renderCount.current}</p>
-    </div>
-  );
-}
-```
-
-### 3. Custom Hooks
-
-```tsx
-// Data fetching hook with error handling and refetch
-interface UseFetchResult<T> {
-  data: T | null;
-  loading: boolean;
-  error: Error | null;
-  refetch: () => Promise<void>;
-}
-
-function useFetch<T>(url: string, options?: RequestInit): UseFetchResult<T> {
-  const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const json = await response.json();
-      setData(json);
-    } catch (e) {
-      setError(e instanceof Error ? e : new Error('Fetch failed'));
-    } finally {
-      setLoading(false);
-    }
-  }, [url, options]);
-
-  useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    return () => { cancelled = true; };
+  }, [url]);
 
-  return { data, loading, error, refetch: fetchData };
-}
-
-// Local storage hook with SSR support
-function useLocalStorage<T>(key: string, initialValue: T) {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
-
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  });
-
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
-      }
-    } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error);
-    }
-  }, [key, storedValue]);
-
-  return [storedValue, setValue] as const;
-}
-
-// Debounced value hook
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-
-  return debouncedValue;
-}
-
-// Window size hook
-function useWindowSize() {
-  const [size, setSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
-  });
-
-  useEffect(() => {
-    function handleResize() {
-      setSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return size;
-}
-
-// Previous value hook
-function usePrevious<T>(value: T): T | undefined {
-  const ref = useRef<T>();
-
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-
-  return ref.current;
-}
-
-// Click outside hook
-function useClickOutside(ref: React.RefObject<HTMLElement>, handler: () => void) {
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        handler();
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [ref, handler]);
+  return { data, loading, error };
 }
 ```
 
-### 4. State Management Patterns
+### Form with Validation
 
 ```tsx
-// Context + useReducer for complex state
-interface AppState {
-  user: User | null;
-  theme: 'light' | 'dark';
-  notifications: Notification[];
-}
-
-type AppAction =
-  | { type: 'SET_USER'; payload: User | null }
-  | { type: 'SET_THEME'; payload: 'light' | 'dark' }
-  | { type: 'ADD_NOTIFICATION'; payload: Notification }
-  | { type: 'REMOVE_NOTIFICATION'; payload: string };
-
-const initialState: AppState = {
-  user: null,
-  theme: 'light',
-  notifications: [],
-};
-
-function appReducer(state: AppState, action: AppAction): AppState {
-  switch (action.type) {
-    case 'SET_USER':
-      return { ...state, user: action.payload };
-    case 'SET_THEME':
-      return { ...state, theme: action.payload };
-    case 'ADD_NOTIFICATION':
-      return { ...state, notifications: [...state.notifications, action.payload] };
-    case 'REMOVE_NOTIFICATION':
-      return {
-        ...state,
-        notifications: state.notifications.filter(n => n.id !== action.payload),
-      };
-    default:
-      return state;
-  }
-}
-
-const AppContext = createContext<{
-  state: AppState;
-  dispatch: React.Dispatch<AppAction>;
-} | null>(null);
-
-export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(appReducer, initialState);
-
-  return (
-    <AppContext.Provider value={{ state, dispatch }}>
-      {children}
-    </AppContext.Provider>
-  );
-}
-
-export function useAppContext() {
-  const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useAppContext must be used within AppProvider');
-  }
-  return context;
-}
-
-// Zustand for simpler state management (recommended for most cases)
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-
-interface UserStore {
-  user: User | null;
-  setUser: (user: User | null) => void;
-  logout: () => void;
-}
-
-const useUserStore = create<UserStore>()(
-  persist(
-    (set) => ({
-      user: null,
-      setUser: (user) => set({ user }),
-      logout: () => set({ user: null }),
-    }),
-    { name: 'user-storage' }
-  )
-);
-
-// Usage
-function UserMenu() {
-  const { user, logout } = useUserStore();
-
-  if (!user) return <LoginButton />;
-
-  return (
-    <div>
-      <span>Welcome, {user.name}</span>
-      <button onClick={logout}>Logout</button>
-    </div>
-  );
-}
-```
-
-### 5. Form Handling
-
-```tsx
-// Controlled form with validation
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-const signUpSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain an uppercase letter')
-    .regex(/[0-9]/, 'Password must contain a number'),
-  confirmPassword: z.string(),
-}).refine(data => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
 });
 
-type SignUpForm = z.infer<typeof signUpSchema>;
-
-function SignUpForm() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<SignUpForm>({
-    resolver: zodResolver(signUpSchema),
+function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(schema),
   });
 
-  const onSubmit = async (data: SignUpForm) => {
-    try {
-      const response = await fetch('/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) throw new Error('Signup failed');
-
-      reset();
-      // Handle success
-    } catch (error) {
-      // Handle error
-    }
+  const onSubmit = (data: z.infer<typeof schema>) => {
+    console.log(data);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium">
-          Name
-        </label>
-        <input
-          {...register('name')}
-          id="name"
-          type="text"
-          className={`mt-1 block w-full rounded-md border ${
-            errors.name ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium">
-          Email
-        </label>
-        <input
-          {...register('email')}
-          id="email"
-          type="email"
-          className={`mt-1 block w-full rounded-md border ${
-            errors.email ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {errors.email && (
-          <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium">
-          Password
-        </label>
-        <input
-          {...register('password')}
-          id="password"
-          type="password"
-          className={`mt-1 block w-full rounded-md border ${
-            errors.password ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {errors.password && (
-          <p className="mt-1 text-sm text-red-500">{errors.password.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="confirmPassword" className="block text-sm font-medium">
-          Confirm Password
-        </label>
-        <input
-          {...register('confirmPassword')}
-          id="confirmPassword"
-          type="password"
-          className={`mt-1 block w-full rounded-md border ${
-            errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {errors.confirmPassword && (
-          <p className="mt-1 text-sm text-red-500">{errors.confirmPassword.message}</p>
-        )}
-      </div>
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-      >
-        {isSubmitting ? 'Signing up...' : 'Sign Up'}
-      </button>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input {...register('email')} />
+      {errors.email && <span>{errors.email.message}</span>}
+      <input {...register('password')} type="password" />
+      {errors.password && <span>{errors.password.message}</span>}
+      <button type="submit">Login</button>
     </form>
   );
 }
 ```
 
-### 6. Performance Optimization
+## Workflows
 
-```tsx
-import { memo, useMemo, useCallback, lazy, Suspense } from 'react';
+### Component Development
 
-// Memoized component to prevent unnecessary re-renders
-interface ExpensiveListItemProps {
-  item: ListItem;
-  onSelect: (id: string) => void;
-}
+1. Define props interface with TypeScript
+2. Create component with hooks
+3. Extract reusable logic to custom hooks
+4. Add error boundaries for fault isolation
+5. Write tests with Testing Library
 
-const ExpensiveListItem = memo(function ExpensiveListItem({
-  item,
-  onSelect,
-}: ExpensiveListItemProps) {
-  // Heavy render logic here
-  return (
-    <div onClick={() => onSelect(item.id)}>
-      {item.name}
-    </div>
-  );
-});
+### State Management Decision
 
-// Parent component with stable callbacks
-function ItemList({ items }: { items: ListItem[] }) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  // Stable callback reference
-  const handleSelect = useCallback((id: string) => {
-    setSelectedId(id);
-  }, []);
-
-  return (
-    <div>
-      {items.map(item => (
-        <ExpensiveListItem
-          key={item.id}
-          item={item}
-          onSelect={handleSelect}
-        />
-      ))}
-    </div>
-  );
-}
-
-// Lazy loading with code splitting
-const HeavyComponent = lazy(() => import('./HeavyComponent'));
-const AdminDashboard = lazy(() => import('./AdminDashboard'));
-
-function App() {
-  const [showHeavy, setShowHeavy] = useState(false);
-  const isAdmin = useUserStore(state => state.user?.role === 'admin');
-
-  return (
-    <div>
-      <button onClick={() => setShowHeavy(true)}>Load Component</button>
-
-      <Suspense fallback={<LoadingSpinner />}>
-        {showHeavy && <HeavyComponent />}
-        {isAdmin && <AdminDashboard />}
-      </Suspense>
-    </div>
-  );
-}
-
-// Virtual list for large datasets
-import { useVirtualizer } from '@tanstack/react-virtual';
-
-function VirtualList({ items }: { items: Item[] }) {
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  const virtualizer = useVirtualizer({
-    count: items.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 50,
-    overscan: 5,
-  });
-
-  return (
-    <div ref={parentRef} className="h-96 overflow-auto">
-      <div
-        style={{
-          height: `${virtualizer.getTotalSize()}px`,
-          position: 'relative',
-        }}
-      >
-        {virtualizer.getVirtualItems().map(virtualItem => (
-          <div
-            key={virtualItem.key}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: `${virtualItem.size}px`,
-              transform: `translateY(${virtualItem.start}px)`,
-            }}
-          >
-            {items[virtualItem.index].name}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 ```
-
-### 7. Error Boundaries
-
-```tsx
-import { Component, ErrorInfo, ReactNode } from 'react';
-
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-}
-
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
-    this.props.onError?.(error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-          <h2 className="text-lg font-semibold text-red-800">Something went wrong</h2>
-          <p className="text-sm text-red-600">{this.state.error?.message}</p>
-          <button
-            onClick={() => this.setState({ hasError: false, error: null })}
-            className="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm"
-          >
-            Try again
-          </button>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
-
-// Usage
-function App() {
-  return (
-    <ErrorBoundary
-      fallback={<ErrorPage />}
-      onError={(error) => logErrorToService(error)}
-    >
-      <MainContent />
-    </ErrorBoundary>
-  );
-}
-```
-
-### 8. Testing Patterns
-
-```tsx
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { vi } from 'vitest';
-
-// Component test with user events
-describe('SignUpForm', () => {
-  it('validates required fields', async () => {
-    const user = userEvent.setup();
-    render(<SignUpForm />);
-
-    await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-    expect(await screen.findByText(/name must be at least 2 characters/i)).toBeInTheDocument();
-    expect(screen.getByText(/invalid email address/i)).toBeInTheDocument();
-  });
-
-  it('submits form with valid data', async () => {
-    const user = userEvent.setup();
-    const mockSubmit = vi.fn();
-
-    render(<SignUpForm onSubmit={mockSubmit} />);
-
-    await user.type(screen.getByLabelText(/name/i), 'John Doe');
-    await user.type(screen.getByLabelText(/email/i), 'john@example.com');
-    await user.type(screen.getByLabelText(/^password$/i), 'Password123');
-    await user.type(screen.getByLabelText(/confirm password/i), 'Password123');
-
-    await user.click(screen.getByRole('button', { name: /sign up/i }));
-
-    await waitFor(() => {
-      expect(mockSubmit).toHaveBeenCalledWith({
-        name: 'John Doe',
-        email: 'john@example.com',
-        password: 'Password123',
-        confirmPassword: 'Password123',
-      });
-    });
-  });
-});
-
-// Custom hook test
-import { renderHook, act } from '@testing-library/react';
-
-describe('useLocalStorage', () => {
-  beforeEach(() => {
-    localStorage.clear();
-  });
-
-  it('returns initial value when no stored value', () => {
-    const { result } = renderHook(() => useLocalStorage('key', 'initial'));
-    expect(result.current[0]).toBe('initial');
-  });
-
-  it('updates localStorage when value changes', () => {
-    const { result } = renderHook(() => useLocalStorage('key', 'initial'));
-
-    act(() => {
-      result.current[1]('updated');
-    });
-
-    expect(result.current[0]).toBe('updated');
-    expect(localStorage.getItem('key')).toBe('"updated"');
-  });
-});
-
-// Component with async data test
-describe('UserProfile', () => {
-  it('shows loading state then user data', async () => {
-    const mockUser = { id: '1', name: 'John', email: 'john@example.com' };
-
-    vi.spyOn(global, 'fetch').mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockUser,
-    } as Response);
-
-    render(<UserProfile userId="1" />);
-
-    expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-    await waitFor(() => {
-      expect(screen.getByText('John')).toBeInTheDocument();
-    });
-  });
-
-  it('shows error state on fetch failure', async () => {
-    vi.spyOn(global, 'fetch').mockRejectedValueOnce(new Error('Network error'));
-
-    render(<UserProfile userId="1" />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/error/i)).toBeInTheDocument();
-    });
-  });
-});
-```
-
-## Use Cases
-
-### Building a Dashboard
-```tsx
-function Dashboard() {
-  const { data: stats, loading } = useFetch<DashboardStats>('/api/stats');
-  const { data: recentActivity } = useFetch<Activity[]>('/api/activity');
-
-  if (loading) return <DashboardSkeleton />;
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <StatsCard title="Total Users" value={stats?.users} />
-      <StatsCard title="Revenue" value={`$${stats?.revenue}`} />
-      <StatsCard title="Active Projects" value={stats?.projects} />
-
-      <div className="col-span-full">
-        <ActivityFeed activities={recentActivity || []} />
-      </div>
-    </div>
-  );
-}
-```
-
-### Building a Todo App
-```tsx
-function TodoApp() {
-  const [todos, setTodos] = useLocalStorage<Todo[]>('todos', []);
-  const [filter, setFilter] = useState<'all' | 'active' | 'completed'>('all');
-
-  const filteredTodos = useMemo(() => {
-    switch (filter) {
-      case 'active': return todos.filter(t => !t.completed);
-      case 'completed': return todos.filter(t => t.completed);
-      default: return todos;
-    }
-  }, [todos, filter]);
-
-  const addTodo = useCallback((text: string) => {
-    setTodos(prev => [...prev, { id: crypto.randomUUID(), text, completed: false }]);
-  }, [setTodos]);
-
-  const toggleTodo = useCallback((id: string) => {
-    setTodos(prev => prev.map(t =>
-      t.id === id ? { ...t, completed: !t.completed } : t
-    ));
-  }, [setTodos]);
-
-  return (
-    <div>
-      <TodoInput onAdd={addTodo} />
-      <FilterButtons filter={filter} onFilterChange={setFilter} />
-      <TodoList todos={filteredTodos} onToggle={toggleTodo} />
-    </div>
-  );
-}
+Local state only       -> useState
+Complex local state    -> useReducer
+Shared across tree     -> Context + useReducer
+App-wide state         -> Zustand/Redux
+Server state           -> TanStack Query
 ```
 
 ## Best Practices
 
-### Do's
-- Use functional components with hooks
-- Keep components small and focused
-- Extract reusable logic into custom hooks
-- Use TypeScript for better type safety
-- Memoize expensive computations
-- Handle loading and error states
-- Use proper key props for lists
-- Clean up effects to prevent memory leaks
+| Do | Avoid |
+|----|-------|
+| Use functional components | Class components |
+| Extract custom hooks | Duplicating effect logic |
+| Memoize expensive computations | Premature optimization |
+| Handle loading/error states | Assuming success |
+| Use keys for lists | Index as key for dynamic lists |
 
-### Don'ts
-- Don't use class components for new code
-- Don't mutate state directly
-- Don't overuse useEffect
-- Don't forget dependency arrays
-- Don't use index as key for dynamic lists
-- Don't put business logic in components
-- Don't skip error boundaries
-- Don't ignore accessibility
+## Project Structure
 
-## References
+```
+src/
+├── App.tsx
+├── main.tsx
+├── components/         # Reusable UI components
+├── hooks/              # Custom hooks
+├── pages/              # Route components
+├── stores/             # State management
+├── services/           # API calls
+├── utils/              # Helper functions
+└── types/              # TypeScript types
+```
 
-- [React Documentation](https://react.dev)
-- [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app)
-- [Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- [Zustand](https://zustand-demo.pmnd.rs)
-- [React Hook Form](https://react-hook-form.com)
+For detailed examples and patterns, see reference files above.

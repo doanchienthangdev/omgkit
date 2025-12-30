@@ -1,6 +1,6 @@
 ---
-title: "token-optimization"
-description: "Optimize AI token usage for efficient, cost-effective interactions while maintaining quality"
+title: "optimizing-tokens"
+description: "AI agent maximizes efficiency and minimizes costs through strategic token usage while maintaining output quality. Use when managing AI interactions, designing prompts, or reducing costs."
 icon: "diagram-project"
 ---
 
@@ -12,7 +12,7 @@ icon: "diagram-project"
 
 ## Overview
 
-Optimize AI token usage for efficient, cost-effective interactions while maintaining quality
+AI agent maximizes efficiency and minimizes costs through strategic token usage while maintaining output quality. Use when managing AI interactions, designing prompts, or reducing costs.
 
 ## What You Get
 
@@ -24,612 +24,91 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Token Optimization
+# Optimizing Tokens
 
-Master **AI token usage optimization** for efficient, cost-effective interactions while maintaining output quality. This skill provides strategies to reduce costs by 30-70% without sacrificing results.
+## Quick Start
 
-## Purpose
-
-Maximize AI efficiency and minimize costs:
-
-- Reduce token usage by 30-70%
-- Maintain or improve output quality
-- Optimize prompt and context design
-- Use strategic caching and batching
-- Choose appropriate models for tasks
-- Manage conversation context efficiently
-- Track and measure token economics
+1. **Analyze** - Identify input vs output token distribution
+2. **Minimize Context** - Read only relevant file sections, not entire files
+3. **Optimize Prompts** - Use direct commands, remove filler words
+4. **Structure Outputs** - Request concise formats (JSON over prose)
+5. **Batch Operations** - Combine related requests, avoid duplicate context
+6. **Select Model** - Match model tier to task complexity
 
 ## Features
 
-### 1. Token Economics Framework
+| Feature | Description | Guide |
+|---------|-------------|-------|
+| Context Targeting | Read only needed code sections | Line ranges, pattern search, summaries |
+| Prompt Efficiency | Direct commands vs verbose requests | 79% reduction possible |
+| Output Formatting | Structured concise responses | JSON/YAML over verbose explanations |
+| Model Selection | Right model for task complexity | Haiku: simple, Sonnet: standard, Opus: complex |
+| Batching | Combine related operations | Single request with multiple outputs |
+| Caching | Avoid redundant computation | Cache by content hash + timestamp |
 
-```markdown
-## Understanding Token Costs
+## Common Patterns
 
-┌─────────────────────────────────────────────────────────────────────────┐
-│                      TOKEN ECONOMICS                                     │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                         │
-│  INPUT TOKENS (Context)           OUTPUT TOKENS (Response)              │
-│  ═══════════════════════          ════════════════════════              │
-│  • System prompt                  • Generated content                   │
-│  • Conversation history           • Code output                         │
-│  • File contents read             • Explanations                        │
-│  • Tool results                   • Structured data                     │
-│                                                                         │
-│  TYPICAL RATIOS:                                                        │
-│  ────────────────                                                       │
-│  • Exploration: 90% input, 10% output                                   │
-│  • Code generation: 60% input, 40% output                               │
-│  • Documentation: 30% input, 70% output                                 │
-│                                                                         │
-│  OPTIMIZATION PRIORITY:                                                 │
-│  ──────────────────────                                                 │
-│  1. Reduce unnecessary context (highest impact)                        │
-│  2. Use efficient prompts                                               │
-│  3. Request concise outputs                                             │
-│  4. Choose right model for task                                        │
-│                                                                         │
-└─────────────────────────────────────────────────────────────────────────┘
+```
+# Prompt Optimization (79% reduction)
+INEFFICIENT (120 tokens):
+"I would really appreciate it if you could help me
+with this task. What I need you to do is to please
+analyze this code and look for any bugs..."
 
-## Token Estimation
+EFFICIENT (25 tokens):
+"Analyze for bugs, error handling issues, security.
+For each: location, problem, fix."
 
-Rough estimates (varies by language/content):
-• English: ~4 characters = 1 token
-• Code: ~3-4 characters = 1 token
-• JSON: ~3 characters = 1 token
+# Context Optimization
+INEFFICIENT: Read entire 1000-line file
+EFFICIENT: Read lines 45-60 around target function
+
+# Output Format
+INEFFICIENT: "Please explain in detail..."
+EFFICIENT: "Output: JSON {name, severity, fix}"
+
+# Batching
+INEFFICIENT:
+  Request 1: "Given code [100 lines], find bugs"
+  Request 2: "Given code [same 100 lines], add types"
+
+EFFICIENT:
+  Single request: "Given code [100 lines]:
+  1. Find bugs
+  2. Add types"
 ```
 
-### 2. Prompt Optimization Techniques
-
-```typescript
-/**
- * Prompt Optimization: Write efficient prompts
- */
-
-// ❌ INEFFICIENT: Verbose, repetitive prompt
-const inefficientPrompt = `
-I would really appreciate it if you could help me with this task.
-What I need you to do is to please analyze this code and look for
-any bugs or issues that might be present. Could you please check
-if there are any problems with error handling, and also please
-make sure to look for any security vulnerabilities. When you find
-issues, please explain them in detail so I can understand what's
-wrong. Please also suggest how to fix each issue you find.
-Thank you so much for your help with this!
-`;
-// Tokens: ~120
-
-// ✅ EFFICIENT: Direct, clear prompt
-const efficientPrompt = `
-Analyze for bugs, error handling issues, and security vulnerabilities.
-For each issue: location, problem, fix.
-`;
-// Tokens: ~25 (79% reduction)
-
-// Optimization techniques:
-const promptOptimizations = {
-  // 1. Use direct commands, not polite requests
-  before: "Could you please help me understand what this function does?",
-  after: "Explain this function.",
-
-  // 2. Remove filler words
-  before: "I think we might need to maybe consider refactoring this code",
-  after: "Refactor this code",
-
-  // 3. Use structured output requests
-  before: "Please provide the results in a nice format with the name, description, and priority for each item",
-  after: "Output: JSON array with {name, description, priority}",
-
-  // 4. Be specific about scope
-  before: "Look at the codebase and find issues",
-  after: "Check src/auth/*.ts for SQL injection",
-
-  // 5. Use abbreviations in technical contexts
-  before: "Application Programming Interface",
-  after: "API"
-};
 ```
-
-### 3. Context Management Strategies
-
-```typescript
-/**
- * Context Management: Minimize unnecessary input tokens
- */
-
-// Strategy 1: Targeted file reading
-class ContextOptimizer {
-  // ❌ Reading entire files
-  async readEntireFile(path: string): Promise<string> {
-    return fs.readFile(path, 'utf-8');
-    // Could be 1000+ lines = 10,000+ tokens
-  }
-
-  // ✅ Read only what's needed
-  async readRelevantSection(
-    path: string,
-    options: { startLine?: number; endLine?: number; searchPattern?: string }
-  ): Promise<string> {
-    const content = await fs.readFile(path, 'utf-8');
-    const lines = content.split('\n');
-
-    if (options.startLine !== undefined && options.endLine !== undefined) {
-      // Read specific line range
-      return lines.slice(options.startLine - 1, options.endLine).join('\n');
-    }
-
-    if (options.searchPattern) {
-      // Find and return context around pattern
-      const regex = new RegExp(options.searchPattern);
-      for (let i = 0; i < lines.length; i++) {
-        if (regex.test(lines[i])) {
-          // Return 10 lines before and after
-          const start = Math.max(0, i - 10);
-          const end = Math.min(lines.length, i + 10);
-          return lines.slice(start, end).join('\n');
-        }
-      }
-    }
-
-    // Fallback: return summary
-    return this.summarizeFile(lines);
-  }
-
-  private summarizeFile(lines: string[]): string {
-    // Return file structure, not full content
-    const summary = [];
-    for (const line of lines) {
-      if (this.isStructuralLine(line)) {
-        summary.push(line);
-      }
-    }
-    return summary.join('\n');
-  }
-
-  private isStructuralLine(line: string): boolean {
-    const patterns = [
-      /^(export\s+)?(async\s+)?function\s+\w+/,  // Function definitions
-      /^(export\s+)?(class|interface|type)\s+\w+/, // Type definitions
-      /^(import|export)\s+/,  // Imports/exports
-      /^\s*\/\*\*/, // JSDoc start
-    ];
-    return patterns.some(p => p.test(line));
-  }
-}
-
-// Strategy 2: Progressive context loading
-async function progressiveContext(query: string): Promise<Context> {
-  // Start with minimal context
-  let context = await loadMinimalContext();
-
-  // Check if sufficient
-  if (await isContextSufficient(context, query)) {
-    return context;
-  }
-
-  // Progressively load more
-  context = await loadExpandedContext(context, query);
-
-  if (await isContextSufficient(context, query)) {
-    return context;
-  }
-
-  // Only load full context if necessary
-  return await loadFullContext(context, query);
-}
-
-// Strategy 3: Context compression
-function compressContext(context: string, maxTokens: number): string {
-  const currentTokens = estimateTokens(context);
-
-  if (currentTokens <= maxTokens) {
-    return context;
-  }
-
-  // Remove low-value content
-  let compressed = context;
-
-  // 1. Remove comments (often duplicates code meaning)
-  compressed = compressed.replace(/\/\/.*$/gm, '');
-  compressed = compressed.replace(/\/\*[\s\S]*?\*\//g, '');
-
-  // 2. Remove blank lines
-  compressed = compressed.replace(/\n\s*\n/g, '\n');
-
-  // 3. Remove import statements if types are inferrable
-  compressed = compressed.replace(/^import.*from.*$/gm, '');
-
-  // 4. Truncate if still too long
-  if (estimateTokens(compressed) > maxTokens) {
-    compressed = truncateToTokens(compressed, maxTokens);
-  }
-
-  return compressed;
-}
-```
-
-### 4. Efficient Search Patterns
-
-```typescript
-/**
- * Search Optimization: Find information efficiently
- */
-
-// ❌ INEFFICIENT: Broad searches that return too much
-const inefficientSearch = {
-  grep: {
-    pattern: '.*',           // Matches everything
-    path: '/',               // Searches entire filesystem
-  },
-  glob: {
-    pattern: '**/*',         // All files
-  }
-};
-
-// ✅ EFFICIENT: Targeted searches
-const efficientSearch = {
-  // Specify file types
-  grep: {
-    pattern: 'handleAuth',
-    path: 'src/',
-    glob: '*.ts',
-    // Only get file names first
-    outputMode: 'files_with_matches'
-  },
-
-  // Use specific patterns
-  glob: {
-    pattern: 'src/services/*Service.ts'
-  },
-
-  // Limit results
-  headLimit: 10
-};
-
-// Search strategy hierarchy
-const searchStrategies = [
-  {
-    name: 'Exact match',
-    when: 'You know the exact term',
-    example: 'grep "function calculateTax" src/tax.ts',
-    tokens: 'Low (single file, exact match)'
-  },
-  {
-    name: 'Scoped search',
-    when: 'You know the directory',
-    example: 'grep "validate" src/validators/ --type ts',
-    tokens: 'Medium (limited scope)'
-  },
-  {
-    name: 'File pattern search',
-    when: 'You know the file naming convention',
-    example: 'glob "**/test/*.spec.ts"',
-    tokens: 'Medium (structured results)'
-  },
-  {
-    name: 'Broad search with limits',
-    when: 'You need to explore',
-    example: 'grep "TODO" --head-limit 20',
-    tokens: 'Medium (capped results)'
-  },
-  {
-    name: 'Agent delegation',
-    when: 'Complex multi-step search',
-    example: 'spawn explore agent with specific query',
-    tokens: 'High but contained in subagent'
-  }
-];
-```
-
-### 5. Model Selection Strategy
-
-```typescript
-/**
- * Model Selection: Right model for the task
- */
-
-type ModelTier = 'haiku' | 'sonnet' | 'opus';
-
-interface TaskProfile {
-  complexity: 'simple' | 'moderate' | 'complex';
-  requiresReasoning: boolean;
-  requiresCreativity: boolean;
-  outputLength: 'short' | 'medium' | 'long';
-  qualityCritical: boolean;
-}
-
-function selectModel(task: TaskProfile): ModelTier {
-  // Simple, short tasks → Haiku (fastest, cheapest)
-  if (
-    task.complexity === 'simple' &&
-    !task.requiresReasoning &&
-    !task.qualityCritical
-  ) {
-    return 'haiku';
-  }
-
-  // Complex reasoning or quality-critical → Opus
-  if (
-    task.complexity === 'complex' ||
-    (task.requiresReasoning && task.qualityCritical)
-  ) {
-    return 'opus';
-  }
-
-  // Default: Sonnet (balanced)
-  return 'sonnet';
-}
-
-// Task examples by model
-const modelUseCases = {
-  haiku: [
-    'Simple code formatting',
-    'Syntax error detection',
-    'File renaming suggestions',
-    'Basic text extraction',
-    'Quick lookups'
-  ],
-  sonnet: [
-    'Feature implementation',
-    'Bug fixing',
-    'Code review',
-    'Documentation generation',
-    'Test writing'
-  ],
-  opus: [
-    'Architecture design',
-    'Complex debugging',
-    'Security analysis',
-    'Performance optimization',
-    'Critical code generation'
-  ]
-};
-```
-
-### 6. Batching and Caching
-
-```typescript
-/**
- * Batching: Combine related operations
- */
-
-// ❌ INEFFICIENT: Multiple separate calls
-async function inefficientApproach() {
-  const file1 = await readFile('src/a.ts');  // Call 1
-  const file2 = await readFile('src/b.ts');  // Call 2
-  const file3 = await readFile('src/c.ts');  // Call 3
-  // Each call has overhead
-}
-
-// ✅ EFFICIENT: Batch related operations
-async function efficientApproach() {
-  const files = await Promise.all([
-    readFile('src/a.ts'),
-    readFile('src/b.ts'),
-    readFile('src/c.ts')
-  ]);
-  // Single logical operation
-}
-
-// ❌ INEFFICIENT: Repeated context
-async function repeatedContext() {
-  await ask("Given this code: [100 lines], find bugs");
-  await ask("Given this code: [same 100 lines], suggest improvements");
-  await ask("Given this code: [same 100 lines], add types");
-  // 300 lines of duplicate context
-}
-
-// ✅ EFFICIENT: Combined request
-async function combinedRequest() {
-  await ask(`
-    Given this code: [100 lines]
-    1. Find bugs
-    2. Suggest improvements
-    3. Add types
-  `);
-  // 100 lines + small overhead
-}
-
-/**
- * Caching: Avoid redundant operations
- */
-
-class ResultCache {
-  private cache: Map<string, CacheEntry> = new Map();
-  private readonly TTL_MS = 5 * 60 * 1000; // 5 minutes
-
-  async getOrCompute<T>(
-    key: string,
-    compute: () => Promise<T>
-  ): Promise<T> {
-    const cached = this.cache.get(key);
-
-    if (cached && Date.now() - cached.timestamp < this.TTL_MS) {
-      return cached.value as T;
-    }
-
-    const result = await compute();
-    this.cache.set(key, {
-      value: result,
-      timestamp: Date.now()
-    });
-
-    return result;
-  }
-
-  // Cache file analysis results
-  async analyzeFile(path: string): Promise<Analysis> {
-    const stat = await fs.stat(path);
-    const cacheKey = `${path}:${stat.mtimeMs}`;
-
-    return this.getOrCompute(cacheKey, async () => {
-      const content = await fs.readFile(path, 'utf-8');
-      return performAnalysis(content);
-    });
-  }
-}
-```
-
-### 7. Output Optimization
-
-```typescript
-/**
- * Output Optimization: Request efficient responses
- */
-
-// ❌ INEFFICIENT: Verbose output request
-const verboseRequest = `
-Please explain your reasoning step by step, and provide a detailed
-analysis of each issue you find. Make sure to include examples and
-context for each point you make.
-`;
-
-// ✅ EFFICIENT: Structured, concise output
-const efficientRequest = `
-Output format:
-- issue: [one line]
-- fix: [one line]
-`;
-
-// Response length control
-const responseLengthStrategies = {
-  minimal: {
-    description: 'Bare essentials only',
-    example: 'Answer: yes/no',
-    useCase: 'Binary decisions, confirmations'
-  },
-  concise: {
-    description: 'Key points only',
-    example: 'List: 3-5 bullet points',
-    useCase: 'Summaries, overviews'
-  },
-  standard: {
-    description: 'Normal explanation',
-    example: 'Explain with one example',
-    useCase: 'Most tasks'
-  },
-  detailed: {
-    description: 'Comprehensive response',
-    example: 'Full analysis with examples',
-    useCase: 'Complex problems, documentation'
-  }
-};
-
-// Format optimization
-const formatOptimization = {
-  // Use structured formats for parsing
-  json: {
-    pros: 'Easy to parse, compact',
-    cons: 'Less readable',
-    best_for: 'Data extraction, API responses'
-  },
-  yaml: {
-    pros: 'Readable, compact',
-    cons: 'Parsing overhead',
-    best_for: 'Configuration, simple structures'
-  },
-  markdown: {
-    pros: 'Human readable',
-    cons: 'More tokens than JSON',
-    best_for: 'Documentation, explanations'
-  },
-  plain: {
-    pros: 'Minimal overhead',
-    cons: 'Harder to parse',
-    best_for: 'Simple text responses'
-  }
-};
-```
-
-## Use Cases
-
-### Optimizing a Code Review Task
-
-```typescript
-// Before optimization: ~15,000 tokens
-const beforeOptimization = {
-  input: {
-    systemPrompt: 500,    // Detailed instructions
-    fullFiles: 10000,     // 3 complete files
-    conversationHistory: 3000,
-    prompt: 500
-  },
-  output: {
-    verboseAnalysis: 2000
-  },
-  total: 16000
-};
-
-// After optimization: ~4,000 tokens (75% reduction)
-const afterOptimization = {
-  input: {
-    systemPrompt: 200,    // Concise instructions
-    relevantSections: 2000, // Only changed code + context
-    noHistory: 0,         // Fresh context
-    prompt: 100           // Direct request
-  },
-  output: {
-    structuredList: 700
-  },
-  total: 3000
-};
-
-// Implementation
-async function optimizedCodeReview(prDiff: string): Promise<Review> {
-  // 1. Extract only the diff (not full files)
-  const relevantCode = extractDiff(prDiff);
-
-  // 2. Use concise prompt
-  const prompt = `
-Review this diff. Output JSON:
-{issues: [{line, severity, message, fix}]}
-  `;
-
-  // 3. Use appropriate model
-  const model = selectModel({
-    complexity: 'moderate',
-    requiresReasoning: true,
-    qualityCritical: true,
-    outputLength: 'medium'
-  }); // Returns 'sonnet'
-
-  // 4. Request structured output
-  return await analyze(relevantCode, prompt, { model });
-}
+# Model Selection Guide
+| Task Type | Model | Examples |
+|-----------|-------|----------|
+| Simple | Haiku | Formatting, syntax check, lookups |
+| Standard | Sonnet | Features, bugs, reviews, tests |
+| Complex | Opus | Architecture, security, critical code |
+
+# Search Efficiency
+INEFFICIENT: grep ".*" / (matches everything)
+EFFICIENT: grep "handleAuth" src/ --type ts
 ```
 
 ## Best Practices
 
-### Do's
+| Do | Avoid |
+|----|-------|
+| Read only what's needed - use line ranges | Reading entire files for one function |
+| Use direct language - commands over requests | Verbose, polite phrasing in prompts |
+| Structure outputs - JSON/YAML over prose | Requesting detailed explanations for simple tasks |
+| Batch operations - combine related requests | Repeating context across multiple requests |
+| Choose right model - Haiku for simple tasks | Using most powerful model for everything |
+| Limit search results - use head_limit | Unbounded searches returning thousands of results |
+| Cache results - avoid redundant computation | Re-analyzing unchanged files |
+| Progressive loading - start minimal, expand | Loading full context when partial suffices |
 
-- **Read only what's needed** - use line ranges and targeted searches
-- **Use direct language** - commands over requests
-- **Structure outputs** - JSON/YAML over prose
-- **Batch operations** - combine related requests
-- **Cache results** - avoid redundant computation
-- **Choose right model** - Haiku for simple, Opus for complex
-- **Limit search results** - use head_limit parameters
-- **Progressive loading** - start minimal, expand if needed
+## Related Skills
 
-### Don'ts
-
-- Don't read entire files when you need one function
-- Don't include full conversation history when not needed
-- Don't use verbose, polite language in prompts
-- Don't request detailed explanations for simple tasks
-- Don't repeat context across multiple requests
-- Don't use the most powerful model for simple tasks
-- Don't search without scope limits
-- Don't ignore token usage in your workflow
-
-## References
-
-- [OpenAI Tokenizer](https://platform.openai.com/tokenizer)
-- [Anthropic Token Counting](https://docs.anthropic.com/claude/docs/counting-tokens)
-- [Prompt Engineering Guide](https://www.promptingguide.ai/)
-- [AI Cost Optimization Strategies](https://docs.anthropic.com/claude/docs/reducing-costs)
+- `dispatching-parallel-agents` - Efficient multi-agent patterns
+- `writing-plans` - Structured planning reduces iteration
+- `thinking-sequentially` - Organized reasoning saves tokens
 
 
 ## Configuration

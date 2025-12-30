@@ -1,6 +1,6 @@
 ---
-title: "aws"
-description: "AWS cloud services with Lambda, S3, DynamoDB, ECS, and infrastructure as code patterns"
+title: "Deploying to AWS"
+description: "The agent implements AWS cloud solutions with Lambda, S3, DynamoDB, ECS, and CDK infrastructure as code. Use when building serverless functions, deploying containers, managing cloud storage, or defining infrastructure as code."
 icon: "server"
 ---
 
@@ -12,7 +12,7 @@ icon: "server"
 
 ## Overview
 
-AWS cloud services with Lambda, S3, DynamoDB, ECS, and infrastructure as code patterns
+The agent implements AWS cloud solutions with Lambda, S3, DynamoDB, ECS, and CDK infrastructure as code. Use when building serverless functions, deploying containers, managing cloud storage, or defining infrastructure as code.
 
 ## What You Get
 
@@ -24,700 +24,106 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# AWS
+# Deploying to AWS
 
-Enterprise-grade **AWS cloud development** following industry best practices. This skill covers Lambda functions, S3 storage, DynamoDB, ECS containers, API Gateway, infrastructure as code with CDK, and production-ready patterns used by top engineering teams.
+## Quick Start
 
-## Purpose
+```typescript
+// Lambda handler
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 
-Build scalable cloud applications on AWS:
+export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const { id } = event.pathParameters || {};
+  return {
+    statusCode: 200,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, message: 'Success' }),
+  };
+};
+```
 
-- Deploy serverless functions with Lambda
-- Store and retrieve data with S3 and DynamoDB
-- Run containerized applications with ECS
-- Build APIs with API Gateway
-- Implement infrastructure as code with CDK
-- Monitor applications with CloudWatch
-- Secure resources with IAM
+```bash
+# Deploy with CDK
+npx cdk deploy --all
+```
 
 ## Features
 
-### 1. Lambda Functions
+| Feature | Description | Guide |
+|---------|-------------|-------|
+| Lambda | Serverless function execution | Use for APIs, event processing, scheduled tasks |
+| S3 | Object storage with presigned URLs | Store files, serve static assets, data lakes |
+| DynamoDB | NoSQL database with single-digit ms latency | Design single-table schemas with GSIs |
+| ECS/Fargate | Container orchestration | Run Docker containers without managing servers |
+| API Gateway | REST and WebSocket API management | Throttling, auth, request validation |
+| CDK | Infrastructure as TypeScript code | Define stacks, manage deployments programmatically |
+
+## Common Patterns
+
+### S3 Presigned Upload URL
 
 ```typescript
-// src/handlers/user.handler.ts
-import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
-
-const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client);
-
-const TABLE_NAME = process.env.USERS_TABLE!;
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  createdAt: string;
-}
-
-// Response helpers
-const response = (statusCode: number, body: unknown): APIGatewayProxyResult => ({
-  statusCode,
-  headers: {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Credentials': true,
-  },
-  body: JSON.stringify(body),
-});
-
-const success = (data: unknown) => response(200, { data });
-const created = (data: unknown) => response(201, { data });
-const notFound = (message: string) => response(404, { error: { code: 'NOT_FOUND', message } });
-const badRequest = (message: string) => response(400, { error: { code: 'BAD_REQUEST', message } });
-const serverError = (error: Error) => response(500, { error: { code: 'SERVER_ERROR', message: error.message } });
-
-// GET /users/{id}
-export const getUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  try {
-    const userId = event.pathParameters?.id;
-    if (!userId) return badRequest('User ID is required');
-
-    const result = await docClient.send(new GetCommand({
-      TableName: TABLE_NAME,
-      Key: { id: userId },
-    }));
-
-    if (!result.Item) {
-      return notFound(`User ${userId} not found`);
-    }
-
-    return success(result.Item);
-  } catch (error) {
-    console.error('Error getting user:', error);
-    return serverError(error as Error);
-  }
-};
-
-// POST /users
-export const createUser = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  try {
-    if (!event.body) return badRequest('Request body is required');
-
-    const body = JSON.parse(event.body);
-    const { email, name } = body;
-
-    if (!email || !name) {
-      return badRequest('Email and name are required');
-    }
-
-    const user: User = {
-      id: crypto.randomUUID(),
-      email: email.toLowerCase(),
-      name,
-      createdAt: new Date().toISOString(),
-    };
-
-    await docClient.send(new PutCommand({
-      TableName: TABLE_NAME,
-      Item: user,
-      ConditionExpression: 'attribute_not_exists(id)',
-    }));
-
-    return created(user);
-  } catch (error) {
-    console.error('Error creating user:', error);
-    return serverError(error as Error);
-  }
-};
-
-// GET /users
-export const listUsers = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  try {
-    const limit = parseInt(event.queryStringParameters?.limit || '20');
-    const lastKey = event.queryStringParameters?.cursor;
-
-    const params: any = {
-      TableName: TABLE_NAME,
-      Limit: limit,
-    };
-
-    if (lastKey) {
-      params.ExclusiveStartKey = JSON.parse(Buffer.from(lastKey, 'base64').toString());
-    }
-
-    const result = await docClient.send(new QueryCommand(params));
-
-    const cursor = result.LastEvaluatedKey
-      ? Buffer.from(JSON.stringify(result.LastEvaluatedKey)).toString('base64')
-      : null;
-
-    return success({
-      items: result.Items,
-      cursor,
-      hasMore: !!result.LastEvaluatedKey,
-    });
-  } catch (error) {
-    console.error('Error listing users:', error);
-    return serverError(error as Error);
-  }
-};
-```
-
-### 2. S3 Operations
-
-```typescript
-// src/services/s3.service.ts
-import {
-  S3Client,
-  PutObjectCommand,
-  GetObjectCommand,
-  DeleteObjectCommand,
-  ListObjectsV2Command,
-  CopyObjectCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { Readable } from 'stream';
 
-const s3Client = new S3Client({ region: process.env.AWS_REGION });
-const BUCKET = process.env.S3_BUCKET!;
+const s3 = new S3Client({});
 
-export class S3Service {
-  // Upload file
-  async upload(key: string, body: Buffer | Readable, contentType: string): Promise<string> {
-    await s3Client.send(new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      Body: body,
-      ContentType: contentType,
-    }));
-
-    return `s3://${BUCKET}/${key}`;
-  }
-
-  // Upload with metadata
-  async uploadWithMetadata(
-    key: string,
-    body: Buffer,
-    options: {
-      contentType: string;
-      metadata?: Record<string, string>;
-      tags?: Record<string, string>;
-    }
-  ): Promise<string> {
-    await s3Client.send(new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      Body: body,
-      ContentType: options.contentType,
-      Metadata: options.metadata,
-      Tagging: options.tags
-        ? Object.entries(options.tags).map(([k, v]) => `${k}=${v}`).join('&')
-        : undefined,
-    }));
-
-    return `https://${BUCKET}.s3.amazonaws.com/${key}`;
-  }
-
-  // Get file
-  async get(key: string): Promise<Buffer> {
-    const response = await s3Client.send(new GetObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-    }));
-
-    const chunks: Buffer[] = [];
-    for await (const chunk of response.Body as Readable) {
-      chunks.push(chunk);
-    }
-    return Buffer.concat(chunks);
-  }
-
-  // Generate presigned upload URL
-  async getUploadUrl(key: string, contentType: string, expiresIn = 3600): Promise<string> {
-    const command = new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      ContentType: contentType,
-    });
-
-    return getSignedUrl(s3Client, command, { expiresIn });
-  }
-
-  // Generate presigned download URL
-  async getDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
-    const command = new GetObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-    });
-
-    return getSignedUrl(s3Client, command, { expiresIn });
-  }
-
-  // List objects with prefix
-  async list(prefix: string, maxKeys = 1000): Promise<string[]> {
-    const response = await s3Client.send(new ListObjectsV2Command({
-      Bucket: BUCKET,
-      Prefix: prefix,
-      MaxKeys: maxKeys,
-    }));
-
-    return response.Contents?.map(obj => obj.Key!) || [];
-  }
-
-  // Delete file
-  async delete(key: string): Promise<void> {
-    await s3Client.send(new DeleteObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-    }));
-  }
-
-  // Copy file
-  async copy(sourceKey: string, destKey: string): Promise<void> {
-    await s3Client.send(new CopyObjectCommand({
-      Bucket: BUCKET,
-      CopySource: `${BUCKET}/${sourceKey}`,
-      Key: destKey,
-    }));
-  }
+async function getUploadUrl(key: string, contentType: string): Promise<string> {
+  const command = new PutObjectCommand({ Bucket: process.env.BUCKET!, Key: key, ContentType: contentType });
+  return getSignedUrl(s3, command, { expiresIn: 3600 });
 }
 ```
 
-### 3. DynamoDB Patterns
+### DynamoDB Single-Table Pattern
 
 ```typescript
-// src/services/dynamodb.service.ts
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocumentClient,
-  GetCommand,
-  PutCommand,
-  UpdateCommand,
-  DeleteCommand,
-  QueryCommand,
-  BatchWriteCommand,
-  TransactWriteCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 
-const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client, {
-  marshallOptions: { removeUndefinedValues: true },
-});
-
-export class DynamoDBService<T extends { pk: string; sk: string }> {
-  constructor(private tableName: string) {}
-
-  async get(pk: string, sk: string): Promise<T | null> {
-    const result = await docClient.send(new GetCommand({
-      TableName: this.tableName,
-      Key: { pk, sk },
-    }));
-    return (result.Item as T) || null;
-  }
-
-  async put(item: T): Promise<T> {
-    await docClient.send(new PutCommand({
-      TableName: this.tableName,
-      Item: item,
-    }));
-    return item;
-  }
-
-  async update(pk: string, sk: string, updates: Partial<T>): Promise<T> {
-    const updateExpressions: string[] = [];
-    const expressionNames: Record<string, string> = {};
-    const expressionValues: Record<string, unknown> = {};
-
-    Object.entries(updates).forEach(([key, value], index) => {
-      if (key !== 'pk' && key !== 'sk') {
-        updateExpressions.push(`#attr${index} = :val${index}`);
-        expressionNames[`#attr${index}`] = key;
-        expressionValues[`:val${index}`] = value;
-      }
-    });
-
-    const result = await docClient.send(new UpdateCommand({
-      TableName: this.tableName,
-      Key: { pk, sk },
-      UpdateExpression: `SET ${updateExpressions.join(', ')}`,
-      ExpressionAttributeNames: expressionNames,
-      ExpressionAttributeValues: expressionValues,
-      ReturnValues: 'ALL_NEW',
-    }));
-
-    return result.Attributes as T;
-  }
-
-  async delete(pk: string, sk: string): Promise<void> {
-    await docClient.send(new DeleteCommand({
-      TableName: this.tableName,
-      Key: { pk, sk },
-    }));
-  }
-
-  async query(
-    pk: string,
-    options?: {
-      skPrefix?: string;
-      limit?: number;
-      scanForward?: boolean;
-    }
-  ): Promise<T[]> {
-    const params: any = {
-      TableName: this.tableName,
-      KeyConditionExpression: 'pk = :pk',
-      ExpressionAttributeValues: { ':pk': pk },
-      Limit: options?.limit,
-      ScanIndexForward: options?.scanForward ?? true,
-    };
-
-    if (options?.skPrefix) {
-      params.KeyConditionExpression += ' AND begins_with(sk, :skPrefix)';
-      params.ExpressionAttributeValues[':skPrefix'] = options.skPrefix;
-    }
-
-    const result = await docClient.send(new QueryCommand(params));
-    return (result.Items as T[]) || [];
-  }
-
-  async batchWrite(items: T[]): Promise<void> {
-    const chunks = this.chunkArray(items, 25);
-
-    for (const chunk of chunks) {
-      await docClient.send(new BatchWriteCommand({
-        RequestItems: {
-          [this.tableName]: chunk.map(item => ({
-            PutRequest: { Item: item },
-          })),
-        },
-      }));
-    }
-  }
-
-  async transactWrite(operations: Array<{ type: 'put' | 'delete'; item: T }>): Promise<void> {
-    await docClient.send(new TransactWriteCommand({
-      TransactItems: operations.map(op => {
-        if (op.type === 'put') {
-          return { Put: { TableName: this.tableName, Item: op.item } };
-        }
-        return { Delete: { TableName: this.tableName, Key: { pk: op.item.pk, sk: op.item.sk } } };
-      }),
-    }));
-  }
-
-  private chunkArray<U>(array: U[], size: number): U[][] {
-    const chunks: U[][] = [];
-    for (let i = 0; i < array.length; i += size) {
-      chunks.push(array.slice(i, i + size));
-    }
-    return chunks;
-  }
+// pk: USER#123, sk: PROFILE | ORDER#timestamp
+async function getUserWithOrders(userId: string) {
+  const result = await docClient.send(new QueryCommand({
+    TableName: process.env.TABLE!,
+    KeyConditionExpression: 'pk = :pk',
+    ExpressionAttributeValues: { ':pk': `USER#${userId}` },
+  }));
+  return result.Items;
 }
 ```
 
-### 4. CDK Infrastructure
+### CDK Stack Definition
 
 ```typescript
-// lib/app-stack.ts
 import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
-import * as s3 from 'aws-cdk-lib/aws-s3';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import { Construct } from 'constructs';
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
-export class AppStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+const table = new dynamodb.Table(this, 'Table', {
+  partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+  sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
+  billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+});
 
-    // DynamoDB Table
-    const usersTable = new dynamodb.Table(this, 'UsersTable', {
-      partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecovery: true,
-      removalPolicy: cdk.RemovalPolicy.RETAIN,
-    });
+const fn = new lambda.Function(this, 'Handler', {
+  runtime: lambda.Runtime.NODEJS_20_X,
+  handler: 'index.handler',
+  code: lambda.Code.fromAsset('dist'),
+  environment: { TABLE_NAME: table.tableName },
+});
 
-    usersTable.addGlobalSecondaryIndex({
-      indexName: 'GSI1',
-      partitionKey: { name: 'gsi1pk', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'gsi1sk', type: dynamodb.AttributeType.STRING },
-      projectionType: dynamodb.ProjectionType.ALL,
-    });
-
-    // S3 Bucket
-    const bucket = new s3.Bucket(this, 'AssetsBucket', {
-      encryption: s3.BucketEncryption.S3_MANAGED,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      versioned: true,
-      lifecycleRules: [
-        {
-          expiration: cdk.Duration.days(365),
-          noncurrentVersionExpiration: cdk.Duration.days(30),
-        },
-      ],
-    });
-
-    // Lambda Functions
-    const getUserFn = new NodejsFunction(this, 'GetUserFunction', {
-      entry: 'src/handlers/user.handler.ts',
-      handler: 'getUser',
-      runtime: lambda.Runtime.NODEJS_20_X,
-      timeout: cdk.Duration.seconds(30),
-      memorySize: 256,
-      environment: {
-        USERS_TABLE: usersTable.tableName,
-        S3_BUCKET: bucket.bucketName,
-      },
-      tracing: lambda.Tracing.ACTIVE,
-    });
-
-    const createUserFn = new NodejsFunction(this, 'CreateUserFunction', {
-      entry: 'src/handlers/user.handler.ts',
-      handler: 'createUser',
-      runtime: lambda.Runtime.NODEJS_20_X,
-      timeout: cdk.Duration.seconds(30),
-      memorySize: 256,
-      environment: {
-        USERS_TABLE: usersTable.tableName,
-      },
-    });
-
-    // Grant permissions
-    usersTable.grantReadData(getUserFn);
-    usersTable.grantReadWriteData(createUserFn);
-    bucket.grantRead(getUserFn);
-
-    // API Gateway
-    const api = new apigateway.RestApi(this, 'UsersApi', {
-      restApiName: 'Users Service',
-      deployOptions: {
-        stageName: 'prod',
-        throttlingRateLimit: 1000,
-        throttlingBurstLimit: 500,
-      },
-      defaultCorsPreflightOptions: {
-        allowOrigins: apigateway.Cors.ALL_ORIGINS,
-        allowMethods: apigateway.Cors.ALL_METHODS,
-      },
-    });
-
-    const users = api.root.addResource('users');
-    users.addMethod('GET', new apigateway.LambdaIntegration(getUserFn));
-    users.addMethod('POST', new apigateway.LambdaIntegration(createUserFn));
-
-    const user = users.addResource('{id}');
-    user.addMethod('GET', new apigateway.LambdaIntegration(getUserFn));
-
-    // Outputs
-    new cdk.CfnOutput(this, 'ApiUrl', { value: api.url });
-    new cdk.CfnOutput(this, 'BucketName', { value: bucket.bucketName });
-  }
-}
-```
-
-### 5. ECS Container Deployment
-
-```typescript
-// lib/ecs-stack.ts
-import * as cdk from 'aws-cdk-lib';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as ecs from 'aws-cdk-lib/aws-ecs';
-import * as ecsPatterns from 'aws-cdk-lib/aws-ecs-patterns';
-import * as ecr from 'aws-cdk-lib/aws-ecr';
-import { Construct } from 'constructs';
-
-export class EcsStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
-
-    // VPC
-    const vpc = new ec2.Vpc(this, 'AppVpc', {
-      maxAzs: 2,
-      natGateways: 1,
-    });
-
-    // ECS Cluster
-    const cluster = new ecs.Cluster(this, 'AppCluster', {
-      vpc,
-      containerInsights: true,
-    });
-
-    // Fargate Service with ALB
-    const service = new ecsPatterns.ApplicationLoadBalancedFargateService(
-      this,
-      'AppService',
-      {
-        cluster,
-        taskImageOptions: {
-          image: ecs.ContainerImage.fromRegistry('nginx:latest'),
-          containerPort: 80,
-          environment: {
-            NODE_ENV: 'production',
-          },
-        },
-        desiredCount: 2,
-        cpu: 256,
-        memoryLimitMiB: 512,
-        publicLoadBalancer: true,
-        healthCheckGracePeriod: cdk.Duration.seconds(60),
-      }
-    );
-
-    // Auto Scaling
-    const scaling = service.service.autoScaleTaskCount({
-      minCapacity: 2,
-      maxCapacity: 10,
-    });
-
-    scaling.scaleOnCpuUtilization('CpuScaling', {
-      targetUtilizationPercent: 70,
-      scaleInCooldown: cdk.Duration.seconds(60),
-      scaleOutCooldown: cdk.Duration.seconds(60),
-    });
-
-    scaling.scaleOnMemoryUtilization('MemoryScaling', {
-      targetUtilizationPercent: 80,
-    });
-  }
-}
-```
-
-### 6. SQS and SNS Integration
-
-```typescript
-// src/services/messaging.service.ts
-import { SQSClient, SendMessageCommand, ReceiveMessageCommand, DeleteMessageCommand } from '@aws-sdk/client-sqs';
-import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
-
-const sqsClient = new SQSClient({});
-const snsClient = new SNSClient({});
-
-export class MessagingService {
-  // Send message to SQS
-  async sendToQueue(queueUrl: string, message: unknown, delaySeconds = 0): Promise<string> {
-    const result = await sqsClient.send(new SendMessageCommand({
-      QueueUrl: queueUrl,
-      MessageBody: JSON.stringify(message),
-      DelaySeconds: delaySeconds,
-    }));
-    return result.MessageId!;
-  }
-
-  // Receive messages from SQS
-  async receiveFromQueue(queueUrl: string, maxMessages = 10): Promise<Array<{ id: string; body: unknown; receiptHandle: string }>> {
-    const result = await sqsClient.send(new ReceiveMessageCommand({
-      QueueUrl: queueUrl,
-      MaxNumberOfMessages: maxMessages,
-      WaitTimeSeconds: 20,
-    }));
-
-    return (result.Messages || []).map(msg => ({
-      id: msg.MessageId!,
-      body: JSON.parse(msg.Body!),
-      receiptHandle: msg.ReceiptHandle!,
-    }));
-  }
-
-  // Delete message from SQS
-  async deleteFromQueue(queueUrl: string, receiptHandle: string): Promise<void> {
-    await sqsClient.send(new DeleteMessageCommand({
-      QueueUrl: queueUrl,
-      ReceiptHandle: receiptHandle,
-    }));
-  }
-
-  // Publish to SNS
-  async publishToTopic(topicArn: string, message: unknown, subject?: string): Promise<string> {
-    const result = await snsClient.send(new PublishCommand({
-      TopicArn: topicArn,
-      Message: JSON.stringify(message),
-      Subject: subject,
-    }));
-    return result.MessageId!;
-  }
-}
-```
-
-## Use Cases
-
-### File Upload with Presigned URL
-
-```typescript
-// Lambda handler for file upload
-export const getUploadUrl = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const { filename, contentType } = JSON.parse(event.body || '{}');
-  const userId = event.requestContext.authorizer?.claims?.sub;
-
-  const key = `uploads/${userId}/${Date.now()}-${filename}`;
-  const s3Service = new S3Service();
-  const uploadUrl = await s3Service.getUploadUrl(key, contentType);
-
-  return success({ uploadUrl, key });
-};
-```
-
-### Event-Driven Processing
-
-```typescript
-// SQS Event Handler
-import { SQSHandler, SQSEvent } from 'aws-lambda';
-
-export const processQueue: SQSHandler = async (event: SQSEvent) => {
-  for (const record of event.Records) {
-    const message = JSON.parse(record.body);
-
-    try {
-      await processMessage(message);
-    } catch (error) {
-      console.error('Failed to process message:', error);
-      throw error; // Message returns to queue
-    }
-  }
-};
+table.grantReadWriteData(fn);
 ```
 
 ## Best Practices
 
-### Do's
-
-- Use IAM roles instead of access keys
-- Enable encryption at rest and in transit
-- Use VPC for sensitive workloads
-- Implement proper error handling and retries
-- Use CloudWatch for monitoring and alerting
-- Tag all resources for cost tracking
-- Use infrastructure as code (CDK/CloudFormation)
-- Implement least privilege access
-- Use environment variables for configuration
-- Enable X-Ray tracing for debugging
-
-### Don'ts
-
-- Don't hardcode credentials in code
-- Don't use root account for deployments
-- Don't expose S3 buckets publicly
-- Don't skip encryption for sensitive data
-- Don't ignore CloudWatch alarms
-- Don't over-provision resources
-- Don't skip VPC for production workloads
-- Don't use synchronous invocations for long tasks
-- Don't ignore cost optimization
-- Don't skip backup and disaster recovery
-
-## References
-
-- [AWS Documentation](https://docs.aws.amazon.com/)
-- [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/)
-- [AWS SDK for JavaScript](https://docs.aws.amazon.com/sdk-for-javascript/)
-- [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/)
-- [AWS Best Practices](https://aws.amazon.com/architecture/best-practices/)
+| Do | Avoid |
+|----|-------|
+| Use IAM roles, never access keys in code | Hardcoding credentials or secrets |
+| Enable encryption at rest and in transit | Exposing S3 buckets publicly |
+| Tag resources for cost tracking | Over-provisioning resources |
+| Use environment variables for config | Skipping CloudWatch alarms |
+| Implement least-privilege IAM policies | Using root account for deployments |
+| Enable X-Ray tracing for debugging | Synchronous invocations for long tasks |
+| Use VPC for sensitive workloads | Ignoring backup and disaster recovery |
 
 
 ## Configuration

@@ -1,359 +1,121 @@
 ---
-name: accessibility
-description: Web accessibility (a11y) with WCAG compliance, ARIA, keyboard navigation, screen readers, and testing
-category: frontend
-triggers:
-  - accessibility
-  - a11y
-  - wcag
-  - screen reader
-  - aria
-  - keyboard navigation
+name: implementing-accessibility
+description: Claude implements WCAG 2.1 AA compliant web interfaces with proper ARIA, keyboard navigation, and screen reader support. Use when building accessible components or auditing existing UIs.
 ---
 
-# Accessibility
+# Implementing Accessibility
 
-Enterprise-grade **web accessibility** following WCAG 2.1 AA guidelines and best practices. This skill covers semantic HTML, ARIA attributes, keyboard navigation, focus management, screen reader support, and accessibility testing patterns used by top engineering teams.
-
-## Purpose
-
-Build inclusive web applications:
-
-- Implement WCAG 2.1 AA compliance
-- Write semantic, accessible HTML
-- Use ARIA attributes correctly
-- Support keyboard navigation
-- Manage focus appropriately
-- Test with screen readers
-- Build accessible components
-
-## Features
-
-### 1. Semantic HTML Structure
-
-```html
-<!-- Accessible page structure -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Title - Site Name</title>
-</head>
-<body>
-  <!-- Skip link for keyboard users -->
-  <a href="#main-content" class="skip-link">
-    Skip to main content
-  </a>
-
-  <header role="banner">
-    <nav aria-label="Main navigation">
-      <ul>
-        <li><a href="/" aria-current="page">Home</a></li>
-        <li><a href="/about">About</a></li>
-        <li><a href="/contact">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <main id="main-content" role="main">
-    <article>
-      <h1>Main Heading</h1>
-      <p>Content...</p>
-
-      <section aria-labelledby="section-heading">
-        <h2 id="section-heading">Section Title</h2>
-        <p>Section content...</p>
-      </section>
-    </article>
-
-    <aside aria-label="Related content">
-      <h2>Related Articles</h2>
-      <!-- Sidebar content -->
-    </aside>
-  </main>
-
-  <footer role="contentinfo">
-    <nav aria-label="Footer navigation">
-      <!-- Footer links -->
-    </nav>
-    <p>&copy; 2024 Company Name</p>
-  </footer>
-</body>
-</html>
-```
-
-```css
-/* Skip link styles */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: #000;
-  color: #fff;
-  padding: 8px 16px;
-  z-index: 100;
-  transition: top 0.3s;
-}
-
-.skip-link:focus {
-  top: 0;
-}
-
-/* Focus styles - never remove, customize instead */
-:focus {
-  outline: 2px solid #005fcc;
-  outline-offset: 2px;
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
-
-:focus-visible {
-  outline: 2px solid #005fcc;
-  outline-offset: 2px;
-}
-
-/* Visually hidden but accessible to screen readers */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* Show when focused (for skip links) */
-.sr-only-focusable:focus {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: inherit;
-  margin: inherit;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-}
-```
-
-### 2. ARIA Attributes
+## Quick Start
 
 ```tsx
-// components/accessible/Alert.tsx
-import React from "react";
-
-interface AlertProps {
-  type: "info" | "success" | "warning" | "error";
-  children: React.ReactNode;
-  dismissible?: boolean;
-  onDismiss?: () => void;
-}
-
-export function Alert({ type, children, dismissible, onDismiss }: AlertProps) {
-  // Map type to appropriate ARIA role
-  const role = type === "error" ? "alert" : "status";
-  const ariaLive = type === "error" ? "assertive" : "polite";
-
-  return (
-    <div
-      role={role}
-      aria-live={ariaLive}
-      aria-atomic="true"
-      className={`alert alert-${type}`}
-    >
-      <span className="sr-only">{type}:</span>
-      <div className="alert-content">{children}</div>
-      {dismissible && (
-        <button
-          type="button"
-          aria-label={`Dismiss ${type} message`}
-          onClick={onDismiss}
-          className="alert-dismiss"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      )}
-    </div>
-  );
-}
-
-// components/accessible/Dialog.tsx
-import React, { useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-
-interface DialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-}
-
+// Accessible dialog with focus trap and ARIA
 export function Dialog({ isOpen, onClose, title, children }: DialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-  const titleId = `dialog-title-${React.useId()}`;
-  const descId = `dialog-desc-${React.useId()}`;
+  const titleId = useId();
 
   useEffect(() => {
     if (isOpen) {
-      // Store current focus
-      previousFocusRef.current = document.activeElement as HTMLElement;
-
-      // Focus the dialog
       dialogRef.current?.focus();
-
-      // Prevent body scroll
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     }
-
-    return () => {
-      document.body.style.overflow = "";
-      // Return focus on close
-      previousFocusRef.current?.focus();
-    };
+    return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // Trap focus within dialog
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      onClose();
-      return;
-    }
-
-    if (e.key !== "Tab") return;
-
-    const focusableElements = dialogRef.current?.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-
-    if (!focusableElements?.length) return;
-
-    const firstElement = focusableElements[0] as HTMLElement;
-    const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-    if (e.shiftKey && document.activeElement === firstElement) {
-      e.preventDefault();
-      lastElement.focus();
-    } else if (!e.shiftKey && document.activeElement === lastElement) {
-      e.preventDefault();
-      firstElement.focus();
-    }
-  };
-
   if (!isOpen) return null;
-
   return createPortal(
     <>
-      <div
-        className="dialog-backdrop"
-        aria-hidden="true"
-        onClick={onClose}
-      />
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        aria-describedby={descId}
-        tabIndex={-1}
-        onKeyDown={handleKeyDown}
-        className="dialog"
-      >
+      <div className="dialog-backdrop" onClick={onClose} />
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}>
         <h2 id={titleId}>{title}</h2>
-        <div id={descId}>{children}</div>
-        <button
-          type="button"
-          aria-label="Close dialog"
-          onClick={onClose}
-          className="dialog-close"
-        >
-          &times;
-        </button>
+        {children}
+        <button onClick={onClose} aria-label="Close dialog">&times;</button>
       </div>
     </>,
     document.body
   );
 }
+```
 
-// components/accessible/Tabs.tsx
-import React, { useState, useRef } from "react";
+## Features
 
-interface Tab {
-  id: string;
-  label: string;
-  content: React.ReactNode;
+| Feature | Description | Guide |
+|---------|-------------|-------|
+| Semantic HTML | Proper landmarks, headings, and native elements | `ref/semantic-structure.md` |
+| ARIA Attributes | Roles, states, and properties for custom widgets | `ref/aria-patterns.md` |
+| Keyboard Navigation | Tab order, roving tabindex, keyboard shortcuts | `ref/keyboard-nav.md` |
+| Focus Management | Focus trapping, restoration, visible indicators | `ref/focus-management.md` |
+| Live Regions | Dynamic content announcements for screen readers | `ref/live-regions.md` |
+| Testing | jest-axe, Cypress accessibility, manual testing | `ref/a11y-testing.md` |
+
+## Common Patterns
+
+### Accessible Form Field
+
+```tsx
+export function FormField({ id, label, error, hint, required, ...props }: FormFieldProps) {
+  const hintId = hint ? `${id}-hint` : undefined;
+  const errorId = error ? `${id}-error` : undefined;
+  const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
+
+  return (
+    <div className={`form-field ${error ? 'has-error' : ''}`}>
+      <label htmlFor={id}>
+        {label}
+        {required && <span aria-hidden="true">*</span>}
+        {required && <span className="sr-only">(required)</span>}
+      </label>
+      {hint && <p id={hintId} className="form-hint">{hint}</p>}
+      <input
+        id={id}
+        aria-required={required}
+        aria-invalid={!!error}
+        aria-describedby={describedBy}
+        {...props}
+      />
+      {error && <p id={errorId} role="alert">{error}</p>}
+    </div>
+  );
 }
+```
 
-interface TabsProps {
-  tabs: Tab[];
-  defaultTab?: string;
-}
+### Roving Tabindex for Tab Component
 
-export function Tabs({ tabs, defaultTab }: TabsProps) {
-  const [activeTab, setActiveTab] = useState(defaultTab || tabs[0]?.id);
-  const tabRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+```tsx
+export function Tabs({ tabs }: { tabs: Tab[] }) {
+  const [activeTab, setActiveTab] = useState(0);
+  const tabRefs = useRef<HTMLButtonElement[]>([]);
 
-  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
-    let newIndex: number | null = null;
-
-    switch (e.key) {
-      case "ArrowLeft":
-        newIndex = index === 0 ? tabs.length - 1 : index - 1;
-        break;
-      case "ArrowRight":
-        newIndex = index === tabs.length - 1 ? 0 : index + 1;
-        break;
-      case "Home":
-        newIndex = 0;
-        break;
-      case "End":
-        newIndex = tabs.length - 1;
-        break;
-      default:
-        return;
+  const handleKeyDown = (e: KeyboardEvent, index: number) => {
+    let newIndex = index;
+    if (e.key === 'ArrowRight') newIndex = (index + 1) % tabs.length;
+    if (e.key === 'ArrowLeft') newIndex = (index - 1 + tabs.length) % tabs.length;
+    if (e.key === 'Home') newIndex = 0;
+    if (e.key === 'End') newIndex = tabs.length - 1;
+    if (newIndex !== index) {
+      e.preventDefault();
+      setActiveTab(newIndex);
+      tabRefs.current[newIndex]?.focus();
     }
-
-    e.preventDefault();
-    const newTab = tabs[newIndex];
-    setActiveTab(newTab.id);
-    tabRefs.current.get(newTab.id)?.focus();
   };
 
   return (
-    <div className="tabs">
-      <div role="tablist" aria-label="Content tabs">
-        {tabs.map((tab, index) => (
+    <div>
+      <div role="tablist">
+        {tabs.map((tab, i) => (
           <button
             key={tab.id}
-            ref={(el) => el && tabRefs.current.set(tab.id, el)}
+            ref={el => tabRefs.current[i] = el!}
             role="tab"
-            id={`tab-${tab.id}`}
-            aria-selected={activeTab === tab.id}
+            aria-selected={activeTab === i}
             aria-controls={`panel-${tab.id}`}
-            tabIndex={activeTab === tab.id ? 0 : -1}
-            onClick={() => setActiveTab(tab.id)}
-            onKeyDown={(e) => handleKeyDown(e, index)}
-            className={`tab ${activeTab === tab.id ? "active" : ""}`}
-          >
-            {tab.label}
-          </button>
+            tabIndex={activeTab === i ? 0 : -1}
+            onClick={() => setActiveTab(i)}
+            onKeyDown={e => handleKeyDown(e, i)}
+          >{tab.label}</button>
         ))}
       </div>
-      {tabs.map((tab) => (
-        <div
-          key={tab.id}
-          role="tabpanel"
-          id={`panel-${tab.id}`}
-          aria-labelledby={`tab-${tab.id}`}
-          hidden={activeTab !== tab.id}
-          tabIndex={0}
-          className="tab-panel"
-        >
+      {tabs.map((tab, i) => (
+        <div key={tab.id} role="tabpanel" id={`panel-${tab.id}`} hidden={activeTab !== i} tabIndex={0}>
           {tab.content}
         </div>
       ))}
@@ -362,765 +124,38 @@ export function Tabs({ tabs, defaultTab }: TabsProps) {
 }
 ```
 
-### 3. Keyboard Navigation
+### Live Region Announcer
 
 ```tsx
-// components/accessible/Menu.tsx
-import React, { useState, useRef, useEffect } from "react";
+export function useAnnounce() {
+  const [message, setMessage] = useState('');
 
-interface MenuItem {
-  id: string;
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-}
-
-interface MenuProps {
-  trigger: React.ReactNode;
-  items: MenuItem[];
-  label: string;
-}
-
-export function Menu({ trigger, items, label }: MenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(-1);
-  const menuRef = useRef<HTMLUListElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuId = `menu-${React.useId()}`;
-
-  useEffect(() => {
-    if (isOpen && activeIndex >= 0) {
-      const item = menuRef.current?.children[activeIndex] as HTMLElement;
-      item?.focus();
-    }
-  }, [isOpen, activeIndex]);
-
-  // Close on outside click
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(e.target as Node) &&
-        !triggerRef.current?.contains(e.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+  const announce = useCallback((text: string) => {
+    setMessage('');
+    requestAnimationFrame(() => setMessage(text));
+    setTimeout(() => setMessage(''), 1000);
   }, []);
 
-  const handleTriggerKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case "Enter":
-      case " ":
-      case "ArrowDown":
-        e.preventDefault();
-        setIsOpen(true);
-        setActiveIndex(0);
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setIsOpen(true);
-        setActiveIndex(items.length - 1);
-        break;
-    }
-  };
-
-  const handleMenuKeyDown = (e: React.KeyboardEvent) => {
-    switch (e.key) {
-      case "Escape":
-        setIsOpen(false);
-        triggerRef.current?.focus();
-        break;
-      case "ArrowDown":
-        e.preventDefault();
-        setActiveIndex((prev) =>
-          prev === items.length - 1 ? 0 : prev + 1
-        );
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setActiveIndex((prev) =>
-          prev === 0 ? items.length - 1 : prev - 1
-        );
-        break;
-      case "Home":
-        e.preventDefault();
-        setActiveIndex(0);
-        break;
-      case "End":
-        e.preventDefault();
-        setActiveIndex(items.length - 1);
-        break;
-      case "Tab":
-        setIsOpen(false);
-        break;
-    }
-  };
-
-  const handleItemClick = (item: MenuItem) => {
-    if (!item.disabled) {
-      item.onClick();
-      setIsOpen(false);
-      triggerRef.current?.focus();
-    }
-  };
-
-  return (
-    <div className="menu-container">
-      <button
-        ref={triggerRef}
-        aria-haspopup="menu"
-        aria-expanded={isOpen}
-        aria-controls={menuId}
-        onClick={() => setIsOpen(!isOpen)}
-        onKeyDown={handleTriggerKeyDown}
-        className="menu-trigger"
-      >
-        {trigger}
-        <span className="sr-only">{label}</span>
-      </button>
-
-      {isOpen && (
-        <ul
-          ref={menuRef}
-          id={menuId}
-          role="menu"
-          aria-label={label}
-          onKeyDown={handleMenuKeyDown}
-          className="menu-list"
-        >
-          {items.map((item, index) => (
-            <li
-              key={item.id}
-              role="menuitem"
-              tabIndex={activeIndex === index ? 0 : -1}
-              aria-disabled={item.disabled}
-              onClick={() => handleItemClick(item)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleItemClick(item);
-                }
-              }}
-              className={`menu-item ${item.disabled ? "disabled" : ""}`}
-            >
-              {item.label}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
-// hooks/useRovingTabIndex.ts
-import { useState, useCallback } from "react";
-
-export function useRovingTabIndex<T>(items: T[]) {
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent, index: number) => {
-      let newIndex: number | null = null;
-
-      switch (e.key) {
-        case "ArrowDown":
-        case "ArrowRight":
-          newIndex = index === items.length - 1 ? 0 : index + 1;
-          break;
-        case "ArrowUp":
-        case "ArrowLeft":
-          newIndex = index === 0 ? items.length - 1 : index - 1;
-          break;
-        case "Home":
-          newIndex = 0;
-          break;
-        case "End":
-          newIndex = items.length - 1;
-          break;
-        default:
-          return;
-      }
-
-      e.preventDefault();
-      setActiveIndex(newIndex);
-    },
-    [items.length]
-  );
-
-  const getTabIndex = useCallback(
-    (index: number) => (index === activeIndex ? 0 : -1),
-    [activeIndex]
-  );
-
-  return { activeIndex, setActiveIndex, handleKeyDown, getTabIndex };
-}
-```
-
-### 4. Form Accessibility
-
-```tsx
-// components/accessible/FormField.tsx
-import React from "react";
-
-interface FormFieldProps {
-  id: string;
-  label: string;
-  type?: string;
-  required?: boolean;
-  error?: string;
-  hint?: string;
-  children?: React.ReactNode;
-}
-
-export function FormField({
-  id,
-  label,
-  type = "text",
-  required,
-  error,
-  hint,
-  children,
-}: FormFieldProps) {
-  const hintId = hint ? `${id}-hint` : undefined;
-  const errorId = error ? `${id}-error` : undefined;
-  const describedBy = [hintId, errorId].filter(Boolean).join(" ") || undefined;
-
-  return (
-    <div className={`form-field ${error ? "has-error" : ""}`}>
-      <label htmlFor={id}>
-        {label}
-        {required && (
-          <span aria-hidden="true" className="required">*</span>
-        )}
-        {required && <span className="sr-only">(required)</span>}
-      </label>
-
-      {hint && (
-        <p id={hintId} className="form-hint">
-          {hint}
-        </p>
-      )}
-
-      {children || (
-        <input
-          id={id}
-          type={type}
-          required={required}
-          aria-required={required}
-          aria-invalid={!!error}
-          aria-describedby={describedBy}
-        />
-      )}
-
-      {error && (
-        <p id={errorId} role="alert" className="form-error">
-          <span className="sr-only">Error: </span>
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// components/accessible/Checkbox.tsx
-interface CheckboxProps {
-  id: string;
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  description?: string;
-}
-
-export function Checkbox({
-  id,
-  label,
-  checked,
-  onChange,
-  description,
-}: CheckboxProps) {
-  const descId = description ? `${id}-desc` : undefined;
-
-  return (
-    <div className="checkbox-field">
-      <input
-        type="checkbox"
-        id={id}
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        aria-describedby={descId}
-      />
-      <label htmlFor={id}>{label}</label>
-      {description && (
-        <p id={descId} className="checkbox-description">
-          {description}
-        </p>
-      )}
-    </div>
-  );
-}
-
-// components/accessible/RadioGroup.tsx
-interface RadioOption {
-  value: string;
-  label: string;
-  description?: string;
-}
-
-interface RadioGroupProps {
-  name: string;
-  legend: string;
-  options: RadioOption[];
-  value: string;
-  onChange: (value: string) => void;
-  required?: boolean;
-  error?: string;
-}
-
-export function RadioGroup({
-  name,
-  legend,
-  options,
-  value,
-  onChange,
-  required,
-  error,
-}: RadioGroupProps) {
-  const errorId = error ? `${name}-error` : undefined;
-
-  return (
-    <fieldset
-      aria-required={required}
-      aria-invalid={!!error}
-      aria-describedby={errorId}
-    >
-      <legend>
-        {legend}
-        {required && <span className="sr-only">(required)</span>}
-      </legend>
-
-      {options.map((option) => {
-        const optionId = `${name}-${option.value}`;
-        const descId = option.description ? `${optionId}-desc` : undefined;
-
-        return (
-          <div key={option.value} className="radio-option">
-            <input
-              type="radio"
-              id={optionId}
-              name={name}
-              value={option.value}
-              checked={value === option.value}
-              onChange={(e) => onChange(e.target.value)}
-              aria-describedby={descId}
-            />
-            <label htmlFor={optionId}>{option.label}</label>
-            {option.description && (
-              <p id={descId} className="radio-description">
-                {option.description}
-              </p>
-            )}
-          </div>
-        );
-      })}
-
-      {error && (
-        <p id={errorId} role="alert" className="form-error">
-          {error}
-        </p>
-      )}
-    </fieldset>
-  );
-}
-```
-
-### 5. Live Regions
-
-```tsx
-// components/accessible/LiveRegion.tsx
-import React from "react";
-
-interface LiveRegionProps {
-  message: string;
-  type?: "polite" | "assertive";
-  atomic?: boolean;
-}
-
-export function LiveRegion({
-  message,
-  type = "polite",
-  atomic = true,
-}: LiveRegionProps) {
-  return (
-    <div
-      role={type === "assertive" ? "alert" : "status"}
-      aria-live={type}
-      aria-atomic={atomic}
-      className="sr-only"
-    >
+  const Announcer = () => (
+    <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
       {message}
     </div>
   );
+
+  return { announce, Announcer };
 }
 
-// hooks/useAnnounce.ts
-import { useState, useCallback, useRef, useEffect } from "react";
-
-export function useAnnounce() {
-  const [announcement, setAnnouncement] = useState("");
-  const timeoutRef = useRef<NodeJS.Timeout>();
-
-  const announce = useCallback((message: string, duration = 1000) => {
-    // Clear previous announcement
-    setAnnouncement("");
-
-    // Small delay to ensure screen reader picks up change
-    requestAnimationFrame(() => {
-      setAnnouncement(message);
-    });
-
-    // Clear after duration
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setAnnouncement("");
-    }, duration);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
-
-  return { announcement, announce };
-}
-
-// Usage with loading states
-function SearchResults() {
-  const { announcement, announce } = useAnnounce();
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const handleSearch = async (query: string) => {
-    setLoading(true);
-    announce("Searching...");
-
-    const data = await fetchResults(query);
-    setResults(data);
-    setLoading(false);
-
-    announce(`Found ${data.length} results`);
-  };
-
-  return (
-    <div>
-      <LiveRegion message={announcement} />
-      {/* Search UI */}
-    </div>
-  );
-}
-```
-
-### 6. Color and Contrast
-
-```css
-/* Color contrast guidelines */
-
-/* Text colors - minimum 4.5:1 for normal text, 3:1 for large text */
-:root {
-  --color-text-primary: #1a1a1a;    /* High contrast */
-  --color-text-secondary: #4a4a4a;  /* 4.5:1 minimum */
-  --color-text-disabled: #767676;   /* 4.5:1 on white */
-  --color-background: #ffffff;
-
-  /* Focus indicators - minimum 3:1 against adjacent colors */
-  --color-focus: #005fcc;
-  --color-focus-offset: #ffffff;
-
-  /* Error states - don't rely on color alone */
-  --color-error: #d32f2f;
-  --color-error-bg: #ffebee;
-
-  /* Success states */
-  --color-success: #2e7d32;
-  --color-success-bg: #e8f5e9;
-}
-
-/* Don't rely on color alone - use icons and text */
-.status-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.status-indicator::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-indicator.success::before {
-  background-color: var(--color-success);
-}
-
-.status-indicator.error::before {
-  background-color: var(--color-error);
-}
-
-/* Link styling - don't rely on color alone */
-a {
-  color: var(--color-focus);
-  text-decoration: underline;
-}
-
-a:hover,
-a:focus {
-  text-decoration-thickness: 2px;
-}
-
-/* Form validation - use icons alongside color */
-.input-error {
-  border-color: var(--color-error);
-  border-width: 2px;
-}
-
-.input-error + .error-icon {
-  display: block;
-  color: var(--color-error);
-}
-```
-
-### 7. Testing Accessibility
-
-```tsx
-// tests/accessibility.test.tsx
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { axe, toHaveNoViolations } from "jest-axe";
-
-expect.extend(toHaveNoViolations);
-
-describe("Accessibility Tests", () => {
-  describe("Button", () => {
-    it("should have no accessibility violations", async () => {
-      const { container } = render(
-        <button onClick={() => {}}>Click me</button>
-      );
-      const results = await axe(container);
-      expect(results).toHaveNoViolations();
-    });
-
-    it("should be keyboard accessible", async () => {
-      const user = userEvent.setup();
-      const handleClick = jest.fn();
-
-      render(<button onClick={handleClick}>Click me</button>);
-
-      const button = screen.getByRole("button");
-      button.focus();
-      expect(button).toHaveFocus();
-
-      await user.keyboard("{Enter}");
-      expect(handleClick).toHaveBeenCalledTimes(1);
-
-      await user.keyboard(" ");
-      expect(handleClick).toHaveBeenCalledTimes(2);
-    });
-  });
-
-  describe("Form", () => {
-    it("should have proper labels", () => {
-      render(
-        <form>
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" />
-        </form>
-      );
-
-      expect(screen.getByLabelText("Email")).toBeInTheDocument();
-    });
-
-    it("should announce errors to screen readers", async () => {
-      render(
-        <div>
-          <input aria-invalid="true" aria-describedby="error" />
-          <p id="error" role="alert">Invalid email</p>
-        </div>
-      );
-
-      expect(screen.getByRole("alert")).toHaveTextContent("Invalid email");
-    });
-  });
-
-  describe("Dialog", () => {
-    it("should trap focus", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <div role="dialog" aria-modal="true">
-          <button>First</button>
-          <button>Second</button>
-          <button>Third</button>
-        </div>
-      );
-
-      const buttons = screen.getAllByRole("button");
-      buttons[0].focus();
-
-      // Tab through all buttons
-      await user.tab();
-      expect(buttons[1]).toHaveFocus();
-
-      await user.tab();
-      expect(buttons[2]).toHaveFocus();
-    });
-  });
-});
-
-// Cypress accessibility tests
-// cypress/e2e/accessibility.cy.ts
-describe("Accessibility", () => {
-  beforeEach(() => {
-    cy.visit("/");
-    cy.injectAxe();
-  });
-
-  it("should have no accessibility violations on homepage", () => {
-    cy.checkA11y();
-  });
-
-  it("should have no violations after interaction", () => {
-    cy.get("button").first().click();
-    cy.checkA11y();
-  });
-
-  it("should be navigable by keyboard", () => {
-    cy.get("body").tab();
-    cy.focused().should("have.attr", "href");
-  });
-});
-```
-
-## Use Cases
-
-### Accessible Data Table
-
-```tsx
-// components/accessible/DataTable.tsx
-interface Column<T> {
-  key: keyof T;
-  header: string;
-  render?: (value: T[keyof T], row: T) => React.ReactNode;
-}
-
-interface DataTableProps<T> {
-  data: T[];
-  columns: Column<T>[];
-  caption: string;
-  sortable?: boolean;
-}
-
-export function DataTable<T extends { id: string }>({
-  data,
-  columns,
-  caption,
-  sortable,
-}: DataTableProps<T>) {
-  const [sortColumn, setSortColumn] = useState<keyof T | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-
-  return (
-    <table>
-      <caption>{caption}</caption>
-      <thead>
-        <tr>
-          {columns.map((col) => (
-            <th
-              key={String(col.key)}
-              scope="col"
-              aria-sort={
-                sortable && sortColumn === col.key
-                  ? sortDirection === "asc"
-                    ? "ascending"
-                    : "descending"
-                  : undefined
-              }
-            >
-              {sortable ? (
-                <button
-                  onClick={() => handleSort(col.key)}
-                  aria-label={`Sort by ${col.header}`}
-                >
-                  {col.header}
-                </button>
-              ) : (
-                col.header
-              )}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {data.map((row) => (
-          <tr key={row.id}>
-            {columns.map((col, index) => (
-              <td
-                key={String(col.key)}
-                headers={`header-${String(col.key)}`}
-              >
-                {col.render
-                  ? col.render(row[col.key], row)
-                  : String(row[col.key])}
-              </td>
-            ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
+// Usage: announce('3 results found');
 ```
 
 ## Best Practices
 
-### Do's
-
-- Use semantic HTML elements
-- Provide text alternatives for images
-- Ensure keyboard accessibility
-- Use sufficient color contrast (4.5:1)
-- Associate labels with form controls
-- Provide skip links for navigation
-- Test with screen readers
-- Use ARIA only when needed
-- Manage focus appropriately
-- Announce dynamic content changes
-
-### Don'ts
-
-- Don't remove focus outlines without replacement
-- Don't rely on color alone to convey information
-- Don't use placeholder as label
-- Don't trap keyboard focus unintentionally
-- Don't auto-play media with sound
-- Don't use ARIA when HTML suffices
-- Don't hide content from screen readers unnecessarily
-- Don't create keyboard traps
-- Don't use very small touch targets
-- Don't ignore accessibility in testing
-
-## References
-
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [WAI-ARIA Practices](https://www.w3.org/WAI/ARIA/apg/)
-- [MDN Accessibility](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
-- [A11y Project](https://www.a11yproject.com/)
-- [Inclusive Components](https://inclusive-components.design/)
+| Do | Avoid |
+|----|-------|
+| Use semantic HTML elements (`<button>`, `<nav>`, `<main>`) | Removing focus outlines without replacement |
+| Provide text alternatives for images | Relying on color alone to convey information |
+| Ensure 4.5:1 color contrast for text | Using placeholder as the only label |
+| Associate labels with form controls | Trapping keyboard focus unintentionally |
+| Provide skip links for keyboard users | Auto-playing media with sound |
+| Test with actual screen readers (NVDA, VoiceOver) | Using ARIA when native HTML suffices |
+| Announce dynamic content changes with live regions | Very small touch targets (min 44x44px) |
