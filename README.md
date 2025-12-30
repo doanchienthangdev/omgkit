@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **AI Team System for Claude Code**
-> 23 Agents • 58 Commands • 76 Skills • 10 Modes
+> 23 Agents • 58 Commands • 88 Skills • 10 Modes
 > *"Think Omega. Build Omega. Be Omega."*
 
 OMGKIT transforms Claude Code into an autonomous AI development team with sprint management, specialized agents, and Omega-level thinking for 10x-1000x productivity improvements.
@@ -18,7 +18,7 @@ OMGKIT transforms Claude Code into an autonomous AI development team with sprint
 |-----------|-------|-------------|
 | **Agents** | 23 | Specialized AI team members |
 | **Commands** | 58 | Slash commands for every task |
-| **Skills** | 76 | Domain expertise modules |
+| **Skills** | 88 | Domain expertise modules |
 | **Modes** | 10 | Behavioral configurations |
 | **Sprint Management** | ✅ | Vision, backlog, team autonomy |
 | **Omega Thinking** | ✅ | 7 modes for 10x-1000x solutions |
@@ -203,6 +203,25 @@ Switch modes with: `/mode <name>`
 | ⏳ Temporal | Time dimension analysis |
 | 🕸️ Systemic | Interconnections and emergence |
 | ⚛️ Quantum | Multiple possibilities |
+
+## 🧠 AI Engineering Skills (12)
+
+Based on Chip Huyen's "AI Engineering" book, OMGKIT includes comprehensive skills for building production AI applications:
+
+| Skill | Description |
+|-------|-------------|
+| `foundation-models` | Model architecture, sampling, structured outputs |
+| `evaluation-methodology` | AI-as-judge, semantic similarity, ELO ranking |
+| `ai-system-evaluation` | Benchmarks, model selection, cost analysis |
+| `prompt-engineering` | Few-shot, chain-of-thought, injection defense |
+| `rag-systems` | Chunking, embedding, hybrid retrieval, reranking |
+| `ai-agents` | Tool use, ReAct, Plan-and-Execute, memory |
+| `finetuning` | LoRA, QLoRA, PEFT, model merging |
+| `dataset-engineering` | Curation, deduplication, synthesis |
+| `inference-optimization` | Quantization, batching, caching, vLLM |
+| `ai-architecture` | Gateway, routing, observability |
+| `guardrails-safety` | Input/output guards, PII protection |
+| `user-feedback` | Explicit/implicit signals, A/B testing |
 
 ## 🛠️ CLI Commands
 
