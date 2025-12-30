@@ -30,7 +30,7 @@ jobs:
     name: Publish to npm (OIDC)
     needs: test
     runs-on: ubuntu-latest
-    environment: npm-publish  # Must match npm trusted publisher config
+    environment: omg-npm-publish  # Must match npm trusted publisher config
     permissions:
       contents: read
       id-token: write  # Required for OIDC trusted publishing
