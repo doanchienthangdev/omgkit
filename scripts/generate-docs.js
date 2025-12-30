@@ -457,7 +457,7 @@ ${categoryOrder.map(cat => {
   const agents = agentsByCategory[cat] || [];
   if (agents.length === 0) return '';
   return `
-## ${cat} {#${cat.toLowerCase().replace(' ', '-')}}
+## ${cat}
 
 | Agent | Description | Tools | Best For |
 |-------|-------------|-------|----------|
@@ -765,7 +765,7 @@ ${categoryOrder.map(cat => {
   if (cmds.length === 0) return '';
   const catMeta = COMMAND_CATEGORIES[cat] || { icon: 'terminal', description: '' };
   return `
-## ${cat.charAt(0).toUpperCase() + cat.slice(1)} {#${cat}}
+## ${cat.charAt(0).toUpperCase() + cat.slice(1)}
 
 ${catMeta.description}
 
@@ -1092,7 +1092,7 @@ ${categoryOrder.map(cat => {
   if (skills.length === 0) return '';
   const catMeta = SKILL_CATEGORIES[cat] || { icon: 'brain', description: '' };
   return `
-## ${cat.charAt(0).toUpperCase() + cat.slice(1)} {#${cat}}
+## ${cat.charAt(0).toUpperCase() + cat.slice(1)}
 
 ${catMeta.description}
 
@@ -1344,7 +1344,7 @@ ${categoryOrder.map(cat => {
   const modes = modesByCategory[cat] || [];
   if (modes.length === 0) return '';
   return `
-## ${cat} {#${cat.toLowerCase()}}
+## ${cat}
 
 | Mode | Description | Best For |
 |------|-------------|----------|
