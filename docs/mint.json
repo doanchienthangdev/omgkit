@@ -255,8 +255,7 @@
     {
       "group": "Skills Overview",
       "pages": [
-        "skills/overview",
-        "skills/all"
+        "skills/overview"
       ]
     },
     {
@@ -366,6 +365,10 @@
     "raiseIssue": true
   },
   "redirects": [
+    {
+      "source": "/skills",
+      "destination": "/skills/overview"
+    },
     {
       "source": "/skills/all",
       "destination": "/skills/overview"
