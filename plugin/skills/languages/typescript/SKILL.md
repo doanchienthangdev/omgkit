@@ -1,66 +1,415 @@
 ---
 name: typescript
-description: TypeScript development. Use when writing TypeScript, using strict types, or type-safe code.
+description: TypeScript development with advanced type safety, generics, utility types, and best practices
+category: languages
+triggers:
+  - typescript
+  - ts
+  - type
+  - interface
+  - generic
+  - type safety
 ---
 
-# TypeScript Skill
+# TypeScript
 
-## Patterns
+Enterprise-grade **TypeScript development** following industry best practices. This skill covers type system mastery, advanced patterns, generic programming, utility types, and type-safe design patterns used by top engineering teams.
 
-### Strict Types
+## Purpose
+
+Write type-safe code that scales with confidence:
+
+- Master TypeScript's type system
+- Leverage generics for reusable code
+- Use utility types effectively
+- Implement type-safe patterns
+- Handle complex type scenarios
+- Improve code maintainability
+
+## Features
+
+### 1. Type Fundamentals
+
 ```typescript
+// Primitive types
+const name: string = 'John';
+const age: number = 30;
+const isActive: boolean = true;
+
+// Arrays and tuples
+const numbers: number[] = [1, 2, 3];
+const tuple: [string, number, boolean] = ['John', 30, true];
+const namedTuple: [name: string, age: number] = ['John', 30];
+
+// Object types
 interface User {
   id: string;
+  name: string;
   email: string;
-  createdAt: Date;
+  age?: number; // Optional
+  readonly createdAt: Date; // Readonly
 }
 
-interface CreateUserInput {
-  email: string;
-  password: string;
+// Type aliases
+type ID = string | number;
+type Status = 'pending' | 'active' | 'inactive';
+type Callback = (error: Error | null, result?: unknown) => void;
+
+// Union and intersection types
+type StringOrNumber = string | number;
+type AdminUser = User & { role: 'admin'; permissions: string[] };
+
+// Literal types
+type Direction = 'north' | 'south' | 'east' | 'west';
+type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+// Template literal types
+type EventName = `on${Capitalize<string>}`;
+type APIRoute = `/api/${string}`;
+```
+
+### 2. Advanced Type Patterns
+
+```typescript
+// Discriminated unions
+type Result<T, E = Error> =
+  | { success: true; data: T }
+  | { success: false; error: E };
+
+function processResult<T>(result: Result<T>): T | null {
+  if (result.success) {
+    return result.data;
+  } else {
+    console.error(result.error);
+    return null;
+  }
 }
 
-function createUser(input: CreateUserInput): Promise<User> {
-  ...
+// Type guards
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
+}
+
+function isUser(value: unknown): value is User {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    'email' in value
+  );
+}
+
+// Assertion functions
+function assertDefined<T>(value: T | null | undefined): asserts value is T {
+  if (value === null || value === undefined) {
+    throw new Error('Value is not defined');
+  }
+}
+
+// Conditional types
+type NonNullable<T> = T extends null | undefined ? never : T;
+type ExtractArray<T> = T extends (infer U)[] ? U : never;
+type ReturnTypeOf<T> = T extends (...args: any[]) => infer R ? R : never;
+
+// Mapped types
+type Nullable<T> = { [K in keyof T]: T[K] | null };
+type Optional<T> = { [K in keyof T]?: T[K] };
+type Readonly<T> = { readonly [K in keyof T]: T[K] };
+```
+
+### 3. Generics
+
+```typescript
+// Generic functions
+function identity<T>(value: T): T {
+  return value;
+}
+
+function first<T>(array: T[]): T | undefined {
+  return array[0];
+}
+
+function map<T, U>(array: T[], fn: (item: T) => U): U[] {
+  return array.map(fn);
+}
+
+// Generic constraints
+interface Lengthwise {
+  length: number;
+}
+
+function logLength<T extends Lengthwise>(value: T): T {
+  console.log(value.length);
+  return value;
+}
+
+// Generic interfaces
+interface Repository<T, ID = string> {
+  findById(id: ID): Promise<T | null>;
+  findAll(): Promise<T[]>;
+  create(data: Omit<T, 'id'>): Promise<T>;
+  update(id: ID, data: Partial<T>): Promise<T | null>;
+  delete(id: ID): Promise<boolean>;
+}
+
+// Generic classes
+class Stack<T> {
+  private items: T[] = [];
+
+  push(item: T): void {
+    this.items.push(item);
+  }
+
+  pop(): T | undefined {
+    return this.items.pop();
+  }
+
+  peek(): T | undefined {
+    return this.items[this.items.length - 1];
+  }
+}
+
+// Constrained generic with keyof
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
 }
 ```
 
-### Generics
+### 4. Utility Types
+
 ```typescript
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  role: 'user' | 'admin';
+  createdAt: Date;
+}
+
+// Partial - make all optional
+type UserUpdate = Partial<User>;
+
+// Required - make all required
+type CompleteUser = Required<User>;
+
+// Readonly - make all readonly
+type ImmutableUser = Readonly<User>;
+
+// Pick - select specific properties
+type UserCredentials = Pick<User, 'email' | 'password'>;
+
+// Omit - exclude specific properties
+type PublicUser = Omit<User, 'password'>;
+
+// Record - create object type
+type UserRoles = Record<string, User['role']>;
+
+// Exclude/Extract - work with unions
+type NonAdminRole = Exclude<User['role'], 'admin'>;
+
+// Parameters/ReturnType - function types
+type FunctionParams = Parameters<(a: string, b: number) => void>;
+type FunctionReturn = ReturnType<() => Promise<User>>;
+
+// Custom utility types
+type DeepPartial<T> = {
+  [K in keyof T]?: T[K] extends object ? DeepPartial<T[K]> : T[K];
+};
+
+type DeepReadonly<T> = {
+  readonly [K in keyof T]: T[K] extends object ? DeepReadonly<T[K]> : T[K];
+};
+```
+
+### 5. Type-Safe API Design
+
+```typescript
+// Type-safe API client
+interface APIEndpoints {
+  '/users': {
+    GET: { response: User[]; params: { page?: number } };
+    POST: { response: User; body: Omit<User, 'id'> };
+  };
+  '/users/:id': {
+    GET: { response: User; params: { id: string } };
+    DELETE: { response: void; params: { id: string } };
+  };
+}
+
+async function apiRequest<
+  Path extends keyof APIEndpoints,
+  Method extends keyof APIEndpoints[Path]
+>(
+  path: Path,
+  method: Method,
+  config?: APIEndpoints[Path][Method]
+): Promise<APIEndpoints[Path][Method]['response']> {
+  const response = await fetch(path, { method: method as string });
+  return response.json();
+}
+```
+
+### 6. Error Handling Patterns
+
+```typescript
+// Type-safe Result type
 type Result<T, E = Error> =
-  | { ok: true; data: T }
+  | { ok: true; value: T }
   | { ok: false; error: E };
 
-async function fetchUser(id: string): Promise<Result<User>> {
+function ok<T>(value: T): Result<T, never> {
+  return { ok: true, value };
+}
+
+function err<E>(error: E): Result<never, E> {
+  return { ok: false, error };
+}
+
+// Error class hierarchy
+class AppError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string,
+    public readonly statusCode: number = 500
+  ) {
+    super(message);
+    this.name = 'AppError';
+  }
+}
+
+class NotFoundError extends AppError {
+  constructor(resource: string, id: string) {
+    super(`${resource} with id ${id} not found`, 'NOT_FOUND', 404);
+  }
+}
+
+// Try/catch wrapper
+async function tryCatch<T>(fn: () => Promise<T>): Promise<Result<T, Error>> {
   try {
-    const user = await db.users.findById(id);
-    return { ok: true, data: user };
+    const value = await fn();
+    return ok(value);
   } catch (error) {
-    return { ok: false, error };
+    return err(error instanceof Error ? error : new Error(String(error)));
   }
 }
 ```
 
-### Utility Types
+### 7. Declaration Files
+
 ```typescript
-type Partial<T> = { [P in keyof T]?: T[P] };
-type Required<T> = { [P in keyof T]-?: T[P] };
-type Pick<T, K extends keyof T> = { [P in K]: T[P] };
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+// types/express.d.ts
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+      requestId: string;
+    }
+  }
+}
+
+// types/environment.d.ts
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      NODE_ENV: 'development' | 'production' | 'test';
+      DATABASE_URL: string;
+      API_KEY: string;
+    }
+  }
+}
+
+// Module declarations
+declare module '*.svg' {
+  const content: React.FunctionComponent<React.SVGAttributes<SVGElement>>;
+  export default content;
+}
 ```
 
-### Const Assertions
+## Use Cases
+
+### Type-Safe Redux State
 ```typescript
-const CONFIG = {
-  API_URL: 'https://api.example.com',
-  TIMEOUT: 5000,
-} as const;
+interface AppState {
+  users: UsersState;
+  products: ProductsState;
+}
+
+type Action =
+  | { type: 'USERS_LOADED'; payload: User[] }
+  | { type: 'USER_ADDED'; payload: User };
+
+function reducer(state: AppState, action: Action): AppState {
+  switch (action.type) {
+    case 'USERS_LOADED':
+      return { ...state, users: { items: action.payload } };
+    default:
+      return state;
+  }
+}
+```
+
+### Type-Safe Event Emitter
+```typescript
+type EventMap = {
+  userCreated: { user: User };
+  userDeleted: { userId: string };
+};
+
+class TypedEventEmitter<Events extends Record<string, unknown>> {
+  private listeners = new Map<keyof Events, Set<(data: any) => void>>();
+
+  on<E extends keyof Events>(event: E, listener: (data: Events[E]) => void): void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event)!.add(listener);
+  }
+
+  emit<E extends keyof Events>(event: E, data: Events[E]): void {
+    this.listeners.get(event)?.forEach(listener => listener(data));
+  }
+}
 ```
 
 ## Best Practices
-- Enable strict mode
-- Use interfaces for objects
-- Use type for unions/intersections
-- Avoid `any`
-- Use const assertions
-- Prefer unknown over any
+
+### Do's
+- Enable strict mode in tsconfig
+- Use interfaces for object shapes
+- Leverage type inference
+- Use discriminated unions for state
+- Prefer readonly for immutable data
+- Use unknown over any
+- Create reusable generic types
+
+### Don'ts
+- Don't use any unless necessary
+- Don't ignore errors with @ts-ignore
+- Don't overuse type assertions
+- Don't create overly complex generics
+- Don't forget null/undefined handling
+- Don't skip strict null checks
+
+## Configuration
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+## References
+
+- [TypeScript Documentation](https://www.typescriptlang.org/docs)
+- [TypeScript Deep Dive](https://basarat.gitbook.io/typescript)
+- [Type Challenges](https://github.com/type-challenges/type-challenges)

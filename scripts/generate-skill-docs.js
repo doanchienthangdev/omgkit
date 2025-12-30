@@ -265,9 +265,9 @@ function main() {
     const mdx = generateMDX(skill.path, skill.category, skill.name);
 
     if (existingDocs.has(skill.name)) {
-      // Check if it's a simple doc that needs enhancement
+      // Check if it's a simple doc that needs enhancement (under 250 lines)
       const existing = fs.readFileSync(docPath, 'utf8');
-      if (existing.split('\n').length < 150) {
+      if (existing.split('\n').length < 250) {
         fs.writeFileSync(docPath, mdx);
         console.log(`✓ Enhanced: ${skill.name}`);
         updated++;

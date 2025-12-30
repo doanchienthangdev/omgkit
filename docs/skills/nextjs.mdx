@@ -1,6 +1,6 @@
 ---
 title: "nextjs"
-description: "Next.js development. Use for Next.js projects, App Router, Server Components, Server Actions."
+description: "Next.js development with App Router, Server Components, API routes, and full-stack patterns"
 icon: "layer-group"
 ---
 
@@ -12,7 +12,7 @@ icon: "layer-group"
 
 ## Overview
 
-Next.js development. Use for Next.js projects, App Router, Server Components, Server Actions.
+Next.js development with App Router, Server Components, API routes, and full-stack patterns
 
 ## What You Get
 
@@ -24,78 +24,433 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Next.js Skill
+# Next.js
 
-## App Router
+Modern **Next.js development** with App Router following industry best practices. This skill covers Server Components, data fetching, API routes, middleware, authentication, and full-stack patterns.
 
-### Server Component (default)
-```tsx
-// app/users/page.tsx
-async function UsersPage() {
-  const users = await fetch('/api/users').then(r => r.json());
-  return <UserList users={users} />;
+## Purpose
+
+Build production-ready Next.js applications:
+
+- Master App Router architecture
+- Implement Server and Client Components
+- Handle data fetching and caching
+- Create type-safe API routes
+- Implement authentication and middleware
+- Optimize performance and SEO
+
+## Features
+
+### 1. App Router Structure
+
+```typescript
+// app/layout.tsx - Root layout
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: { default: 'My App', template: '%s | My App' },
+  description: 'A Next.js application',
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <Header />
+        <main>{children}</main>
+        <Footer />
+      </body>
+    </html>
+  );
+}
+
+// app/page.tsx - Home page
+import { Suspense } from 'react';
+
+export default function HomePage() {
+  return (
+    <div className="container mx-auto py-8">
+      <h1 className="text-3xl font-bold">Featured Products</h1>
+      <Suspense fallback={<ProductListSkeleton />}>
+        <ProductList />
+      </Suspense>
+    </div>
+  );
+}
+
+// app/products/[id]/page.tsx - Dynamic route
+import { notFound } from 'next/navigation';
+
+interface ProductPageProps {
+  params: { id: string };
+}
+
+export async function generateMetadata({ params }: ProductPageProps) {
+  const product = await getProduct(params.id);
+  if (!product) return { title: 'Not Found' };
+  return { title: product.name, description: product.description };
+}
+
+export default async function ProductPage({ params }: ProductPageProps) {
+  const product = await getProduct(params.id);
+  if (!product) notFound();
+  return <ProductDetails product={product} />;
 }
 ```
 
-### Client Component
-```tsx
+### 2. Server and Client Components
+
+```typescript
+// Server Component (default)
+// app/components/product-list.tsx
+import { getProducts } from '@/lib/products';
+
+export async function ProductList() {
+  const products = await getProducts();
+  return (
+    <div className="grid grid-cols-3 gap-6">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </div>
+  );
+}
+
+// Client Component
+// app/components/add-to-cart-button.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
+import { addToCart } from '@/lib/actions';
 
-export function Counter() {
-  const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
+export function AddToCartButton({ productId }: { productId: string }) {
+  const [isPending, startTransition] = useTransition();
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleClick = () => {
+    startTransition(async () => {
+      const result = await addToCart(productId);
+      setMessage(result.message);
+    });
+  };
+
+  return (
+    <button onClick={handleClick} disabled={isPending}>
+      {isPending ? 'Adding...' : 'Add to Cart'}
+    </button>
+  );
 }
 ```
 
-### Server Action
-```tsx
+### 3. Server Actions
+
+```typescript
+// app/lib/actions.ts
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
+import { auth } from '@/lib/auth';
 
-export async function createUser(formData: FormData) {
-  await db.users.create({
-    email: formData.get('email'),
+const createProductSchema = z.object({
+  name: z.string().min(1),
+  price: z.number().positive(),
+  description: z.string().optional(),
+});
+
+export async function createProduct(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const validatedFields = createProductSchema.safeParse({
+    name: formData.get('name'),
+    price: Number(formData.get('price')),
+    description: formData.get('description'),
   });
-  revalidatePath('/users');
+
+  if (!validatedFields.success) {
+    return { success: false, errors: validatedFields.error.flatten().fieldErrors };
+  }
+
+  const product = await db.product.create({
+    data: { ...validatedFields.data, userId: session.user.id },
+  });
+
+  revalidatePath('/products');
+  redirect(`/products/${product.id}`);
+}
+
+export async function addToCart(productId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: 'Please sign in' };
+  }
+
+  await db.cartItem.upsert({
+    where: { userId_productId: { userId: session.user.id, productId } },
+    update: { quantity: { increment: 1 } },
+    create: { userId: session.user.id, productId, quantity: 1 },
+  });
+
+  revalidatePath('/cart');
+  return { success: true, message: 'Added to cart!' };
 }
 ```
 
-### Route Handler
-```tsx
-// app/api/users/route.ts
-export async function GET() {
-  const users = await db.users.findMany();
-  return Response.json(users);
+### 4. Data Fetching and Caching
+
+```typescript
+// Cached data fetching
+import { unstable_cache } from 'next/cache';
+
+export const getProducts = unstable_cache(
+  async () => {
+    return db.product.findMany({
+      include: { category: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+  ['products'],
+  { tags: ['products'], revalidate: 3600 }
+);
+
+// Fetch with built-in caching
+async function getUser(id: string) {
+  const res = await fetch(`https://api.example.com/users/${id}`, {
+    next: { revalidate: 3600 },
+  });
+  return res.json();
 }
 
-export async function POST(request: Request) {
+// No caching for dynamic data
+async function getCurrentPrice(symbol: string) {
+  const res = await fetch(`https://api.example.com/stocks/${symbol}`, {
+    cache: 'no-store',
+  });
+  return res.json();
+}
+
+// Parallel data fetching
+export async function getProductPageData(id: string) {
+  const [product, relatedProducts, reviews] = await Promise.all([
+    getProduct(id),
+    getRelatedProducts(id),
+    getProductReviews(id),
+  ]);
+  return { product, relatedProducts, reviews };
+}
+```
+
+### 5. API Routes
+
+```typescript
+// app/api/products/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const page = Number(searchParams.get('page') || '1');
+  const limit = Number(searchParams.get('limit') || '10');
+
+  const [products, total] = await Promise.all([
+    db.product.findMany({ skip: (page - 1) * limit, take: limit }),
+    db.product.count(),
+  ]);
+
+  return NextResponse.json({
+    data: products,
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  });
+}
+
+export async function POST(request: NextRequest) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await request.json();
-  const user = await db.users.create(body);
-  return Response.json(user, { status: 201 });
+  const product = await db.product.create({
+    data: { ...body, userId: session.user.id },
+  });
+
+  return NextResponse.json(product, { status: 201 });
+}
+
+// app/api/products/[id]/route.ts
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const product = await db.product.findUnique({ where: { id: params.id } });
+  if (!product) {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+  return NextResponse.json(product);
 }
 ```
 
-## File Structure
+### 6. Middleware
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { auth } from '@/lib/auth';
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Public routes
+  const publicRoutes = ['/', '/login', '/register'];
+  if (publicRoutes.some((route) => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+  // Check authentication
+  const session = await auth();
+  if (!session) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Admin-only routes
+  if (pathname.startsWith('/admin') && session.user.role !== 'admin') {
+    return NextResponse.redirect(new URL('/unauthorized', request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+};
 ```
-app/
-├── layout.tsx
-├── page.tsx
-├── users/
-│   ├── page.tsx
-│   └── [id]/page.tsx
-└── api/
-    └── users/route.ts
+
+### 7. Error Handling
+
+```typescript
+// app/error.tsx
+'use client';
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error;
+  reset: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h2 className="text-2xl font-bold">Something went wrong!</h2>
+      <button onClick={reset}>Try again</button>
+    </div>
+  );
+}
+
+// app/not-found.tsx
+import Link from 'next/link';
+
+export default function NotFound() {
+  return (
+    <div className="text-center py-12">
+      <h2 className="text-2xl font-bold">Page Not Found</h2>
+      <Link href="/">Return Home</Link>
+    </div>
+  );
+}
+```
+
+### 8. Performance Optimization
+
+```typescript
+// Image optimization
+import Image from 'next/image';
+
+export function OptimizedImage() {
+  return (
+    <Image
+      src="/hero.jpg"
+      alt="Hero"
+      width={1200}
+      height={600}
+      priority
+      placeholder="blur"
+    />
+  );
+}
+
+// Dynamic imports
+import dynamic from 'next/dynamic';
+
+const DynamicChart = dynamic(() => import('./Chart'), {
+  loading: () => <p>Loading...</p>,
+  ssr: false,
+});
+
+// Static generation
+export async function generateStaticParams() {
+  const products = await getProducts();
+  return products.map((product) => ({ id: product.id }));
+}
+```
+
+## Use Cases
+
+### E-commerce Product Page
+```typescript
+export default async function ProductPage({ params, searchParams }) {
+  const product = await getProductBySlug(params.slug);
+  if (!product) notFound();
+
+  const selectedVariant = product.variants.find(
+    (v) => v.id === searchParams.variant
+  ) || product.variants[0];
+
+  return (
+    <div className="grid md:grid-cols-2 gap-8">
+      <ProductGallery images={product.images} />
+      <div>
+        <h1>{product.name}</h1>
+        <p>${selectedVariant.price}</p>
+        <VariantSelector variants={product.variants} />
+        <AddToCartButton productId={product.id} />
+      </div>
+    </div>
+  );
+}
 ```
 
 ## Best Practices
-- Default to Server Components
-- Use 'use client' only when needed
+
+### Do's
+- Use Server Components by default
+- Colocate data fetching with components
+- Implement loading and error states
 - Use Server Actions for mutations
-- Use loading.tsx for loading states
-- Use error.tsx for error handling
+- Cache data appropriately
+- Optimize images with next/image
+
+### Don'ts
+- Don't use 'use client' unnecessarily
+- Don't fetch data in Client Components
+- Don't ignore TypeScript errors
+- Don't skip error boundaries
+- Don't hardcode environment variables
+
+## References
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [App Router](https://nextjs.org/docs/app)
+- [Server Actions](https://nextjs.org/docs/app/api-reference/functions/server-actions)
+- [NextAuth.js](https://next-auth.js.org)
 
 
 ## Configuration
