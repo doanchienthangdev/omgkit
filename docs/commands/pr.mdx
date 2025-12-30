@@ -1,0 +1,38 @@
+---
+title: "/pr"
+description: "Create pull request"
+---
+
+<Info>**Usage:** `/pr [title]`</Info>
+
+
+# 🔀 PR: $ARGUMENTS
+
+Create pull request for current branch.
+
+## Process
+1. Get current branch
+2. Analyze commits
+3. Generate PR description
+4. Create PR via gh CLI
+
+## Command
+```bash
+gh pr create --title "Title" --body "Description"
+```
+
+
+## Tools Used
+
+Bash, Read
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 54 commands
+  </Card>
+  <Card title="git Commands" icon="folder" href="/commands/overview#git">
+    More git commands
+  </Card>
+</CardGroup>

@@ -1,0 +1,297 @@
+---
+title: Project Structure
+description: 'Understanding the .omgkit directory'
+---
+
+## Overview
+
+After running `omgkit init`, your project contains a `.omgkit/` directory with all OMGKIT configuration and generated artifacts.
+
+```
+your-project/
+├── .omgkit/
+│   ├── config.yaml       # Project configuration
+│   ├── settings.json     # Permissions and settings
+│   ├── sprints/
+│   │   ├── vision.yaml   # Product vision
+│   │   ├── backlog.yaml  # Task backlog
+│   │   └── current.yaml  # Current sprint
+│   ├── plans/            # Generated plans
+│   ├── docs/             # Generated documentation
+│   └── logs/             # Activity logs
+└── OMEGA.md              # Project context file
+```
+
+## Files
+
+### config.yaml
+
+Main project configuration. See [Configuration](/getting-started/configuration) for full details.
+
+```yaml
+project:
+  name: "my-project"
+  type: "web"
+
+models:
+  default: "claude-sonnet"
+  planning: "claude-opus"
+
+agents:
+  enabled: true
+  auto_handoff: true
+
+sprint:
+  default_duration: "2 weeks"
+  task_size: "2-5 min"
+```
+
+---
+
+### settings.json
+
+Permissions and safety settings.
+
+```json
+{
+  "permissions": {
+    "file_write": true,
+    "git_operations": true,
+    "external_api": false,
+    "shell_commands": true
+  },
+  "confirmations": {
+    "before_commit": true,
+    "before_deploy": true,
+    "before_delete": true
+  }
+}
+```
+
+**Permission Types:**
+
+| Permission | Description |
+|------------|-------------|
+| `file_write` | Allow writing files |
+| `git_operations` | Allow git commands |
+| `external_api` | Allow external API calls |
+| `shell_commands` | Allow shell command execution |
+
+---
+
+### sprints/vision.yaml
+
+Your product vision, created by `/vision:set`.
+
+```yaml
+vision:
+  product: "Task Management App"
+  tagline: "Simple task tracking for busy professionals"
+
+  target_users:
+    primary: "Busy professionals"
+    secondary: "Small teams"
+
+  core_value:
+    - "Speed - add tasks in seconds"
+    - "Simplicity - no learning curve"
+
+  success_metrics:
+    - "80% daily task completion"
+    - "NPS > 50"
+
+  constraints:
+    - "Mobile-first"
+    - "Works offline"
+
+created_at: "2024-01-15T10:00:00Z"
+updated_at: "2024-01-15T10:00:00Z"
+```
+
+---
+
+### sprints/backlog.yaml
+
+Product backlog, managed by `/backlog:*` commands.
+
+```yaml
+backlog:
+  - id: "task-001"
+    title: "User authentication"
+    description: "Email/password login with social auth"
+    priority: 1
+    size: "L"
+    value: "high"
+    tags: ["auth", "security"]
+
+  - id: "task-002"
+    title: "Task CRUD"
+    description: "Create, read, update, delete tasks"
+    priority: 2
+    size: "M"
+    value: "high"
+    tags: ["core", "mvp"]
+
+updated_at: "2024-01-15T10:00:00Z"
+```
+
+---
+
+### sprints/current.yaml
+
+Current active sprint.
+
+```yaml
+sprint:
+  name: "MVP Sprint"
+  start_date: "2024-01-15"
+  end_date: "2024-01-29"
+  status: "active"
+
+  tasks:
+    - id: "sprint-001"
+      backlog_id: "task-001"
+      title: "User authentication"
+      status: "completed"
+      completed_at: "2024-01-17T14:30:00Z"
+
+    - id: "sprint-002"
+      backlog_id: "task-002"
+      title: "Task CRUD"
+      status: "in_progress"
+      assigned_to: "fullstack-developer"
+
+  metrics:
+    planned_tasks: 5
+    completed_tasks: 2
+    velocity: 7.5
+```
+
+---
+
+### plans/
+
+Generated implementation plans.
+
+```
+plans/
+├── auth.md           # Plan for authentication
+├── task-crud.md      # Plan for task CRUD
+└── dashboard.md      # Plan for dashboard
+```
+
+**Example Plan:**
+
+```markdown
+# Plan: User Authentication
+
+## Overview
+Implement email/password authentication with session management.
+
+## Tasks
+1. [ ] Create User model - 3 min - src/models/User.ts
+2. [ ] Create AuthService - 5 min - src/services/AuthService.ts
+3. [ ] Add login endpoint - 3 min - src/routes/auth.ts
+4. [ ] Add register endpoint - 3 min - src/routes/auth.ts
+5. [ ] Create auth middleware - 3 min - src/middleware/auth.ts
+
+## Files to Create/Modify
+- `src/models/User.ts` - New
+- `src/services/AuthService.ts` - New
+- `src/routes/auth.ts` - New
+- `src/middleware/auth.ts` - New
+
+## Testing Strategy
+- Unit: AuthService methods
+- Integration: Login/register flows
+
+## Risks
+| Risk | Mitigation |
+|------|------------|
+| Password security | Use bcrypt with 12 rounds |
+```
+
+---
+
+### docs/
+
+Generated documentation.
+
+```
+docs/
+├── api/
+│   └── auth.md       # API documentation
+├── components/
+│   └── Button.md     # Component docs
+└── architecture.md   # System architecture
+```
+
+---
+
+### logs/
+
+Activity logs for debugging and retrospectives.
+
+```
+logs/
+├── 2024-01-15.log
+├── 2024-01-16.log
+└── 2024-01-17.log
+```
+
+**Log Format:**
+
+```
+[2024-01-15T10:30:00Z] [planner] Started planning auth feature
+[2024-01-15T10:32:00Z] [planner] Created plan: plans/auth.md
+[2024-01-15T10:32:00Z] [planner] Handoff to fullstack-developer
+[2024-01-15T10:33:00Z] [fullstack-developer] Starting task 1/5
+```
+
+---
+
+## OMEGA.md
+
+Project context file in your project root. This is read by Claude Code for context.
+
+```markdown
+# Project Context
+
+## Overview
+Task Management App - Simple task tracking for busy professionals
+
+## Tech Stack
+- Frontend: Next.js 14, TypeScript, Tailwind CSS
+- Backend: Next.js API Routes
+- Database: PostgreSQL with Prisma
+- Auth: NextAuth.js
+
+## Key Patterns
+- App Router for routing
+- Server Components by default
+- Server Actions for mutations
+
+## Current Sprint
+MVP Sprint - Focus on core task management
+
+## Recent Changes
+- Added user authentication
+- Implemented task CRUD
+```
+
+---
+
+## .gitignore Recommendations
+
+Add to your `.gitignore`:
+
+```gitignore
+# OMGKIT
+.omgkit/logs/        # Activity logs
+.omgkit/plans/*.draft.md  # Draft plans
+```
+
+Keep in git:
+- `config.yaml` - Share team configuration
+- `settings.json` - Share permissions
+- `sprints/` - Sprint history for retrospectives

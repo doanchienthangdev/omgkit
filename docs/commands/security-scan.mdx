@@ -1,0 +1,47 @@
+---
+title: "/security-scan"
+description: "Scan for security vulnerabilities"
+---
+
+
+
+
+# 🔒 Security Scan
+
+Full security audit of the codebase.
+
+## Scans
+1. Dependency vulnerabilities (`npm audit`)
+2. Hardcoded secrets
+3. SQL injection patterns
+4. XSS vulnerabilities
+5. Insecure configurations
+
+## Output
+```markdown
+## Security Report
+
+### Risk Level: LOW | MEDIUM | HIGH
+
+### Vulnerabilities
+| Severity | Type | Location | Fix |
+
+### Recommendations
+1. [Action]
+```
+
+
+## Tools Used
+
+Task, Read, Grep, Bash, Glob
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 54 commands
+  </Card>
+  <Card title="quality Commands" icon="folder" href="/commands/overview#quality">
+    More quality commands
+  </Card>
+</CardGroup>

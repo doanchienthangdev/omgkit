@@ -1,0 +1,202 @@
+---
+title: Quick Start
+description: 'Build your first feature with OMGKIT in 5 minutes'
+---
+
+This guide walks you through using OMGKIT to build a feature from start to finish.
+
+## Prerequisites
+
+<Check>OMGKIT installed (`omgkit doctor` shows all green)</Check>
+<Check>A project initialized with `omgkit init`</Check>
+
+## Option 1: Single Command (Quick)
+
+The fastest way to use OMGKIT is the `/feature` command:
+
+```bash
+/feature "add user authentication with email/password"
+```
+
+This triggers a full workflow:
+
+<Steps>
+  <Step title="Planning">
+    The **Planner** agent analyzes requirements and creates an implementation plan.
+  </Step>
+  <Step title="Implementation">
+    The **Fullstack Developer** agent writes the code.
+  </Step>
+  <Step title="Testing">
+    The **Tester** agent generates and runs tests.
+  </Step>
+  <Step title="Review">
+    The **Code Reviewer** agent reviews for quality and security.
+  </Step>
+  <Step title="Commit">
+    The **Git Manager** agent creates a meaningful commit.
+  </Step>
+</Steps>
+
+## Option 2: Sprint Management (Recommended)
+
+For larger projects, use sprint management for organized development.
+
+### Step 1: Set Your Vision
+
+```bash
+/vision:set
+```
+
+Claude will ask you questions about your product. Answer them, and it creates a `vision.yaml`:
+
+```yaml
+vision:
+  product: "Task Management App"
+  target_users: "Busy professionals"
+  core_value: "Simple, fast task tracking"
+  success_metrics:
+    - "Users complete 80% of daily tasks"
+```
+
+### Step 2: Create a Sprint
+
+```bash
+/sprint:new "MVP Sprint" --propose
+```
+
+The AI analyzes your vision and proposes tasks:
+
+```
+Proposed Sprint Tasks:
+1. [ ] User authentication (login/register)
+2. [ ] Task CRUD operations
+3. [ ] Task list UI with filtering
+4. [ ] Due date reminders
+5. [ ] Basic analytics dashboard
+
+Accept these tasks? (yes/no/modify)
+```
+
+### Step 3: Start the Sprint
+
+```bash
+/sprint:start
+```
+
+### Step 4: Run the AI Team
+
+<Tabs>
+  <Tab title="Full Auto">
+    ```bash
+    /team:run --mode=full-auto
+    ```
+    The AI team works autonomously, completing tasks one by one.
+  </Tab>
+  <Tab title="Semi Auto">
+    ```bash
+    /team:run --mode=semi-auto
+    ```
+    AI proposes actions, you approve each step.
+  </Tab>
+  <Tab title="Manual">
+    ```bash
+    /team:run --mode=manual
+    ```
+    You direct the team explicitly for each task.
+  </Tab>
+</Tabs>
+
+### Step 5: Monitor Progress
+
+```bash
+/sprint:current
+```
+
+Output:
+```
+Sprint: MVP Sprint
+Progress: 3/5 tasks (60%)
+━━━━━━━━━━━━━━━━━━━━ 60%
+
+Completed:
+  ✓ User authentication
+  ✓ Task CRUD operations
+  ✓ Task list UI
+
+In Progress:
+  → Due date reminders (fullstack-developer working)
+
+Remaining:
+  ○ Basic analytics dashboard
+```
+
+### Step 6: End the Sprint
+
+```bash
+/sprint:end
+```
+
+Generates a retrospective with:
+- Completed vs planned tasks
+- Time analysis
+- Lessons learned
+- Recommendations for next sprint
+
+## Essential Commands
+
+<CardGroup cols={2}>
+  <Card title="Development" icon="code">
+    - `/feature <desc>` - Full feature
+    - `/fix <error>` - Debug and fix
+    - `/test <scope>` - Generate tests
+  </Card>
+  <Card title="Planning" icon="map">
+    - `/plan <task>` - Create plan
+    - `/research <topic>` - Research tech
+    - `/brainstorm <topic>` - Explore ideas
+  </Card>
+  <Card title="Git" icon="code-branch">
+    - `/commit` - Smart commit
+    - `/ship` - Commit + PR
+    - `/pr` - Create PR
+  </Card>
+  <Card title="Omega" icon="wand-magic-sparkles">
+    - `/10x <topic>` - 10x improvement
+    - `/100x <topic>` - Paradigm shift
+    - `/1000x <topic>` - Moonshot thinking
+  </Card>
+</CardGroup>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card
+    title="Explore Agents"
+    icon="robot"
+    href="/agents/overview"
+  >
+    Learn about all 23 specialized agents.
+  </Card>
+  <Card
+    title="All Commands"
+    icon="terminal"
+    href="/commands/overview"
+  >
+    Discover all 54 slash commands.
+  </Card>
+  <Card
+    title="Omega Philosophy"
+    icon="atom"
+    href="/concepts/omega-philosophy"
+  >
+    Understand 10x-1000x thinking.
+  </Card>
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/getting-started/configuration"
+  >
+    Customize OMGKIT settings.
+  </Card>
+</CardGroup>

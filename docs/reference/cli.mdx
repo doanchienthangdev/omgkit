@@ -1,0 +1,253 @@
+---
+title: CLI Reference
+description: 'OMGKIT command-line interface'
+---
+
+## Installation
+
+```bash
+npm install -g omgkit
+```
+
+## Commands
+
+### omgkit install
+
+Install the OMGKIT plugin to Claude Code.
+
+```bash
+omgkit install [options]
+```
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `--force` | Overwrite existing installation |
+| `--path <path>` | Custom installation path |
+
+**Example:**
+```bash
+omgkit install
+omgkit install --force
+```
+
+---
+
+### omgkit init
+
+Initialize OMGKIT in your project.
+
+```bash
+omgkit init [options]
+```
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `--type <type>` | Project type: web, api, cli, library |
+| `--force` | Overwrite existing configuration |
+
+**Example:**
+```bash
+cd my-project
+omgkit init
+omgkit init --type api
+```
+
+**Creates:**
+```
+.omgkit/
+├── config.yaml
+├── settings.json
+├── sprints/
+│   ├── vision.yaml
+│   └── backlog.yaml
+├── plans/
+├── docs/
+└── logs/
+```
+
+---
+
+### omgkit doctor
+
+Check installation status and diagnose issues.
+
+```bash
+omgkit doctor
+```
+
+**Example Output:**
+```
+OMGKIT Doctor
+==========================
+Plugin Status: Installed
+Plugin Path: ~/.claude/plugins/omgkit
+Project Initialized: Yes
+Config Valid: Yes
+
+Components:
+  Agents: 23 loaded
+  Commands: 54 loaded
+  Skills: 43 loaded
+  Modes: 9 loaded
+
+All systems operational!
+```
+
+---
+
+### omgkit list
+
+List all available components.
+
+```bash
+omgkit list [type]
+```
+
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `type` | Optional: agents, commands, skills, modes |
+
+**Example:**
+```bash
+omgkit list           # List all
+omgkit list agents    # List agents only
+omgkit list commands  # List commands only
+```
+
+---
+
+### omgkit update
+
+Update the plugin to the latest version.
+
+```bash
+omgkit update
+```
+
+**Example:**
+```bash
+omgkit update
+# Updating plugin...
+# Updated from v2.0.5 to v2.0.6
+```
+
+---
+
+### omgkit uninstall
+
+Remove the OMGKIT plugin.
+
+```bash
+omgkit uninstall
+```
+
+**Example:**
+```bash
+omgkit uninstall
+# Plugin removed from ~/.claude/plugins/omgkit
+```
+
+---
+
+### omgkit help
+
+Show help information.
+
+```bash
+omgkit help [command]
+```
+
+**Example:**
+```bash
+omgkit help
+omgkit help install
+omgkit help init
+```
+
+---
+
+## Global Options
+
+These options work with all commands:
+
+| Option | Description |
+|--------|-------------|
+| `--version`, `-v` | Show version number |
+| `--help`, `-h` | Show help |
+| `--verbose` | Verbose output |
+| `--quiet`, `-q` | Minimal output |
+
+---
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OMGKIT_PLUGIN_PATH` | Custom plugin path | `~/.claude/plugins/omgkit` |
+| `OMGKIT_MODEL` | Default AI model | `claude-sonnet` |
+| `OMGKIT_MODE` | Default mode | `default` |
+| `OMGKIT_AUTO_HANDOFF` | Agent auto-handoff | `true` |
+
+**Example:**
+```bash
+export OMGKIT_MODEL="claude-opus"
+export OMGKIT_MODE="omega"
+```
+
+---
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Success |
+| `1` | General error |
+| `2` | Invalid arguments |
+| `3` | Plugin not installed |
+| `4` | Project not initialized |
+
+---
+
+## Configuration Files
+
+### ~/.omgkitrc
+
+Global configuration:
+
+```json
+{
+  "defaultModel": "claude-sonnet",
+  "defaultMode": "default",
+  "telemetry": false
+}
+```
+
+### .omgkit/config.yaml
+
+Project configuration (see [Configuration](/getting-started/configuration)).
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Add npm global bin to PATH:
+    ```bash
+    export PATH="$PATH:$(npm config get prefix)/bin"
+    ```
+  </Accordion>
+
+  <Accordion title="Permission denied">
+    Use a Node version manager like nvm instead of system Node.
+  </Accordion>
+
+  <Accordion title="Plugin not loading">
+    1. Run `omgkit doctor`
+    2. Try `omgkit install --force`
+    3. Restart Claude Code
+  </Accordion>
+</AccordionGroup>

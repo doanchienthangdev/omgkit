@@ -1,0 +1,46 @@
+---
+title: "/execute-plan"
+description: "Execute existing plan with subagents"
+---
+
+<Info>**Usage:** `/execute-plan <plan-file>`</Info>
+
+
+# ▶️ Execute: $ARGUMENTS
+
+Execute plan from: **$ARGUMENTS**
+
+## Process
+1. Read plan file
+2. Execute tasks sequentially
+3. Review gate after each phase
+4. Report progress
+
+## Execution
+For each task:
+1. Assign to appropriate agent
+2. Execute task
+3. Verify success criteria
+4. Update progress
+5. Next task
+
+## Progress Tracking
+- [ ] Task 1
+- [ ] Task 2
+- [ ] ...
+
+
+## Tools Used
+
+Task, Read, Write, Bash, Glob
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 54 commands
+  </Card>
+  <Card title="planning Commands" icon="folder" href="/commands/overview#planning">
+    More planning commands
+  </Card>
+</CardGroup>

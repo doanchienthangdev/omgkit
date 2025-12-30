@@ -1,0 +1,75 @@
+---
+title: "javascript"
+description: "JavaScript development. Use for ES6+, async patterns, DOM manipulation."
+---
+
+
+# JavaScript Skill
+
+## Patterns
+
+### Async/Await
+```javascript
+async function fetchData() {
+  try {
+    const response = await fetch('/api/data');
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Fetch failed:', error);
+    throw error;
+  }
+}
+```
+
+### Destructuring
+```javascript
+const { name, email } = user;
+const [first, ...rest] = items;
+const { data: userData } = response;
+```
+
+### Spread Operator
+```javascript
+const merged = { ...defaults, ...options };
+const combined = [...array1, ...array2];
+```
+
+### Modules (ESM)
+```javascript
+// Named exports
+export const helper = () => {};
+export function process() {}
+
+// Default export
+export default class Service {}
+
+// Import
+import Service, { helper, process } from './service.js';
+```
+
+### Optional Chaining
+```javascript
+const street = user?.address?.street;
+const result = callback?.();
+```
+
+## Best Practices
+- Use const/let, never var
+- Use arrow functions for callbacks
+- Use template literals
+- Use optional chaining
+- Use nullish coalescing (??)
+- Use modules (ESM)
+
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="languages" icon="folder" href="/skills/overview#languages">
+    More languages skills
+  </Card>
+</CardGroup>

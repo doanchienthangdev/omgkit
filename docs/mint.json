@@ -1,0 +1,319 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "OMGKIT",
+  "logo": {
+    "dark": "/logo/dark.svg",
+    "light": "/logo/light.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#7C3AED",
+    "light": "#A78BFA",
+    "dark": "#5B21B6",
+    "anchors": {
+      "from": "#7C3AED",
+      "to": "#F59E0B"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/doanchienthangdev/omgkit"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Get Started",
+    "url": "/getting-started/installation"
+  },
+  "tabs": [
+    {
+      "name": "Agents",
+      "url": "agents"
+    },
+    {
+      "name": "Commands",
+      "url": "commands"
+    },
+    {
+      "name": "Skills",
+      "url": "skills"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "npm Package",
+      "icon": "npm",
+      "url": "https://www.npmjs.com/package/omgkit"
+    },
+    {
+      "name": "Community",
+      "icon": "github",
+      "url": "https://github.com/doanchienthangdev/omgkit/discussions"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "getting-started/installation",
+        "getting-started/quickstart",
+        "getting-started/configuration"
+      ]
+    },
+    {
+      "group": "Core Concepts",
+      "pages": [
+        "concepts/omega-philosophy",
+        "concepts/sprint-management",
+        "concepts/ai-team"
+      ]
+    },
+    {
+      "group": "Modes",
+      "pages": [
+        "modes/overview",
+        "modes/default",
+        "modes/omega",
+        "modes/autonomous",
+        "modes/brainstorm",
+        "modes/deep-research",
+        "modes/implementation",
+        "modes/review",
+        "modes/orchestration",
+        "modes/token-efficient"
+      ]
+    },
+    {
+      "group": "Reference",
+      "pages": [
+        "reference/cli",
+        "reference/project-structure"
+      ]
+    },
+    {
+      "group": "Resources",
+      "pages": [
+        "resources/faq",
+        "resources/contributing",
+        "resources/changelog"
+      ]
+    },
+    {
+      "group": "Agents",
+      "pages": [
+        "agents/overview",
+        {
+          "group": "Core Development",
+          "pages": [
+            "agents/planner",
+            "agents/researcher",
+            "agents/debugger",
+            "agents/tester",
+            "agents/code-reviewer",
+            "agents/scout"
+          ]
+        },
+        {
+          "group": "Operations",
+          "pages": [
+            "agents/git-manager",
+            "agents/docs-manager",
+            "agents/project-manager",
+            "agents/database-admin",
+            "agents/ui-ux-designer"
+          ]
+        },
+        {
+          "group": "Extended",
+          "pages": [
+            "agents/fullstack-developer",
+            "agents/cicd-manager",
+            "agents/security-auditor",
+            "agents/api-designer",
+            "agents/vulnerability-scanner",
+            "agents/pipeline-architect"
+          ]
+        },
+        {
+          "group": "Creative",
+          "pages": [
+            "agents/copywriter",
+            "agents/brainstormer",
+            "agents/journal-writer"
+          ]
+        },
+        {
+          "group": "Omega Exclusive",
+          "pages": [
+            "agents/oracle",
+            "agents/architect",
+            "agents/sprint-master"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Commands",
+      "pages": [
+        "commands/overview",
+        {
+          "group": "Development",
+          "pages": [
+            "commands/feature",
+            "commands/fix",
+            "commands/fix-fast",
+            "commands/fix-hard",
+            "commands/fix-test",
+            "commands/fix-ci",
+            "commands/fix-logs",
+            "commands/review",
+            "commands/test",
+            "commands/tdd"
+          ]
+        },
+        {
+          "group": "Planning",
+          "pages": [
+            "commands/plan",
+            "commands/plan-detailed",
+            "commands/plan-parallel",
+            "commands/brainstorm",
+            "commands/execute-plan",
+            "commands/research",
+            "commands/doc",
+            "commands/ask"
+          ]
+        },
+        {
+          "group": "Git & Deploy",
+          "pages": [
+            "commands/commit",
+            "commands/ship",
+            "commands/pr",
+            "commands/deploy",
+            "commands/cm",
+            "commands/cp"
+          ]
+        },
+        {
+          "group": "Quality",
+          "pages": [
+            "commands/security-scan",
+            "commands/api-gen",
+            "commands/refactor",
+            "commands/optimize",
+            "commands/lint"
+          ]
+        },
+        {
+          "group": "Context",
+          "pages": [
+            "commands/mode",
+            "commands/index",
+            "commands/load",
+            "commands/checkpoint",
+            "commands/spawn",
+            "commands/spawn-collect"
+          ]
+        },
+        {
+          "group": "Design",
+          "pages": [
+            "commands/screenshot",
+            "commands/fast",
+            "commands/good",
+            "commands/cro",
+            "commands/enhance"
+          ]
+        },
+        {
+          "group": "Omega",
+          "pages": [
+            "commands/10x",
+            "commands/100x",
+            "commands/1000x",
+            "commands/principles",
+            "commands/dimensions"
+          ]
+        },
+        {
+          "group": "Sprint",
+          "pages": [
+            "commands/init",
+            "commands/vision-set",
+            "commands/vision-show",
+            "commands/sprint-new",
+            "commands/sprint-start",
+            "commands/sprint-current",
+            "commands/sprint-end",
+            "commands/backlog-add",
+            "commands/backlog-show",
+            "commands/backlog-prioritize",
+            "commands/team-run",
+            "commands/team-status",
+            "commands/team-ask"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Skills",
+      "pages": [
+        "skills/overview",
+        {
+          "group": "Languages",
+          "pages": [
+            "skills/python",
+            "skills/typescript",
+            "skills/javascript"
+          ]
+        },
+        {
+          "group": "Frameworks",
+          "pages": [
+            "skills/nextjs",
+            "skills/react",
+            "skills/vue",
+            "skills/express",
+            "skills/nestjs",
+            "skills/fastapi",
+            "skills/django",
+            "skills/rails",
+            "skills/spring",
+            "skills/laravel"
+          ]
+        },
+        {
+          "group": "Databases",
+          "pages": [
+            "skills/postgresql",
+            "skills/mongodb",
+            "skills/redis",
+            "skills/prisma"
+          ]
+        },
+        {
+          "group": "Frontend",
+          "pages": [
+            "skills/tailwindcss",
+            "skills/shadcn-ui"
+          ]
+        }
+      ]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/doanchienthangdev/omgkit"
+  },
+  "analytics": {
+    "posthog": {
+      "apiKey": ""
+    }
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true,
+    "raiseIssue": true
+  }
+}

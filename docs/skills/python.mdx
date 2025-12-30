@@ -1,0 +1,76 @@
+---
+title: "python"
+description: "Python development. Use when writing Python code, using pip, or working with Python frameworks."
+---
+
+
+# Python Skill
+
+## Patterns
+
+### Type Hints
+```python
+from typing import Optional, List
+
+def create_user(email: str, password: str) -> User:
+    """Create a new user."""
+    ...
+
+def get_users(limit: int = 10) -> List[User]:
+    ...
+```
+
+### Async
+```python
+import asyncio
+import aiohttp
+
+async def fetch_data(url: str) -> dict:
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            return await response.json()
+```
+
+### Dataclasses
+```python
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass
+class User:
+    id: str
+    email: str
+    created_at: datetime = field(default_factory=datetime.now)
+```
+
+### Pydantic
+```python
+from pydantic import BaseModel, EmailStr
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+
+    class Config:
+        str_strip_whitespace = True
+```
+
+## Best Practices
+- Use type hints everywhere
+- Use dataclasses or Pydantic for data
+- Use async for I/O operations
+- Follow PEP 8
+- Use virtual environments
+- Write docstrings
+
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="languages" icon="folder" href="/skills/overview#languages">
+    More languages skills
+  </Card>
+</CardGroup>

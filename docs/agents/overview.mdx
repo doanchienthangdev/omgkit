@@ -1,0 +1,87 @@
+---
+title: "Agents Overview"
+description: "23 specialized AI agents for every development task"
+---
+
+OMGKIT includes 23 specialized agents, each expert in their domain.
+
+## Agent Categories
+
+<CardGroup cols={2}>
+  <Card title="Core Development" icon="code">
+    Planning, research, debugging, testing, review, exploration
+  </Card>
+  <Card title="Operations" icon="gears">
+    Git, docs, project management, database, UI/UX
+  </Card>
+  <Card title="Extended" icon="puzzle-piece">
+    Fullstack, CI/CD, security, API design, pipelines
+  </Card>
+  <Card title="Creative" icon="palette">
+    Copy, brainstorming, journaling
+  </Card>
+</CardGroup>
+
+## All Agents
+
+| Agent | Description | Tools |
+|-------|-------------|-------|
+| [api-designer](/agents/api-designer) | API design, OpenAPI specs, REST best practices. Use for API ... | Read,  Write,  Glob |
+| [architect](/agents/architect) | System design with leverage multiplication. Creates architec... | Read,  Write,  Grep |
+| [brainstormer](/agents/brainstormer) | Creative exploration, ideation, option generation. Use for b... | Read,  WebSearch,  Glob |
+| [cicd-manager](/agents/cicd-manager) | CI/CD pipeline management, GitHub Actions, deployment automa... | Read,  Write,  Bash |
+| [code-reviewer](/agents/code-reviewer) | Code review with security focus, performance analysis, quali... | Read,  Grep,  Glob |
+| [copywriter](/agents/copywriter) | Marketing copy, content writing, UX writing. Creates compell... | Read,  Write,  WebSearch |
+| [database-admin](/agents/database-admin) | Schema design, query optimization, migrations. Database expe... | Read,  Write,  Bash |
+| [debugger](/agents/debugger) | Error analysis, root cause finding, bug investigation. Exper... | Read,  Grep,  Glob |
+| [docs-manager](/agents/docs-manager) | Documentation generation, API docs, architecture guides. Mai... | Read,  Write,  Glob |
+| [fullstack-developer](/agents/fullstack-developer) | Full implementation with strict file ownership. Writes clean... | Read,  Write,  Edit |
+| [git-manager](/agents/git-manager) | Git operations, commits, PRs, branch management. Handles all... | Bash,  Read |
+| [journal-writer](/agents/journal-writer) | Failure documentation, lessons learned, retrospectives. Docu... | Read,  Write |
+| [oracle](/agents/oracle) | Omega thinking with 7 modes for deep analysis and breakthrou... | Read,  Grep,  Glob |
+| [pipeline-architect](/agents/pipeline-architect) | Pipeline optimization, workflow design, automation architect... | Read,  Write,  Bash |
+| [planner](/agents/planner) | Task decomposition and implementation planning. Creates deta... | Read,  Grep,  Glob |
+| [project-manager](/agents/project-manager) | Progress tracking, coordination, status reports. Manages dev... | Read,  Write,  Glob |
+| [researcher](/agents/researcher) | Technology research, best practices, documentation lookup. U... | Read,  WebSearch,  WebFetch |
+| [scout](/agents/scout) | Codebase exploration, file search, pattern discovery. Expert... | Read,  Grep,  Glob |
+| [security-auditor](/agents/security-auditor) | Security reviews, vulnerability assessment, compliance check... | Read,  Grep,  Bash |
+| [sprint-master](/agents/sprint-master) | Sprint management, team orchestration, AI autonomy control. ... | Read,  Write,  Task |
+| [tester](/agents/tester) | Test generation, coverage analysis, quality validation. Writ... | Read,  Write,  Bash |
+| [ui-ux-designer](/agents/ui-ux-designer) | UI component creation, responsive design, accessibility. Cre... | Read,  Write,  Bash |
+| [vulnerability-scanner](/agents/vulnerability-scanner) | Security scanning, dependency audit, code analysis. Use for ... | Read,  Grep,  Bash |
+
+## Using Agents
+
+### Direct Invocation
+
+```bash
+@planner "plan the checkout feature"
+@tester "write tests for AuthService"
+@code-reviewer "review src/components/"
+```
+
+### Via Commands
+
+Most commands automatically route to the appropriate agent:
+
+```bash
+/plan → planner
+/test → tester
+/review → code-reviewer
+/commit → git-manager
+```
+
+### In Team Mode
+
+When running `/team:run`, the Sprint Master assigns agents to tasks automatically.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="AI Team" icon="users" href="/concepts/ai-team">
+    How agents collaborate
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands that use agents
+  </Card>
+</CardGroup>

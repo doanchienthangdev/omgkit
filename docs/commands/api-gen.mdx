@@ -1,0 +1,43 @@
+---
+title: "/api-gen"
+description: "Generate API code from spec"
+---
+
+<Info>**Usage:** `/api-gen <resource>`</Info>
+
+
+# 🔌 API Gen: $ARGUMENTS
+
+Generate API code for: **$ARGUMENTS**
+
+## Generates
+- Route handler
+- Validation schema
+- Types/interfaces
+- Tests
+- Documentation
+
+## Output Structure
+```
+src/api/[resource]/
+├── route.ts
+├── schema.ts
+├── types.ts
+└── route.test.ts
+```
+
+
+## Tools Used
+
+Task, Read, Write
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 54 commands
+  </Card>
+  <Card title="quality Commands" icon="folder" href="/commands/overview#quality">
+    More quality commands
+  </Card>
+</CardGroup>

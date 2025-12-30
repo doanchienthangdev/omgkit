@@ -1,0 +1,39 @@
+---
+title: "/backlog-add"
+description: "Add task to backlog"
+---
+
+<Info>**Usage:** `/backlog-add <task> [--type TYPE] [--priority N]`</Info>
+
+
+# ➕ Backlog Add: $ARGUMENTS
+
+Add task to backlog.
+
+## Options
+- `--type` - feature, bugfix, docs, test, refactor, infra
+- `--priority` - 1-5 (1 = highest)
+
+## Example
+```
+/backlog:add "Add user authentication" --type feature --priority 1
+```
+
+## Output
+Generates task ID and saves to `.omgkit/sprints/backlog.yaml`
+
+
+## Tools Used
+
+Read, Write
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 54 commands
+  </Card>
+  <Card title="sprint Commands" icon="folder" href="/commands/overview#sprint">
+    More sprint commands
+  </Card>
+</CardGroup>

@@ -1,0 +1,49 @@
+---
+title: "/review"
+description: "Code review with security and quality focus"
+---
+
+<Info>**Usage:** `/review [file or directory]`</Info>
+
+
+# 🔍 Review: $ARGUMENTS
+
+Code review for: **$ARGUMENTS**
+
+## Checklist
+
+### Security
+- [ ] No hardcoded secrets
+- [ ] Input validation
+- [ ] SQL injection prevention
+- [ ] XSS prevention
+
+### Performance
+- [ ] No N+1 queries
+- [ ] Efficient algorithms
+- [ ] Proper caching
+
+### Quality
+- [ ] Single responsibility
+- [ ] No duplication
+- [ ] Proper error handling
+- [ ] Type safety
+
+## Output
+Provide: APPROVED or CHANGES_REQUESTED with details.
+
+
+## Tools Used
+
+Read, Grep, Glob
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 54 commands
+  </Card>
+  <Card title="dev Commands" icon="folder" href="/commands/overview#dev">
+    More dev commands
+  </Card>
+</CardGroup>

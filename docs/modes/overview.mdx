@@ -1,0 +1,67 @@
+---
+title: "Modes Overview"
+description: "9 behavioral modes for different development contexts"
+---
+
+Modes change how OMGKIT behaves. Switch modes to optimize for different tasks.
+
+## Available Modes
+
+| Mode | Description | Best For |
+|------|-------------|----------|
+| [autonomous](/modes/autonomous) | AI team self-management mode for sprint ... | Various |
+| [brainstorm](/modes/brainstorm) | Creative exploration mode for design and... | Various |
+| [deep-research](/modes/deep-research) | Thorough analysis mode with citations an... | Various |
+| [default](/modes/default) | Balanced standard behavior for general t... | Various |
+| [implementation](/modes/implementation) | Code-focused mode with minimal prose.... | Various |
+| [omega](/modes/omega) | 10x-1000x thinking mode for breakthrough... | Various |
+| [orchestration](/modes/orchestration) | Multi-task coordination mode for paralle... | Various |
+| [review](/modes/review) | Critical analysis mode for code review.... | Various |
+| [token-efficient](/modes/token-efficient) | Compressed output mode for cost savings ... | Various |
+
+## Mode Categories
+
+<CardGroup cols={2}>
+  <Card title="Standard Modes" icon="sliders">
+    **Default**, **Implementation**, **Review** - Everyday development
+  </Card>
+  <Card title="Creative Modes" icon="lightbulb">
+    **Brainstorm**, **Deep Research** - Exploration and analysis
+  </Card>
+  <Card title="Efficiency Modes" icon="gauge-high">
+    **Token Efficient**, **Orchestration** - Optimized workflows
+  </Card>
+  <Card title="Omega Modes" icon="wand-magic-sparkles">
+    **Omega**, **Autonomous** - Advanced AI capabilities
+  </Card>
+</CardGroup>
+
+## Switching Modes
+
+```bash
+# Switch to a mode
+/mode omega
+
+# Check current mode
+/mode
+
+# Temporary mode for one command
+/mode brainstorm && /brainstorm "new feature ideas"
+```
+
+## Mode Persistence
+
+- Modes persist for the session
+- Configure default mode in `.omgkit/config.yaml`
+- Some commands auto-switch modes temporarily
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Omega Philosophy" icon="atom" href="/concepts/omega-philosophy">
+    Understanding Omega mode
+  </Card>
+  <Card title="Configuration" icon="gear" href="/getting-started/configuration">
+    Set default mode
+  </Card>
+</CardGroup>

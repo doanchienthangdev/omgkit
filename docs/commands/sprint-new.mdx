@@ -1,0 +1,49 @@
+---
+title: "/sprint-new"
+description: "Create new sprint"
+---
+
+<Info>**Usage:** `/sprint-new [name] [--propose]`</Info>
+
+
+# 🏃 Sprint New: $ARGUMENTS
+
+Create new sprint.
+
+## Options
+- `--propose` - AI analyzes codebase and proposes tasks
+
+## AI Proposal Analyzes
+- TODOs and FIXMEs in code
+- Test coverage gaps
+- Documentation gaps
+- Features aligned with vision
+- Technical debt
+
+## Output
+Save to: `.omgkit/sprints/current.yaml`
+
+```yaml
+sprint:
+  name: Sprint 1
+  status: planning
+  start_date: null
+  end_date: null
+  tasks: []
+```
+
+
+## Tools Used
+
+Task, Read, Write, Grep, Glob
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 54 commands
+  </Card>
+  <Card title="sprint Commands" icon="folder" href="/commands/overview#sprint">
+    More sprint commands
+  </Card>
+</CardGroup>

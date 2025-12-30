@@ -43,7 +43,10 @@
     "test:unit": "vitest run tests/unit",
     "test:validation": "vitest run tests/validation",
     "test:integration": "vitest run tests/integration",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "docs:generate": "node scripts/generate-docs.js",
+    "docs:dev": "cd docs && mintlify dev",
+    "docs:build": "npm run docs:generate"
   },
   "engines": {
     "node": ">=18.0.0"

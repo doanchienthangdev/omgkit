@@ -1,0 +1,66 @@
+---
+title: "better-auth"
+description: "Better Auth library. Use for authentication in TypeScript projects."
+---
+
+
+# Better Auth Skill
+
+## Setup
+```typescript
+import { betterAuth } from 'better-auth';
+
+export const auth = betterAuth({
+  database: {
+    provider: 'postgresql',
+    url: process.env.DATABASE_URL,
+  },
+  emailAndPassword: {
+    enabled: true,
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    },
+  },
+});
+```
+
+## Client Usage
+```typescript
+import { createAuthClient } from 'better-auth/client';
+
+const authClient = createAuthClient();
+
+// Sign up
+await authClient.signUp.email({
+  email: 'user@example.com',
+  password: 'password',
+  name: 'User',
+});
+
+// Sign in
+await authClient.signIn.email({
+  email: 'user@example.com',
+  password: 'password',
+});
+```
+
+## Best Practices
+- Enable rate limiting
+- Use secure cookies
+- Implement email verification
+- Add MFA option
+
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="security" icon="folder" href="/skills/overview#security">
+    More security skills
+  </Card>
+</CardGroup>

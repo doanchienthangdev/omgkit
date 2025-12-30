@@ -1,0 +1,277 @@
+---
+title: Configuration
+description: 'Customize OMGKIT for your project'
+---
+
+## Project Configuration
+
+After running `omgkit init`, your project has a `.omgkit/config.yaml` file:
+
+```yaml
+# .omgkit/config.yaml
+project:
+  name: "your-project"
+  type: "web"  # web, api, cli, library, mobile
+
+# AI Model Routing
+models:
+  default: "claude-sonnet"
+  planning: "claude-opus"
+  implementation: "claude-sonnet"
+  review: "claude-opus"
+
+# Agent Settings
+agents:
+  enabled: true
+  auto_handoff: true  # Agents pass work to each other
+
+# Sprint Settings
+sprint:
+  default_duration: "2 weeks"
+  task_size: "2-5 min"  # Target task granularity
+  auto_propose: true    # AI proposes sprint tasks
+
+# Mode Defaults
+modes:
+  default: "default"
+  omega_threshold: "10x"  # Trigger omega thinking at 10x+
+
+# Output
+output:
+  plans_dir: ".omgkit/plans"
+  docs_dir: ".omgkit/docs"
+  logs_dir: ".omgkit/logs"
+```
+
+## Configuration Options
+
+### Project Type
+
+<Tabs>
+  <Tab title="Web">
+    ```yaml
+    project:
+      type: "web"
+    ```
+    Optimized for web applications. Enables UI/UX agents and frontend skills.
+  </Tab>
+  <Tab title="API">
+    ```yaml
+    project:
+      type: "api"
+    ```
+    Optimized for backend services. Focuses on API design and database agents.
+  </Tab>
+  <Tab title="CLI">
+    ```yaml
+    project:
+      type: "cli"
+    ```
+    Optimized for command-line tools. Simplified agent set.
+  </Tab>
+  <Tab title="Library">
+    ```yaml
+    project:
+      type: "library"
+    ```
+    Optimized for packages/libraries. Emphasizes documentation and testing.
+  </Tab>
+</Tabs>
+
+### Model Routing
+
+Route different tasks to different Claude models:
+
+```yaml
+models:
+  # Use Opus for complex planning and review
+  planning: "claude-opus"
+  review: "claude-opus"
+
+  # Use Sonnet for implementation (faster, cheaper)
+  implementation: "claude-sonnet"
+
+  # Use Haiku for simple tasks
+  simple: "claude-haiku"
+```
+
+<Note>
+  Model routing optimizes cost while maintaining quality where it matters most.
+</Note>
+
+### Agent Configuration
+
+```yaml
+agents:
+  # Enable/disable the agent system
+  enabled: true
+
+  # Let agents hand off work to each other
+  auto_handoff: true
+
+  # Specific agent overrides
+  overrides:
+    planner:
+      model: "claude-opus"  # Always use Opus for planning
+    tester:
+      coverage_target: 80   # Minimum coverage percentage
+```
+
+### Sprint Settings
+
+```yaml
+sprint:
+  # Default sprint length
+  default_duration: "2 weeks"
+
+  # Target task size for breakdown
+  task_size: "2-5 min"
+
+  # AI automatically proposes tasks based on vision
+  auto_propose: true
+
+  # Maximum tasks per sprint
+  max_tasks: 20
+
+  # Require tests before marking complete
+  require_tests: true
+```
+
+### Mode Defaults
+
+```yaml
+modes:
+  # Starting mode
+  default: "default"
+
+  # Auto-switch to omega mode for large tasks
+  omega_threshold: "10x"
+
+  # Token efficiency settings
+  token_efficient:
+    compression_level: "medium"  # low, medium, high
+```
+
+## Environment Variables
+
+You can also configure OMGKIT via environment variables:
+
+```bash
+# Override default model
+export OMGKIT_MODEL="claude-opus"
+
+# Disable agent auto-handoff
+export OMGKIT_AUTO_HANDOFF="false"
+
+# Set default mode
+export OMGKIT_MODE="omega"
+```
+
+## Settings File
+
+The `.omgkit/settings.json` file controls permissions:
+
+```json
+{
+  "permissions": {
+    "file_write": true,
+    "git_operations": true,
+    "external_api": false,
+    "shell_commands": true
+  },
+  "confirmations": {
+    "before_commit": true,
+    "before_deploy": true,
+    "before_delete": true
+  }
+}
+```
+
+## Per-File Configuration
+
+Add OMGKIT directives to specific files:
+
+```typescript
+// @omgkit-skip-review
+// This file is auto-generated, skip code review
+
+// @omgkit-owner planner
+// The planner agent owns this file
+```
+
+## Recommended Configurations
+
+<AccordionGroup>
+  <Accordion title="Solo Developer">
+    ```yaml
+    agents:
+      auto_handoff: true
+    sprint:
+      default_duration: "1 week"
+      task_size: "5-10 min"
+    modes:
+      default: "implementation"
+    ```
+  </Accordion>
+
+  <Accordion title="Team Project">
+    ```yaml
+    agents:
+      auto_handoff: false  # Manual control
+    sprint:
+      default_duration: "2 weeks"
+      require_tests: true
+    models:
+      review: "claude-opus"  # Quality reviews
+    ```
+  </Accordion>
+
+  <Accordion title="Rapid Prototyping">
+    ```yaml
+    modes:
+      default: "implementation"
+    sprint:
+      task_size: "10-15 min"
+      require_tests: false
+    agents:
+      overrides:
+        code-reviewer:
+          enabled: false
+    ```
+  </Accordion>
+
+  <Accordion title="Production Critical">
+    ```yaml
+    models:
+      default: "claude-opus"
+    sprint:
+      require_tests: true
+    agents:
+      overrides:
+        security-auditor:
+          enabled: true
+          scan_on_commit: true
+        tester:
+          coverage_target: 90
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Agents Overview"
+    icon="robot"
+    href="/agents/overview"
+  >
+    Learn about all 23 agents.
+  </Card>
+  <Card
+    title="Modes Overview"
+    icon="sliders"
+    href="/modes/overview"
+  >
+    Explore 9 behavioral modes.
+  </Card>
+</CardGroup>

@@ -1,0 +1,181 @@
+---
+title: FAQ
+description: 'Frequently asked questions about OMGKIT'
+---
+
+## General
+
+<AccordionGroup>
+  <Accordion title="What is OMGKIT?">
+    OMGKIT (Omega-Level Development Kit) is a plugin for Claude Code that transforms it into an autonomous AI development team. It includes 23 specialized agents, 54 commands, 43 skills, and 9 behavioral modes.
+  </Accordion>
+
+  <Accordion title="Is OMGKIT free?">
+    Yes, OMGKIT is open source and free to use under the MIT license. You need a Claude Code subscription to use it.
+  </Accordion>
+
+  <Accordion title="What's the difference between OMGKIT and vanilla Claude Code?">
+    Claude Code is a powerful AI coding assistant. OMGKIT adds:
+    - **Specialized agents** instead of one general AI
+    - **Sprint management** for organized development
+    - **Omega thinking** for 10x-1000x solutions
+    - **Modes** for different development contexts
+    - **Skills** for deep domain expertise
+  </Accordion>
+
+  <Accordion title="Does OMGKIT work with other AI assistants?">
+    Currently, OMGKIT is designed specifically for Claude Code. Support for other AI assistants may be added in the future.
+  </Accordion>
+</AccordionGroup>
+
+## Installation
+
+<AccordionGroup>
+  <Accordion title="What are the requirements?">
+    - Node.js 18 or higher
+    - Claude Code installed and working
+    - npm, yarn, or pnpm
+  </Accordion>
+
+  <Accordion title="Where is the plugin installed?">
+    The plugin is installed to `~/.claude/plugins/omgkit/`. Your project-specific configuration goes in `.omgkit/` within your project.
+  </Accordion>
+
+  <Accordion title="How do I update OMGKIT?">
+    ```bash
+    npm update -g omgkit
+    omgkit install  # Reinstall plugin
+    ```
+  </Accordion>
+
+  <Accordion title="How do I uninstall OMGKIT?">
+    ```bash
+    omgkit uninstall  # Remove plugin
+    npm uninstall -g omgkit  # Remove CLI
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Usage
+
+<AccordionGroup>
+  <Accordion title="How do I start using OMGKIT?">
+    1. Install: `npm install -g omgkit`
+    2. Install plugin: `omgkit install`
+    3. Initialize project: `cd your-project && omgkit init`
+    4. Start using commands: `/feature "add login"`
+  </Accordion>
+
+  <Accordion title="What's the difference between /feature and /fix?">
+    - `/feature` is for building new functionality. It uses the full workflow: plan → implement → test → review → commit.
+    - `/fix` is for debugging and fixing bugs. It focuses on finding and resolving issues.
+  </Accordion>
+
+  <Accordion title="When should I use sprint management vs. single commands?">
+    - **Single commands** (`/feature`, `/fix`): Quick, one-off tasks
+    - **Sprint management** (`/sprint:new`, `/team:run`): Larger projects with multiple features, when you want organized development
+  </Accordion>
+
+  <Accordion title="What does /team:run --mode=full-auto actually do?">
+    In full-auto mode, the AI team works autonomously:
+    1. Sprint Master picks up the next task
+    2. Assigns to appropriate agent(s)
+    3. Agent completes the task
+    4. Results are reviewed and committed
+    5. Moves to next task
+    6. Repeats until sprint is complete
+  </Accordion>
+</AccordionGroup>
+
+## Agents
+
+<AccordionGroup>
+  <Accordion title="Can I create custom agents?">
+    Not yet, but this is planned for a future release. Currently, you can customize existing agents through configuration.
+  </Accordion>
+
+  <Accordion title="How do I invoke a specific agent?">
+    Use the `@` prefix:
+    ```bash
+    @planner "plan the checkout flow"
+    @tester "write tests for UserService"
+    ```
+  </Accordion>
+
+  <Accordion title="Can agents work in parallel?">
+    Yes, in `/team:run` mode, independent tasks can be executed by different agents in parallel. The Sprint Master coordinates this.
+  </Accordion>
+</AccordionGroup>
+
+## Omega
+
+<AccordionGroup>
+  <Accordion title="What is Omega thinking?">
+    Omega thinking is a mental framework that pushes you to think beyond incremental improvements. Instead of 10% better, aim for 10x, 100x, or even 1000x better.
+  </Accordion>
+
+  <Accordion title="What are the 7 Omega Principles?">
+    1. Leverage Multiplication - Build systems, not features
+    2. Transcendent Abstraction - Solve classes, not instances
+    3. Agentic Decomposition - Orchestrate specialists
+    4. Feedback Acceleration - Compress feedback loops
+    5. Zero-Marginal-Cost Scaling - Build once, scale infinitely
+    6. Emergent Intelligence - System greater than parts
+    7. Aesthetic Perfection - Excellence in everything
+  </Accordion>
+
+  <Accordion title="How do I use /10x, /100x, /1000x?">
+    These commands invoke the Oracle agent to analyze a topic through the lens of Omega thinking:
+    ```bash
+    /10x "our deployment process"    # Find 10x improvements
+    /100x "our testing strategy"     # Find paradigm shifts
+    /1000x "our entire product"      # Moonshot thinking
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Commands not working in Claude Code">
+    1. Run `omgkit doctor` to check installation
+    2. Restart Claude Code
+    3. Verify plugin exists at `~/.claude/plugins/omgkit/`
+    4. Re-run `omgkit install`
+  </Accordion>
+
+  <Accordion title="'omgkit' command not found">
+    Add npm global bin to your PATH:
+    ```bash
+    export PATH="$PATH:$(npm config get prefix)/bin"
+    ```
+    Add this to your `~/.bashrc` or `~/.zshrc`.
+  </Accordion>
+
+  <Accordion title="Agents not handoff correctly">
+    Check your `.omgkit/config.yaml`:
+    ```yaml
+    agents:
+      auto_handoff: true
+    ```
+    If still not working, try `/mode orchestration` for explicit coordination.
+  </Accordion>
+
+  <Accordion title="Tests failing in CI but passing locally">
+    Ensure your CI environment matches local:
+    - Same Node.js version
+    - Same dependencies (`npm ci` not `npm install`)
+    - Same environment variables
+  </Accordion>
+</AccordionGroup>
+
+## Still have questions?
+
+<CardGroup cols={2}>
+  <Card title="GitHub Discussions" icon="github" href="https://github.com/doanchienthangdev/omgkit/discussions">
+    Ask the community
+  </Card>
+  <Card title="Report an Issue" icon="bug" href="https://github.com/doanchienthangdev/omgkit/issues">
+    Found a bug? Report it
+  </Card>
+</CardGroup>

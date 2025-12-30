@@ -1,0 +1,60 @@
+---
+title: "frontend-design"
+description: "Frontend design patterns. Use for component architecture, state management."
+---
+
+
+# Frontend Design Skill
+
+## Component Patterns
+
+### Compound Components
+```tsx
+<Select>
+  <SelectTrigger>Select option</SelectTrigger>
+  <SelectContent>
+    <SelectItem value="1">Option 1</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+### Render Props
+```tsx
+<DataFetcher url="/api/users">
+  {({ data, loading }) => loading ? <Spinner /> : <UserList users={data} />}
+</DataFetcher>
+```
+
+### Custom Hooks
+```tsx
+function useLocalStorage<T>(key: string, initial: T) {
+  const [value, setValue] = useState<T>(() => {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : initial;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [key, value]);
+
+  return [value, setValue] as const;
+}
+```
+
+## Best Practices
+- Single responsibility components
+- Lift state appropriately
+- Colocate related code
+- Use composition over inheritance
+
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="frontend" icon="folder" href="/skills/overview#frontend">
+    More frontend skills
+  </Card>
+</CardGroup>

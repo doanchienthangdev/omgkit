@@ -1,0 +1,83 @@
+---
+title: "spring"
+description: "Spring Boot development. Use for Spring projects, REST APIs, JPA."
+---
+
+
+# Spring Boot Skill
+
+## Patterns
+
+### Controller
+```java
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+    @Autowired
+    private UserService userService;
+
+    @GetMapping
+    public List<User> findAll() {
+        return userService.findAll();
+    }
+
+    @PostMapping
+    public ResponseEntity<User> create(@RequestBody CreateUserDto dto) {
+        User user = userService.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+}
+```
+
+### Service
+```java
+@Service
+public class UserService {
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+}
+```
+
+### Repository
+```java
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+}
+```
+
+### Entity
+```java
+@Entity
+@Table(name = "users")
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true)
+    private String email;
+}
+```
+
+## Best Practices
+- Use constructor injection
+- Use DTOs for API contracts
+- Use @Transactional for writes
+- Use Spring Security
+
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="frameworks" icon="folder" href="/skills/overview#frameworks">
+    More frameworks skills
+  </Card>
+</CardGroup>

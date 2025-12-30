@@ -1,0 +1,30 @@
+<svg width="800" height="400" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradientDark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E1B4B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#312E81;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="400" fill="url(#bgGradientDark)"/>
+
+  <!-- Central Omega -->
+  <circle cx="400" cy="180" r="60" stroke="#A78BFA" stroke-width="6" fill="none"/>
+  <path d="M360 240 L380 180 L420 180 L440 240" stroke="#A78BFA" stroke-width="6" fill="none"/>
+
+  <!-- Orbiting elements - Agents -->
+  <circle cx="280" cy="120" r="20" fill="#7C3AED" opacity="0.8"/>
+  <circle cx="520" cy="120" r="20" fill="#7C3AED" opacity="0.8"/>
+  <circle cx="240" cy="220" r="15" fill="#8B5CF6" opacity="0.6"/>
+  <circle cx="560" cy="220" r="15" fill="#8B5CF6" opacity="0.6"/>
+  <circle cx="300" cy="280" r="18" fill="#A78BFA" opacity="0.7"/>
+  <circle cx="500" cy="280" r="18" fill="#A78BFA" opacity="0.7"/>
+
+  <!-- Title -->
+  <text x="400" y="340" text-anchor="middle" font-family="system-ui, sans-serif" font-size="28" font-weight="700" fill="#E9D5FF">
+    Omega-Level Development Kit
+  </text>
+  <text x="400" y="370" text-anchor="middle" font-family="system-ui, sans-serif" font-size="16" fill="#C4B5FD">
+    23 Agents • 54 Commands • 43 Skills • 9 Modes
+  </text>
+</svg>

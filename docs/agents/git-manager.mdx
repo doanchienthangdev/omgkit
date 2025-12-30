@@ -1,0 +1,74 @@
+---
+title: "git-manager"
+description: "Git operations, commits, PRs, branch management. Handles all version control. Use for git operations."
+---
+
+<Info>
+  **Tools:** Bash, Read
+
+  **Model:** inherit
+</Info>
+
+
+# 🔀 Git Manager Agent
+
+You handle version control.
+
+## Commit Format
+```
+<type>(<scope>): <subject>
+
+<body>
+```
+
+Types: feat, fix, docs, style, refactor, test, chore
+
+## Branch Naming
+```
+feat/feature-name
+fix/bug-description
+```
+
+## Commands
+```bash
+git add -A
+git commit -m "type(scope): message"
+git push origin branch
+gh pr create --title "Title" --body "Description"
+```
+
+## PR Template
+```markdown
+## Summary
+[Changes made]
+
+## Test Plan
+- [ ] Unit tests pass
+- [ ] Manual testing done
+
+## Checklist
+- [ ] Code reviewed
+- [ ] Tests added
+- [ ] Docs updated
+```
+
+
+## Usage
+
+```bash
+# Direct invocation
+@git-manager "your task here"
+
+# Or use related commands
+```
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="All Agents" icon="robot" href="/agents/overview">
+    See all 23 agents
+  </Card>
+  <Card title="AI Team" icon="users" href="/concepts/ai-team">
+    How agents collaborate
+  </Card>
+</CardGroup>

@@ -1,0 +1,155 @@
+---
+title: Installation
+description: 'Install OMGKIT in 2 minutes'
+---
+
+## Prerequisites
+
+<Check>
+  **Node.js 18+** - [Download Node.js](https://nodejs.org/)
+</Check>
+
+<Check>
+  **Claude Code** - [Install Claude Code](https://claude.com/claude-code)
+</Check>
+
+## Step 1: Install OMGKIT
+
+<CodeGroup>
+
+```bash npm
+npm install -g omgkit
+```
+
+```bash yarn
+yarn global add omgkit
+```
+
+```bash pnpm
+pnpm add -g omgkit
+```
+
+</CodeGroup>
+
+Verify the installation:
+
+```bash
+omgkit --version
+```
+
+## Step 2: Install Claude Code Plugin
+
+```bash
+omgkit install
+```
+
+This installs the OMGKIT plugin to Claude Code, adding:
+- 23 specialized agents
+- 54 slash commands
+- 43 domain skills
+- 9 behavioral modes
+
+<Note>
+  The plugin is installed to `~/.claude/plugins/omgkit/`
+</Note>
+
+## Step 3: Initialize Your Project
+
+Navigate to your project and initialize OMGKIT:
+
+```bash
+cd your-project
+omgkit init
+```
+
+This creates the `.omgkit/` directory with:
+
+```
+.omgkit/
+├── config.yaml      # Project settings
+├── settings.json    # Permissions
+├── sprints/
+│   ├── vision.yaml  # Product vision
+│   └── backlog.yaml # Task backlog
+├── plans/           # Generated plans
+├── docs/            # Generated docs
+└── logs/            # Activity logs
+```
+
+## Step 4: Verify Installation
+
+Run the doctor command to verify everything is working:
+
+```bash
+omgkit doctor
+```
+
+<Accordion title="Expected Output">
+```
+OMGKIT Doctor
+==========================
+Plugin Status: Installed
+Plugin Path: ~/.claude/plugins/omgkit
+Project Initialized: Yes
+Config Valid: Yes
+
+Components:
+  Agents: 23 loaded
+  Commands: 54 loaded
+  Skills: 43 loaded
+  Modes: 9 loaded
+
+All systems operational!
+```
+</Accordion>
+
+## What's Next?
+
+<CardGroup cols={2}>
+  <Card
+    title="Quick Start"
+    icon="play"
+    href="/getting-started/quickstart"
+  >
+    Build your first feature with OMGKIT.
+  </Card>
+  <Card
+    title="Configuration"
+    icon="gear"
+    href="/getting-started/configuration"
+  >
+    Customize OMGKIT for your project.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found: omgkit">
+    Make sure npm global bin is in your PATH:
+    ```bash
+    export PATH="$PATH:$(npm config get prefix)/bin"
+    ```
+  </Accordion>
+
+  <Accordion title="Permission denied errors">
+    Try installing without sudo using a Node version manager:
+    ```bash
+    # Install nvm
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+
+    # Install and use Node
+    nvm install 20
+    nvm use 20
+
+    # Now install omgkit
+    npm install -g omgkit
+    ```
+  </Accordion>
+
+  <Accordion title="Plugin not loading in Claude Code">
+    1. Restart Claude Code
+    2. Run `omgkit doctor` to verify installation
+    3. Check `~/.claude/plugins/` for the omgkit folder
+  </Accordion>
+</AccordionGroup>

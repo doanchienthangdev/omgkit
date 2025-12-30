@@ -1,0 +1,249 @@
+---
+title: Contributing
+description: 'How to contribute to OMGKIT'
+---
+
+Thank you for your interest in contributing to OMGKIT!
+
+## Ways to Contribute
+
+<CardGroup cols={2}>
+  <Card title="Report Bugs" icon="bug">
+    Found a bug? [Open an issue](https://github.com/doanchienthangdev/omgkit/issues/new?template=bug_report.md)
+  </Card>
+  <Card title="Suggest Features" icon="lightbulb">
+    Have an idea? [Start a discussion](https://github.com/doanchienthangdev/omgkit/discussions/new?category=ideas)
+  </Card>
+  <Card title="Improve Docs" icon="book">
+    Found a typo or unclear section? Submit a PR!
+  </Card>
+  <Card title="Write Code" icon="code">
+    Pick up an issue and submit a PR
+  </Card>
+</CardGroup>
+
+## Development Setup
+
+### Prerequisites
+
+- Node.js 18+
+- Git
+- Claude Code (for testing)
+
+### Clone and Install
+
+```bash
+# Clone the repository
+git clone https://github.com/doanchienthangdev/omgkit.git
+cd omgkit
+
+# Install dependencies
+npm install
+
+# Link for local development
+npm link
+```
+
+### Run Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run specific test suites
+npm run test:unit
+npm run test:validation
+npm run test:integration
+
+# Run with coverage
+npm run test:coverage
+```
+
+### Test Your Changes
+
+```bash
+# Install plugin from local source
+omgkit install
+
+# Verify
+omgkit doctor
+
+# Try in a test project
+cd /tmp/test-project
+omgkit init
+```
+
+## Project Structure
+
+```
+omgkit/
+├── bin/              # CLI entry point
+├── lib/              # Core library
+├── plugin/           # Claude Code plugin
+│   ├── agents/       # 23 agents
+│   ├── commands/     # 54 commands
+│   ├── skills/       # 43 skills
+│   └── modes/        # 9 modes
+├── templates/        # Project templates
+├── tests/            # Test suites
+├── docs/             # Documentation (Mintlify)
+└── scripts/          # Build scripts
+```
+
+## Pull Request Process
+
+<Steps>
+  <Step title="Fork & Branch">
+    Fork the repository and create a feature branch:
+    ```bash
+    git checkout -b feature/my-feature
+    ```
+  </Step>
+
+  <Step title="Make Changes">
+    Write your code, following existing patterns and style.
+  </Step>
+
+  <Step title="Add Tests">
+    Add tests for any new functionality.
+  </Step>
+
+  <Step title="Run Tests">
+    Ensure all tests pass:
+    ```bash
+    npm test
+    ```
+  </Step>
+
+  <Step title="Commit">
+    Use conventional commits:
+    ```bash
+    git commit -m "feat: add new feature"
+    git commit -m "fix: resolve bug"
+    git commit -m "docs: update documentation"
+    ```
+  </Step>
+
+  <Step title="Push & PR">
+    Push your branch and create a pull request.
+  </Step>
+</Steps>
+
+## Commit Convention
+
+We use [Conventional Commits](https://www.conventionalcommits.org/):
+
+| Type | Description |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation changes |
+| `style` | Code style (formatting, etc.) |
+| `refactor` | Code refactoring |
+| `test` | Adding/updating tests |
+| `chore` | Maintenance tasks |
+
+Examples:
+```bash
+feat: add new brainstorm command
+fix: resolve agent handoff issue
+docs: update installation guide
+chore: update dependencies
+```
+
+## Code Style
+
+- ES Modules (`import`/`export`)
+- 2-space indentation
+- Single quotes for strings
+- No semicolons
+- Descriptive variable names
+- JSDoc comments for public functions
+
+## Adding New Components
+
+### New Agent
+
+1. Create `plugin/agents/my-agent.md`:
+   ```yaml
+   ---
+   name: my-agent
+   description: What it does
+   tools: Read, Write, Bash
+   model: inherit
+   ---
+
+   # My Agent
+
+   Instructions for the agent...
+   ```
+
+2. Add tests in `tests/validation/plugins.test.js`
+
+3. Update documentation
+
+### New Command
+
+1. Create `plugin/commands/<category>/my-command.md`:
+   ```yaml
+   ---
+   description: What it does
+   allowed-tools: Task, Read, Write
+   argument-hint: <description>
+   ---
+
+   # My Command
+
+   Instructions...
+   ```
+
+2. Add tests
+
+3. Update documentation
+
+### New Skill
+
+1. Create `plugin/skills/<category>/my-skill/SKILL.md`:
+   ```yaml
+   ---
+   name: my-skill
+   description: Expertise area
+   ---
+
+   # My Skill
+
+   Best practices and patterns...
+   ```
+
+2. Add tests
+
+3. Update documentation
+
+## Release Process
+
+Releases are automated via GitHub Actions:
+
+1. **Version Bump**: Go to Actions → Version Bump → Run
+2. **Tests**: Automatically run on tag push
+3. **Publish**: Automatically publish to npm
+4. **Release**: Automatically create GitHub Release
+
+See [CONTRIBUTING.md](https://github.com/doanchienthangdev/omgkit/blob/main/CONTRIBUTING.md) for detailed release instructions.
+
+## Getting Help
+
+<CardGroup cols={2}>
+  <Card title="Discussions" icon="comments" href="https://github.com/doanchienthangdev/omgkit/discussions">
+    Ask questions and discuss
+  </Card>
+  <Card title="Issues" icon="circle-exclamation" href="https://github.com/doanchienthangdev/omgkit/issues">
+    Report bugs and track progress
+  </Card>
+</CardGroup>
+
+---
+
+*Think Omega. Build Omega. Be Omega.*

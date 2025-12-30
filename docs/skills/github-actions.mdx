@@ -1,0 +1,76 @@
+---
+title: "github-actions"
+description: "GitHub Actions CI/CD. Use for workflows, automation, deployments."
+---
+
+
+# GitHub Actions Skill
+
+## CI Workflow
+```yaml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+```
+
+## Deploy Workflow
+```yaml
+deploy:
+  needs: test
+  if: github.ref == 'refs/heads/main'
+  runs-on: ubuntu-latest
+
+  steps:
+    - uses: actions/checkout@v4
+    - run: npm ci && npm run build
+    - uses: some/deploy-action@v1
+      with:
+        token: ${{ secrets.DEPLOY_TOKEN }}
+```
+
+## Matrix Build
+```yaml
+strategy:
+  matrix:
+    node: [18, 20, 22]
+    os: [ubuntu-latest, macos-latest]
+```
+
+## Best Practices
+- Cache dependencies
+- Use matrix for multiple versions
+- Use secrets for sensitive data
+- Add status badges
+
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="devops" icon="folder" href="/skills/overview#devops">
+    More devops skills
+  </Card>
+</CardGroup>

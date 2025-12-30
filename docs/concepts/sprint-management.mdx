@@ -1,0 +1,351 @@
+---
+title: Sprint Management
+description: 'Agile development with AI team autonomy'
+icon: 'calendar'
+---
+
+## Overview
+
+OMGKIT brings agile sprint management to AI-assisted development. Set a vision, create sprints, and let your AI team work autonomously.
+
+<img
+  src="/images/sprint-workflow.svg"
+  alt="Sprint Workflow"
+/>
+
+## The Sprint Lifecycle
+
+<Steps>
+  <Step title="Vision">
+    Define your product vision - what are you building and why?
+  </Step>
+  <Step title="Backlog">
+    Create a prioritized list of tasks and features.
+  </Step>
+  <Step title="Sprint Planning">
+    Select tasks for the upcoming sprint.
+  </Step>
+  <Step title="Execution">
+    AI team works on tasks autonomously or with guidance.
+  </Step>
+  <Step title="Retrospective">
+    Review what worked, what didn't, and improve.
+  </Step>
+</Steps>
+
+## Setting Your Vision
+
+The vision is the north star for your AI team. It guides all decisions.
+
+```bash
+/vision:set
+```
+
+Claude will ask you questions:
+- What are you building?
+- Who are your target users?
+- What's the core value proposition?
+- What does success look like?
+
+This creates `vision.yaml`:
+
+```yaml
+vision:
+  product: "Task Management App"
+  tagline: "Simple task tracking for busy professionals"
+
+  target_users:
+    primary: "Busy professionals"
+    secondary: "Small teams"
+
+  core_value:
+    - "Speed - add tasks in seconds"
+    - "Simplicity - no learning curve"
+    - "Focus - see only what matters"
+
+  success_metrics:
+    - "Users complete 80% of daily tasks"
+    - "Average session under 2 minutes"
+    - "NPS score above 50"
+
+  constraints:
+    - "Mobile-first design"
+    - "Works offline"
+    - "No account required to start"
+```
+
+View your vision:
+
+```bash
+/vision:show
+```
+
+## Managing the Backlog
+
+Add items to your backlog:
+
+```bash
+/backlog:add "User authentication with social login"
+/backlog:add "Dark mode support"
+/backlog:add "Export tasks to CSV"
+```
+
+View the backlog:
+
+```bash
+/backlog:show
+```
+
+```
+Product Backlog (12 items)
+==========================
+
+Priority | Task                              | Size  | Value
+---------|-----------------------------------|-------|------
+   1     | User authentication               | L     | High
+   2     | Task CRUD operations              | M     | High
+   3     | Task list UI                      | M     | High
+   4     | Due date reminders                | S     | Medium
+   5     | Dark mode support                 | S     | Medium
+   ...
+```
+
+AI-assisted prioritization:
+
+```bash
+/backlog:prioritize
+```
+
+The Oracle agent analyzes your vision and suggests optimal ordering.
+
+## Creating Sprints
+
+Create a new sprint:
+
+```bash
+/sprint:new "MVP Sprint"
+```
+
+Let AI propose tasks based on vision and backlog:
+
+```bash
+/sprint:new "MVP Sprint" --propose
+```
+
+```
+Sprint: MVP Sprint
+Duration: 2 weeks
+Start: 2024-01-15
+End: 2024-01-29
+
+Proposed Tasks:
+━━━━━━━━━━━━━━━
+1. [ ] User authentication (email/password)
+   - Agents: planner → fullstack-developer → tester
+   - Estimated: 15 tasks (30-75 min total)
+
+2. [ ] Task CRUD operations
+   - Agents: api-designer → fullstack-developer → tester
+   - Estimated: 12 tasks (24-60 min total)
+
+3. [ ] Task list UI with filtering
+   - Agents: ui-ux-designer → fullstack-developer → tester
+   - Estimated: 10 tasks (20-50 min total)
+
+Total: 37 tasks across 3 features
+
+Accept? (yes/no/modify)
+```
+
+## Running the Sprint
+
+Start the sprint:
+
+```bash
+/sprint:start
+```
+
+### Execution Modes
+
+<Tabs>
+  <Tab title="Full Auto">
+    ```bash
+    /team:run --mode=full-auto
+    ```
+
+    The AI team works completely autonomously:
+    - Picks up next task
+    - Plans implementation
+    - Writes code
+    - Runs tests
+    - Creates commits
+    - Moves to next task
+
+    **Best for**: Routine work, well-defined tasks, trusted codebase.
+  </Tab>
+
+  <Tab title="Semi Auto">
+    ```bash
+    /team:run --mode=semi-auto
+    ```
+
+    AI proposes each action, you approve:
+    - "I'm about to create auth middleware. Proceed?"
+    - "Tests passing. Ready to commit. Approve?"
+
+    **Best for**: Learning, important features, reviewing AI decisions.
+  </Tab>
+
+  <Tab title="Manual">
+    ```bash
+    /team:run --mode=manual
+    ```
+
+    You direct each action:
+    - "Work on task 1"
+    - "Now write tests"
+    - "Create commit"
+
+    **Best for**: Complex decisions, teaching the AI your patterns.
+  </Tab>
+</Tabs>
+
+## Monitoring Progress
+
+Check current sprint status:
+
+```bash
+/sprint:current
+```
+
+```
+Sprint: MVP Sprint
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Progress: 23/37 tasks (62%)
+[████████████████░░░░░░░░░░] 62%
+
+Time: Day 5 of 14 (35% elapsed)
+Velocity: Ahead of schedule
+
+Completed Features:
+  ✓ User authentication
+  ✓ Task CRUD operations
+
+In Progress:
+  → Task list UI (7/10 tasks done)
+    Currently: fullstack-developer implementing filters
+
+Blocked:
+  (none)
+
+Team Activity:
+  planner: idle
+  fullstack-developer: active (filters component)
+  tester: waiting (for filters completion)
+  code-reviewer: idle
+```
+
+Check team status:
+
+```bash
+/team:status
+```
+
+Ask the team about progress:
+
+```bash
+/team:ask "what's blocking the filters feature?"
+```
+
+## Ending the Sprint
+
+Complete the sprint:
+
+```bash
+/sprint:end
+```
+
+This generates a retrospective:
+
+```
+Sprint Retrospective: MVP Sprint
+================================
+
+Summary:
+  Planned: 37 tasks
+  Completed: 35 tasks (95%)
+  Rolled over: 2 tasks
+
+Velocity:
+  Average: 7 tasks/day
+  Peak: 12 tasks (Day 3)
+
+What Went Well:
+  - Authentication completed ahead of schedule
+  - Test coverage reached 87%
+  - Zero production bugs
+
+What Didn't:
+  - UI polish tasks underestimated
+  - Needed more design input upfront
+
+Recommendations for Next Sprint:
+  1. Involve ui-ux-designer earlier
+  2. Add buffer for UI polish
+  3. Consider reducing sprint scope by 10%
+
+Carry Over to Next Sprint:
+  - [ ] Dark mode support
+  - [ ] Mobile responsive fixes
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Keep Tasks Small" icon="scissors">
+    Break tasks into 2-5 minute units. This enables:
+    - Faster feedback
+    - Better progress tracking
+    - Easier course correction
+  </Accordion>
+
+  <Accordion title="Vision-Driven Development" icon="compass">
+    Reference your vision in every decision. Ask:
+    - Does this align with our core value?
+    - Does this serve our target users?
+    - Does this move our metrics?
+  </Accordion>
+
+  <Accordion title="Regular Check-ins" icon="clock">
+    Even in full-auto mode, check progress:
+    - `/sprint:current` at start of day
+    - `/team:status` when curious
+    - `/team:ask` if something seems off
+  </Accordion>
+
+  <Accordion title="Iterate on Process" icon="arrows-rotate">
+    Use retrospectives to improve:
+    - Adjust task sizing
+    - Change team mode
+    - Refine agent configurations
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="AI Team"
+    icon="users"
+    href="/concepts/ai-team"
+  >
+    Learn how agents collaborate.
+  </Card>
+  <Card
+    title="Agents Reference"
+    icon="robot"
+    href="/agents/overview"
+  >
+    Explore all 23 agents.
+  </Card>
+</CardGroup>

@@ -1,0 +1,64 @@
+---
+title: "aws"
+description: "AWS services. Use for Lambda, S3, RDS, ECS, and other AWS services."
+---
+
+
+# AWS Skill
+
+## Common Services
+
+### Lambda
+```typescript
+export const handler = async (event: APIGatewayEvent) => {
+  const body = JSON.parse(event.body || '{}');
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ message: 'Success' }),
+  };
+};
+```
+
+### S3
+```typescript
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+const s3 = new S3Client({ region: 'us-east-1' });
+
+await s3.send(new PutObjectCommand({
+  Bucket: 'my-bucket',
+  Key: 'file.txt',
+  Body: 'content',
+}));
+```
+
+### DynamoDB
+```typescript
+import { DynamoDBClient, PutItemCommand } from '@aws-sdk/client-dynamodb';
+
+const client = new DynamoDBClient({});
+
+await client.send(new PutItemCommand({
+  TableName: 'users',
+  Item: { id: { S: '123' }, email: { S: 'test@example.com' } },
+}));
+```
+
+## Best Practices
+- Use IAM roles
+- Enable encryption
+- Use VPC for security
+- Monitor with CloudWatch
+
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="devops" icon="folder" href="/skills/overview#devops">
+    More devops skills
+  </Card>
+</CardGroup>
