@@ -902,7 +902,12 @@ const SKILL_CATEGORIES = {
   languages: { icon: 'code', description: 'Programming language expertise' },
   frameworks: { icon: 'layer-group', description: 'Framework-specific patterns and best practices' },
   databases: { icon: 'database', description: 'Database design and optimization' },
-  frontend: { icon: 'palette', description: 'Frontend tooling and styling' }
+  frontend: { icon: 'palette', description: 'Frontend tooling, styling, and UI patterns' },
+  devops: { icon: 'server', description: 'Infrastructure, containers, and CI/CD' },
+  security: { icon: 'shield-halved', description: 'Security best practices and authentication' },
+  testing: { icon: 'flask-vial', description: 'Testing frameworks and strategies' },
+  methodology: { icon: 'diagram-project', description: 'Development methodologies and workflows' },
+  omega: { icon: 'wand-magic-sparkles', description: 'Omega-level development practices' }
 };
 
 /**
@@ -1016,11 +1021,11 @@ OMGKIT detects and activates this skill when it finds:
     skillsByCategory[skill.category].push(skill);
   }
 
-  const categoryOrder = ['languages', 'frameworks', 'databases', 'frontend'];
+  const categoryOrder = ['languages', 'frameworks', 'databases', 'frontend', 'devops', 'security', 'testing', 'methodology', 'omega'];
 
   const overviewDoc = `---
 title: "Skills Overview"
-description: "43 domain expertise modules for languages, frameworks, and tools"
+description: "${allSkills.length} domain expertise modules for languages, frameworks, and tools"
 icon: "brain"
 ---
 
@@ -1029,10 +1034,10 @@ Skills provide **deep domain expertise** that agents use when working with speci
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="43" icon="brain">
+  <Card title="${allSkills.length}" icon="brain">
     Total Skills
   </Card>
-  <Card title="4" icon="folder">
+  <Card title="${Object.keys(skillsByCategory).length}" icon="folder">
     Categories
   </Card>
   <Card title="Auto" icon="wand-magic-sparkles">

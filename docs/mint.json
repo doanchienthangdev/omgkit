@@ -253,9 +253,14 @@
       ]
     },
     {
+      "group": "Skills Overview",
+      "pages": [
+        "skills/overview"
+      ]
+    },
+    {
       "group": "Languages",
       "pages": [
-        "skills/all",
         "skills/python",
         "skills/typescript",
         "skills/javascript"
@@ -289,7 +294,65 @@
       "group": "Frontend",
       "pages": [
         "skills/tailwindcss",
-        "skills/shadcn-ui"
+        "skills/shadcn-ui",
+        "skills/frontend-design",
+        "skills/responsive",
+        "skills/accessibility",
+        "skills/threejs"
+      ]
+    },
+    {
+      "group": "DevOps",
+      "pages": [
+        "skills/docker",
+        "skills/kubernetes",
+        "skills/github-actions",
+        "skills/aws"
+      ]
+    },
+    {
+      "group": "Security",
+      "pages": [
+        "skills/owasp",
+        "skills/better-auth",
+        "skills/oauth"
+      ]
+    },
+    {
+      "group": "Testing",
+      "pages": [
+        "skills/pytest",
+        "skills/vitest",
+        "skills/playwright"
+      ]
+    },
+    {
+      "group": "Methodology",
+      "pages": [
+        "skills/brainstorming",
+        "skills/writing-plans",
+        "skills/executing-plans",
+        "skills/test-driven-development",
+        "skills/verification-before-completion",
+        "skills/testing-anti-patterns",
+        "skills/systematic-debugging",
+        "skills/root-cause-tracing",
+        "skills/defense-in-depth",
+        "skills/dispatching-parallel-agents",
+        "skills/requesting-code-review",
+        "skills/receiving-code-review",
+        "skills/finishing-development-branch",
+        "skills/token-optimization"
+      ]
+    },
+    {
+      "group": "Omega Skills",
+      "pages": [
+        "skills/omega-coding",
+        "skills/omega-thinking",
+        "skills/omega-testing",
+        "skills/omega-architecture",
+        "skills/omega-sprint"
       ]
     }
   ],
