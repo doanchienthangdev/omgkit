@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { existsSync, mkdirSync, rmSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -19,7 +19,8 @@ import {
   uninstallPlugin,
   getPluginDir,
   isPluginInstalled,
-  isProjectInitialized
+  isProjectInitialized,
+  countFiles
 } from '../../lib/cli.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -230,26 +231,7 @@ describe('Integration: Plugin Content Validation', () => {
     const sourceAgents = join(PACKAGE_ROOT, 'plugin/agents');
     const installedAgents = join(getPluginDir(TEST_HOME), 'agents');
 
-    // Count files in both
-    const countDir = (dir) => {
-      let count = 0;
-      const walk = (d) => {
-        const items = require('fs').readdirSync(d);
-        items.forEach(item => {
-          const path = join(d, item);
-          if (require('fs').statSync(path).isDirectory()) {
-            walk(path);
-          } else if (item.endsWith('.md')) {
-            count++;
-          }
-        });
-      };
-      walk(dir);
-      return count;
-    };
-
-    // Using our countFiles function
-    const { countFiles } = require('../../lib/cli.js');
+    // Using our countFiles function (imported at top)
     expect(countFiles(installedAgents)).toBe(countFiles(sourceAgents));
   });
 
