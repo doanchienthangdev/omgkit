@@ -363,5 +363,11 @@
     "thumbsRating": true,
     "suggestEdit": true,
     "raiseIssue": true
-  }
+  },
+  "redirects": [
+    {
+      "source": "/skills/all",
+      "destination": "/skills/overview"
+    }
+  ]
 }
