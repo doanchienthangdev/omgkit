@@ -27,9 +27,12 @@ jobs:
         run: npm test
 
   publish-npm:
-    name: Publish to npm
+    name: Publish to npm (OIDC)
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for OIDC trusted publishing
 
     steps:
       - name: Checkout repository
@@ -52,10 +55,9 @@ jobs:
       - name: Update package.json version
         run: npm version ${{ steps.version.outputs.VERSION }} --no-git-tag-version
 
-      - name: Publish to npm
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm with provenance
+        run: npm publish --access public --provenance
+        # No NODE_AUTH_TOKEN needed - uses OIDC!
 
   create-release:
     name: Create GitHub Release
