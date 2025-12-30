@@ -1,6 +1,6 @@
 ---
 title: "Skills Overview"
-description: "52 domain expertise modules for languages, frameworks, and tools"
+description: "72 domain expertise modules for languages, frameworks, backend, tools, and more"
 icon: "brain"
 ---
 
@@ -9,10 +9,10 @@ Skills provide **deep domain expertise** that agents use when working with speci
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="52" icon="brain">
+  <Card title="72" icon="brain">
     Total Skills
   </Card>
-  <Card title="9" icon="folder">
+  <Card title="13" icon="folder">
     Categories
   </Card>
   <Card title="Auto" icon="wand-magic-sparkles">
@@ -32,23 +32,35 @@ Skills provide **deep domain expertise** that agents use when working with speci
   <Card title="Frameworks" icon="layer-group" href="#frameworks">
     **10 skills** - Framework-specific patterns and best practices
   </Card>
+  <Card title="Backend" icon="server" href="#backend">
+    **4 skills** - API design, caching, real-time, event-driven
+  </Card>
   <Card title="Databases" icon="database" href="#databases">
-    **4 skills** - Database design and optimization
+    **5 skills** - Database design and optimization
   </Card>
   <Card title="Frontend" icon="palette" href="#frontend">
-    **6 skills** - Frontend tooling, styling, and UI patterns
+    **7 skills** - Frontend tooling, styling, and UI patterns
   </Card>
-  <Card title="Devops" icon="server" href="#devops">
-    **4 skills** - Infrastructure, containers, and CI/CD
+  <Card title="Mobile" icon="mobile" href="#mobile">
+    **1 skill** - Cross-platform mobile development
+  </Card>
+  <Card title="DevOps" icon="cloud" href="#devops">
+    **7 skills** - Infrastructure, containers, observability
   </Card>
   <Card title="Security" icon="shield-halved" href="#security">
-    **3 skills** - Security best practices and authentication
+    **4 skills** - Security best practices and hardening
   </Card>
   <Card title="Testing" icon="flask-vial" href="#testing">
     **3 skills** - Testing frameworks and strategies
   </Card>
+  <Card title="Tools" icon="wrench" href="#tools">
+    **4 skills** - Document, image, media, MCP processing
+  </Card>
+  <Card title="Integrations" icon="plug" href="#integrations">
+    **2 skills** - Payment and AI service integration
+  </Card>
   <Card title="Methodology" icon="diagram-project" href="#methodology">
-    **14 skills** - Development methodologies and workflows
+    **17 skills** - Development methodologies and workflows
   </Card>
   <Card title="Omega" icon="wand-magic-sparkles" href="#omega">
     **5 skills** - Omega-level development practices
@@ -69,16 +81,18 @@ Skills provide **deep domain expertise** that agents use when working with speci
   </Step>
 </Steps>
 
-### Example: Next.js Project
+### Example: Full-Stack Project
 
-When working on a Next.js project, OMGKIT automatically loads:
+When working on a modern full-stack project, OMGKIT automatically loads:
 
 | Skill | Provides |
 |-------|----------|
 | **Next.js** | App Router patterns, Server Components, API routes |
 | **React** | Component patterns, hooks, state management |
 | **TypeScript** | Type safety, interfaces, generics |
-| **Tailwind CSS** | Utility classes, responsive design |
+| **api-architecture** | REST/GraphQL design patterns, versioning |
+| **caching-strategies** | Redis, CDN, HTTP caching |
+| **database-optimization** | Query tuning, indexing strategies |
 
 ---
 
@@ -89,9 +103,9 @@ Programming language expertise
 
 | Skill | Description |
 |-------|-------------|
-| [**javascript**](/skills/javascript) | JavaScript development. Use for ES6+, async patter... |
-| [**python**](/skills/python) | Python development. Use when writing Python code, ... |
-| [**typescript**](/skills/typescript) | TypeScript development. Use when writing TypeScrip... |
+| [**javascript**](/skills/javascript) | JavaScript development - ES6+, async patterns, modules |
+| [**python**](/skills/python) | Python development - idioms, type hints, best practices |
+| [**typescript**](/skills/typescript) | TypeScript development - type safety, generics, patterns |
 
 
 ## Frameworks
@@ -100,16 +114,28 @@ Framework-specific patterns and best practices
 
 | Skill | Description |
 |-------|-------------|
-| [**django**](/skills/django) | Django development. Use for Django projects, ORM, ... |
-| [**express**](/skills/express) | Express.js development. Use for Express APIs, midd... |
-| [**fastapi**](/skills/fastapi) | FastAPI development. Use for FastAPI projects, asy... |
-| [**laravel**](/skills/laravel) | Laravel PHP development. Use for Laravel projects,... |
-| [**nestjs**](/skills/nestjs) | NestJS development. Use for NestJS projects, modul... |
-| [**nextjs**](/skills/nextjs) | Next.js development. Use for Next.js projects, App... |
-| [**rails**](/skills/rails) | Ruby on Rails development. Use for Rails projects,... |
-| [**react**](/skills/react) | React development. Use for React components, hooks... |
-| [**spring**](/skills/spring) | Spring Boot development. Use for Spring projects, ... |
-| [**vue**](/skills/vue) | Vue.js development. Use for Vue 3 projects, Compos... |
+| [**django**](/skills/django) | Django development - ORM, views, templates |
+| [**express**](/skills/express) | Express.js development - middleware, routing, APIs |
+| [**fastapi**](/skills/fastapi) | FastAPI development - async, Pydantic, OpenAPI |
+| [**laravel**](/skills/laravel) | Laravel PHP development - Eloquent, Blade, Artisan |
+| [**nestjs**](/skills/nestjs) | NestJS development - modules, DI, decorators |
+| [**nextjs**](/skills/nextjs) | Next.js development - App Router, Server Components |
+| [**rails**](/skills/rails) | Ruby on Rails development - ActiveRecord, conventions |
+| [**react**](/skills/react) | React development - components, hooks, state |
+| [**spring**](/skills/spring) | Spring Boot development - DI, REST, JPA |
+| [**vue**](/skills/vue) | Vue.js development - Composition API, Pinia |
+
+
+## Backend
+
+Backend architecture and patterns
+
+| Skill | Description |
+|-------|-------------|
+| [**api-architecture**](/skills/api-architecture) | REST, GraphQL, gRPC design patterns and best practices |
+| [**caching-strategies**](/skills/caching-strategies) | Multi-layer caching with Redis, CDN, HTTP caching |
+| [**event-driven-architecture**](/skills/event-driven-architecture) | Event sourcing, CQRS, message queues, Kafka |
+| [**real-time-systems**](/skills/real-time-systems) | WebSocket, SSE, Socket.io, presence systems |
 
 
 ## Databases
@@ -118,10 +144,11 @@ Database design and optimization
 
 | Skill | Description |
 |-------|-------------|
-| [**mongodb**](/skills/mongodb) | MongoDB database. Use for document storage, aggreg... |
-| [**postgresql**](/skills/postgresql) | PostgreSQL database. Use for schema design, querie... |
-| [**prisma**](/skills/prisma) | Prisma ORM. Use for database access, migrations, t... |
-| [**redis**](/skills/redis) | Redis caching. Use for caching, sessions, pub/sub. |
+| [**postgresql**](/skills/postgresql) | PostgreSQL - schema design, queries, extensions |
+| [**mongodb**](/skills/mongodb) | MongoDB - document storage, aggregation pipeline |
+| [**redis**](/skills/redis) | Redis - caching, sessions, pub/sub patterns |
+| [**prisma**](/skills/prisma) | Prisma ORM - migrations, type-safe queries |
+| [**database-optimization**](/skills/database-optimization) | Query optimization, indexing, partitioning, scaling |
 
 
 ## Frontend
@@ -130,35 +157,49 @@ Frontend tooling, styling, and UI patterns
 
 | Skill | Description |
 |-------|-------------|
-| [**accessibility**](/skills/accessibility) | Accessibility (a11y). Use for WCAG compliance, scr... |
-| [**frontend-design**](/skills/frontend-design) | Frontend design patterns. Use for component archit... |
-| [**responsive**](/skills/responsive) | Responsive design. Use for mobile-first, adaptive ... |
-| [**shadcn-ui**](/skills/shadcn-ui) | shadcn/ui components. Use for pre-built accessible... |
-| [**tailwindcss**](/skills/tailwindcss) | Tailwind CSS styling. Use when styling with utilit... |
-| [**threejs**](/skills/threejs) | Three.js 3D graphics. Use for 3D scenes, WebGL, an... |
+| [**tailwindcss**](/skills/tailwindcss) | Tailwind CSS - utility-first styling |
+| [**shadcn-ui**](/skills/shadcn-ui) | shadcn/ui - accessible component library |
+| [**frontend-design**](/skills/frontend-design) | Frontend design patterns and architecture |
+| [**responsive**](/skills/responsive) | Responsive design - mobile-first, adaptive layouts |
+| [**accessibility**](/skills/accessibility) | Accessibility (a11y) - WCAG compliance |
+| [**threejs**](/skills/threejs) | Three.js - 3D graphics, WebGL, animations |
+| [**advanced-ui-design**](/skills/advanced-ui-design) | BRSP Framework - beautiful, right, satisfying, peak UI |
 
 
-## Devops
+## Mobile
+
+Cross-platform mobile development
+
+| Skill | Description |
+|-------|-------------|
+| [**mobile-development**](/skills/mobile-development) | React Native, Expo - cross-platform apps |
+
+
+## DevOps
 
 Infrastructure, containers, and CI/CD
 
 | Skill | Description |
 |-------|-------------|
-| [**aws**](/skills/aws) | AWS services. Use for Lambda, S3, RDS, ECS, and ot... |
-| [**docker**](/skills/docker) | Docker containerization. Use for Dockerfiles, dock... |
-| [**github-actions**](/skills/github-actions) | GitHub Actions CI/CD. Use for workflows, automatio... |
-| [**kubernetes**](/skills/kubernetes) | Kubernetes orchestration. Use for K8s manifests, d... |
+| [**docker**](/skills/docker) | Docker - containerization, multi-stage builds |
+| [**kubernetes**](/skills/kubernetes) | Kubernetes - orchestration, deployments, services |
+| [**github-actions**](/skills/github-actions) | GitHub Actions - CI/CD workflows, automation |
+| [**aws**](/skills/aws) | AWS services - Lambda, S3, RDS, ECS |
+| [**monorepo-management**](/skills/monorepo-management) | Turborepo, Nx - workspace optimization |
+| [**observability**](/skills/observability) | Logging, metrics, tracing, OpenTelemetry |
+| [**performance-profiling**](/skills/performance-profiling) | Lighthouse, Core Web Vitals, DevTools |
 
 
 ## Security
 
-Security best practices and authentication
+Security best practices and hardening
 
 | Skill | Description |
 |-------|-------------|
-| [**better-auth**](/skills/better-auth) | Better Auth library. Use for authentication in Typ... |
-| [**oauth**](/skills/oauth) | OAuth 2.0 / OIDC. Use for third-party authenticati... |
-| [**owasp**](/skills/owasp) | OWASP security. Use for security best practices, v... |
+| [**owasp**](/skills/owasp) | OWASP - security best practices, vulnerabilities |
+| [**better-auth**](/skills/better-auth) | Better Auth - TypeScript authentication |
+| [**oauth**](/skills/oauth) | OAuth 2.0 / OIDC - third-party authentication |
+| [**security-hardening**](/skills/security-hardening) | Zero-trust, Vault, CSP, security headers |
 
 
 ## Testing
@@ -167,9 +208,31 @@ Testing frameworks and strategies
 
 | Skill | Description |
 |-------|-------------|
-| [**playwright**](/skills/playwright) | Playwright E2E testing. Use for browser automation... |
-| [**pytest**](/skills/pytest) | Python testing with pytest. Use for unit tests, fi... |
-| [**vitest**](/skills/vitest) | Vitest testing. Use for JavaScript/TypeScript unit... |
+| [**pytest**](/skills/pytest) | Python testing - fixtures, parametrize |
+| [**vitest**](/skills/vitest) | Vitest - fast JavaScript/TypeScript testing |
+| [**playwright**](/skills/playwright) | Playwright - E2E testing, browser automation |
+
+
+## Tools
+
+Document, image, and media processing
+
+| Skill | Description |
+|-------|-------------|
+| [**document-processing**](/skills/document-processing) | PDF, DOCX, XLSX, PPTX processing |
+| [**image-processing**](/skills/image-processing) | Sharp, WebP, AVIF - image optimization |
+| [**media-processing**](/skills/media-processing) | ffmpeg - video/audio transcoding |
+| [**mcp-development**](/skills/mcp-development) | Model Context Protocol - AI tool servers |
+
+
+## Integrations
+
+Payment and AI service integration
+
+| Skill | Description |
+|-------|-------------|
+| [**ai-integration**](/skills/ai-integration) | Vision, embeddings, RAG pipelines |
+| [**payment-integration**](/skills/payment-integration) | Stripe, PayPal, LemonSqueezy |
 
 
 ## Methodology
@@ -178,20 +241,23 @@ Development methodologies and workflows
 
 | Skill | Description |
 |-------|-------------|
-| [**brainstorming**](/skills/brainstorming) | Creative brainstorming. Use when exploring ideas, ... |
-| [**defense-in-depth**](/skills/defense-in-depth) | Security defense in depth. Use when designing secu... |
-| [**dispatching-parallel-agents**](/skills/dispatching-parallel-agents) | Parallel agent execution. Use when tasks can run c... |
-| [**executing-plans**](/skills/executing-plans) | Executing implementation plans. Use when implement... |
-| [**finishing-development-branch**](/skills/finishing-development-branch) | Completing a development branch. Use when wrapping... |
-| [**receiving-code-review**](/skills/receiving-code-review) | Receiving code review feedback. Use when handling ... |
-| [**requesting-code-review**](/skills/requesting-code-review) | Requesting code reviews. Use when submitting code ... |
-| [**root-cause-tracing**](/skills/root-cause-tracing) | Finding root causes. Use when debugging complex is... |
-| [**systematic-debugging**](/skills/systematic-debugging) | Systematic debugging process. Use when investigati... |
-| [**test-driven-development**](/skills/test-driven-development) | TDD workflow. Use when implementing features with ... |
-| [**testing-anti-patterns**](/skills/testing-anti-patterns) | Testing anti-patterns to avoid. Use when writing o... |
-| [**token-optimization**](/skills/token-optimization) | Token/cost optimization. Use for efficient AI inte... |
-| [**verification-before-completion**](/skills/verification-before-completion) | Evidence-based verification. Use before marking ta... |
-| [**writing-plans**](/skills/writing-plans) | Writing implementation plans. Use when planning fe... |
+| [**brainstorming**](/skills/brainstorming) | Creative brainstorming and idea exploration |
+| [**writing-plans**](/skills/writing-plans) | Writing implementation plans |
+| [**executing-plans**](/skills/executing-plans) | Executing implementation plans |
+| [**test-driven-development**](/skills/test-driven-development) | TDD workflow - red, green, refactor |
+| [**verification-before-completion**](/skills/verification-before-completion) | Evidence-based verification |
+| [**testing-anti-patterns**](/skills/testing-anti-patterns) | Testing anti-patterns to avoid |
+| [**systematic-debugging**](/skills/systematic-debugging) | Systematic debugging process |
+| [**root-cause-tracing**](/skills/root-cause-tracing) | Finding root causes of issues |
+| [**defense-in-depth**](/skills/defense-in-depth) | Security defense in depth |
+| [**dispatching-parallel-agents**](/skills/dispatching-parallel-agents) | Parallel agent execution |
+| [**requesting-code-review**](/skills/requesting-code-review) | Requesting code reviews |
+| [**receiving-code-review**](/skills/receiving-code-review) | Receiving code review feedback |
+| [**finishing-development-branch**](/skills/finishing-development-branch) | Completing development branches |
+| [**token-optimization**](/skills/token-optimization) | Token/cost optimization |
+| [**sequential-thinking**](/skills/sequential-thinking) | Numbered thought sequences for complex problems |
+| [**problem-solving**](/skills/problem-solving) | 5-phase systematic problem solving |
+| [**research-validation**](/skills/research-validation) | Multi-source validation framework |
 
 
 ## Omega
@@ -200,11 +266,11 @@ Omega-level development practices
 
 | Skill | Description |
 |-------|-------------|
-| [**omega-architecture**](/skills/omega-architecture) | Omega system architecture. Use for designing scala... |
-| [**omega-coding**](/skills/omega-coding) | AI-first development patterns. Use for leveraging ... |
-| [**omega-sprint**](/skills/omega-sprint) | Omega sprint management. Use for AI team sprint ex... |
-| [**omega-testing**](/skills/omega-testing) | Comprehensive Omega testing. Use for thorough test... |
-| [**omega-thinking**](/skills/omega-thinking) | 7 modes of Omega thinking. Use for deep analysis, ... |
+| [**omega-coding**](/skills/omega-coding) | AI-first development patterns |
+| [**omega-thinking**](/skills/omega-thinking) | 7 modes of Omega thinking |
+| [**omega-testing**](/skills/omega-testing) | Comprehensive Omega testing |
+| [**omega-architecture**](/skills/omega-architecture) | Omega system architecture |
+| [**omega-sprint**](/skills/omega-sprint) | Omega sprint management |
 
 
 ---
@@ -216,16 +282,31 @@ Common skill combinations for popular stacks:
 <AccordionGroup>
   <Accordion title="Next.js Full-Stack">
     - **Next.js** + **React** + **TypeScript** + **Tailwind CSS**
-    - **Prisma** or **MongoDB** for database
-    - **shadcn/ui** for components
+    - **Prisma** + **PostgreSQL** + **database-optimization**
+    - **shadcn/ui** + **advanced-ui-design** for components
+    - **caching-strategies** for performance
+  </Accordion>
+  <Accordion title="Real-Time Application">
+    - **real-time-systems** + **event-driven-architecture**
+    - **Redis** for pub/sub and caching
+    - **observability** for monitoring
+    - **security-hardening** for production
+  </Accordion>
+  <Accordion title="E-commerce Platform">
+    - **payment-integration** + **api-architecture**
+    - **database-optimization** + **caching-strategies**
+    - **image-processing** for product images
+    - **performance-profiling** for optimization
+  </Accordion>
+  <Accordion title="Mobile App">
+    - **mobile-development** + **React** + **TypeScript**
+    - **api-architecture** for backend
+    - **ai-integration** for AI features
   </Accordion>
   <Accordion title="Python Backend">
     - **Python** + **FastAPI** or **Django**
-    - **PostgreSQL** + **Redis**
-  </Accordion>
-  <Accordion title="Node.js API">
-    - **TypeScript** + **Express** or **NestJS**
-    - **PostgreSQL** + **Prisma**
+    - **PostgreSQL** + **Redis** + **database-optimization**
+    - **observability** + **security-hardening**
   </Accordion>
 </AccordionGroup>
 
@@ -242,6 +323,10 @@ skills:
     preferFunctionalComponents: true
   postgresql:
     useParameterizedQueries: true
+  caching-strategies:
+    defaultTTL: 3600
+  security-hardening:
+    enforceCSP: true
 ```
 
 ## Next Steps

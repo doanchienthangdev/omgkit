@@ -1,13 +1,13 @@
 ---
 title: "/execute-plan"
 description: "Execute existing plan with subagents"
-icon: "map"
+icon: "play"
 ---
 
 <Info>
   **Category:** Planning
 
-  **Syntax:** `/execute-plan <plan-file>`
+  **Syntax:** `/execute-plan`
 </Info>
 
 ## Overview
@@ -17,13 +17,12 @@ Execute existing plan with subagents
 ## Quick Start
 
 ```bash
-/execute-plan "plan-file"
+/execute-plan
 ```
 
+# ▶️ Execute: $ARGUMENTS
 
-# ▶️ Execute: \<plan-file\>
-
-Execute plan from: **\<plan-file\>**
+Execute plan from: **$ARGUMENTS**
 
 ## Process
 1. Read plan file
@@ -44,25 +43,23 @@ For each task:
 - [ ] Task 2
 - [ ] ...
 
-
-
 ## Tools Used
 
-This command uses the following tools:
+This command leverages the following capabilities:
 
-- **Task** - Enables task capabilities
-- **Read** - Enables read capabilities
-- **Write** - Enables write capabilities
-- **Bash** - Enables bash capabilities
-- **Glob** - Enables glob capabilities
-
+<Check>**Task** - Orchestrates complex multi-step operations</Check>
+<Check>**Read** - Analyzes files and codebase context</Check>
+<Check>**Write** - Creates and modifies files</Check>
+<Check>**Bash** - Executes system commands</Check>
+<Check>**Grep** - Searches code patterns</Check>
+<Check>**Glob** - Finds files by pattern</Check>
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/execute-plan "your input here"
+/execute-plan
 ```
 
 ### With Context
@@ -72,13 +69,29 @@ This command uses the following tools:
 /index
 
 # Then run the command
-/execute-plan "detailed description"
+/execute-plan
 ```
+
+### Combined with Other Commands
+
+```bash
+# Example workflow
+/plan "describe your goal"
+/execute-plan
+/commit
+```
+
+## Best Practices
+
+<Check>Be specific in your descriptions</Check>
+<Check>Include relevant file paths when applicable</Check>
+<Check>Use in combination with other commands for complex workflows</Check>
+<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, be specific in your descriptions and include relevant file paths or context.
+For best results, provide detailed descriptions and include relevant context about your project structure.
 </Note>
 
 ## Troubleshooting
@@ -89,6 +102,9 @@ For best results, be specific in your descriptions and include relevant file pat
   </Accordion>
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
+  </Accordion>
+  <Accordion title="Command taking too long">
+    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
   </Accordion>
 </AccordionGroup>
 

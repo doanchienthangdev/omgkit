@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "name": "OMGKIT Documentation",
-  "version": "2.0.7",
+  "version": "2.1.0",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -283,12 +283,22 @@
       ]
     },
     {
+      "group": "Backend",
+      "pages": [
+        "skills/api-architecture",
+        "skills/caching-strategies",
+        "skills/event-driven-architecture",
+        "skills/real-time-systems"
+      ]
+    },
+    {
       "group": "Databases",
       "pages": [
         "skills/postgresql",
         "skills/mongodb",
         "skills/redis",
-        "skills/prisma"
+        "skills/prisma",
+        "skills/database-optimization"
       ]
     },
     {
@@ -299,7 +309,14 @@
         "skills/frontend-design",
         "skills/responsive",
         "skills/accessibility",
-        "skills/threejs"
+        "skills/threejs",
+        "skills/advanced-ui-design"
+      ]
+    },
+    {
+      "group": "Mobile",
+      "pages": [
+        "skills/mobile-development"
       ]
     },
     {
@@ -308,7 +325,10 @@
         "skills/docker",
         "skills/kubernetes",
         "skills/github-actions",
-        "skills/aws"
+        "skills/aws",
+        "skills/monorepo-management",
+        "skills/observability",
+        "skills/performance-profiling"
       ]
     },
     {
@@ -316,7 +336,8 @@
       "pages": [
         "skills/owasp",
         "skills/better-auth",
-        "skills/oauth"
+        "skills/oauth",
+        "skills/security-hardening"
       ]
     },
     {
@@ -325,6 +346,22 @@
         "skills/pytest",
         "skills/vitest",
         "skills/playwright"
+      ]
+    },
+    {
+      "group": "Tools",
+      "pages": [
+        "skills/document-processing",
+        "skills/image-processing",
+        "skills/media-processing",
+        "skills/mcp-development"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "skills/ai-integration",
+        "skills/payment-integration"
       ]
     },
     {
@@ -343,7 +380,10 @@
         "skills/requesting-code-review",
         "skills/receiving-code-review",
         "skills/finishing-development-branch",
-        "skills/token-optimization"
+        "skills/token-optimization",
+        "skills/sequential-thinking",
+        "skills/problem-solving",
+        "skills/research-validation"
       ]
     },
     {

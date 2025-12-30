@@ -1,0 +1,417 @@
+---
+title: "problem-solving"
+description: "Systematic 5-phase approaches when stuck on complex problems"
+icon: "lightbulb"
+---
+
+<Info>
+  **Category:** Methodology
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
+
+  **Triggers:** stuck, blocked, can't figure out, problem solving, not working
+</Info>
+
+## Overview
+
+Systematic 5-phase approaches when stuck on complex problems
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices and patterns</Check>
+<Check>Production-ready code examples</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+<Check>Comprehensive error handling</Check>
+
+# Problem Solving
+
+A **systematic 5-phase framework** for tackling complex problems when conventional approaches fail. This skill provides structured methods to break through blockers and find solutions efficiently.
+
+## Purpose
+
+When you're stuck, random attempts waste time and energy. This skill provides:
+
+- Structured approach to unknown problems
+- Multiple hypothesis generation
+- Systematic elimination process
+- Time-boxed investigation phases
+- Clear escalation criteria
+
+## The 5-Phase Framework
+
+### Phase 1: Define (5-10 minutes)
+```
+BOUNDARY DEFINITION
+==================
+What IS the problem:
+- [ ] Specific error/behavior observed
+- [ ] Exact steps to reproduce
+- [ ] When it started occurring
+- [ ] Affected scope (users, features, environments)
+
+What is NOT the problem:
+- [ ] What still works correctly
+- [ ] Unrelated symptoms
+- [ ] Red herrings already eliminated
+
+Success criteria:
+- [ ] What does "solved" look like?
+- [ ] How will we verify the fix?
+```
+
+### Phase 2: Hypothesize (10-15 minutes)
+```
+HYPOTHESIS GENERATION (minimum 3)
+================================
+H1: [Most likely] ________________________
+    Evidence for: ________________________
+    Evidence against: ____________________
+    Test cost: Low / Medium / High
+
+H2: [Second likely] ______________________
+    Evidence for: ________________________
+    Evidence against: ____________________
+    Test cost: Low / Medium / High
+
+H3: [Unlikely but possible] ______________
+    Evidence for: ________________________
+    Evidence against: ____________________
+    Test cost: Low / Medium / High
+
+RULE: Generate hypotheses BEFORE testing any of them.
+```
+
+### Phase 3: Test (Time-boxed per hypothesis)
+```
+HYPOTHESIS TESTING ORDER
+========================
+Sort by: (Evidence strength) × (1 / Test cost)
+
+Test H1: [15 min box]
+  Action: ________________________________
+  Result: CONFIRMED / ELIMINATED / INCONCLUSIVE
+  If inconclusive: Need more data on __________
+
+Test H2: [15 min box]
+  Action: ________________________________
+  Result: CONFIRMED / ELIMINATED / INCONCLUSIVE
+
+STOP when: Hypothesis confirmed OR all eliminated
+```
+
+### Phase 4: Solve (Implementation)
+```
+SOLUTION IMPLEMENTATION
+=======================
+Root cause: ______________________________
+Solution approach: _______________________
+
+Implementation checklist:
+- [ ] Write the fix
+- [ ] Verify fix addresses root cause (not symptom)
+- [ ] Check for side effects
+- [ ] Add test to prevent regression
+- [ ] Document the issue and solution
+```
+
+### Phase 5: Prevent (Post-mortem)
+```
+PREVENTION ANALYSIS
+===================
+Why did this happen?
+- Immediate cause: _______________________
+- Contributing factors: __________________
+- Systemic issues: _______________________
+
+How do we prevent recurrence?
+- [ ] Code changes
+- [ ] Process changes
+- [ ] Monitoring/alerting
+- [ ] Documentation updates
+```
+
+## Features
+
+### 1. Root Cause Hypothesis Generator
+```javascript
+// Common hypothesis categories for software issues:
+
+const hypothesisCategories = \{
+  data: [
+    "Invalid input data",
+    "Data corruption",
+    "Missing required data",
+    "Encoding/format mismatch",
+    "Stale/cached data"
+  ],
+  configuration: [
+    "Environment variable missing",
+    "Config file incorrect",
+    "Feature flag state",
+    "Permission misconfiguration",
+    "Version mismatch"
+  ],
+  timing: [
+    "Race condition",
+    "Timeout too short",
+    "Order of operations",
+    "Async/await issue",
+    "Deadlock"
+  ],
+  resources: [
+    "Memory exhaustion",
+    "Disk space",
+    "Connection pool depleted",
+    "Rate limiting",
+    "CPU throttling"
+  ],
+  external: [
+    "Third-party service down",
+    "Network connectivity",
+    "DNS resolution",
+    "Certificate expiry",
+    "API contract change"
+  ]
+\};
+```
+
+### 2. Decision Tree Construction
+```
+START: Error occurs
+  |
+  +-- Is it reproducible?
+  |     |
+  |     +-- YES: Proceed to isolation
+  |     |
+  |     +-- NO: Focus on logging/monitoring
+  |           |
+  |           +-- Add debug logging
+  |           +-- Wait for recurrence
+  |           +-- Analyze patterns
+  |
+  +-- Can you isolate the component?
+        |
+        +-- YES: Deep dive that component
+        |
+        +-- NO: Binary search approach
+              |
+              +-- Disable half the system
+              +-- Does error persist?
+              +-- Narrow down iteratively
+```
+
+### 3. Risk Assessment Matrix
+```
+| Hypothesis | Probability | Impact | Test Effort | Priority |
+|------------|-------------|--------|-------------|----------|
+| H1         | High        | High   | Low         | 1st      |
+| H2         | Medium      | High   | Medium      | 2nd      |
+| H3         | Low         | High   | Low         | 3rd      |
+| H4         | High        | Low    | High        | 4th      |
+```
+
+### 4. Time-Boxing Templates
+```
+INVESTIGATION TIME BOX: 2 hours total
+
+Phase 1 (Define):      15 min  [■■■□□□□□□□□□]
+Phase 2 (Hypothesize): 15 min  [■■■□□□□□□□□□]
+Phase 3 (Test):        60 min  [■■■■■■■■■■■■]
+Phase 4 (Solve):       20 min  [■■■■□□□□□□□□]
+Phase 5 (Prevent):     10 min  [■■□□□□□□□□□□]
+
+ESCALATION TRIGGER: If no progress after Phase 3, escalate.
+```
+
+## Use Cases
+
+### Stuck on Implementation
+```
+PROBLEM: Feature works locally but fails in staging
+
+Phase 1 - Define:
+  - Works: Local dev environment
+  - Fails: Staging environment
+  - Error: "Connection refused to service X"
+  - Started: After last deployment
+
+Phase 2 - Hypothesize:
+  H1: Environment variable not set in staging
+  H2: Network policy blocking connection
+  H3: Service X not deployed to staging
+  H4: Different service discovery mechanism
+
+Phase 3 - Test:
+  H1 Test: Check env vars → MISSING API_URL! ✓ CONFIRMED
+
+Phase 4 - Solve:
+  - Add API_URL to staging config
+  - Verify connection works
+  - Add config validation on startup
+
+Phase 5 - Prevent:
+  - Add env var validation script to CI
+  - Document all required env vars
+```
+
+### Performance Bottleneck
+```
+PROBLEM: API response time degraded from 100ms to 2s
+
+Phase 1 - Define:
+  - Specific: GET /api/users endpoint
+  - Started: Monday after deployment
+  - Scope: All users, all requests
+
+Phase 2 - Hypothesize:
+  H1: N+1 query introduced
+  H2: Missing database index
+  H3: External API slowdown
+  H4: Resource contention
+
+Phase 3 - Test:
+  H1: Query count check → 1 query, not N+1
+  H2: EXPLAIN ANALYZE → Full table scan! ✓ CONFIRMED
+
+Phase 4 - Solve:
+  - Add index on users.organization_id
+  - Response time: 2s → 50ms
+
+Phase 5 - Prevent:
+  - Add query performance tests
+  - Require EXPLAIN for new queries in PR review
+```
+
+### Integration Failures
+```
+PROBLEM: Webhook deliveries failing intermittently
+
+Phase 1 - Define:
+  - Failure rate: ~5% of webhooks
+  - No pattern in time/endpoint
+  - Error: Timeout after 30s
+  - Started: Gradual increase over 2 weeks
+
+Phase 2 - Hypothesize:
+  H1: Receiving servers slow
+  H2: Our server resource exhaustion
+  H3: Network issues
+  H4: Payload size growth
+
+Phase 3 - Test:
+  H1: Check receiving server logs → Mixed results
+  H2: Monitor our CPU/memory → Normal
+  H3: Network packet loss test → Normal
+  H4: Analyze payload sizes → 10x increase! ✓ CONFIRMED
+
+Phase 4 - Solve:
+  - Compress payloads
+  - Increase timeout for large payloads
+  - Add pagination for large datasets
+
+Phase 5 - Prevent:
+  - Add payload size monitoring
+  - Set alerts for size thresholds
+```
+
+## Best Practices
+
+### Do's
+- **Generate multiple hypotheses** before testing any
+- **Test cheapest hypothesis first** when evidence is equal
+- **Time-box each phase** to prevent rabbit holes
+- **Document failed approaches** - they're valuable data
+- **Escalate when time-boxed out** - don't hero-code
+
+### Don'ts
+- Don't test the first idea that comes to mind
+- Don't spend 4 hours on 1 hypothesis
+- Don't discard hypotheses without testing
+- Don't fix symptoms without understanding root cause
+- Don't skip the prevention phase
+
+### Escalation Criteria
+```
+ESCALATE WHEN:
+- [ ] Time box exceeded with no progress
+- [ ] All hypotheses eliminated but problem persists
+- [ ] Problem scope larger than initially understood
+- [ ] Required access/knowledge not available
+- [ ] Business impact exceeds threshold
+
+ESCALATION FORMAT:
+"I've investigated [problem] for [time].
+ Tested hypotheses: [H1, H2, H3]
+ Current status: [findings]
+ Blocker: [what's needed]
+ Ask: [specific help needed]"
+```
+
+## Related Skills
+
+- **systematic-debugging** - Four-phase debugging with 95% fix rate
+- **root-cause-tracing** - Deep investigation techniques
+- **sequential-thinking** - Structure reasoning as numbered thoughts
+- **brainstorming** - Generate more hypotheses
+- **verification-before-completion** - Ensure fix is complete
+
+## Integration
+
+Works seamlessly with debugging workflows:
+```
+1. Bug reported → problem-solving Phase 1 (Define)
+2. Reproduce → systematic-debugging Phase 1 (Reproduce)
+3. Investigate → problem-solving Phases 2-3 (Hypothesize, Test)
+4. Fix → systematic-debugging Phase 3 (Fix)
+5. Verify → verification-before-completion
+6. Prevent → problem-solving Phase 5 (Prevent)
+```
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  problem-solving:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when:
+
+- You mention relevant keywords in your prompts
+- Project files match the skill's domain
+- Configuration files indicate this technology
+- Package dependencies suggest this skill is needed
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Skill not activating">
+    Ensure your project has relevant files or explicitly mention the technology in your prompt.
+  </Accordion>
+  <Accordion title="Unexpected patterns suggested">
+    Check your project's configuration to ensure it matches your actual stack.
+  </Accordion>
+  <Accordion title="Missing best practices">
+    Run `/index` to refresh codebase context and ensure full analysis.
+  </Accordion>
+</AccordionGroup>
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 72 skills
+  </Card>
+  <Card title="Methodology" icon="brain" href="/skills/overview#methodology">
+    More methodology skills
+  </Card>
+</CardGroup>

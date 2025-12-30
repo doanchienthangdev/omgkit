@@ -1,13 +1,13 @@
 ---
 title: "/research"
 description: "Research technology or topic"
-icon: "map"
+icon: "book-open"
 ---
 
 <Info>
   **Category:** Planning
 
-  **Syntax:** `/research <topic>`
+  **Syntax:** `/research`
 </Info>
 
 ## Overview
@@ -17,13 +17,12 @@ Research technology or topic
 ## Quick Start
 
 ```bash
-/research "topic"
+/research
 ```
 
+# 🔬 Research: $ARGUMENTS
 
-# 🔬 Research: \<topic\>
-
-Research: **\<topic\>**
+Research: **$ARGUMENTS**
 
 ## Process
 1. Define research questions
@@ -55,25 +54,23 @@ Research: **\<topic\>**
 [What to do based on research]
 ```
 
-
-
 ## Tools Used
 
-This command uses the following tools:
+This command leverages the following capabilities:
 
-- **Task** - Enables task capabilities
-- **Read** - Enables read capabilities
-- **WebSearch** - Enables websearch capabilities
-- **WebFetch** - Enables webfetch capabilities
-- **Glob** - Enables glob capabilities
-
+<Check>**Task** - Orchestrates complex multi-step operations</Check>
+<Check>**Read** - Analyzes files and codebase context</Check>
+<Check>**Write** - Creates and modifies files</Check>
+<Check>**Bash** - Executes system commands</Check>
+<Check>**Grep** - Searches code patterns</Check>
+<Check>**Glob** - Finds files by pattern</Check>
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/research "your input here"
+/research
 ```
 
 ### With Context
@@ -83,13 +80,29 @@ This command uses the following tools:
 /index
 
 # Then run the command
-/research "detailed description"
+/research
 ```
+
+### Combined with Other Commands
+
+```bash
+# Example workflow
+/plan "describe your goal"
+/research
+/commit
+```
+
+## Best Practices
+
+<Check>Be specific in your descriptions</Check>
+<Check>Include relevant file paths when applicable</Check>
+<Check>Use in combination with other commands for complex workflows</Check>
+<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, be specific in your descriptions and include relevant file paths or context.
+For best results, provide detailed descriptions and include relevant context about your project structure.
 </Note>
 
 ## Troubleshooting
@@ -100,6 +113,9 @@ For best results, be specific in your descriptions and include relevant file pat
   </Accordion>
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
+  </Accordion>
+  <Accordion title="Command taking too long">
+    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
   </Accordion>
 </AccordionGroup>
 

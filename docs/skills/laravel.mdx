@@ -7,7 +7,9 @@ icon: "layer-group"
 <Info>
   **Category:** Frameworks
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
+
+  
 </Info>
 
 ## Overview
@@ -18,11 +20,11 @@ Laravel PHP development. Use for Laravel projects, Eloquent, Blade.
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices</Check>
-<Check>Idiomatic patterns</Check>
+<Check>Industry best practices and patterns</Check>
+<Check>Production-ready code examples</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-
+<Check>Comprehensive error handling</Check>
 
 # Laravel Skill
 
@@ -31,28 +33,28 @@ When this skill is active, agents automatically apply:
 ### Model
 ```php
 class User extends Model
-{
+\{
     protected $fillable = ['email', 'password'];
     protected $hidden = ['password'];
 
     public function posts()
-    {
+    \{
         return $this->hasMany(Post::class);
-    }
-}
+    \}
+\}
 ```
 
 ### Controller
 ```php
 class UserController extends Controller
-{
+\{
     public function index()
-    {
+    \{
         return User::all();
-    }
+    \}
 
     public function store(Request $request)
-    {
+    \{
         $validated = $request->validate([
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8',
@@ -60,8 +62,8 @@ class UserController extends Controller
 
         $user = User::create($validated);
         return response()->json($user, 201);
-    }
-}
+    \}
+\}
 ```
 
 ### Routes
@@ -71,12 +73,12 @@ Route::apiResource('users', UserController::class);
 
 ### Migration
 ```php
-Schema::create('users', function (Blueprint $table) {
+Schema::create('users', function (Blueprint $table) \{
     $table->id();
     $table->string('email')->unique();
     $table->string('password');
     $table->timestamps();
-});
+\});
 ```
 
 ## Best Practices
@@ -84,7 +86,6 @@ Schema::create('users', function (Blueprint $table) {
 - Use Form Requests
 - Use Resources for API responses
 - Use Jobs for async
-
 
 ## Configuration
 
@@ -100,17 +101,32 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when it finds:
+OMGKIT detects and activates this skill when:
 
-- Relevant file extensions in your project
-- Configuration files specific to this technology
-- Package dependencies in package.json, requirements.txt, etc.
+- You mention relevant keywords in your prompts
+- Project files match the skill's domain
+- Configuration files indicate this technology
+- Package dependencies suggest this skill is needed
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Skill not activating">
+    Ensure your project has relevant files or explicitly mention the technology in your prompt.
+  </Accordion>
+  <Accordion title="Unexpected patterns suggested">
+    Check your project's configuration to ensure it matches your actual stack.
+  </Accordion>
+  <Accordion title="Missing best practices">
+    Run `/index` to refresh codebase context and ensure full analysis.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 43 skills
+    See all 72 skills
   </Card>
   <Card title="Frameworks" icon="layer-group" href="/skills/overview#frameworks">
     More frameworks skills
