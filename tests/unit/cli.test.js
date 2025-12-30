@@ -140,7 +140,7 @@ describe('CLI Core Functions', () => {
       installPlugin({ homeDir: TEST_HOME, silent: true });
       const modesDir = join(getPluginDir(TEST_HOME), 'modes');
       const count = countFiles(modesDir);
-      expect(count).toBe(9);
+      expect(count).toBe(10);
     });
   });
 

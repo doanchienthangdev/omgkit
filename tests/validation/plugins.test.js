@@ -243,8 +243,8 @@ describe('Plugin Validation', () => {
     const modesDir = join(PLUGIN_DIR, 'modes');
     const modeFiles = getMarkdownFiles(modesDir);
 
-    it('should have 9 mode files', () => {
-      expect(modeFiles.length).toBe(9);
+    it('should have 10 mode files', () => {
+      expect(modeFiles.length).toBe(10);
     });
 
     it.each(modeFiles.map(f => [f.replace(PLUGIN_DIR, ''), f]))(
