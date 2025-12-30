@@ -156,7 +156,7 @@
     {
       "group": "Commands Overview",
       "pages": [
-        "commands/overview"
+        "commands/all-commands"
       ]
     },
     {
@@ -260,7 +260,7 @@
     {
       "group": "Skills Overview",
       "pages": [
-        "skills/overview"
+        "skills/all-skills"
       ]
     },
     {
