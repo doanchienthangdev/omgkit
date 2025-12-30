@@ -600,6 +600,12 @@ async function generateCommandDocs() {
         // Parse tools for better display
         const tools = (frontmatter['allowed-tools'] || '').split(',').map(t => t.trim()).filter(Boolean);
 
+        // Replace $ARGUMENTS placeholder with argument-hint or generic text
+        const argumentHint = frontmatter['argument-hint'] || '<your input>';
+        const processedBody = body
+          .replace(/\$ARGUMENTS/g, argumentHint)
+          .replace(/\$\{ARGUMENTS\}/g, argumentHint);
+
         // Generate individual command page with enhanced structure
         const commandDoc = `---
 title: "/${slug}"
@@ -623,7 +629,7 @@ ${frontmatter.description || 'No description available.'}
 /${slug}${frontmatter['argument-hint'] ? ' ' + frontmatter['argument-hint'].split(' ')[0].replace('<', '"').replace('>', '"') : ''}
 \`\`\`
 
-${body}
+${processedBody}
 
 ${tools.length > 0 ? `
 ## Tools Used
