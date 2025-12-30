@@ -1,0 +1,79 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prepatch
+          - preminor
+          - premajor
+          - prerelease
+      prerelease_id:
+        description: 'Prerelease identifier (e.g., alpha, beta, rc)'
+        required: false
+        default: ''
+
+jobs:
+  bump-version:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Bump version
+        id: bump
+        run: |
+          if [ -n "${{ github.event.inputs.prerelease_id }}" ]; then
+            NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} --preid=${{ github.event.inputs.prerelease_id }} -m "chore(release): v%s")
+          else
+            NEW_VERSION=$(npm version ${{ github.event.inputs.version_type }} -m "chore(release): v%s")
+          fi
+          echo "NEW_VERSION=${NEW_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Push changes
+        run: |
+          git push
+          git push --tags
+
+      - name: Summary
+        run: |
+          echo "## Version Bumped! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "New version: **${{ steps.bump.outputs.NEW_VERSION }}**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The release workflow will now automatically:" >> $GITHUB_STEP_SUMMARY
+          echo "1. Run tests" >> $GITHUB_STEP_SUMMARY
+          echo "2. Publish to npm" >> $GITHUB_STEP_SUMMARY
+          echo "3. Create GitHub Release" >> $GITHUB_STEP_SUMMARY

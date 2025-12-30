@@ -1,6 +1,8 @@
 # 🔮 OMGKIT - Omega-Level Development Kit
 
 [![CI](https://github.com/doanchienthangdev/omgkit/actions/workflows/ci.yml/badge.svg)](https://github.com/doanchienthangdev/omgkit/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/omgkit.svg)](https://www.npmjs.com/package/omgkit)
+[![npm downloads](https://img.shields.io/npm/dm/omgkit.svg)](https://www.npmjs.com/package/omgkit)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 

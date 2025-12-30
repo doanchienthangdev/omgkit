@@ -14,10 +14,13 @@
     "team",
     "claudekit"
   ],
-  "homepage": "https://github.com/user/omgkit",
+  "homepage": "https://github.com/doanchienthangdev/omgkit#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/user/omgkit.git"
+    "url": "git+https://github.com/doanchienthangdev/omgkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/doanchienthangdev/omgkit/issues"
   },
   "license": "MIT",
   "author": "OMGKIT Team",
