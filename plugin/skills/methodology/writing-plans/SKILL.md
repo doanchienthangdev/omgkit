@@ -1,0 +1,34 @@
+---
+name: writing-plans
+description: Writing implementation plans. Use when planning features or tasks.
+---
+
+# Writing Plans Skill
+
+## Plan Structure
+```markdown
+# Plan: [Feature Name]
+
+## Overview
+[1-2 sentence description]
+
+## Tasks
+1. [ ] [Task] - [2-5 min] - `path/file.ts:line`
+2. [ ] [Task] - [2-5 min] - `path/file.ts:line`
+
+## Files to Modify
+- `src/file.ts` - [What changes]
+
+## Testing Strategy
+- Unit: [What to test]
+- Integration: [What flows]
+
+## Risks
+| Risk | Likelihood | Impact | Mitigation |
+```
+
+## Guidelines
+- Each task: 2-5 minutes
+- Include exact file locations
+- Identify dependencies
+- Note testing requirements

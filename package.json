@@ -1,0 +1,52 @@
+{
+  "name": "omgkit",
+  "version": "1.0.0",
+  "description": "Omega-Level Development Kit - AI Team System for Claude Code. 23 agents, 54 commands, 43 skills, sprint management.",
+  "keywords": [
+    "claude-code",
+    "ai",
+    "agents",
+    "productivity",
+    "omega",
+    "development",
+    "automation",
+    "sprint",
+    "team",
+    "claudekit"
+  ],
+  "homepage": "https://github.com/user/omgkit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/omgkit.git"
+  },
+  "license": "MIT",
+  "author": "OMGKIT Team",
+  "type": "module",
+  "main": "lib/index.js",
+  "bin": {
+    "omgkit": "./bin/omgkit.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "plugin",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run tests/unit",
+    "test:validation": "vitest run tests/validation",
+    "test:integration": "vitest run tests/integration",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.16",
+    "vitest": "^4.0.16"
+  }
+}

@@ -1,0 +1,25 @@
+# Product Backlog
+# Managed by /backlog:* commands
+
+backlog: []
+
+# Task template:
+# - id: "TASK-001"
+#   title: ""
+#   description: ""
+#   type: feature | bugfix | docs | test | refactor | infra
+#   priority: 1-5 (1 = highest)
+#   status: pending | in_progress | review | done | blocked
+#   assigned_to: null | agent_name
+#   sprint_id: null | sprint_id
+#   estimate: "2h" | "1d" | "3d"
+#   tags: []
+#   dependencies: []
+#   created_at: ""
+#   completed_at: null
+
+stats:
+  total: 0
+  pending: 0
+  in_progress: 0
+  done: 0

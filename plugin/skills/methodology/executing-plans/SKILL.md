@@ -1,0 +1,34 @@
+---
+name: executing-plans
+description: Executing implementation plans. Use when implementing from a plan.
+---
+
+# Executing Plans Skill
+
+## Process
+1. Read the plan completely
+2. Verify understanding
+3. Execute tasks in order
+4. Check off completed tasks
+5. Report blockers immediately
+
+## Per Task
+1. Read task description
+2. Navigate to code location
+3. Implement change
+4. Verify it works
+5. Mark complete
+6. Proceed to next
+
+## Quality Gates
+- After each task: Does it work?
+- After each phase: Run tests
+- After completion: Full verification
+
+## Reporting
+```markdown
+## Progress Update
+- Completed: 5/10 tasks
+- Current: Task 6 - [description]
+- Blockers: [None | Description]
+```

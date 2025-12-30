@@ -1,0 +1,43 @@
+---
+description: Display 7 Omega Principles
+---
+
+# 🔮 7 Omega Principles
+
+## Ω1. LEVERAGE MULTIPLICATION 💪
+> "Don't do. Create systems that do."
+
+Build once, use infinitely. Automate everything. Create multipliers.
+
+## Ω2. TRANSCENDENT ABSTRACTION 🎯
+> "Solve the class, not the instance."
+
+Find patterns. Solve for N cases. Build frameworks, not features.
+
+## Ω3. AGENTIC DECOMPOSITION 🤖
+> "Complex task = Orchestra of specialists."
+
+Break into specialist agents. Clear interfaces. Parallel execution.
+
+## Ω4. FEEDBACK ACCELERATION ⚡
+> "Compress feedback loops."
+
+Test immediately. Deploy continuously. Learn faster.
+
+## Ω5. ZERO-MARGINAL-COST SCALING 📈
+> "Build once, scale infinitely."
+
+No per-unit cost. Digital goods. Platform thinking.
+
+## Ω6. EMERGENT INTELLIGENCE 🌟
+> "System > Sum of parts."
+
+Design for emergence. Enable self-organization. Create synergies.
+
+## Ω7. AESTHETIC PERFECTION ✨
+> "Excellence is not optional."
+
+Beauty in code. Elegance in design. Perfection in execution.
+
+---
+*Think Omega. Build Omega. Be Omega.* 🔮

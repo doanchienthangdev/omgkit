@@ -1,0 +1,77 @@
+---
+name: nextjs
+description: Next.js development. Use for Next.js projects, App Router, Server Components, Server Actions.
+---
+
+# Next.js Skill
+
+## App Router
+
+### Server Component (default)
+```tsx
+// app/users/page.tsx
+async function UsersPage() {
+  const users = await fetch('/api/users').then(r => r.json());
+  return <UserList users={users} />;
+}
+```
+
+### Client Component
+```tsx
+'use client';
+
+import { useState } from 'react';
+
+export function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
+}
+```
+
+### Server Action
+```tsx
+'use server';
+
+import { revalidatePath } from 'next/cache';
+
+export async function createUser(formData: FormData) {
+  await db.users.create({
+    email: formData.get('email'),
+  });
+  revalidatePath('/users');
+}
+```
+
+### Route Handler
+```tsx
+// app/api/users/route.ts
+export async function GET() {
+  const users = await db.users.findMany();
+  return Response.json(users);
+}
+
+export async function POST(request: Request) {
+  const body = await request.json();
+  const user = await db.users.create(body);
+  return Response.json(user, { status: 201 });
+}
+```
+
+## File Structure
+```
+app/
+├── layout.tsx
+├── page.tsx
+├── users/
+│   ├── page.tsx
+│   └── [id]/page.tsx
+└── api/
+    └── users/route.ts
+```
+
+## Best Practices
+- Default to Server Components
+- Use 'use client' only when needed
+- Use Server Actions for mutations
+- Use loading.tsx for loading states
+- Use error.tsx for error handling

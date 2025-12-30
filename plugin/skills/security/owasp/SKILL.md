@@ -1,0 +1,57 @@
+---
+name: owasp
+description: OWASP security. Use for security best practices, vulnerability prevention.
+---
+
+# OWASP Skill
+
+## Top 10 Prevention
+
+### 1. Injection
+```typescript
+// Bad
+db.query(`SELECT * FROM users WHERE id = ${id}`);
+
+// Good
+db.query('SELECT * FROM users WHERE id = $1', [id]);
+```
+
+### 2. Broken Authentication
+```typescript
+// Use secure session management
+// Implement MFA
+// Rate limit login attempts
+```
+
+### 3. XSS Prevention
+```typescript
+// Bad
+element.innerHTML = userInput;
+
+// Good
+element.textContent = userInput;
+// Or use DOMPurify
+```
+
+### 4. CSRF Prevention
+```typescript
+// Use CSRF tokens
+// SameSite cookies
+// Verify Origin header
+```
+
+### 5. Security Headers
+```typescript
+app.use(helmet({
+  contentSecurityPolicy: true,
+  hsts: true,
+  noSniff: true,
+}));
+```
+
+## Checklist
+- [ ] Input validation
+- [ ] Output encoding
+- [ ] Parameterized queries
+- [ ] Secure headers
+- [ ] HTTPS only

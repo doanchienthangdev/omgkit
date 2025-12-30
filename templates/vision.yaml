@@ -1,0 +1,30 @@
+# Product Vision
+# Created by /vision:set command
+
+vision:
+  product: ""
+  tagline: ""
+
+  users:
+    primary: ""
+    secondary: ""
+
+  goals:
+    business: []
+    technical: []
+    user: []
+
+  constraints:
+    technical: []
+    time: ""
+    budget: ""
+
+  success_metrics:
+    - metric: ""
+      target: ""
+
+  competitors: []
+  differentiators: []
+
+  created_at: ""
+  updated_at: ""

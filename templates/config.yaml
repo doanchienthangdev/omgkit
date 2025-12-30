@@ -1,0 +1,44 @@
+# OMGKIT Project Configuration
+version: "1.0.0"
+
+# Project info
+project:
+  name: ""
+  description: ""
+
+# AI settings
+ai:
+  model: inherit
+  temperature: 0.7
+
+# Agent settings
+agents:
+  mode: auto  # auto | sequential | parallel
+  timeout: 300
+
+# Sprint settings
+sprint:
+  default_duration: 14
+  max_tasks: 20
+  auto_propose: true
+
+# Team settings
+team:
+  autonomy: semi-auto  # full-auto | semi-auto | manual
+  review_gates: true
+  auto_commit: false
+
+# Output settings
+output:
+  plans_dir: .omgkit/plans
+  docs_dir: .omgkit/docs
+  logs_dir: .omgkit/logs
+  verbose: false
+
+# MCP settings
+mcp:
+  context7: true
+  sequential: true
+  playwright: false
+  memory: true
+  filesystem: true

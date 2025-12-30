@@ -1,0 +1,52 @@
+---
+name: tailwindcss
+description: Tailwind CSS styling. Use when styling with utility classes.
+---
+
+# Tailwind CSS Skill
+
+## Core Utilities
+```html
+<!-- Spacing -->
+<div class="p-4 m-2 space-y-4">
+
+<!-- Flexbox -->
+<div class="flex items-center justify-between gap-4">
+
+<!-- Grid -->
+<div class="grid grid-cols-3 gap-4">
+
+<!-- Typography -->
+<p class="text-lg font-bold text-gray-900">
+```
+
+## Responsive
+```html
+<div class="text-sm md:text-base lg:text-lg">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+```
+
+## Component Pattern
+```html
+<button class="
+  px-4 py-2
+  bg-blue-500 hover:bg-blue-600
+  text-white font-medium
+  rounded-lg
+  transition-colors
+  focus:outline-none focus:ring-2 focus:ring-blue-500
+">
+  Click me
+</button>
+```
+
+## Dark Mode
+```html
+<div class="bg-white dark:bg-gray-900 text-black dark:text-white">
+```
+
+## Best Practices
+- Use consistent spacing
+- Mobile-first responsive
+- Extract common patterns
+- Use @apply sparingly

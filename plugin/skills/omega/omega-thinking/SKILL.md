@@ -1,0 +1,54 @@
+---
+name: omega-thinking
+description: 7 modes of Omega thinking. Use for deep analysis, problem solving, finding 10x improvements.
+---
+
+# Omega Thinking Skill
+
+## The 7 Modes
+
+### 🔭 TELESCOPIC
+Zoom out to see the big picture.
+- Task → Feature → Product → Market → Industry → World
+- **Ask**: "What's the ultimate impact?"
+
+### 🔬 MICROSCOPIC
+First principles analysis.
+- Why? → Why? → Why? → Why? → Why?
+- **Ask**: "What's fundamentally true?"
+
+### ↔️ LATERAL
+Different angles and approaches.
+- How would [X industry] solve this?
+- What's the opposite approach?
+- **Ask**: "What are we not seeing?"
+
+### 🔄 INVERSION
+Learn through failure.
+- How to guarantee failure?
+- Avoid those things.
+- **Ask**: "What would make this fail?"
+
+### ⏳ TEMPORAL
+Time dimension analysis.
+- Historical patterns?
+- Relevant in 10 years?
+- **Ask**: "How does time affect this?"
+
+### 🕸️ SYSTEMIC
+Interconnections and emergence.
+- Components and connections?
+- Feedback loops?
+- **Ask**: "What system dynamics are at play?"
+
+### ⚛️ QUANTUM
+Multiple possibilities.
+- All possible solutions?
+- How to test quickly?
+- **Ask**: "What are all the possibilities?"
+
+## Application
+For any problem:
+1. Apply all 7 modes
+2. Synthesize insights
+3. Find the 10x opportunity

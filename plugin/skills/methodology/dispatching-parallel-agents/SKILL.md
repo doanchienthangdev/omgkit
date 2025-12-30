@@ -1,0 +1,43 @@
+---
+name: dispatching-parallel-agents
+description: Parallel agent execution. Use when tasks can run concurrently.
+---
+
+# Dispatching Parallel Agents Skill
+
+## When to Parallelize
+- Independent tasks
+- No shared state
+- Different file scopes
+- Research + implementation
+
+## Pattern
+```
+┌─────────────────────────────────────┐
+│           Main Agent                │
+└──────────────┬──────────────────────┘
+               │
+    ┌──────────┼──────────┐
+    ▼          ▼          ▼
+┌───────┐ ┌───────┐ ┌───────┐
+│Agent A│ │Agent B│ │Agent C│
+│(task1)│ │(task2)│ │(task3)│
+└───────┘ └───────┘ └───────┘
+    │          │          │
+    └──────────┼──────────┘
+               ▼
+       [Aggregate Results]
+```
+
+## Commands
+```bash
+/spawn "Research authentication options"
+/spawn "Write tests for user module"
+/spawn:collect
+```
+
+## Best Practices
+- Clear task boundaries
+- Define sync points
+- Aggregate results
+- Handle failures

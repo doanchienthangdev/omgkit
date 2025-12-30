@@ -1,0 +1,67 @@
+---
+name: nestjs
+description: NestJS development. Use for NestJS projects, modules, dependency injection.
+---
+
+# NestJS Skill
+
+## Patterns
+
+### Module
+```typescript
+@Module({
+  imports: [DatabaseModule],
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService],
+})
+export class UsersModule {}
+```
+
+### Controller
+```typescript
+@Controller('users')
+export class UsersController {
+  constructor(private usersService: UsersService) {}
+
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Post()
+  create(@Body() dto: CreateUserDto) {
+    return this.usersService.create(dto);
+  }
+}
+```
+
+### Service
+```typescript
+@Injectable()
+export class UsersService {
+  constructor(private db: DatabaseService) {}
+
+  async findAll() {
+    return this.db.users.findMany();
+  }
+}
+```
+
+### DTO
+```typescript
+export class CreateUserDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+```
+
+## Best Practices
+- Use modules for organization
+- Use DTOs for validation
+- Use dependency injection
+- Use guards for auth

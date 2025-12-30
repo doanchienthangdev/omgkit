@@ -1,0 +1,47 @@
+---
+name: django
+description: Django development. Use for Django projects, ORM, admin, templates.
+---
+
+# Django Skill
+
+## Patterns
+
+### Model
+```python
+from django.db import models
+
+class User(models.Model):
+    email = models.EmailField(unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+```
+
+### View
+```python
+from django.views import View
+from django.http import JsonResponse
+
+class UserView(View):
+    def get(self, request, id):
+        user = User.objects.get(id=id)
+        return JsonResponse({'email': user.email})
+```
+
+### Serializer (DRF)
+```python
+from rest_framework import serializers
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'created_at']
+```
+
+## Best Practices
+- Use class-based views
+- Use Django REST Framework
+- Use migrations
+- Use signals sparingly

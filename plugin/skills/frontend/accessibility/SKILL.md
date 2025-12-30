@@ -1,0 +1,52 @@
+---
+name: accessibility
+description: Accessibility (a11y). Use for WCAG compliance, screen readers, keyboard navigation.
+---
+
+# Accessibility Skill
+
+## Semantic HTML
+```html
+<header>
+<nav aria-label="Main">
+<main>
+<article>
+<aside>
+<footer>
+```
+
+## ARIA
+```html
+<button aria-label="Close" aria-pressed="false">
+<div role="alert" aria-live="polite">
+<input aria-describedby="hint-id">
+```
+
+## Keyboard Navigation
+```tsx
+function handleKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    activate();
+  }
+  if (e.key === 'Escape') {
+    close();
+  }
+}
+```
+
+## Focus Management
+```tsx
+const ref = useRef<HTMLButtonElement>(null);
+
+useEffect(() => {
+  if (isOpen) ref.current?.focus();
+}, [isOpen]);
+```
+
+## Checklist
+- [ ] Color contrast 4.5:1+
+- [ ] Keyboard accessible
+- [ ] Focus visible
+- [ ] Alt text on images
+- [ ] Form labels
+- [ ] Skip links

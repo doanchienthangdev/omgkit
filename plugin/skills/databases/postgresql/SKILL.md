@@ -1,0 +1,43 @@
+---
+name: postgresql
+description: PostgreSQL database. Use for schema design, queries, optimization.
+---
+
+# PostgreSQL Skill
+
+## Schema Design
+```sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_email ON users(email);
+```
+
+## Query Patterns
+```sql
+-- Pagination
+SELECT * FROM users
+ORDER BY created_at DESC
+LIMIT 10 OFFSET 20;
+
+-- Search
+SELECT * FROM users
+WHERE email ILIKE '%@example.com';
+
+-- Aggregation
+SELECT DATE(created_at), COUNT(*)
+FROM users
+GROUP BY DATE(created_at);
+```
+
+## Best Practices
+- Use UUIDs for IDs
+- Add indexes for queries
+- Use EXPLAIN ANALYZE
+- Use transactions
+- Use connection pooling

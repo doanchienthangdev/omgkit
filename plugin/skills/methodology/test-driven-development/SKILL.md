@@ -1,0 +1,39 @@
+---
+name: test-driven-development
+description: TDD workflow. Use when implementing features with test-first approach.
+---
+
+# Test-Driven Development Skill
+
+## TDD Cycle
+1. 🔴 **RED** - Write failing test
+2. 🟢 **GREEN** - Make it pass (minimal code)
+3. ♻️ **REFACTOR** - Improve code
+
+## Rules
+- No production code without failing test
+- Only enough code to pass test
+- Refactor only when green
+- One assertion per test
+
+## Example
+```typescript
+// 1. RED - Write test first
+describe('calculateTax', () => {
+  it('calculates 10% tax', () => {
+    expect(calculateTax(100, 0.1)).toBe(10);
+  });
+});
+
+// 2. GREEN - Minimal implementation
+function calculateTax(amount: number, rate: number) {
+  return amount * rate;
+}
+
+// 3. REFACTOR if needed
+```
+
+## Benefits
+- Design emerges from tests
+- 100% coverage by default
+- Confidence in refactoring

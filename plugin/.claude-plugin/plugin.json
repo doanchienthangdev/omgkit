@@ -1,0 +1,11 @@
+{
+  "name": "omgkit",
+  "version": "1.0.0",
+  "description": "Omega-Level Development Kit - AI Team System with 23 agents, 54 commands, 43 skills, and sprint management for 10x-1000x productivity",
+  "author": "OMGKIT Team",
+  "homepage": "https://github.com/user/omgkit",
+  "keywords": [
+    "omega", "ai-team", "productivity", "claude-code",
+    "agents", "sprint", "automation", "claudekit"
+  ]
+}
