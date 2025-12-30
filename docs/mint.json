@@ -154,14 +154,9 @@
       ]
     },
     {
-      "group": "Commands Overview",
-      "pages": [
-        "commands/all-commands"
-      ]
-    },
-    {
       "group": "Development",
       "pages": [
+        "commands/overview",
         "commands/feature",
         "commands/fix",
         "commands/fix-fast",
@@ -258,14 +253,9 @@
       ]
     },
     {
-      "group": "Skills Overview",
-      "pages": [
-        "skills/all-skills"
-      ]
-    },
-    {
       "group": "Languages",
       "pages": [
+        "skills/overview",
         "skills/python",
         "skills/typescript",
         "skills/javascript"
