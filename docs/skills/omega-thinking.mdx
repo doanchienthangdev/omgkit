@@ -1,7 +1,27 @@
 ---
 title: "omega-thinking"
 description: "7 modes of Omega thinking. Use for deep analysis, problem solving, finding 10x improvements."
+icon: "brain"
 ---
+
+<Info>
+  **Category:** Omega
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+7 modes of Omega thinking. Use for deep analysis, problem solving, finding 10x improvements.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
 
 
 # Omega Thinking Skill
@@ -55,13 +75,33 @@ For any problem:
 3. Find the 10x opportunity
 
 
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  omega-thinking:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
     See all 43 skills
   </Card>
-  <Card title="omega" icon="folder" href="/skills/overview#omega">
+  <Card title="Omega" icon="brain" href="/skills/overview#omega">
     More omega skills
   </Card>
 </CardGroup>

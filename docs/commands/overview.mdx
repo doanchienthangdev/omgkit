@@ -1,181 +1,306 @@
 ---
 title: "Commands Overview"
 description: "54 slash commands for every development task"
+icon: "terminal"
 ---
 
-OMGKIT provides 54 slash commands covering the entire development lifecycle.
+OMGKIT provides **54 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
 
-## Quick Reference
+## At a Glance
 
-
-### Context {#context}
-
-| Command | Description |
-|---------|-------------|
-| [`/checkpoint`](/commands/checkpoint) | Save or restore session state |
-| [`/index`](/commands/index) | Generate project index |
-| [`/load`](/commands/load) | Load project context |
-| [`/mode`](/commands/mode) | Switch behavioral mode |
-| [`/spawn-collect`](/commands/spawn-collect) | Collect results from parallel tasks |
-| [`/spawn`](/commands/spawn) | Launch parallel background task |
-
-
-### Design {#design}
-
-| Command | Description |
-|---------|-------------|
-| [`/cro`](/commands/cro) | CRO-focused content/design |
-| [`/enhance`](/commands/enhance) | Enhance existing content/design |
-| [`/fast`](/commands/fast) | Quick UI implementation |
-| [`/good`](/commands/good) | High-quality UI with polish |
-| [`/screenshot`](/commands/screenshot) | Implement UI from screenshot |
-
-
-### Dev {#dev}
-
-| Command | Description |
-|---------|-------------|
-| [`/feature`](/commands/feature) | Full feature development with planning, testing, a... |
-| [`/fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues |
-| [`/fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation |
-| [`/fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation |
-| [`/fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues |
-| [`/fix-test`](/commands/fix-test) | Fix failing tests |
-| [`/fix`](/commands/fix) | Debug and fix bugs |
-| [`/review`](/commands/review) | Code review with security and quality focus |
-| [`/tdd`](/commands/tdd) | Test-driven development workflow |
-| [`/test`](/commands/test) | Generate and run tests |
-
-
-### Git {#git}
-
-| Command | Description |
-|---------|-------------|
-| [`/cm`](/commands/cm) | Quick conventional commit |
-| [`/commit`](/commands/commit) | Smart commit with conventional message |
-| [`/cp`](/commands/cp) | Commit and push |
-| [`/deploy`](/commands/deploy) | Deploy to environment |
-| [`/pr`](/commands/pr) | Create pull request |
-| [`/ship`](/commands/ship) | Commit and create PR |
-
-
-### Omega {#omega}
-
-| Command | Description |
-|---------|-------------|
-| [`/1000x`](/commands/1000x) | Find 1000x moonshot path |
-| [`/100x`](/commands/100x) | Find 100x paradigm shift |
-| [`/10x`](/commands/10x) | Find 10x improvement path |
-| [`/dimensions`](/commands/dimensions) | Display 10 Omega Dimensions |
-| [`/principles`](/commands/principles) | Display 7 Omega Principles |
-
-
-### Planning {#planning}
-
-| Command | Description |
-|---------|-------------|
-| [`/ask`](/commands/ask) | Quick question with codebase context |
-| [`/brainstorm`](/commands/brainstorm) | Interactive brainstorming session |
-| [`/doc`](/commands/doc) | Generate documentation |
-| [`/execute-plan`](/commands/execute-plan) | Execute existing plan with subagents |
-| [`/plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks |
-| [`/plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy |
-| [`/plan`](/commands/plan) | Create implementation plan |
-| [`/research`](/commands/research) | Research technology or topic |
-
-
-### Quality {#quality}
-
-| Command | Description |
-|---------|-------------|
-| [`/api-gen`](/commands/api-gen) | Generate API code from spec |
-| [`/lint`](/commands/lint) | Run linting |
-| [`/optimize`](/commands/optimize) | Performance optimization |
-| [`/refactor`](/commands/refactor) | Improve code structure |
-| [`/security-scan`](/commands/security-scan) | Scan for security vulnerabilities |
-
-
-### Sprint {#sprint}
-
-| Command | Description |
-|---------|-------------|
-| [`/backlog-add`](/commands/backlog-add) | Add task to backlog |
-| [`/backlog-prioritize`](/commands/backlog-prioritize) | AI-powered backlog prioritization |
-| [`/backlog-show`](/commands/backlog-show) | Display backlog |
-| [`/init`](/commands/init) | Initialize OMGKIT in project |
-| [`/sprint-current`](/commands/sprint-current) | Show sprint progress |
-| [`/sprint-end`](/commands/sprint-end) | End sprint with retrospective |
-| [`/sprint-new`](/commands/sprint-new) | Create new sprint |
-| [`/sprint-start`](/commands/sprint-start) | Start current sprint |
-| [`/team-ask`](/commands/team-ask) | Ask the AI team a question |
-| [`/team-run`](/commands/team-run) | Run AI team on sprint tasks |
-| [`/team-status`](/commands/team-status) | Show AI team activity |
-| [`/vision-set`](/commands/vision-set) | Set product vision interactively |
-| [`/vision-show`](/commands/vision-show) | Display current vision |
-
+<CardGroup cols={4}>
+  <Card title="54" icon="terminal">
+    Total Commands
+  </Card>
+  <Card title="8" icon="folder">
+    Categories
+  </Card>
+  <Card title="23" icon="robot">
+    Backing Agents
+  </Card>
+  <Card title="9" icon="sliders">
+    Mode-Aware
+  </Card>
+</CardGroup>
 
 ## Command Categories
 
 <CardGroup cols={2}>
-  <Card title="Context" icon="layer-group">
-    6 commands for context tasks
+  <Card title="Dev" icon="code" href="#dev">
+    **10 commands** - Build features and fix bugs
   </Card>
-  <Card title="Design" icon="palette">
-    5 commands for design tasks
+  <Card title="Planning" icon="map" href="#planning">
+    **8 commands** - Plan and research before coding
   </Card>
-  <Card title="Dev" icon="code">
-    10 commands for dev tasks
+  <Card title="Git" icon="code-branch" href="#git">
+    **6 commands** - Version control and deployment
   </Card>
-  <Card title="Git" icon="code-branch">
-    6 commands for git tasks
+  <Card title="Quality" icon="shield-check" href="#quality">
+    **5 commands** - Ensure code health and security
   </Card>
-  <Card title="Omega" icon="wand-magic-sparkles">
-    5 commands for omega tasks
+  <Card title="Context" icon="layer-group" href="#context">
+    **6 commands** - Manage session and codebase context
   </Card>
-  <Card title="Planning" icon="map">
-    8 commands for planning tasks
+  <Card title="Design" icon="palette" href="#design">
+    **5 commands** - UI/UX and visual design
   </Card>
-  <Card title="Quality" icon="shield-check">
-    5 commands for quality tasks
+  <Card title="Omega" icon="wand-magic-sparkles" href="#omega">
+    **5 commands** - Strategic 10x/100x/1000x thinking
   </Card>
-  <Card title="Sprint" icon="calendar">
-    13 commands for sprint tasks
+  <Card title="Sprint" icon="calendar-days" href="#sprint">
+    **13 commands** - Team and sprint management
   </Card>
 </CardGroup>
 
+## Essential Commands Cheat Sheet
+
+| Task | Command | Example |
+|------|---------|---------|
+| Plan a feature | `/plan` | `/plan "user authentication"` |
+| Implement feature | `/feature` | `/feature "add login form"` |
+| Fix a bug | `/fix` | `/fix "button not clickable"` |
+| Write tests | `/test` | `/test "AuthService"` |
+| Code review | `/review` | `/review src/components/` |
+| Commit changes | `/commit` | `/commit` |
+| Create PR | `/pr` | `/pr` |
+| Research tech | `/research` | `/research "GraphQL best practices"` |
+
+---
+
+
+## Dev {#dev}
+
+Development commands for building features and fixing bugs
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/feature`](/commands/feature) | Full feature development with planning, ... | `/feature <feature description>` |
+| [`/fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/fix-ci <github-action-url>` |
+| [`/fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/fix-fast <bug>` |
+| [`/fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation | `/fix-hard <complex bug>` |
+| [`/fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues | `/fix-logs` |
+| [`/fix-test`](/commands/fix-test) | Fix failing tests | `/fix-test` |
+| [`/fix`](/commands/fix) | Debug and fix bugs | `/fix <error or issue>` |
+| [`/review`](/commands/review) | Code review with security and quality fo... | `/review [file or directory]` |
+| [`/tdd`](/commands/tdd) | Test-driven development workflow | `/tdd <feature>` |
+| [`/test`](/commands/test) | Generate and run tests | `/test <scope>` |
+
+
+## Planning {#planning}
+
+Planning and research commands for strategic work
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/ask`](/commands/ask) | Quick question with codebase context | `/ask <question>` |
+| [`/brainstorm`](/commands/brainstorm) | Interactive brainstorming session | `/brainstorm <topic>` |
+| [`/doc`](/commands/doc) | Generate documentation | `/doc <target>` |
+| [`/execute-plan`](/commands/execute-plan) | Execute existing plan with subagents | `/execute-plan <plan-file>` |
+| [`/plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks | `/plan-detailed <task>` |
+| [`/plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy | `/plan-parallel <task>` |
+| [`/plan`](/commands/plan) | Create implementation plan | `/plan <task>` |
+| [`/research`](/commands/research) | Research technology or topic | `/research <topic>` |
+
+
+## Git {#git}
+
+Git and deployment commands for version control
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/cm`](/commands/cm) | Quick conventional commit | `/cm` |
+| [`/commit`](/commands/commit) | Smart commit with conventional message | `/commit [message]` |
+| [`/cp`](/commands/cp) | Commit and push | `/cp` |
+| [`/deploy`](/commands/deploy) | Deploy to environment | `/deploy [env]` |
+| [`/pr`](/commands/pr) | Create pull request | `/pr [title]` |
+| [`/ship`](/commands/ship) | Commit and create PR | `/ship [message]` |
+
+
+## Quality {#quality}
+
+Quality and security commands for code health
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/api-gen`](/commands/api-gen) | Generate API code from spec | `/api-gen <resource>` |
+| [`/lint`](/commands/lint) | Run linting | `/lint` |
+| [`/optimize`](/commands/optimize) | Performance optimization | `/optimize <file>` |
+| [`/refactor`](/commands/refactor) | Improve code structure | `/refactor <file or directory>` |
+| [`/security-scan`](/commands/security-scan) | Scan for security vulnerabilities | `/security-scan` |
+
+
+## Context {#context}
+
+Context and session management commands
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/checkpoint`](/commands/checkpoint) | Save or restore session state | `/checkpoint <save|restore|list>` |
+| [`/index`](/commands/index) | Generate project index | `/index` |
+| [`/load`](/commands/load) | Load project context | `/load <component>` |
+| [`/mode`](/commands/mode) | Switch behavioral mode | `/mode <mode-name>` |
+| [`/spawn-collect`](/commands/spawn-collect) | Collect results from parallel tasks | `/spawn-collect` |
+| [`/spawn`](/commands/spawn) | Launch parallel background task | `/spawn <task description>` |
+
+
+## Design {#design}
+
+Design and UI/UX commands for visual work
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/cro`](/commands/cro) | CRO-focused content/design | `/cro <page>` |
+| [`/enhance`](/commands/enhance) | Enhance existing content/design | `/enhance <target>` |
+| [`/fast`](/commands/fast) | Quick UI implementation | `/fast <UI description>` |
+| [`/good`](/commands/good) | High-quality UI with polish | `/good <UI description>` |
+| [`/screenshot`](/commands/screenshot) | Implement UI from screenshot | `/screenshot <screenshot reference>` |
+
+
+## Omega {#omega}
+
+Omega-level strategic thinking commands
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/1000x`](/commands/1000x) | Find 1000x moonshot path | `/1000x <topic>` |
+| [`/100x`](/commands/100x) | Find 100x paradigm shift | `/100x <topic>` |
+| [`/10x`](/commands/10x) | Find 10x improvement path | `/10x <topic>` |
+| [`/dimensions`](/commands/dimensions) | Display 10 Omega Dimensions | `/dimensions` |
+| [`/principles`](/commands/principles) | Display 7 Omega Principles | `/principles` |
+
+
+## Sprint {#sprint}
+
+Sprint and team management commands
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/backlog-add`](/commands/backlog-add) | Add task to backlog | `/backlog-add <task> [--type TYPE] [--priority N]` |
+| [`/backlog-prioritize`](/commands/backlog-prioritize) | AI-powered backlog prioritization | `/backlog-prioritize` |
+| [`/backlog-show`](/commands/backlog-show) | Display backlog | `/backlog-show` |
+| [`/init`](/commands/init) | Initialize OMGKIT in project | `/init` |
+| [`/sprint-current`](/commands/sprint-current) | Show sprint progress | `/sprint-current` |
+| [`/sprint-end`](/commands/sprint-end) | End sprint with retrospective | `/sprint-end` |
+| [`/sprint-new`](/commands/sprint-new) | Create new sprint | `/sprint-new [name] [--propose]` |
+| [`/sprint-start`](/commands/sprint-start) | Start current sprint | `/sprint-start` |
+| [`/team-ask`](/commands/team-ask) | Ask the AI team a question | `/team-ask <question>` |
+| [`/team-run`](/commands/team-run) | Run AI team on sprint tasks | `/team-run [--mode MODE]` |
+| [`/team-status`](/commands/team-status) | Show AI team activity | `/team-status` |
+| [`/vision-set`](/commands/vision-set) | Set product vision interactively | `/vision-set` |
+| [`/vision-show`](/commands/vision-show) | Display current vision | `/vision-show` |
+
+
+---
+
 ## Usage Patterns
 
-### Basic Usage
+### Basic Syntax
 
 ```bash
-/command argument
-/command "argument with spaces"
-/command --flag value
+# Simple command
+/command
+
+# With argument
+/command "your input"
+
+# With specific file
+/command src/file.ts
+
+# With flags (some commands)
+/command --verbose
 ```
 
-### Common Workflows
+### Workflow Examples
 
+<Tabs>
+  <Tab title="Feature Development">
 ```bash
-# Feature development
-/feature "add user authentication"
+# 1. Plan the feature
+/plan "user profile page"
 
-# Quick bug fix
-/fix "login not working"
+# 2. Execute the plan
+/execute-plan
 
-# Full planning
-/plan "checkout flow" && /execute-plan
+# 3. Write tests
+/test "ProfilePage"
 
-# Git workflow
+# 4. Review code
+/review src/pages/Profile.tsx
+
+# 5. Commit and PR
 /commit && /pr
 ```
+  </Tab>
+  <Tab title="Bug Fixing">
+```bash
+# 1. Quick fix
+/fix "login fails on mobile"
+
+# 2. Or detailed investigation
+/fix-hard "login fails on mobile"
+
+# 3. Run tests
+/test
+
+# 4. Commit
+/commit
+```
+  </Tab>
+  <Tab title="Strategic Thinking">
+```bash
+# 1. Activate Omega mode
+/mode omega
+
+# 2. Find 10x opportunities
+/10x "our checkout flow"
+
+# 3. Or 100x moonshots
+/100x "our entire product"
+
+# 4. Get principles
+/principles
+```
+  </Tab>
+</Tabs>
+
+### Command Chaining
+
+Commands can be chained for complex workflows:
+
+```bash
+# Plan, implement, test, commit in sequence
+/plan "feature" && /execute-plan && /test && /commit
+
+# Research before planning
+/research "best practices" && /plan "implement findings"
+```
+
+## Command Modes
+
+Commands behave differently based on the active mode:
+
+| Mode | Effect on Commands |
+|------|-------------------|
+| **Default** | Standard behavior |
+| **Omega** | Enhanced strategic thinking |
+| **Token Efficient** | Minimal context, faster responses |
+| **Autonomous** | Less confirmation prompts |
+
+Switch modes with `/mode <mode-name>`.
 
 ## Next Steps
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/agents/overview">
-    Agents that power commands
+    23 agents that power these commands
   </Card>
   <Card title="Modes" icon="sliders" href="/modes/overview">
-    Behavioral modes
+    9 behavioral modes
+  </Card>
+  <Card title="Skills" icon="brain" href="/skills/overview">
+    43 domain expertise modules
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/getting-started/quickstart">
+    Get started in 5 minutes
   </Card>
 </CardGroup>

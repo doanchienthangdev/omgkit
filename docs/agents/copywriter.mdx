@@ -1,13 +1,25 @@
 ---
 title: "copywriter"
 description: "Marketing copy, content writing, UX writing. Creates compelling content. Use for content creation."
+icon: "pen-fancy"
 ---
 
 <Info>
+  **Category:** Creative
+
   **Tools:** Read, Write, WebSearch
 
   **Model:** inherit
+
+  **Best For:** Marketing copy, content writing, UX writing
 </Info>
+
+## Quick Start
+
+```bash
+# Invoke directly
+@copywriter "your task description here"
+```
 
 
 # ✍️ Copywriter Agent
@@ -53,22 +65,67 @@ Provide 2-3 options with recommendation:
 ```
 
 
-## Usage
+## Integration Points
+
+### Works Well With
+
+- **[ui-ux-designer](/agents/ui-ux-designer)** - UI components, responsive design, accessibility
+- **[docs-manager](/agents/docs-manager)** - Documentation generation, API docs, architecture guides
+
+
+## Common Patterns
+
+### Pattern 1: Direct Task Assignment
 
 ```bash
-# Direct invocation
-@copywriter "your task here"
-
-# Or use related commands
+@copywriter "describe what you need done"
 ```
+
+### Pattern 2: Chained with Other Agents
+
+```bash
+# Research first, then plan
+@researcher "investigate best practices for X"
+@copywriter "create implementation plan based on research"
+```
+
+### Pattern 3: Within Team Mode
+
+```bash
+/team:run
+# Sprint Master will automatically assign copywriter to appropriate tasks
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent not responding as expected">
+    Try being more specific in your task description. Include:
+    - Clear success criteria
+    - Relevant file paths
+    - Expected output format
+  </Accordion>
+  <Accordion title="Missing context from codebase">
+    Run `/index` first to ensure the agent has full codebase awareness.
+  </Accordion>
+  <Accordion title="Agent taking too long">
+    For complex tasks, break them down into smaller pieces or use `/mode token-efficient`.
+  </Accordion>
+</AccordionGroup>
 
 ## Related
 
 <CardGroup cols={2}>
   <Card title="All Agents" icon="robot" href="/agents/overview">
-    See all 23 agents
+    See all 23 specialized agents
   </Card>
   <Card title="AI Team" icon="users" href="/concepts/ai-team">
-    How agents collaborate
+    Learn how agents collaborate
+  </Card>
+  <Card title="Creative" icon="pen-fancy" href="/agents/overview#creative">
+    More Creative agents
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands that use this agent
   </Card>
 </CardGroup>

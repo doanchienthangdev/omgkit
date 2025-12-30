@@ -1,7 +1,27 @@
 ---
 title: "aws"
 description: "AWS services. Use for Lambda, S3, RDS, ECS, and other AWS services."
+icon: "brain"
 ---
+
+<Info>
+  **Category:** Devops
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+AWS services. Use for Lambda, S3, RDS, ECS, and other AWS services.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
 
 
 # AWS Skill
@@ -52,13 +72,33 @@ await client.send(new PutItemCommand({
 - Monitor with CloudWatch
 
 
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  aws:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
     See all 43 skills
   </Card>
-  <Card title="devops" icon="folder" href="/skills/overview#devops">
+  <Card title="Devops" icon="brain" href="/skills/overview#devops">
     More devops skills
   </Card>
 </CardGroup>

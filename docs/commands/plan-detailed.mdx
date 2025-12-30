@@ -1,9 +1,24 @@
 ---
 title: "/plan-detailed"
 description: "Detailed plan with 2-5 min tasks"
+icon: "map"
 ---
 
-<Info>**Usage:** `/plan-detailed <task>`</Info>
+<Info>
+  **Category:** Planning
+
+  **Syntax:** `/plan-detailed <task>`
+</Info>
+
+## Overview
+
+Detailed plan with 2-5 min tasks
+
+## Quick Start
+
+```bash
+/plan-detailed "task"
+```
 
 
 # 📋 Detailed Plan: $ARGUMENTS
@@ -34,9 +49,52 @@ Create detailed plan with granular tasks.
 Break complex work into atomic tasks.
 
 
+
 ## Tools Used
 
-Task, Read, Grep, Glob, WebSearch
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+- **WebSearch** - Enables websearch capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/plan-detailed "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/plan-detailed "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -44,7 +102,7 @@ Task, Read, Grep, Glob, WebSearch
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="planning Commands" icon="folder" href="/commands/overview#planning">
+  <Card title="Planning Commands" icon="map" href="/commands/overview#planning">
     More planning commands
   </Card>
 </CardGroup>

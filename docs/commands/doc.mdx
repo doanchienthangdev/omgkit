@@ -1,9 +1,24 @@
 ---
 title: "/doc"
 description: "Generate documentation"
+icon: "map"
 ---
 
-<Info>**Usage:** `/doc <target>`</Info>
+<Info>
+  **Category:** Planning
+
+  **Syntax:** `/doc <target>`
+</Info>
+
+## Overview
+
+Generate documentation
+
+## Quick Start
+
+```bash
+/doc "target"
+```
 
 
 # 📚 Doc: $ARGUMENTS
@@ -30,9 +45,51 @@ Generate documentation for: **$ARGUMENTS**
 - Error documentation
 
 
+
 ## Tools Used
 
-Task, Read, Write, Glob
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/doc "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/doc "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -40,7 +97,7 @@ Task, Read, Write, Glob
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="planning Commands" icon="folder" href="/commands/overview#planning">
+  <Card title="Planning Commands" icon="map" href="/commands/overview#planning">
     More planning commands
   </Card>
 </CardGroup>

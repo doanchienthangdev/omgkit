@@ -1,9 +1,24 @@
 ---
 title: "/checkpoint"
 description: "Save or restore session state"
+icon: "layer-group"
 ---
 
-<Info>**Usage:** `/checkpoint <save|restore|list>`</Info>
+<Info>
+  **Category:** Context
+
+  **Syntax:** `/checkpoint <save|restore|list>`
+</Info>
+
+## Overview
+
+Save or restore session state
+
+## Quick Start
+
+```bash
+/checkpoint "save|restore|list"
+```
 
 
 # 💾 Checkpoint: $ARGUMENTS
@@ -22,9 +37,49 @@ Session state management.
 - Decisions made
 
 
+
 ## Tools Used
 
-Read, Write
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/checkpoint "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/checkpoint "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -32,7 +87,7 @@ Read, Write
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="context Commands" icon="folder" href="/commands/overview#context">
+  <Card title="Context Commands" icon="layer-group" href="/commands/overview#context">
     More context commands
   </Card>
 </CardGroup>

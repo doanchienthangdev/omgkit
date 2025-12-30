@@ -1,7 +1,27 @@
 ---
 title: "rails"
 description: "Ruby on Rails development. Use for Rails projects, MVC, ActiveRecord."
+icon: "layer-group"
 ---
+
+<Info>
+  **Category:** Frameworks
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Ruby on Rails development. Use for Rails projects, MVC, ActiveRecord.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
 
 
 # Ruby on Rails Skill
@@ -57,13 +77,33 @@ end
 - Use background jobs for async
 
 
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  rails:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
     See all 43 skills
   </Card>
-  <Card title="frameworks" icon="folder" href="/skills/overview#frameworks">
+  <Card title="Frameworks" icon="layer-group" href="/skills/overview#frameworks">
     More frameworks skills
   </Card>
 </CardGroup>

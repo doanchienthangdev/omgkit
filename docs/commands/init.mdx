@@ -1,9 +1,24 @@
 ---
 title: "/init"
 description: "Initialize OMGKIT in project"
+icon: "calendar-days"
 ---
 
+<Info>
+  **Category:** Sprint
 
+  **Syntax:** `/init`
+</Info>
+
+## Overview
+
+Initialize OMGKIT in project
+
+## Quick Start
+
+```bash
+/init
+```
 
 
 # 🔮 Initialize OMGKIT
@@ -30,9 +45,49 @@ OMEGA.md
 3. `/team:run` - Start AI team
 
 
+
 ## Tools Used
 
-Bash, Write
+This command uses the following tools:
+
+- **Bash** - Enables bash capabilities
+- **Write** - Enables write capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/init
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/init
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -40,7 +95,7 @@ Bash, Write
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="sprint Commands" icon="folder" href="/commands/overview#sprint">
+  <Card title="Sprint Commands" icon="calendar-days" href="/commands/overview#sprint">
     More sprint commands
   </Card>
 </CardGroup>

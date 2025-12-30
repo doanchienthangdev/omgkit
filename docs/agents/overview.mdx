@@ -1,87 +1,215 @@
 ---
 title: "Agents Overview"
 description: "23 specialized AI agents for every development task"
+icon: "robot"
 ---
 
-OMGKIT includes 23 specialized agents, each expert in their domain.
+OMGKIT includes **23 specialized agents**, each an expert in their domain. Agents work independently or collaborate as a team under the Sprint Master's orchestration.
+
+## At a Glance
+
+<CardGroup cols={4}>
+  <Card title="23" icon="robot">
+    Specialized Agents
+  </Card>
+  <Card title="5" icon="folder">
+    Categories
+  </Card>
+  <Card title="∞" icon="arrows-spin">
+    Collaboration Patterns
+  </Card>
+  <Card title="1" icon="users-gear">
+    Sprint Master
+  </Card>
+</CardGroup>
 
 ## Agent Categories
 
 <CardGroup cols={2}>
-  <Card title="Core Development" icon="code">
-    Planning, research, debugging, testing, review, exploration
+  <Card title="Core Development" icon="code" href="#core-development">
+    **6 agents** - Planning, research, debugging, testing, review, exploration
   </Card>
-  <Card title="Operations" icon="gears">
-    Git, docs, project management, database, UI/UX
+  <Card title="Operations" icon="gears" href="#operations">
+    **5 agents** - Git, docs, project management, database, UI/UX
   </Card>
-  <Card title="Extended" icon="puzzle-piece">
-    Fullstack, CI/CD, security, API design, pipelines
+  <Card title="Extended" icon="puzzle-piece" href="#extended">
+    **6 agents** - Fullstack, CI/CD, security, API design, pipelines
   </Card>
-  <Card title="Creative" icon="palette">
-    Copy, brainstorming, journaling
+  <Card title="Creative" icon="palette" href="#creative">
+    **3 agents** - Copy, brainstorming, journaling
+  </Card>
+  <Card title="Omega Exclusive" icon="wand-magic-sparkles" href="#omega-exclusive">
+    **3 agents** - Oracle, architect, sprint master
   </Card>
 </CardGroup>
 
-## All Agents
+## Choosing the Right Agent
 
-| Agent | Description | Tools |
-|-------|-------------|-------|
-| [api-designer](/agents/api-designer) | API design, OpenAPI specs, REST best practices. Use for API ... | Read,  Write,  Glob |
-| [architect](/agents/architect) | System architect applying Omega principles. Designs systems ... | Read,  Write,  Grep |
-| [brainstormer](/agents/brainstormer) | Creative exploration, ideation, option generation. Use for b... | Read,  WebSearch,  Glob |
-| [cicd-manager](/agents/cicd-manager) | CI/CD pipeline management, GitHub Actions, deployment automa... | Read,  Write,  Bash |
-| [code-reviewer](/agents/code-reviewer) | Code quality guardian with security-first mindset. OWASP Top... | Read,  Grep,  Glob |
-| [copywriter](/agents/copywriter) | Marketing copy, content writing, UX writing. Creates compell... | Read,  Write,  WebSearch |
-| [database-admin](/agents/database-admin) | Schema design, query optimization, migrations. Database expe... | Read,  Write,  Bash |
-| [debugger](/agents/debugger) | Expert bug investigator with structured problem-solving. Fin... | Read,  Grep,  Glob |
-| [docs-manager](/agents/docs-manager) | Documentation architect with API docs, architecture guides, ... | Read,  Write,  Glob |
-| [fullstack-developer](/agents/fullstack-developer) | Full implementation with strict file ownership. Writes clean... | Read,  Write,  Edit |
-| [git-manager](/agents/git-manager) | Version control expert with conventional commits, PR automat... | Bash,  Read,  Write |
-| [journal-writer](/agents/journal-writer) | Failure documentation, lessons learned, retrospectives. Docu... | Read,  Write |
-| [oracle](/agents/oracle) | Strategic thinking with 7 Omega thinking modes. Finds 10x/10... | Read,  Grep,  Glob |
-| [pipeline-architect](/agents/pipeline-architect) | Pipeline optimization, workflow design, automation architect... | Read,  Write,  Bash |
-| [planner](/agents/planner) | Task decomposition and implementation planning. Creates deta... | Read,  Grep,  Glob |
-| [project-manager](/agents/project-manager) | Progress tracking, coordination, status reports. Manages dev... | Read,  Write,  Glob |
-| [researcher](/agents/researcher) | Technology research expert with best practices discovery, do... | Read,  WebSearch,  WebFetch |
-| [scout](/agents/scout) | Expert codebase explorer with parallel search capabilities. ... | Read,  Grep,  Glob |
-| [security-auditor](/agents/security-auditor) | Security reviews, vulnerability assessment, compliance check... | Read,  Grep,  Bash |
-| [sprint-master](/agents/sprint-master) | AI Team orchestrator with sprint management, velocity tracki... | Read,  Write,  Task |
-| [tester](/agents/tester) | Quality assurance through comprehensive testing. Framework-s... | Read,  Write,  Bash |
-| [ui-ux-designer](/agents/ui-ux-designer) | UI component creation, responsive design, accessibility. Cre... | Read,  Write,  Bash |
-| [vulnerability-scanner](/agents/vulnerability-scanner) | Security scanning, dependency audit, code analysis. Use for ... | Read,  Grep,  Bash |
+<AccordionGroup>
+  <Accordion title="I need to plan a feature">
+    Use **[@planner](/agents/planner)** for detailed implementation plans with task breakdowns, dependencies, and rollback procedures.
+  </Accordion>
+  <Accordion title="I need to fix a bug">
+    Use **[@debugger](/agents/debugger)** for systematic bug investigation with root cause analysis and verification steps.
+  </Accordion>
+  <Accordion title="I need to write tests">
+    Use **[@tester](/agents/tester)** for comprehensive test generation with edge cases and coverage optimization.
+  </Accordion>
+  <Accordion title="I need to implement a feature">
+    Use **[@fullstack-developer](/agents/fullstack-developer)** for complete code implementation following project patterns.
+  </Accordion>
+  <Accordion title="I need a code review">
+    Use **[@code-reviewer](/agents/code-reviewer)** for security-focused review with OWASP checks and best practices.
+  </Accordion>
+  <Accordion title="I need strategic thinking">
+    Use **[@oracle](/agents/oracle)** for 10x/100x/1000x opportunities using Omega thinking modes.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+
+## Core Development {#core-development}
+
+| Agent | Description | Tools | Best For |
+|-------|-------------|-------|----------|
+| [**code-reviewer**](/agents/code-reviewer) | Code quality guardian with security-first mindset.... | Read,  Grep,  Glob | Code quality review, security analysis, ... |
+| [**debugger**](/agents/debugger) | Expert bug investigator with structured problem-so... | Read,  Grep,  Glob | Bug investigation, root cause analysis, ... |
+| [**planner**](/agents/planner) | Task decomposition and implementation planning. Cr... | Read,  Grep,  Glob | Feature planning, task decomposition, im... |
+| [**researcher**](/agents/researcher) | Technology research expert with best practices dis... | Read,  WebSearch,  WebFetch | Technology research, best practices disc... |
+| [**scout**](/agents/scout) | Expert codebase explorer with parallel search capa... | Read,  Grep,  Glob | Codebase exploration, pattern discovery,... |
+| [**tester**](/agents/tester) | Quality assurance through comprehensive testing. F... | Read,  Write,  Bash | Test creation, coverage improvement, qua... |
+
+
+## Operations {#operations}
+
+| Agent | Description | Tools | Best For |
+|-------|-------------|-------|----------|
+| [**database-admin**](/agents/database-admin) | Schema design, query optimization, migrations. Dat... | Read,  Write,  Bash | Schema design, query optimization, migra... |
+| [**docs-manager**](/agents/docs-manager) | Documentation architect with API docs, architectur... | Read,  Write,  Glob | Documentation generation, API docs, arch... |
+| [**git-manager**](/agents/git-manager) | Version control expert with conventional commits, ... | Bash,  Read,  Write | Version control, commit management, PR a... |
+| [**project-manager**](/agents/project-manager) | Progress tracking, coordination, status reports. M... | Read,  Write,  Glob | Progress tracking, coordination, status ... |
+| [**ui-ux-designer**](/agents/ui-ux-designer) | UI component creation, responsive design, accessib... | Read,  Write,  Bash | UI components, responsive design, access... |
+
+
+## Extended {#extended}
+
+| Agent | Description | Tools | Best For |
+|-------|-------------|-------|----------|
+| [**api-designer**](/agents/api-designer) | API design, OpenAPI specs, REST best practices. Us... | Read,  Write,  Glob | API design, OpenAPI specs, REST best pra... |
+| [**cicd-manager**](/agents/cicd-manager) | CI/CD pipeline management, GitHub Actions, deploym... | Read,  Write,  Bash | CI/CD pipelines, GitHub Actions, deploym... |
+| [**fullstack-developer**](/agents/fullstack-developer) | Full implementation with strict file ownership. Wr... | Read,  Write,  Edit | Full implementation, code writing, featu... |
+| [**pipeline-architect**](/agents/pipeline-architect) | Pipeline optimization, workflow design, automation... | Read,  Write,  Bash | Pipeline optimization, workflow design, ... |
+| [**security-auditor**](/agents/security-auditor) | Security reviews, vulnerability assessment, compli... | Read,  Grep,  Bash | Security reviews, vulnerability assessme... |
+| [**vulnerability-scanner**](/agents/vulnerability-scanner) | Security scanning, dependency audit, code analysis... | Read,  Grep,  Bash | Security scanning, dependency audit, cod... |
+
+
+## Creative {#creative}
+
+| Agent | Description | Tools | Best For |
+|-------|-------------|-------|----------|
+| [**brainstormer**](/agents/brainstormer) | Creative exploration, ideation, option generation.... | Read,  WebSearch,  Glob | Creative exploration, ideation, option g... |
+| [**copywriter**](/agents/copywriter) | Marketing copy, content writing, UX writing. Creat... | Read,  Write,  WebSearch | Marketing copy, content writing, UX writ... |
+| [**journal-writer**](/agents/journal-writer) | Failure documentation, lessons learned, retrospect... | Read,  Write | Failure documentation, lessons learned, ... |
+
+
+## Omega Exclusive {#omega-exclusive}
+
+| Agent | Description | Tools | Best For |
+|-------|-------------|-------|----------|
+| [**architect**](/agents/architect) | System architect applying Omega principles. Design... | Read,  Write,  Grep | System architecture, design patterns, sc... |
+| [**oracle**](/agents/oracle) | Strategic thinking with 7 Omega thinking modes. Fi... | Read,  Grep,  Glob | Strategic thinking, 10x/100x/1000x oppor... |
+| [**sprint-master**](/agents/sprint-master) | AI Team orchestrator with sprint management, veloc... | Read,  Write,  Task | AI Team orchestration, sprint management... |
+
+
+---
 
 ## Using Agents
 
 ### Direct Invocation
 
+The most straightforward way to use an agent:
+
 ```bash
-@planner "plan the checkout feature"
-@tester "write tests for AuthService"
-@code-reviewer "review src/components/"
+# Syntax
+@agent-name "your task description"
+
+# Examples
+@planner "plan the user authentication feature"
+@tester "write tests for the PaymentService class"
+@code-reviewer "review src/components/ for security issues"
+@debugger "investigate why login fails on mobile"
 ```
 
 ### Via Commands
 
-Most commands automatically route to the appropriate agent:
+Many commands automatically route to the appropriate agent:
 
-```bash
-/plan → planner
-/test → tester
-/review → code-reviewer
-/commit → git-manager
-```
+| Command | Agent | Use Case |
+|---------|-------|----------|
+| `/plan` | planner | Feature planning |
+| `/test` | tester | Test generation |
+| `/review` | code-reviewer | Code review |
+| `/commit` | git-manager | Git commits |
+| `/fix` | debugger | Bug fixing |
+| `/research` | researcher | Technology research |
+| `/brainstorm` | brainstormer | Ideation |
 
 ### In Team Mode
 
-When running `/team:run`, the Sprint Master assigns agents to tasks automatically.
+When running `/team:run`, the Sprint Master automatically:
+
+1. Analyzes the sprint backlog
+2. Decomposes tasks into agent assignments
+3. Orchestrates parallel execution
+4. Handles agent handoffs
+5. Reports progress and blockers
+
+```bash
+# Start team mode
+/team:run
+
+# Check team status
+/team:status
+
+# Ask the team a question
+/team:ask "what's blocking the auth feature?"
+```
+
+### Agent Chaining
+
+Agents can be chained for complex workflows:
+
+```bash
+# Research → Plan → Implement → Test → Review
+@researcher "investigate GraphQL best practices"
+@planner "plan GraphQL API implementation"
+@fullstack-developer "implement the planned GraphQL API"
+@tester "write tests for the new GraphQL API"
+@code-reviewer "review the GraphQL implementation"
+```
+
+## Agent Communication
+
+Agents communicate through:
+
+1. **Shared Context** - All agents see the same codebase and conversation
+2. **Handoff Protocols** - Structured handoffs between agents
+3. **Sprint Master** - Central orchestration in team mode
 
 ## Next Steps
 
 <CardGroup cols={2}>
-  <Card title="AI Team" icon="users" href="/concepts/ai-team">
-    How agents collaborate
+  <Card title="AI Team Concepts" icon="users" href="/concepts/ai-team">
+    Deep dive into how agents collaborate
   </Card>
-  <Card title="Commands" icon="terminal" href="/commands/overview">
-    Commands that use agents
+  <Card title="Commands Reference" icon="terminal" href="/commands/overview">
+    54 commands that utilize agents
+  </Card>
+  <Card title="Sprint Management" icon="calendar-days" href="/concepts/sprint-management">
+    Manage agents across sprints
+  </Card>
+  <Card title="Omega Philosophy" icon="atom" href="/concepts/omega-philosophy">
+    The philosophy behind agent design
   </Card>
 </CardGroup>

@@ -1,13 +1,25 @@
 ---
 title: "scout"
 description: "Expert codebase explorer with parallel search capabilities. Navigates large codebases efficiently, discovers patterns, maps dependencies, and provides architectural insights."
+icon: "binoculars"
 ---
 
 <Info>
+  **Category:** Core Development
+
   **Tools:** Read, Grep, Glob, Task
 
   **Model:** inherit
+
+  **Best For:** Codebase exploration, pattern discovery, dependency mapping
 </Info>
+
+## Quick Start
+
+```bash
+# Invoke directly
+@scout "your task description here"
+```
 
 
 # 🔍 Scout Agent
@@ -447,22 +459,68 @@ UserController
 - `/trace [symbol]` - Trace symbol usage
 
 
-## Usage
+## Integration Points
+
+### Works Well With
+
+- **[planner](/agents/planner)** - Feature planning, task decomposition, implementation roadmaps
+- **[debugger](/agents/debugger)** - Bug investigation, root cause analysis, error resolution
+- **[researcher](/agents/researcher)** - Technology research, best practices discovery, documentation lookup
+
+
+## Common Patterns
+
+### Pattern 1: Direct Task Assignment
 
 ```bash
-# Direct invocation
-@scout "your task here"
-
-# Or use related commands
+@scout "describe what you need done"
 ```
+
+### Pattern 2: Chained with Other Agents
+
+```bash
+# Research first, then plan
+@researcher "investigate best practices for X"
+@scout "create implementation plan based on research"
+```
+
+### Pattern 3: Within Team Mode
+
+```bash
+/team:run
+# Sprint Master will automatically assign scout to appropriate tasks
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent not responding as expected">
+    Try being more specific in your task description. Include:
+    - Clear success criteria
+    - Relevant file paths
+    - Expected output format
+  </Accordion>
+  <Accordion title="Missing context from codebase">
+    Run `/index` first to ensure the agent has full codebase awareness.
+  </Accordion>
+  <Accordion title="Agent taking too long">
+    For complex tasks, break them down into smaller pieces or use `/mode token-efficient`.
+  </Accordion>
+</AccordionGroup>
 
 ## Related
 
 <CardGroup cols={2}>
   <Card title="All Agents" icon="robot" href="/agents/overview">
-    See all 23 agents
+    See all 23 specialized agents
   </Card>
   <Card title="AI Team" icon="users" href="/concepts/ai-team">
-    How agents collaborate
+    Learn how agents collaborate
+  </Card>
+  <Card title="Core Development" icon="binoculars" href="/agents/overview#core-development">
+    More Core Development agents
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands that use this agent
   </Card>
 </CardGroup>

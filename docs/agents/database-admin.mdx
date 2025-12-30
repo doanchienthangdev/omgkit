@@ -1,13 +1,25 @@
 ---
 title: "database-admin"
 description: "Schema design, query optimization, migrations. Database expert. Use for database tasks."
+icon: "database"
 ---
 
 <Info>
+  **Category:** Operations
+
   **Tools:** Read, Write, Bash, Glob
 
   **Model:** inherit
+
+  **Best For:** Schema design, query optimization, migrations
 </Info>
+
+## Quick Start
+
+```bash
+# Invoke directly
+@database-admin "your task description here"
+```
 
 
 # 🗄️ Database Admin Agent
@@ -54,22 +66,67 @@ DROP TABLE users;
 - Regular backups
 
 
-## Usage
+## Integration Points
+
+### Works Well With
+
+- **[fullstack-developer](/agents/fullstack-developer)** - Full implementation, code writing, feature development
+- **[security-auditor](/agents/security-auditor)** - Security reviews, vulnerability assessment, compliance
+
+
+## Common Patterns
+
+### Pattern 1: Direct Task Assignment
 
 ```bash
-# Direct invocation
-@database-admin "your task here"
-
-# Or use related commands
+@database-admin "describe what you need done"
 ```
+
+### Pattern 2: Chained with Other Agents
+
+```bash
+# Research first, then plan
+@researcher "investigate best practices for X"
+@database-admin "create implementation plan based on research"
+```
+
+### Pattern 3: Within Team Mode
+
+```bash
+/team:run
+# Sprint Master will automatically assign database-admin to appropriate tasks
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent not responding as expected">
+    Try being more specific in your task description. Include:
+    - Clear success criteria
+    - Relevant file paths
+    - Expected output format
+  </Accordion>
+  <Accordion title="Missing context from codebase">
+    Run `/index` first to ensure the agent has full codebase awareness.
+  </Accordion>
+  <Accordion title="Agent taking too long">
+    For complex tasks, break them down into smaller pieces or use `/mode token-efficient`.
+  </Accordion>
+</AccordionGroup>
 
 ## Related
 
 <CardGroup cols={2}>
   <Card title="All Agents" icon="robot" href="/agents/overview">
-    See all 23 agents
+    See all 23 specialized agents
   </Card>
   <Card title="AI Team" icon="users" href="/concepts/ai-team">
-    How agents collaborate
+    Learn how agents collaborate
+  </Card>
+  <Card title="Operations" icon="database" href="/agents/overview#operations">
+    More Operations agents
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands that use this agent
   </Card>
 </CardGroup>

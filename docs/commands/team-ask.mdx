@@ -1,9 +1,24 @@
 ---
 title: "/team-ask"
 description: "Ask the AI team a question"
+icon: "calendar-days"
 ---
 
-<Info>**Usage:** `/team-ask <question>`</Info>
+<Info>
+  **Category:** Sprint
+
+  **Syntax:** `/team-ask <question>`
+</Info>
+
+## Overview
+
+Ask the AI team a question
+
+## Quick Start
+
+```bash
+/team-ask "question"
+```
 
 
 # ❓ Team Ask: $ARGUMENTS
@@ -23,9 +38,52 @@ Ask the AI team: **$ARGUMENTS**
 - Security: security-auditor
 
 
+
 ## Tools Used
 
-Task, Read, Grep, Glob, WebSearch
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+- **WebSearch** - Enables websearch capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/team-ask "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/team-ask "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -33,7 +91,7 @@ Task, Read, Grep, Glob, WebSearch
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="sprint Commands" icon="folder" href="/commands/overview#sprint">
+  <Card title="Sprint Commands" icon="calendar-days" href="/commands/overview#sprint">
     More sprint commands
   </Card>
 </CardGroup>

@@ -1,9 +1,24 @@
 ---
 title: "/10x"
 description: "Find 10x improvement path"
+icon: "wand-magic-sparkles"
 ---
 
-<Info>**Usage:** `/10x <topic>`</Info>
+<Info>
+  **Category:** Omega
+
+  **Syntax:** `/10x <topic>`
+</Info>
+
+## Overview
+
+Find 10x improvement path
+
+## Quick Start
+
+```bash
+/10x "topic"
+```
 
 
 # 🚀 10x: $ARGUMENTS
@@ -49,9 +64,52 @@ Save to: `docs/omega/10x-<topic>.md`
 ```
 
 
+
 ## Tools Used
 
-Task, Read, Grep, Glob, WebSearch
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+- **WebSearch** - Enables websearch capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/10x "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/10x "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -59,7 +117,7 @@ Task, Read, Grep, Glob, WebSearch
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="omega Commands" icon="folder" href="/commands/overview#omega">
+  <Card title="Omega Commands" icon="wand-magic-sparkles" href="/commands/overview#omega">
     More omega commands
   </Card>
 </CardGroup>

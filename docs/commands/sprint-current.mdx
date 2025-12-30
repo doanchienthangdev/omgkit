@@ -1,9 +1,24 @@
 ---
 title: "/sprint-current"
 description: "Show sprint progress"
+icon: "calendar-days"
 ---
 
+<Info>
+  **Category:** Sprint
 
+  **Syntax:** `/sprint-current`
+</Info>
+
+## Overview
+
+Show sprint progress
+
+## Quick Start
+
+```bash
+/sprint-current
+```
 
 
 # 📊 Sprint Current
@@ -25,9 +40,48 @@ Velocity: X tasks/day
 ```
 
 
+
 ## Tools Used
 
-Read
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/sprint-current
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/sprint-current
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -35,7 +89,7 @@ Read
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="sprint Commands" icon="folder" href="/commands/overview#sprint">
+  <Card title="Sprint Commands" icon="calendar-days" href="/commands/overview#sprint">
     More sprint commands
   </Card>
 </CardGroup>

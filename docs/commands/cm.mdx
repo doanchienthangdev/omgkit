@@ -1,9 +1,24 @@
 ---
 title: "/cm"
 description: "Quick conventional commit"
+icon: "code-branch"
 ---
 
+<Info>
+  **Category:** Git
 
+  **Syntax:** `/cm`
+</Info>
+
+## Overview
+
+Quick conventional commit
+
+## Quick Start
+
+```bash
+/cm
+```
 
 
 # 📝 Git Commit
@@ -16,9 +31,48 @@ git commit -m "type(scope): message"
 ```
 
 
+
 ## Tools Used
 
-Bash
+This command uses the following tools:
+
+- **Bash** - Enables bash capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/cm
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/cm
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -26,7 +80,7 @@ Bash
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="git Commands" icon="folder" href="/commands/overview#git">
+  <Card title="Git Commands" icon="code-branch" href="/commands/overview#git">
     More git commands
   </Card>
 </CardGroup>

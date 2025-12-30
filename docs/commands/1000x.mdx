@@ -1,9 +1,24 @@
 ---
 title: "/1000x"
 description: "Find 1000x moonshot path"
+icon: "wand-magic-sparkles"
 ---
 
-<Info>**Usage:** `/1000x <topic>`</Info>
+<Info>
+  **Category:** Omega
+
+  **Syntax:** `/1000x <topic>`
+</Info>
+
+## Overview
+
+Find 1000x moonshot path
+
+## Quick Start
+
+```bash
+/1000x "topic"
+```
 
 
 # 🌙 1000x: $ARGUMENTS
@@ -43,9 +58,53 @@ Save to: `docs/omega/1000x-<topic>.md`
 ```
 
 
+
 ## Tools Used
 
-Task, Read, Grep, Glob, WebSearch, WebFetch
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+- **WebSearch** - Enables websearch capabilities
+- **WebFetch** - Enables webfetch capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/1000x "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/1000x "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -53,7 +112,7 @@ Task, Read, Grep, Glob, WebSearch, WebFetch
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="omega Commands" icon="folder" href="/commands/overview#omega">
+  <Card title="Omega Commands" icon="wand-magic-sparkles" href="/commands/overview#omega">
     More omega commands
   </Card>
 </CardGroup>

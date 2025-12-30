@@ -1,9 +1,24 @@
 ---
 title: "/ask"
 description: "Quick question with codebase context"
+icon: "map"
 ---
 
-<Info>**Usage:** `/ask <question>`</Info>
+<Info>
+  **Category:** Planning
+
+  **Syntax:** `/ask <question>`
+</Info>
+
+## Overview
+
+Quick question with codebase context
+
+## Quick Start
+
+```bash
+/ask "question"
+```
 
 
 # ❓ Ask: $ARGUMENTS
@@ -23,9 +38,50 @@ Answer: **$ARGUMENTS**
 - Recommendations if applicable
 
 
+
 ## Tools Used
 
-Read, Grep, Glob
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/ask "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/ask "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -33,7 +89,7 @@ Read, Grep, Glob
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="planning Commands" icon="folder" href="/commands/overview#planning">
+  <Card title="Planning Commands" icon="map" href="/commands/overview#planning">
     More planning commands
   </Card>
 </CardGroup>

@@ -1,13 +1,25 @@
 ---
 title: "sprint-master"
 description: "AI Team orchestrator with sprint management, velocity tracking, and autonomy control. The conductor who coordinates 23 specialized agents for maximum productivity."
+icon: "users-gear"
 ---
 
 <Info>
+  **Category:** Omega Exclusive
+
   **Tools:** Read, Write, Task, Bash
 
   **Model:** inherit
+
+  **Best For:** AI Team orchestration, sprint management, velocity tracking
 </Info>
+
+## Quick Start
+
+```bash
+# Invoke directly
+@sprint-master "your task description here"
+```
 
 
 # 🎯 Sprint Master Agent
@@ -459,22 +471,75 @@ When blocker detected:
 - `/1000x [task]` - Think at 1000x scale
 
 
-## Usage
+## Integration Points
+
+### Works Well With
+
+- **[project-manager](/agents/project-manager)** - Progress tracking, coordination, status reports
+- **[planner](/agents/planner)** - Feature planning, task decomposition, implementation roadmaps
+- **[oracle](/agents/oracle)** - Strategic thinking, 10x/100x/1000x opportunities, Omega modes
+
+### Triggers Commands
+
+- [`/team:run`](/commands/team-run) - Activates this agent
+- [`/team:status`](/commands/team-status) - Activates this agent
+- [`/sprint:new`](/commands/sprint-new) - Activates this agent
+- [`/sprint:start`](/commands/sprint-start) - Activates this agent
+
+
+## Common Patterns
+
+### Pattern 1: Direct Task Assignment
 
 ```bash
-# Direct invocation
-@sprint-master "your task here"
-
-# Or use related commands
+@sprint-master "describe what you need done"
 ```
+
+### Pattern 2: Chained with Other Agents
+
+```bash
+# Research first, then plan
+@researcher "investigate best practices for X"
+@sprint-master "create implementation plan based on research"
+```
+
+### Pattern 3: Within Team Mode
+
+```bash
+/team:run
+# Sprint Master will automatically assign sprint-master to appropriate tasks
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent not responding as expected">
+    Try being more specific in your task description. Include:
+    - Clear success criteria
+    - Relevant file paths
+    - Expected output format
+  </Accordion>
+  <Accordion title="Missing context from codebase">
+    Run `/index` first to ensure the agent has full codebase awareness.
+  </Accordion>
+  <Accordion title="Agent taking too long">
+    For complex tasks, break them down into smaller pieces or use `/mode token-efficient`.
+  </Accordion>
+</AccordionGroup>
 
 ## Related
 
 <CardGroup cols={2}>
   <Card title="All Agents" icon="robot" href="/agents/overview">
-    See all 23 agents
+    See all 23 specialized agents
   </Card>
   <Card title="AI Team" icon="users" href="/concepts/ai-team">
-    How agents collaborate
+    Learn how agents collaborate
+  </Card>
+  <Card title="Omega Exclusive" icon="users-gear" href="/agents/overview#omega-exclusive">
+    More Omega Exclusive agents
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands that use this agent
   </Card>
 </CardGroup>

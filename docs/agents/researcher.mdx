@@ -1,13 +1,25 @@
 ---
 title: "researcher"
 description: "Technology research expert with best practices discovery, documentation analysis, and solution comparison. Provides evidence-based recommendations with source citations."
+icon: "magnifying-glass"
 ---
 
 <Info>
+  **Category:** Core Development
+
   **Tools:** Read, WebSearch, WebFetch, Glob, Grep
 
   **Model:** inherit
+
+  **Best For:** Technology research, best practices discovery, documentation lookup
 </Info>
+
+## Quick Start
+
+```bash
+# Invoke directly
+@researcher "your task description here"
+```
 
 
 # 🔬 Researcher Agent
@@ -364,22 +376,72 @@ site:reactjs.org hooks
 - `/compare [A] vs [B]` - Compare technologies
 
 
-## Usage
+## Integration Points
+
+### Works Well With
+
+- **[planner](/agents/planner)** - Feature planning, task decomposition, implementation roadmaps
+- **[architect](/agents/architect)** - System architecture, design patterns, scalability
+- **[oracle](/agents/oracle)** - Strategic thinking, 10x/100x/1000x opportunities, Omega modes
+
+### Triggers Commands
+
+- [`/research`](/commands/research) - Activates this agent
+
+
+## Common Patterns
+
+### Pattern 1: Direct Task Assignment
 
 ```bash
-# Direct invocation
-@researcher "your task here"
-
-# Or use related commands
+@researcher "describe what you need done"
 ```
+
+### Pattern 2: Chained with Other Agents
+
+```bash
+# Research first, then plan
+@researcher "investigate best practices for X"
+@researcher "create implementation plan based on research"
+```
+
+### Pattern 3: Within Team Mode
+
+```bash
+/team:run
+# Sprint Master will automatically assign researcher to appropriate tasks
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent not responding as expected">
+    Try being more specific in your task description. Include:
+    - Clear success criteria
+    - Relevant file paths
+    - Expected output format
+  </Accordion>
+  <Accordion title="Missing context from codebase">
+    Run `/index` first to ensure the agent has full codebase awareness.
+  </Accordion>
+  <Accordion title="Agent taking too long">
+    For complex tasks, break them down into smaller pieces or use `/mode token-efficient`.
+  </Accordion>
+</AccordionGroup>
 
 ## Related
 
 <CardGroup cols={2}>
   <Card title="All Agents" icon="robot" href="/agents/overview">
-    See all 23 agents
+    See all 23 specialized agents
   </Card>
   <Card title="AI Team" icon="users" href="/concepts/ai-team">
-    How agents collaborate
+    Learn how agents collaborate
+  </Card>
+  <Card title="Core Development" icon="magnifying-glass" href="/agents/overview#core-development">
+    More Core Development agents
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands that use this agent
   </Card>
 </CardGroup>

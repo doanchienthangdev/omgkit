@@ -1,9 +1,24 @@
 ---
 title: "/lint"
 description: "Run linting"
+icon: "shield-check"
 ---
 
+<Info>
+  **Category:** Quality
 
+  **Syntax:** `/lint`
+</Info>
+
+## Overview
+
+Run linting
+
+## Quick Start
+
+```bash
+/lint
+```
 
 
 # 🔍 Lint
@@ -18,9 +33,48 @@ npm run lint:fix
 Report any remaining issues.
 
 
+
 ## Tools Used
 
-Bash
+This command uses the following tools:
+
+- **Bash** - Enables bash capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/lint
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/lint
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -28,7 +82,7 @@ Bash
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="quality Commands" icon="folder" href="/commands/overview#quality">
+  <Card title="Quality Commands" icon="shield-check" href="/commands/overview#quality">
     More quality commands
   </Card>
 </CardGroup>

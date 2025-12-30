@@ -1,42 +1,106 @@
 ---
 title: "Modes Overview"
 description: "9 behavioral modes for different development contexts"
+icon: "sliders"
 ---
 
-Modes change how OMGKIT behaves. Switch modes to optimize for different tasks.
+Modes change how OMGKIT behaves. Switch modes to **optimize for different tasks** - from creative brainstorming to efficient execution.
 
-## Available Modes
+## At a Glance
 
-| Mode | Description | Best For |
-|------|-------------|----------|
-| [autonomous](/modes/autonomous) | AI team self-management mode for sprint ... | Various |
-| [brainstorm](/modes/brainstorm) | Creative exploration mode for design and... | Various |
-| [deep-research](/modes/deep-research) | Thorough analysis mode with citations an... | Various |
-| [default](/modes/default) | Balanced standard behavior for general t... | Various |
-| [implementation](/modes/implementation) | Code-focused mode with minimal prose.... | Various |
-| [omega](/modes/omega) | 10x-1000x thinking mode for breakthrough... | Various |
-| [orchestration](/modes/orchestration) | Multi-task coordination mode for paralle... | Various |
-| [review](/modes/review) | Critical analysis mode for code review.... | Various |
-| [token-efficient](/modes/token-efficient) | Compressed output mode for cost savings ... | Various |
+<CardGroup cols={4}>
+  <Card title="9" icon="sliders">
+    Total Modes
+  </Card>
+  <Card title="4" icon="folder">
+    Categories
+  </Card>
+  <Card title="Instant" icon="bolt">
+    Switching
+  </Card>
+  <Card title="Session" icon="clock">
+    Persistence
+  </Card>
+</CardGroup>
 
 ## Mode Categories
 
 <CardGroup cols={2}>
-  <Card title="Standard Modes" icon="sliders">
-    **Default**, **Implementation**, **Review** - Everyday development
+  <Card title="Standard Modes" icon="sliders" href="#standard">
+    **3 modes** - Everyday development (Default, Implementation, Review)
   </Card>
-  <Card title="Creative Modes" icon="lightbulb">
-    **Brainstorm**, **Deep Research** - Exploration and analysis
+  <Card title="Creative Modes" icon="lightbulb" href="#creative">
+    **2 modes** - Exploration and analysis (Brainstorm, Deep Research)
   </Card>
-  <Card title="Efficiency Modes" icon="gauge-high">
-    **Token Efficient**, **Orchestration** - Optimized workflows
+  <Card title="Efficiency Modes" icon="gauge-high" href="#efficiency">
+    **2 modes** - Optimized workflows (Token Efficient, Orchestration)
   </Card>
-  <Card title="Omega Modes" icon="wand-magic-sparkles">
-    **Omega**, **Autonomous** - Advanced AI capabilities
+  <Card title="Omega Modes" icon="wand-magic-sparkles" href="#omega">
+    **2 modes** - Advanced AI (Omega, Autonomous)
   </Card>
 </CardGroup>
 
+## Choosing the Right Mode
+
+<AccordionGroup>
+  <Accordion title="I want general development help">
+    Use **Default Mode** - Balanced behavior for everyday tasks.
+  </Accordion>
+  <Accordion title="I want to brainstorm ideas">
+    Use **Brainstorm Mode** - Creative exploration, multiple options.
+  </Accordion>
+  <Accordion title="I want strategic thinking">
+    Use **Omega Mode** - 10x/100x/1000x opportunities, big-picture thinking.
+  </Accordion>
+  <Accordion title="I want to minimize API costs">
+    Use **Token Efficient Mode** - Minimal context, concise responses.
+  </Accordion>
+  <Accordion title="I want less confirmation prompts">
+    Use **Autonomous Mode** - Faster execution, less interruption.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+
+## Standard {#standard}
+
+| Mode | Description | Best For |
+|------|-------------|----------|
+| [**default**](/modes/default) | Balanced standard behavior for general t... | General development tasks |
+| [**implementation**](/modes/implementation) | Code-focused mode with minimal prose. | Writing code, building features |
+| [**review**](/modes/review) | Critical analysis mode for code review. | Code review, quality checks |
+
+
+## Creative {#creative}
+
+| Mode | Description | Best For |
+|------|-------------|----------|
+| [**brainstorm**](/modes/brainstorm) | Creative exploration mode for design and... | Ideation, exploring options |
+| [**deep-research**](/modes/deep-research) | Thorough analysis mode with citations an... | In-depth analysis, learning |
+
+
+## Efficiency {#efficiency}
+
+| Mode | Description | Best For |
+|------|-------------|----------|
+| [**orchestration**](/modes/orchestration) | Multi-task coordination mode for paralle... | Multi-agent coordination |
+| [**token-efficient**](/modes/token-efficient) | Compressed output mode for cost savings ... | Reducing API costs |
+
+
+## Omega {#omega}
+
+| Mode | Description | Best For |
+|------|-------------|----------|
+| [**autonomous**](/modes/autonomous) | AI team self-management mode for sprint ... | Minimal supervision, fast execution |
+| [**omega**](/modes/omega) | 10x-1000x thinking mode for breakthrough... | Strategic thinking, 10x opportunities |
+
+
+---
+
 ## Switching Modes
+
+### Basic Commands
 
 ```bash
 # Switch to a mode
@@ -45,23 +109,55 @@ Modes change how OMGKIT behaves. Switch modes to optimize for different tasks.
 # Check current mode
 /mode
 
-# Temporary mode for one command
-/mode brainstorm && /brainstorm "new feature ideas"
+# Switch back to default
+/mode default
 ```
+
+### Temporary Mode Switching
+
+```bash
+# Switch mode for a specific workflow
+/mode brainstorm
+/brainstorm "new feature ideas"
+/mode default
+
+# Or chain with &&
+/mode omega && /10x "our checkout flow" && /mode default
+```
+
+## Mode Comparison
+
+| Aspect | Default | Omega | Token Efficient | Autonomous |
+|--------|---------|-------|-----------------|------------|
+| **Context Usage** | Normal | High | Minimal | Normal |
+| **Confirmations** | Normal | Normal | Normal | Fewer |
+| **Strategic Thinking** | Standard | Enhanced | Reduced | Standard |
+| **Response Length** | Normal | Detailed | Concise | Normal |
 
 ## Mode Persistence
 
-- Modes persist for the session
-- Configure default mode in `.omgkit/config.yaml`
-- Some commands auto-switch modes temporarily
+<Note>
+Modes persist for the session. Configure your preferred default mode in `.omgkit/config.yaml`.
+</Note>
+
+```yaml
+# .omgkit/config.yaml
+mode: omega  # Your preferred default mode
+```
 
 ## Next Steps
 
 <CardGroup cols={2}>
   <Card title="Omega Philosophy" icon="atom" href="/concepts/omega-philosophy">
-    Understanding Omega mode
+    Deep dive into Omega thinking
   </Card>
   <Card title="Configuration" icon="gear" href="/getting-started/configuration">
-    Set default mode
+    Set your default mode
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands affected by modes
+  </Card>
+  <Card title="Agents" icon="robot" href="/agents/overview">
+    Agents that adapt to modes
   </Card>
 </CardGroup>

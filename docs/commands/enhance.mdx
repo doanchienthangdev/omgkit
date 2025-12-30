@@ -1,9 +1,24 @@
 ---
 title: "/enhance"
 description: "Enhance existing content/design"
+icon: "palette"
 ---
 
-<Info>**Usage:** `/enhance <target>`</Info>
+<Info>
+  **Category:** Design
+
+  **Syntax:** `/enhance <target>`
+</Info>
+
+## Overview
+
+Enhance existing content/design
+
+## Quick Start
+
+```bash
+/enhance "target"
+```
 
 
 # ✨ Enhance: $ARGUMENTS
@@ -18,9 +33,49 @@ Improve existing content/design: **$ARGUMENTS**
 - Accessibility
 
 
+
 ## Tools Used
 
-Read, Write
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/enhance "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/enhance "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -28,7 +83,7 @@ Read, Write
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="design Commands" icon="folder" href="/commands/overview#design">
+  <Card title="Design Commands" icon="palette" href="/commands/overview#design">
     More design commands
   </Card>
 </CardGroup>

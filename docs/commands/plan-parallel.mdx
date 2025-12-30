@@ -1,9 +1,24 @@
 ---
 title: "/plan-parallel"
 description: "Plan with parallel execution strategy"
+icon: "map"
 ---
 
-<Info>**Usage:** `/plan-parallel <task>`</Info>
+<Info>
+  **Category:** Planning
+
+  **Syntax:** `/plan-parallel <task>`
+</Info>
+
+## Overview
+
+Plan with parallel execution strategy
+
+## Quick Start
+
+```bash
+/plan-parallel "task"
+```
 
 
 # 📋 Parallel Plan: $ARGUMENTS
@@ -37,9 +52,51 @@ Plan optimized for parallel agent execution.
 ```
 
 
+
 ## Tools Used
 
-Task, Read, Grep, Glob
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/plan-parallel "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/plan-parallel "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -47,7 +104,7 @@ Task, Read, Grep, Glob
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="planning Commands" icon="folder" href="/commands/overview#planning">
+  <Card title="Planning Commands" icon="map" href="/commands/overview#planning">
     More planning commands
   </Card>
 </CardGroup>

@@ -1,7 +1,27 @@
 ---
 title: "python"
 description: "Python development. Use when writing Python code, using pip, or working with Python frameworks."
+icon: "code"
 ---
+
+<Info>
+  **Category:** Languages
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Python development. Use when writing Python code, using pip, or working with Python frameworks.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
 
 
 # Python Skill
@@ -64,13 +84,33 @@ class UserCreate(BaseModel):
 - Write docstrings
 
 
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  python:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
     See all 43 skills
   </Card>
-  <Card title="languages" icon="folder" href="/skills/overview#languages">
+  <Card title="Languages" icon="code" href="/skills/overview#languages">
     More languages skills
   </Card>
 </CardGroup>

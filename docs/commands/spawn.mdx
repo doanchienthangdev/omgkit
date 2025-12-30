@@ -1,9 +1,24 @@
 ---
 title: "/spawn"
 description: "Launch parallel background task"
+icon: "layer-group"
 ---
 
-<Info>**Usage:** `/spawn <task description>`</Info>
+<Info>
+  **Category:** Context
+
+  **Syntax:** `/spawn <task description>`
+</Info>
+
+## Overview
+
+Launch parallel background task
+
+## Quick Start
+
+```bash
+/spawn "task
+```
 
 
 # 🔀 Spawn: $ARGUMENTS
@@ -22,9 +37,48 @@ Spawn background tasks that run in parallel.
 Use `/spawn:collect` to gather results.
 
 
+
 ## Tools Used
 
-Task
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/spawn "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/spawn "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -32,7 +86,7 @@ Task
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="context Commands" icon="folder" href="/commands/overview#context">
+  <Card title="Context Commands" icon="layer-group" href="/commands/overview#context">
     More context commands
   </Card>
 </CardGroup>

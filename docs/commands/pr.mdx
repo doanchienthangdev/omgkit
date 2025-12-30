@@ -1,9 +1,24 @@
 ---
 title: "/pr"
 description: "Create pull request"
+icon: "code-branch"
 ---
 
-<Info>**Usage:** `/pr [title]`</Info>
+<Info>
+  **Category:** Git
+
+  **Syntax:** `/pr [title]`
+</Info>
+
+## Overview
+
+Create pull request
+
+## Quick Start
+
+```bash
+/pr [title]
+```
 
 
 # 🔀 PR: $ARGUMENTS
@@ -22,9 +37,49 @@ gh pr create --title "Title" --body "Description"
 ```
 
 
+
 ## Tools Used
 
-Bash, Read
+This command uses the following tools:
+
+- **Bash** - Enables bash capabilities
+- **Read** - Enables read capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/pr "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/pr "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -32,7 +87,7 @@ Bash, Read
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="git Commands" icon="folder" href="/commands/overview#git">
+  <Card title="Git Commands" icon="code-branch" href="/commands/overview#git">
     More git commands
   </Card>
 </CardGroup>

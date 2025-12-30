@@ -1,13 +1,25 @@
 ---
 title: "project-manager"
 description: "Progress tracking, coordination, status reports. Manages development workflow. Use for project management."
+icon: "clipboard-list"
 ---
 
 <Info>
+  **Category:** Operations
+
   **Tools:** Read, Write, Glob
 
   **Model:** inherit
+
+  **Best For:** Progress tracking, coordination, status reports
 </Info>
+
+## Quick Start
+
+```bash
+# Invoke directly
+@project-manager "your task description here"
+```
 
 
 # 📋 Project Manager Agent
@@ -48,22 +60,67 @@ You coordinate and track progress.
 - Report progress
 
 
-## Usage
+## Integration Points
+
+### Works Well With
+
+- **[sprint-master](/agents/sprint-master)** - AI Team orchestration, sprint management, velocity tracking
+- **[planner](/agents/planner)** - Feature planning, task decomposition, implementation roadmaps
+
+
+## Common Patterns
+
+### Pattern 1: Direct Task Assignment
 
 ```bash
-# Direct invocation
-@project-manager "your task here"
-
-# Or use related commands
+@project-manager "describe what you need done"
 ```
+
+### Pattern 2: Chained with Other Agents
+
+```bash
+# Research first, then plan
+@researcher "investigate best practices for X"
+@project-manager "create implementation plan based on research"
+```
+
+### Pattern 3: Within Team Mode
+
+```bash
+/team:run
+# Sprint Master will automatically assign project-manager to appropriate tasks
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent not responding as expected">
+    Try being more specific in your task description. Include:
+    - Clear success criteria
+    - Relevant file paths
+    - Expected output format
+  </Accordion>
+  <Accordion title="Missing context from codebase">
+    Run `/index` first to ensure the agent has full codebase awareness.
+  </Accordion>
+  <Accordion title="Agent taking too long">
+    For complex tasks, break them down into smaller pieces or use `/mode token-efficient`.
+  </Accordion>
+</AccordionGroup>
 
 ## Related
 
 <CardGroup cols={2}>
   <Card title="All Agents" icon="robot" href="/agents/overview">
-    See all 23 agents
+    See all 23 specialized agents
   </Card>
   <Card title="AI Team" icon="users" href="/concepts/ai-team">
-    How agents collaborate
+    Learn how agents collaborate
+  </Card>
+  <Card title="Operations" icon="clipboard-list" href="/agents/overview#operations">
+    More Operations agents
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands that use this agent
   </Card>
 </CardGroup>

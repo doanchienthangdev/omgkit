@@ -1,7 +1,27 @@
 ---
 title: "finishing-development-branch"
 description: "Completing a development branch. Use when wrapping up feature work."
+icon: "brain"
 ---
+
+<Info>
+  **Category:** Methodology
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Completing a development branch. Use when wrapping up feature work.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
 
 
 # Finishing Development Branch Skill
@@ -42,13 +62,33 @@ gh pr create
 ```
 
 
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  finishing-development-branch:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
     See all 43 skills
   </Card>
-  <Card title="methodology" icon="folder" href="/skills/overview#methodology">
+  <Card title="Methodology" icon="brain" href="/skills/overview#methodology">
     More methodology skills
   </Card>
 </CardGroup>

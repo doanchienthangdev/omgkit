@@ -1,7 +1,27 @@
 ---
 title: "accessibility"
 description: "Accessibility (a11y). Use for WCAG compliance, screen readers, keyboard navigation."
+icon: "palette"
 ---
+
+<Info>
+  **Category:** Frontend
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Accessibility (a11y). Use for WCAG compliance, screen readers, keyboard navigation.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
 
 
 # Accessibility Skill
@@ -53,13 +73,33 @@ useEffect(() => {
 - [ ] Skip links
 
 
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  accessibility:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
     See all 43 skills
   </Card>
-  <Card title="frontend" icon="folder" href="/skills/overview#frontend">
+  <Card title="Frontend" icon="palette" href="/skills/overview#frontend">
     More frontend skills
   </Card>
 </CardGroup>

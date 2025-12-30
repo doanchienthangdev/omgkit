@@ -1,9 +1,24 @@
 ---
 title: "/fix-fast"
 description: "Quick bug fix with minimal investigation"
+icon: "code"
 ---
 
-<Info>**Usage:** `/fix-fast <bug>`</Info>
+<Info>
+  **Category:** Dev
+
+  **Syntax:** `/fix-fast <bug>`
+</Info>
+
+## Overview
+
+Quick bug fix with minimal investigation
+
+## Quick Start
+
+```bash
+/fix-fast "bug"
+```
 
 
 # ⚡ Fix Fast: $ARGUMENTS
@@ -21,9 +36,51 @@ Skip deep analysis. Apply obvious fix immediately.
 Use for obvious bugs with clear solutions.
 
 
+
 ## Tools Used
 
-Read, Write, Bash, Grep
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/fix-fast "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/index
+
+# Then run the command
+/fix-fast "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
 
 ## Related Commands
 
@@ -31,7 +88,7 @@ Read, Write, Bash, Grep
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="dev Commands" icon="folder" href="/commands/overview#dev">
+  <Card title="Dev Commands" icon="code" href="/commands/overview#dev">
     More dev commands
   </Card>
 </CardGroup>

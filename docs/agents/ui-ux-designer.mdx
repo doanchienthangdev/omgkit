@@ -1,13 +1,25 @@
 ---
 title: "ui-ux-designer"
 description: "UI component creation, responsive design, accessibility. Creates beautiful interfaces. Use for UI design."
+icon: "palette"
 ---
 
 <Info>
+  **Category:** Operations
+
   **Tools:** Read, Write, Bash, Glob
 
   **Model:** inherit
+
+  **Best For:** UI components, responsive design, accessibility
 </Info>
+
+## Quick Start
+
+```bash
+# Invoke directly
+@ui-ux-designer "your task description here"
+```
 
 
 # 🎨 UI/UX Designer Agent
@@ -66,22 +78,72 @@ xl: 1280px
 - Color contrast 4.5:1+
 
 
-## Usage
+## Integration Points
+
+### Works Well With
+
+- **[fullstack-developer](/agents/fullstack-developer)** - Full implementation, code writing, feature development
+- **[copywriter](/agents/copywriter)** - Marketing copy, content writing, UX writing
+
+### Triggers Commands
+
+- [`/screenshot`](/commands/screenshot) - Activates this agent
+- [`/cro`](/commands/cro) - Activates this agent
+
+
+## Common Patterns
+
+### Pattern 1: Direct Task Assignment
 
 ```bash
-# Direct invocation
-@ui-ux-designer "your task here"
-
-# Or use related commands
+@ui-ux-designer "describe what you need done"
 ```
+
+### Pattern 2: Chained with Other Agents
+
+```bash
+# Research first, then plan
+@researcher "investigate best practices for X"
+@ui-ux-designer "create implementation plan based on research"
+```
+
+### Pattern 3: Within Team Mode
+
+```bash
+/team:run
+# Sprint Master will automatically assign ui-ux-designer to appropriate tasks
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Agent not responding as expected">
+    Try being more specific in your task description. Include:
+    - Clear success criteria
+    - Relevant file paths
+    - Expected output format
+  </Accordion>
+  <Accordion title="Missing context from codebase">
+    Run `/index` first to ensure the agent has full codebase awareness.
+  </Accordion>
+  <Accordion title="Agent taking too long">
+    For complex tasks, break them down into smaller pieces or use `/mode token-efficient`.
+  </Accordion>
+</AccordionGroup>
 
 ## Related
 
 <CardGroup cols={2}>
   <Card title="All Agents" icon="robot" href="/agents/overview">
-    See all 23 agents
+    See all 23 specialized agents
   </Card>
   <Card title="AI Team" icon="users" href="/concepts/ai-team">
-    How agents collaborate
+    Learn how agents collaborate
+  </Card>
+  <Card title="Operations" icon="palette" href="/agents/overview#operations">
+    More Operations agents
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    Commands that use this agent
   </Card>
 </CardGroup>
