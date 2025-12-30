@@ -158,6 +158,8 @@ describe('CLI Core Functions', () => {
       expect(existsSync(join(TEST_PROJECT, '.omgkit/plans'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/docs'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/logs'))).toBe(true);
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/devlogs'))).toBe(true);
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules'))).toBe(true);
     });
 
     it('should create config files', () => {
@@ -168,6 +170,14 @@ describe('CLI Core Functions', () => {
       expect(existsSync(join(TEST_PROJECT, '.omgkit/sprints/vision.yaml'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/sprints/backlog.yaml'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/settings.json'))).toBe(true);
+    });
+
+    it('should create devlogs and stdrules files', () => {
+      initProject({ cwd: TEST_PROJECT, silent: true });
+
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/devlogs/README.md'))).toBe(true);
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules/README.md'))).toBe(true);
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules/SKILL_STANDARDS.md'))).toBe(true);
     });
 
     it('should not overwrite existing files', () => {

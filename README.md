@@ -229,7 +229,10 @@ your-project/
 │   │   └── backlog.yaml # Task backlog
 │   ├── plans/           # Generated plans
 │   ├── docs/            # Generated docs
-│   └── logs/            # Activity logs
+│   ├── logs/            # Activity logs
+│   ├── devlogs/         # Development logs, planning, tracking (git-ignored)
+│   └── stdrules/        # Standards & rules for the project
+│       └── SKILL_STANDARDS.md
 └── OMEGA.md             # Project context
 ```
 
