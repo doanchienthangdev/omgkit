@@ -1,15 +1,13 @@
 ---
 title: "payment-integration"
 description: "Enterprise payment processing with Stripe, PayPal, and LemonSqueezy including subscriptions, webhooks, and PCI compliance"
-icon: "credit-card"
+icon: "brain"
 ---
 
 <Info>
   **Category:** Integrations
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  **Triggers:** payment integration, stripe, paypal, lemonsqueezy, checkout, subscription billing, payment processing
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ Enterprise payment processing with Stripe, PayPal, and LemonSqueezy including su
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Payment Integration
 
@@ -48,255 +46,255 @@ Implement secure, reliable payment systems:
 ```typescript
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, \{
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16',
   typescript: true,
-\});
+});
 
 // Create checkout session
 async function createCheckoutSession(
   items: CartItem[],
   customerId?: string,
-  metadata?: Record\<string, string>
-): Promise\<Stripe.Checkout.Session> \{
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(item => (\{
-    price_data: \{
+  metadata?: Record<string, string>
+): Promise<Stripe.Checkout.Session> {
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = items.map(item => ({
+    price_data: {
       currency: 'usd',
-      product_data: \{
+      product_data: {
         name: item.name,
         description: item.description,
         images: item.images,
-        metadata: \{ productId: item.id \},
-      \},
+        metadata: { productId: item.id },
+      },
       unit_amount: Math.round(item.price * 100), // Convert to cents
-    \},
+    },
     quantity: item.quantity,
-  \}));
+  }));
 
-  return stripe.checkout.sessions.create(\{
+  return stripe.checkout.sessions.create({
     mode: 'payment',
     line_items: lineItems,
     customer: customerId,
-    success_url: `$\{process.env.APP_URL\}/checkout/success?session_id=\{CHECKOUT_SESSION_ID\}`,
-    cancel_url: `$\{process.env.APP_URL\}/checkout/cancel`,
+    success_url: `${process.env.APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.APP_URL}/checkout/cancel`,
     metadata,
-    payment_intent_data: \{
+    payment_intent_data: {
       metadata,
-    \},
-    shipping_address_collection: \{
+    },
+    shipping_address_collection: {
       allowed_countries: ['US', 'CA', 'GB'],
-    \},
-    automatic_tax: \{ enabled: true \},
-  \});
-\}
+    },
+    automatic_tax: { enabled: true },
+  });
+}
 
 // Create subscription
 async function createSubscription(
   customerId: string,
   priceId: string,
-  options?: \{
+  options?: {
     trialDays?: number;
     couponId?: string;
-    metadata?: Record\<string, string>;
-  \}
-): Promise\<Stripe.Subscription> \{
-  const params: Stripe.SubscriptionCreateParams = \{
+    metadata?: Record<string, string>;
+  }
+): Promise<Stripe.Subscription> {
+  const params: Stripe.SubscriptionCreateParams = {
     customer: customerId,
-    items: [\{ price: priceId \}],
+    items: [{ price: priceId }],
     payment_behavior: 'default_incomplete',
-    payment_settings: \{
+    payment_settings: {
       save_default_payment_method: 'on_subscription',
-    \},
+    },
     expand: ['latest_invoice.payment_intent'],
     metadata: options?.metadata,
-  \};
+  };
 
-  if (options?.trialDays) \{
+  if (options?.trialDays) {
     params.trial_period_days = options.trialDays;
-  \}
+  }
 
-  if (options?.couponId) \{
+  if (options?.couponId) {
     params.coupon = options.couponId;
-  \}
+  }
 
   return stripe.subscriptions.create(params);
-\}
+}
 
 // Handle subscription changes
 async function updateSubscription(
   subscriptionId: string,
   newPriceId: string,
   prorationBehavior: 'create_prorations' | 'none' | 'always_invoice' = 'create_prorations'
-): Promise\<Stripe.Subscription> \{
+): Promise<Stripe.Subscription> {
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
-  return stripe.subscriptions.update(subscriptionId, \{
-    items: [\{
+  return stripe.subscriptions.update(subscriptionId, {
+    items: [{
       id: subscription.items.data[0].id,
       price: newPriceId,
-    \}],
+    }],
     proration_behavior: prorationBehavior,
-  \});
-\}
+  });
+}
 
 // Cancel subscription
 async function cancelSubscription(
   subscriptionId: string,
   cancelImmediately: boolean = false
-): Promise\<Stripe.Subscription> \{
-  if (cancelImmediately) \{
+): Promise<Stripe.Subscription> {
+  if (cancelImmediately) {
     return stripe.subscriptions.cancel(subscriptionId);
-  \}
+  }
 
-  return stripe.subscriptions.update(subscriptionId, \{
+  return stripe.subscriptions.update(subscriptionId, {
     cancel_at_period_end: true,
-  \});
-\}
+  });
+}
 
 // Process refund
 async function processRefund(
   paymentIntentId: string,
   amount?: number, // Partial refund in cents
   reason?: 'duplicate' | 'fraudulent' | 'requested_by_customer'
-): Promise\<Stripe.Refund> \{
-  return stripe.refunds.create(\{
+): Promise<Stripe.Refund> {
+  return stripe.refunds.create({
     payment_intent: paymentIntentId,
     amount, // Omit for full refund
     reason,
-  \});
-\}
+  });
+}
 ```
 
 ### 2. Webhook Handling
 
 ```typescript
-import \{ buffer \} from 'micro';
-import type \{ NextApiRequest, NextApiResponse \} from 'next';
+import { buffer } from 'micro';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 // Webhook handler with signature verification
 async function handleStripeWebhook(
   req: NextApiRequest,
   res: NextApiResponse
-): Promise\<void> \{
-  if (req.method !== 'POST') \{
+): Promise<void> {
+  if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     res.status(405).end('Method Not Allowed');
     return;
-  \}
+  }
 
   const buf = await buffer(req);
   const sig = req.headers['stripe-signature'] as string;
 
   let event: Stripe.Event;
 
-  try \{
+  try {
     event = stripe.webhooks.constructEvent(
       buf,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  \} catch (err) \{
+  } catch (err) {
     console.error('Webhook signature verification failed:', err);
-    res.status(400).send(`Webhook Error: $\{err.message\}`);
+    res.status(400).send(`Webhook Error: ${err.message}`);
     return;
-  \}
+  }
 
   // Handle events with idempotency
   const idempotencyKey = event.id;
   const processed = await isEventProcessed(idempotencyKey);
 
-  if (processed) \{
-    res.status(200).json(\{ received: true, duplicate: true \});
+  if (processed) {
+    res.status(200).json({ received: true, duplicate: true });
     return;
-  \}
+  }
 
-  try \{
+  try {
     await processWebhookEvent(event);
     await markEventProcessed(idempotencyKey);
-    res.status(200).json(\{ received: true \});
-  \} catch (err) \{
+    res.status(200).json({ received: true });
+  } catch (err) {
     console.error('Webhook processing error:', err);
     // Return 200 to prevent retries for business logic errors
     // Return 500 for transient errors that should be retried
-    res.status(err.retryable ? 500 : 200).json(\{ error: err.message \});
-  \}
-\}
+    res.status(err.retryable ? 500 : 200).json({ error: err.message });
+  }
+}
 
 // Event processor
-async function processWebhookEvent(event: Stripe.Event): Promise\<void> \{
-  switch (event.type) \{
-    case 'checkout.session.completed': \{
+async function processWebhookEvent(event: Stripe.Event): Promise<void> {
+  switch (event.type) {
+    case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session;
       await handleCheckoutComplete(session);
       break;
-    \}
+    }
 
     case 'customer.subscription.created':
-    case 'customer.subscription.updated': \{
+    case 'customer.subscription.updated': {
       const subscription = event.data.object as Stripe.Subscription;
       await syncSubscriptionStatus(subscription);
       break;
-    \}
+    }
 
-    case 'customer.subscription.deleted': \{
+    case 'customer.subscription.deleted': {
       const subscription = event.data.object as Stripe.Subscription;
       await handleSubscriptionCanceled(subscription);
       break;
-    \}
+    }
 
-    case 'invoice.payment_succeeded': \{
+    case 'invoice.payment_succeeded': {
       const invoice = event.data.object as Stripe.Invoice;
       await handlePaymentSuccess(invoice);
       break;
-    \}
+    }
 
-    case 'invoice.payment_failed': \{
+    case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice;
       await handlePaymentFailure(invoice);
       break;
-    \}
+    }
 
-    case 'charge.dispute.created': \{
+    case 'charge.dispute.created': {
       const dispute = event.data.object as Stripe.Dispute;
       await handleDispute(dispute);
       break;
-    \}
+    }
 
     default:
-      console.log(`Unhandled event type: $\{event.type\}`);
-  \}
-\}
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+}
 
 // Subscription sync
-async function syncSubscriptionStatus(subscription: Stripe.Subscription): Promise\<void> \{
-  await db.subscription.upsert(\{
-    where: \{ stripeSubscriptionId: subscription.id \},
-    update: \{
+async function syncSubscriptionStatus(subscription: Stripe.Subscription): Promise<void> {
+  await db.subscription.upsert({
+    where: { stripeSubscriptionId: subscription.id },
+    update: {
       status: subscription.status,
       currentPeriodStart: new Date(subscription.current_period_start * 1000),
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       priceId: subscription.items.data[0].price.id,
-    \},
-    create: \{
+    },
+    create: {
       stripeSubscriptionId: subscription.id,
       stripeCustomerId: subscription.customer as string,
       status: subscription.status,
       currentPeriodStart: new Date(subscription.current_period_start * 1000),
       currentPeriodEnd: new Date(subscription.current_period_end * 1000),
       priceId: subscription.items.data[0].price.id,
-    \},
-  \});
-\}
+    },
+  });
+}
 ```
 
 ### 3. PayPal Integration
 
 ```typescript
-import \{ PayPalHttpClient, OrdersCreateRequest, OrdersCaptureRequest \} from '@paypal/checkout-server-sdk';
+import { PayPalHttpClient, OrdersCreateRequest, OrdersCaptureRequest } from '@paypal/checkout-server-sdk';
 
 // PayPal client setup
-function getPayPalClient(): PayPalHttpClient \{
+function getPayPalClient(): PayPalHttpClient {
   const environment = process.env.NODE_ENV === 'production'
     ? new paypal.core.LiveEnvironment(
         process.env.PAYPAL_CLIENT_ID!,
@@ -308,13 +306,13 @@ function getPayPalClient(): PayPalHttpClient \{
       );
 
   return new PayPalHttpClient(environment);
-\}
+}
 
 // Create PayPal order
 async function createPayPalOrder(
   items: CartItem[],
   shippingCost: number = 0
-): Promise\<PayPalOrder> \{
+): Promise<PayPalOrder> {
   const client = getPayPalClient();
 
   const itemTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -322,182 +320,182 @@ async function createPayPalOrder(
 
   const request = new OrdersCreateRequest();
   request.prefer('return=representation');
-  request.requestBody(\{
+  request.requestBody({
     intent: 'CAPTURE',
-    purchase_units: [\{
-      amount: \{
+    purchase_units: [{
+      amount: {
         currency_code: 'USD',
         value: total.toFixed(2),
-        breakdown: \{
-          item_total: \{ currency_code: 'USD', value: itemTotal.toFixed(2) \},
-          shipping: \{ currency_code: 'USD', value: shippingCost.toFixed(2) \},
-        \},
-      \},
-      items: items.map(item => (\{
+        breakdown: {
+          item_total: { currency_code: 'USD', value: itemTotal.toFixed(2) },
+          shipping: { currency_code: 'USD', value: shippingCost.toFixed(2) },
+        },
+      },
+      items: items.map(item => ({
         name: item.name,
-        unit_amount: \{ currency_code: 'USD', value: item.price.toFixed(2) \},
+        unit_amount: { currency_code: 'USD', value: item.price.toFixed(2) },
         quantity: item.quantity.toString(),
         category: 'PHYSICAL_GOODS',
-      \})),
-    \}],
-    application_context: \{
+      })),
+    }],
+    application_context: {
       brand_name: process.env.APP_NAME,
       landing_page: 'BILLING',
       user_action: 'PAY_NOW',
-      return_url: `$\{process.env.APP_URL\}/checkout/paypal/success`,
-      cancel_url: `$\{process.env.APP_URL\}/checkout/paypal/cancel`,
-    \},
-  \});
+      return_url: `${process.env.APP_URL}/checkout/paypal/success`,
+      cancel_url: `${process.env.APP_URL}/checkout/paypal/cancel`,
+    },
+  });
 
   const response = await client.execute(request);
   return response.result;
-\}
+}
 
 // Capture PayPal payment
-async function capturePayPalOrder(orderId: string): Promise\<PayPalCapture> \{
+async function capturePayPalOrder(orderId: string): Promise<PayPalCapture> {
   const client = getPayPalClient();
   const request = new OrdersCaptureRequest(orderId);
   request.prefer('return=representation');
 
   const response = await client.execute(request);
 
-  if (response.result.status === 'COMPLETED') \{
+  if (response.result.status === 'COMPLETED') {
     await handlePayPalPaymentComplete(response.result);
-  \}
+  }
 
   return response.result;
-\}
+}
 ```
 
 ### 4. Subscription Management UI
 
 ```typescript
 // Subscription management component
-interface SubscriptionManagerProps \{
+interface SubscriptionManagerProps {
   subscription: UserSubscription;
   availablePlans: Plan[];
-\}
+}
 
-export function SubscriptionManager(\{ subscription, availablePlans \}: SubscriptionManagerProps) \{
+export function SubscriptionManager({ subscription, availablePlans }: SubscriptionManagerProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleUpgrade(newPriceId: string) \{
+  async function handleUpgrade(newPriceId: string) {
     setIsLoading(true);
-    try \{
+    try {
       await updateSubscription(subscription.id, newPriceId);
       toast.success('Subscription updated successfully');
-    \} catch (error) \{
+    } catch (error) {
       toast.error('Failed to update subscription');
-    \} finally \{
+    } finally {
       setIsLoading(false);
-    \}
-  \}
+    }
+  }
 
-  async function handleCancel() \{
+  async function handleCancel() {
     if (!confirm('Are you sure you want to cancel your subscription?')) return;
 
     setIsLoading(true);
-    try \{
+    try {
       await cancelSubscription(subscription.id);
       toast.success('Subscription will be canceled at the end of the billing period');
-    \} catch (error) \{
+    } catch (error) {
       toast.error('Failed to cancel subscription');
-    \} finally \{
+    } finally {
       setIsLoading(false);
-    \}
-  \}
+    }
+  }
 
-  async function handleReactivate() \{
+  async function handleReactivate() {
     setIsLoading(true);
-    try \{
+    try {
       await reactivateSubscription(subscription.id);
       toast.success('Subscription reactivated');
-    \} catch (error) \{
+    } catch (error) {
       toast.error('Failed to reactivate subscription');
-    \} finally \{
+    } finally {
       setIsLoading(false);
-    \}
-  \}
+    }
+  }
 
   return (
-    \<div className="subscription-manager">
-      \<div className="current-plan">
-        \<h3>Current Plan: \{subscription.plan.name\}\</h3>
-        \<p>Status: \{subscription.status\}\</p>
-        \<p>Renews: \{format(subscription.currentPeriodEnd, 'MMM d, yyyy')\}\</p>
-      \</div>
+    <div className="subscription-manager">
+      <div className="current-plan">
+        <h3>Current Plan: {subscription.plan.name}</h3>
+        <p>Status: {subscription.status}</p>
+        <p>Renews: {format(subscription.currentPeriodEnd, 'MMM d, yyyy')}</p>
+      </div>
 
-      \{subscription.cancelAtPeriodEnd && (
-        \<Alert variant="warning">
-          Your subscription will end on \{format(subscription.currentPeriodEnd, 'MMM d, yyyy')\}
-          \<Button onClick=\{handleReactivate\} disabled=\{isLoading\}>
+      {subscription.cancelAtPeriodEnd && (
+        <Alert variant="warning">
+          Your subscription will end on {format(subscription.currentPeriodEnd, 'MMM d, yyyy')}
+          <Button onClick={handleReactivate} disabled={isLoading}>
             Reactivate
-          \</Button>
-        \</Alert>
-      )\}
+          </Button>
+        </Alert>
+      )}
 
-      \<div className="available-plans">
-        \<h4>Available Plans\</h4>
-        \{availablePlans.map(plan => (
-          \<PlanCard
-            key=\{plan.id\}
-            plan=\{plan\}
-            isCurrent=\{plan.priceId === subscription.priceId\}
-            onSelect=\{() => handleUpgrade(plan.priceId)\}
-            disabled=\{isLoading\}
+      <div className="available-plans">
+        <h4>Available Plans</h4>
+        {availablePlans.map(plan => (
+          <PlanCard
+            key={plan.id}
+            plan={plan}
+            isCurrent={plan.priceId === subscription.priceId}
+            onSelect={() => handleUpgrade(plan.priceId)}
+            disabled={isLoading}
           />
-        ))\}
-      \</div>
+        ))}
+      </div>
 
-      \{!subscription.cancelAtPeriodEnd && (
-        \<Button variant="destructive" onClick=\{handleCancel\} disabled=\{isLoading\}>
+      {!subscription.cancelAtPeriodEnd && (
+        <Button variant="destructive" onClick={handleCancel} disabled={isLoading}>
           Cancel Subscription
-        \</Button>
-      )\}
-    \</div>
+        </Button>
+      )}
+    </div>
   );
-\}
+}
 ```
 
 ### 5. LemonSqueezy Integration
 
 ```typescript
-import \{ lemonSqueezySetup, createCheckout, getSubscription \} from '@lemonsqueezy/lemonsqueezy.js';
+import { lemonSqueezySetup, createCheckout, getSubscription } from '@lemonsqueezy/lemonsqueezy.js';
 
 // Initialize LemonSqueezy
-lemonSqueezySetup(\{ apiKey: process.env.LEMONSQUEEZY_API_KEY! \});
+lemonSqueezySetup({ apiKey: process.env.LEMONSQUEEZY_API_KEY! });
 
 // Create LemonSqueezy checkout
 async function createLemonSqueezyCheckout(
   variantId: string,
   customerEmail: string,
-  metadata?: Record\<string, string>
-): Promise\<string> \{
+  metadata?: Record<string, string>
+): Promise<string> {
   const checkout = await createCheckout(
     process.env.LEMONSQUEEZY_STORE_ID!,
     variantId,
-    \{
-      checkoutData: \{
+    {
+      checkoutData: {
         email: customerEmail,
         custom: metadata,
-      \},
-      checkoutOptions: \{
+      },
+      checkoutOptions: {
         embed: false,
         logo: true,
         dark: false,
-      \},
-      productOptions: \{
+      },
+      productOptions: {
         enabledVariants: [parseInt(variantId)],
-        redirectUrl: `$\{process.env.APP_URL\}/checkout/success`,
-      \},
-    \}
+        redirectUrl: `${process.env.APP_URL}/checkout/success`,
+      },
+    }
   );
 
   return checkout.data.attributes.url;
-\}
+}
 
 // LemonSqueezy webhook handler
-async function handleLemonSqueezyWebhook(req: NextApiRequest): Promise\<void> \{
+async function handleLemonSqueezyWebhook(req: NextApiRequest): Promise<void> {
   const signature = req.headers['x-signature'] as string;
   const payload = JSON.stringify(req.body);
 
@@ -506,13 +504,13 @@ async function handleLemonSqueezyWebhook(req: NextApiRequest): Promise\<void> \{
   hmac.update(payload);
   const expectedSignature = hmac.digest('hex');
 
-  if (signature !== expectedSignature) \{
+  if (signature !== expectedSignature) {
     throw new Error('Invalid webhook signature');
-  \}
+  }
 
-  const \{ event_name, data \} = req.body;
+  const { event_name, data } = req.body;
 
-  switch (event_name) \{
+  switch (event_name) {
     case 'subscription_created':
       await handleLSSubscriptionCreated(data);
       break;
@@ -525,8 +523,8 @@ async function handleLemonSqueezyWebhook(req: NextApiRequest): Promise\<void> \{
     case 'order_created':
       await handleLSOrderCreated(data);
       break;
-  \}
-\}
+  }
+}
 ```
 
 ### 6. Payment Security
@@ -537,77 +535,77 @@ async function handleLemonSqueezyWebhook(req: NextApiRequest): Promise\<void> \{
 // Never log sensitive payment data
 const SENSITIVE_FIELDS = ['card_number', 'cvv', 'cvc', 'exp_month', 'exp_year'];
 
-function sanitizeForLogging(data: Record\<string, any>): Record\<string, any> \{
-  const sanitized = \{ ...data \};
+function sanitizeForLogging(data: Record<string, any>): Record<string, any> {
+  const sanitized = { ...data };
 
-  for (const field of SENSITIVE_FIELDS) \{
-    if (field in sanitized) \{
+  for (const field of SENSITIVE_FIELDS) {
+    if (field in sanitized) {
       sanitized[field] = '[REDACTED]';
-    \}
-  \}
+    }
+  }
 
   return sanitized;
-\}
+}
 
 // Secure API endpoint
-async function createPaymentIntent(req: NextApiRequest, res: NextApiResponse) \{
+async function createPaymentIntent(req: NextApiRequest, res: NextApiResponse) {
   // Validate request
-  const \{ amount, currency, customerId \} = req.body;
+  const { amount, currency, customerId } = req.body;
 
-  if (!amount || amount \< 50) \{ // Minimum $0.50
-    return res.status(400).json(\{ error: 'Invalid amount' \});
-  \}
+  if (!amount || amount < 50) { // Minimum $0.50
+    return res.status(400).json({ error: 'Invalid amount' });
+  }
 
   // Use idempotency key
   const idempotencyKey = req.headers['idempotency-key'] as string;
 
-  if (!idempotencyKey) \{
-    return res.status(400).json(\{ error: 'Idempotency key required' \});
-  \}
+  if (!idempotencyKey) {
+    return res.status(400).json({ error: 'Idempotency key required' });
+  }
 
-  try \{
+  try {
     const paymentIntent = await stripe.paymentIntents.create(
-      \{
+      {
         amount,
         currency: currency || 'usd',
         customer: customerId,
-        automatic_payment_methods: \{ enabled: true \},
-        metadata: \{
+        automatic_payment_methods: { enabled: true },
+        metadata: {
           userId: req.user.id,
-        \},
-      \},
-      \{ idempotencyKey \}
+        },
+      },
+      { idempotencyKey }
     );
 
     // Only return necessary data
-    res.json(\{
+    res.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-    \});
-  \} catch (error) \{
+    });
+  } catch (error) {
     console.error('Payment error:', sanitizeForLogging(error));
 
-    if (error.type === 'StripeCardError') \{
-      return res.status(400).json(\{ error: error.message \});
-    \}
+    if (error.type === 'StripeCardError') {
+      return res.status(400).json({ error: error.message });
+    }
 
-    res.status(500).json(\{ error: 'Payment processing failed' \});
-  \}
-\}
+    res.status(500).json({ error: 'Payment processing failed' });
+  }
+}
 
 // Webhook security middleware
 function verifyWebhookSignature(
   payload: Buffer,
   signature: string,
   secret: string
-): boolean \{
-  try \{
+): boolean {
+  try {
     stripe.webhooks.constructEvent(payload, signature, secret);
     return true;
-  \} catch \{
+  } catch {
     return false;
-  \}
-\}
+  }
+}
 ```
 
 ## Use Cases
@@ -616,7 +614,7 @@ function verifyWebhookSignature(
 
 ```typescript
 // Complete e-commerce checkout flow
-async function processCheckout(cart: Cart, user: User): Promise\<CheckoutResult> \{
+async function processCheckout(cart: Cart, user: User): Promise<CheckoutResult> {
   // Calculate totals
   const subtotal = calculateSubtotal(cart.items);
   const tax = await calculateTax(subtotal, user.address);
@@ -624,14 +622,14 @@ async function processCheckout(cart: Cart, user: User): Promise\<CheckoutResult>
   const total = subtotal + tax + shipping;
 
   // Create Stripe checkout
-  const session = await createCheckoutSession(cart.items, user.stripeCustomerId, \{
+  const session = await createCheckoutSession(cart.items, user.stripeCustomerId, {
     orderId: generateOrderId(),
     userId: user.id,
-  \});
+  });
 
   // Create pending order
-  await db.order.create(\{
-    data: \{
+  await db.order.create({
+    data: {
       userId: user.id,
       status: 'pending',
       subtotal,
@@ -639,21 +637,21 @@ async function processCheckout(cart: Cart, user: User): Promise\<CheckoutResult>
       shipping,
       total,
       stripeSessionId: session.id,
-      items: \{
-        create: cart.items.map(item => (\{
+      items: {
+        create: cart.items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
           price: item.price,
-        \})),
-      \},
-    \},
-  \});
+        })),
+      },
+    },
+  });
 
-  return \{
+  return {
     checkoutUrl: session.url,
     sessionId: session.id,
-  \};
-\}
+  };
+}
 ```
 
 ### 2. SaaS Subscription
@@ -663,31 +661,31 @@ async function processCheckout(cart: Cart, user: User): Promise\<CheckoutResult>
 async function handlePlanChange(
   userId: string,
   newPlanId: string
-): Promise\<PlanChangeResult> \{
-  const user = await db.user.findUnique(\{
-    where: \{ id: userId \},
-    include: \{ subscription: true \},
-  \});
+): Promise<PlanChangeResult> {
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    include: { subscription: true },
+  });
 
-  if (!user.subscription) \{
+  if (!user.subscription) {
     // New subscription
     const session = await createSubscriptionCheckout(user, newPlanId);
-    return \{ action: 'redirect', url: session.url \};
-  \}
+    return { action: 'redirect', url: session.url };
+  }
 
   const currentPlan = await getPlan(user.subscription.priceId);
   const newPlan = await getPlan(newPlanId);
 
-  if (newPlan.price > currentPlan.price) \{
+  if (newPlan.price > currentPlan.price) {
     // Upgrade - charge prorated amount
     await updateSubscription(user.subscription.stripeSubscriptionId, newPlanId, 'create_prorations');
-    return \{ action: 'upgraded', newPlan \};
-  \} else \{
+    return { action: 'upgraded', newPlan };
+  } else {
     // Downgrade - apply at period end
     await updateSubscription(user.subscription.stripeSubscriptionId, newPlanId, 'none');
-    return \{ action: 'scheduled', effectiveDate: user.subscription.currentPeriodEnd \};
-  \}
-\}
+    return { action: 'scheduled', effectiveDate: user.subscription.currentPeriodEnd };
+  }
+}
 ```
 
 ## Best Practices
@@ -748,6 +746,7 @@ async function handlePlanChange(
 - [LemonSqueezy Docs](https://docs.lemonsqueezy.com/)
 - [PCI DSS Standards](https://www.pcisecuritystandards.org/)
 
+
 ## Configuration
 
 You can customize skill behavior in your project config:
@@ -762,34 +761,19 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
-  <Card title="Integrations" icon="plug" href="/skills/overview#integrations">
+  <Card title="Integrations" icon="brain" href="/skills/overview#integrations">
     More integrations skills
   </Card>
 </CardGroup>

@@ -1,13 +1,13 @@
 ---
 title: "/fix-ci"
 description: "Fix CI/CD pipeline issues"
-icon: "circle-check"
+icon: "code"
 ---
 
 <Info>
   **Category:** Dev
 
-  **Syntax:** `/fix-ci`
+  **Syntax:** `/fix-ci <github-action-url>`
 </Info>
 
 ## Overview
@@ -17,10 +17,11 @@ Fix CI/CD pipeline issues
 ## Quick Start
 
 ```bash
-/fix-ci
+/fix-ci "github-action-url"
 ```
 
-# 🔧 Fix CI: $ARGUMENTS
+
+# 🔧 Fix CI: \<github-action-url\>
 
 Analyze and fix CI failure.
 
@@ -38,23 +39,25 @@ Analyze and fix CI failure.
 - Environment issues
 - Timeout issues
 
+
+
 ## Tools Used
 
-This command leverages the following capabilities:
+This command uses the following tools:
 
-<Check>**Task** - Orchestrates complex multi-step operations</Check>
-<Check>**Read** - Analyzes files and codebase context</Check>
-<Check>**Write** - Creates and modifies files</Check>
-<Check>**Bash** - Executes system commands</Check>
-<Check>**Grep** - Searches code patterns</Check>
-<Check>**Glob** - Finds files by pattern</Check>
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **WebFetch** - Enables webfetch capabilities
+
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/fix-ci
+/fix-ci "your input here"
 ```
 
 ### With Context
@@ -64,29 +67,13 @@ This command leverages the following capabilities:
 /index
 
 # Then run the command
-/fix-ci
+/fix-ci "detailed description"
 ```
-
-### Combined with Other Commands
-
-```bash
-# Example workflow
-/plan "describe your goal"
-/fix-ci
-/commit
-```
-
-## Best Practices
-
-<Check>Be specific in your descriptions</Check>
-<Check>Include relevant file paths when applicable</Check>
-<Check>Use in combination with other commands for complex workflows</Check>
-<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, provide detailed descriptions and include relevant context about your project structure.
+For best results, be specific in your descriptions and include relevant file paths or context.
 </Note>
 
 ## Troubleshooting
@@ -97,9 +84,6 @@ For best results, provide detailed descriptions and include relevant context abo
   </Accordion>
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
-  </Accordion>
-  <Accordion title="Command taking too long">
-    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
   </Accordion>
 </AccordionGroup>
 

@@ -1,13 +1,13 @@
 ---
 title: "/commit"
 description: "Smart commit with conventional message"
-icon: "check"
+icon: "code-branch"
 ---
 
 <Info>
   **Category:** Git
 
-  **Syntax:** `/commit`
+  **Syntax:** `/commit [message]`
 </Info>
 
 ## Overview
@@ -17,10 +17,11 @@ Smart commit with conventional message
 ## Quick Start
 
 ```bash
-/commit
+/commit [message]
 ```
 
-# 📝 Commit: $ARGUMENTS
+
+# 📝 Commit: [message]
 
 Create conventional commit.
 
@@ -32,9 +33,9 @@ Create conventional commit.
 
 ## Commit Format
 ```
-\<type>(\<scope>): \<subject>
+<type>(<scope>): <subject>
 
-\<body>
+<body>
 ```
 
 ## Types
@@ -46,23 +47,22 @@ Create conventional commit.
 - test: Tests
 - chore: Maintenance
 
+
+
 ## Tools Used
 
-This command leverages the following capabilities:
+This command uses the following tools:
 
-<Check>**Task** - Orchestrates complex multi-step operations</Check>
-<Check>**Read** - Analyzes files and codebase context</Check>
-<Check>**Write** - Creates and modifies files</Check>
-<Check>**Bash** - Executes system commands</Check>
-<Check>**Grep** - Searches code patterns</Check>
-<Check>**Glob** - Finds files by pattern</Check>
+- **Bash** - Enables bash capabilities
+- **Read** - Enables read capabilities
+
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/commit
+/commit "your input here"
 ```
 
 ### With Context
@@ -72,29 +72,13 @@ This command leverages the following capabilities:
 /index
 
 # Then run the command
-/commit
+/commit "detailed description"
 ```
-
-### Combined with Other Commands
-
-```bash
-# Example workflow
-/plan "describe your goal"
-/commit
-/commit
-```
-
-## Best Practices
-
-<Check>Be specific in your descriptions</Check>
-<Check>Include relevant file paths when applicable</Check>
-<Check>Use in combination with other commands for complex workflows</Check>
-<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, provide detailed descriptions and include relevant context about your project structure.
+For best results, be specific in your descriptions and include relevant file paths or context.
 </Note>
 
 ## Troubleshooting
@@ -105,9 +89,6 @@ For best results, provide detailed descriptions and include relevant context abo
   </Accordion>
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
-  </Accordion>
-  <Accordion title="Command taking too long">
-    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
   </Accordion>
 </AccordionGroup>
 

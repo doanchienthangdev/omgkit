@@ -1,7 +1,7 @@
 ---
 title: "/cm"
 description: "Quick conventional commit"
-icon: "message"
+icon: "code-branch"
 ---
 
 <Info>
@@ -20,6 +20,7 @@ Quick conventional commit
 /cm
 ```
 
+
 # 📝 Git Commit
 
 Quick conventional commit for staged changes.
@@ -29,16 +30,14 @@ git add -A
 git commit -m "type(scope): message"
 ```
 
+
+
 ## Tools Used
 
-This command leverages the following capabilities:
+This command uses the following tools:
 
-<Check>**Task** - Orchestrates complex multi-step operations</Check>
-<Check>**Read** - Analyzes files and codebase context</Check>
-<Check>**Write** - Creates and modifies files</Check>
-<Check>**Bash** - Executes system commands</Check>
-<Check>**Grep** - Searches code patterns</Check>
-<Check>**Glob** - Finds files by pattern</Check>
+- **Bash** - Enables bash capabilities
+
 
 ## Examples
 
@@ -58,26 +57,10 @@ This command leverages the following capabilities:
 /cm
 ```
 
-### Combined with Other Commands
-
-```bash
-# Example workflow
-/plan "describe your goal"
-/cm
-/commit
-```
-
-## Best Practices
-
-<Check>Be specific in your descriptions</Check>
-<Check>Include relevant file paths when applicable</Check>
-<Check>Use in combination with other commands for complex workflows</Check>
-<Check>Run `/index` first for full codebase context</Check>
-
 ## Tips
 
 <Note>
-For best results, provide detailed descriptions and include relevant context about your project structure.
+For best results, be specific in your descriptions and include relevant file paths or context.
 </Note>
 
 ## Troubleshooting
@@ -88,9 +71,6 @@ For best results, provide detailed descriptions and include relevant context abo
   </Accordion>
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
-  </Accordion>
-  <Accordion title="Command taking too long">
-    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
   </Accordion>
 </AccordionGroup>
 

@@ -7,9 +7,7 @@ icon: "palette"
 <Info>
   **Category:** Frontend
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ shadcn/ui components. Use for pre-built accessible React components.
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # shadcn/ui Skill
 
@@ -36,49 +34,50 @@ npx shadcn-ui@latest add button
 
 ## Usage
 ```tsx
-import \{ Button \} from "@/components/ui/button"
-import \{ Input \} from "@/components/ui/input"
-import \{ Card, CardHeader, CardTitle, CardContent \} from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
-\<Button variant="default">Click me\</Button>
-\<Button variant="outline">Outline\</Button>
-\<Button variant="ghost">Ghost\</Button>
+<Button variant="default">Click me</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="ghost">Ghost</Button>
 
 <Card>
-  \<CardHeader>
-    \<CardTitle>Title\</CardTitle>
-  \</CardHeader>
-  \<CardContent>
+  <CardHeader>
+    <CardTitle>Title</CardTitle>
+  </CardHeader>
+  <CardContent>
     Content here
-  \</CardContent>
+  </CardContent>
 </Card>
 ```
 
 ## Form Pattern
 ```tsx
-import \{ useForm \} from "react-hook-form"
-import \{ Form, FormField, FormItem, FormLabel, FormControl \} from "@/components/ui/form"
+import { useForm } from "react-hook-form"
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form"
 
-\<Form \{...form\}>
-  \<FormField
-    control=\{form.control\}
+<Form {...form}>
+  <FormField
+    control={form.control}
     name="email"
-    render=\{(\{ field \}) => (
-      \<FormItem>
-        \<FormLabel>Email\</FormLabel>
-        \<FormControl>
-          \<Input \{...field\} />
-        \</FormControl>
-      \</FormItem>
-    )\}
+    render={({ field }) => (
+      <FormItem>
+        <FormLabel>Email</FormLabel>
+        <FormControl>
+          <Input {...field} />
+        </FormControl>
+      </FormItem>
+    )}
   />
-\</Form>
+</Form>
 ```
 
 ## Best Practices
 - Customize via CSS variables
 - Use with React Hook Form
 - Extend components as needed
+
 
 ## Configuration
 
@@ -94,32 +93,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Frontend" icon="palette" href="/skills/overview#frontend">
     More frontend skills

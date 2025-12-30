@@ -1,15 +1,13 @@
 ---
 title: "performance-profiling"
 description: "Browser automation, Chrome DevTools Protocol, Lighthouse audits, and Core Web Vitals optimization"
-icon: "stopwatch"
+icon: "server"
 ---
 
 <Info>
   **Category:** Devops
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  **Triggers:** performance profiling, lighthouse audit, core web vitals, page speed, chrome devtools, performance optimization, bundle analysis
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ Browser automation, Chrome DevTools Protocol, Lighthouse audits, and Core Web Vi
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Performance Profiling
 
@@ -49,79 +47,79 @@ Performance directly impacts user experience and business metrics:
 import lighthouse from 'lighthouse';
 import * as chromeLauncher from 'chrome-launcher';
 
-interface LighthouseConfig \{
+interface LighthouseConfig {
   url: string;
   categories?: ('performance' | 'accessibility' | 'best-practices' | 'seo')[];
   device?: 'mobile' | 'desktop';
   throttling?: ThrottlingConfig;
-\}
+}
 
-interface LighthouseResult \{
-  scores: Record\<string, number>;
+interface LighthouseResult {
+  scores: Record<string, number>;
   metrics: PerformanceMetrics;
   opportunities: Opportunity[];
   diagnostics: Diagnostic[];
-\}
+}
 
 // Run Lighthouse audit
-async function runLighthouseAudit(config: LighthouseConfig): Promise\<LighthouseResult> \{
-  const chrome = await chromeLauncher.launch(\{ chromeFlags: ['--headless'] \});
+async function runLighthouseAudit(config: LighthouseConfig): Promise<LighthouseResult> {
+  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
 
-  try \{
-    const options = \{
+  try {
+    const options = {
       port: chrome.port,
       output: 'json',
       onlyCategories: config.categories || ['performance'],
       formFactor: config.device || 'mobile',
-      throttling: config.throttling || \{
+      throttling: config.throttling || {
         rttMs: 150,
         throughputKbps: 1638,
         cpuSlowdownMultiplier: 4,
-      \},
-    \};
+      },
+    };
 
     const result = await lighthouse(config.url, options);
     const lhr = result?.lhr;
 
     if (!lhr) throw new Error('Lighthouse failed to generate report');
 
-    return \{
-      scores: \{
+    return {
+      scores: {
         performance: lhr.categories.performance?.score ?? 0,
         accessibility: lhr.categories.accessibility?.score ?? 0,
         bestPractices: lhr.categories['best-practices']?.score ?? 0,
         seo: lhr.categories.seo?.score ?? 0,
-      \},
+      },
       metrics: extractMetrics(lhr),
       opportunities: extractOpportunities(lhr),
       diagnostics: extractDiagnostics(lhr),
-    \};
-  \} finally \{
+    };
+  } finally {
     await chrome.kill();
-  \}
-\}
+  }
+}
 
 // Extract key metrics
-function extractMetrics(lhr: LH.Result): PerformanceMetrics \{
+function extractMetrics(lhr: LH.Result): PerformanceMetrics {
   const audits = lhr.audits;
 
-  return \{
+  return {
     // Core Web Vitals
-    lcp: \{
+    lcp: {
       value: audits['largest-contentful-paint']?.numericValue ?? 0,
       score: audits['largest-contentful-paint']?.score ?? 0,
       displayValue: audits['largest-contentful-paint']?.displayValue ?? '',
-    \},
-    fid: \{
+    },
+    fid: {
       value: audits['max-potential-fid']?.numericValue ?? 0,
       score: audits['max-potential-fid']?.score ?? 0,
       displayValue: audits['max-potential-fid']?.displayValue ?? '',
-    \},
-    cls: \{
+    },
+    cls: {
       value: audits['cumulative-layout-shift']?.numericValue ?? 0,
       score: audits['cumulative-layout-shift']?.score ?? 0,
       displayValue: audits['cumulative-layout-shift']?.displayValue ?? '',
-    \},
+    },
 
     // Additional metrics
     fcp: audits['first-contentful-paint']?.numericValue ?? 0,
@@ -129,11 +127,11 @@ function extractMetrics(lhr: LH.Result): PerformanceMetrics \{
     tti: audits['interactive']?.numericValue ?? 0,
     tbt: audits['total-blocking-time']?.numericValue ?? 0,
     speedIndex: audits['speed-index']?.numericValue ?? 0,
-  \};
-\}
+  };
+}
 
 // Extract optimization opportunities
-function extractOpportunities(lhr: LH.Result): Opportunity[] \{
+function extractOpportunities(lhr: LH.Result): Opportunity[] {
   const opportunityAudits = [
     'render-blocking-resources',
     'unused-css-rules',
@@ -148,169 +146,169 @@ function extractOpportunities(lhr: LH.Result): Opportunity[] \{
 
   return opportunityAudits
     .map(id => lhr.audits[id])
-    .filter(audit => audit && audit.score !== null && audit.score \< 1)
-    .map(audit => (\{
+    .filter(audit => audit && audit.score !== null && audit.score < 1)
+    .map(audit => ({
       id: audit.id,
       title: audit.title,
       description: audit.description,
       savings: audit.details?.overallSavingsMs ?? 0,
       items: audit.details?.items ?? [],
-    \}))
+    }))
     .sort((a, b) => b.savings - a.savings);
-\}
+}
 ```
 
 ### 2. Core Web Vitals Monitoring
 
 ```typescript
-import \{ onLCP, onFID, onCLS, onINP, onTTFB \} from 'web-vitals';
+import { onLCP, onFID, onCLS, onINP, onTTFB } from 'web-vitals';
 
-interface WebVitalsReport \{
+interface WebVitalsReport {
   lcp: VitalMetric;
   fid: VitalMetric;
   cls: VitalMetric;
   inp: VitalMetric;
   ttfb: VitalMetric;
-\}
+}
 
-interface VitalMetric \{
+interface VitalMetric {
   value: number;
   rating: 'good' | 'needs-improvement' | 'poor';
   entries: PerformanceEntry[];
-\}
+}
 
 // Real User Monitoring (RUM) setup
-function initWebVitalsMonitoring(onReport: (report: WebVitalsReport) => void): void \{
-  const metrics: Partial\<WebVitalsReport> = \{\};
+function initWebVitalsMonitoring(onReport: (report: WebVitalsReport) => void): void {
+  const metrics: Partial<WebVitalsReport> = {};
 
-  const reportIfComplete = () => \{
-    if (metrics.lcp && metrics.fid && metrics.cls && metrics.inp && metrics.ttfb) \{
+  const reportIfComplete = () => {
+    if (metrics.lcp && metrics.fid && metrics.cls && metrics.inp && metrics.ttfb) {
       onReport(metrics as WebVitalsReport);
-    \}
-  \};
+    }
+  };
 
-  onLCP((metric) => \{
-    metrics.lcp = \{
+  onLCP((metric) => {
+    metrics.lcp = {
       value: metric.value,
       rating: metric.rating,
       entries: metric.entries,
-    \};
+    };
     reportIfComplete();
-  \});
+  });
 
-  onFID((metric) => \{
-    metrics.fid = \{
+  onFID((metric) => {
+    metrics.fid = {
       value: metric.value,
       rating: metric.rating,
       entries: metric.entries,
-    \};
+    };
     reportIfComplete();
-  \});
+  });
 
-  onCLS((metric) => \{
-    metrics.cls = \{
+  onCLS((metric) => {
+    metrics.cls = {
       value: metric.value,
       rating: metric.rating,
       entries: metric.entries,
-    \};
+    };
     reportIfComplete();
-  \});
+  });
 
-  onINP((metric) => \{
-    metrics.inp = \{
+  onINP((metric) => {
+    metrics.inp = {
       value: metric.value,
       rating: metric.rating,
       entries: metric.entries,
-    \};
+    };
     reportIfComplete();
-  \});
+  });
 
-  onTTFB((metric) => \{
-    metrics.ttfb = \{
+  onTTFB((metric) => {
+    metrics.ttfb = {
       value: metric.value,
       rating: metric.rating,
       entries: metric.entries,
-    \};
+    };
     reportIfComplete();
-  \});
-\}
+  });
+}
 
 // Web Vitals thresholds
-const WEB_VITALS_THRESHOLDS = \{
-  LCP: \{ good: 2500, poor: 4000 \},     // milliseconds
-  FID: \{ good: 100, poor: 300 \},        // milliseconds
-  CLS: \{ good: 0.1, poor: 0.25 \},       // score
-  INP: \{ good: 200, poor: 500 \},        // milliseconds
-  TTFB: \{ good: 800, poor: 1800 \},      // milliseconds
-\};
+const WEB_VITALS_THRESHOLDS = {
+  LCP: { good: 2500, poor: 4000 },     // milliseconds
+  FID: { good: 100, poor: 300 },        // milliseconds
+  CLS: { good: 0.1, poor: 0.25 },       // score
+  INP: { good: 200, poor: 500 },        // milliseconds
+  TTFB: { good: 800, poor: 1800 },      // milliseconds
+};
 
 // Analyze and provide recommendations
-function analyzeWebVitals(report: WebVitalsReport): VitalsAnalysis \{
+function analyzeWebVitals(report: WebVitalsReport): VitalsAnalysis {
   const issues: VitalIssue[] = [];
 
   // LCP analysis
-  if (report.lcp.rating !== 'good') \{
+  if (report.lcp.rating !== 'good') {
     const lcpElement = report.lcp.entries[0]?.element;
-    issues.push(\{
+    issues.push({
       metric: 'LCP',
       value: report.lcp.value,
       rating: report.lcp.rating,
       element: lcpElement,
       recommendations: getLCPRecommendations(report.lcp, lcpElement),
-    \});
-  \}
+    });
+  }
 
   // CLS analysis
-  if (report.cls.rating !== 'good') \{
+  if (report.cls.rating !== 'good') {
     const clsSources = report.cls.entries.flatMap(
       entry => (entry as LayoutShift).sources || []
     );
-    issues.push(\{
+    issues.push({
       metric: 'CLS',
       value: report.cls.value,
       rating: report.cls.rating,
       sources: clsSources,
       recommendations: getCLSRecommendations(clsSources),
-    \});
-  \}
+    });
+  }
 
   // INP analysis
-  if (report.inp.rating !== 'good') \{
-    issues.push(\{
+  if (report.inp.rating !== 'good') {
+    issues.push({
       metric: 'INP',
       value: report.inp.value,
       rating: report.inp.rating,
       recommendations: getINPRecommendations(report.inp),
-    \});
-  \}
+    });
+  }
 
-  return \{
+  return {
     overallRating: calculateOverallRating(report),
     issues,
     score: calculateVitalsScore(report),
-  \};
-\}
+  };
+}
 
 // LCP optimization recommendations
-function getLCPRecommendations(metric: VitalMetric, element?: Element): string[] \{
+function getLCPRecommendations(metric: VitalMetric, element?: Element): string[] {
   const recommendations: string[] = [];
 
-  if (element?.tagName === 'IMG') \{
+  if (element?.tagName === 'IMG') {
     recommendations.push(
       'Add fetchpriority="high" to the LCP image',
-      'Preload the LCP image: \<link rel="preload" as="image" href="...">',
+      'Preload the LCP image: <link rel="preload" as="image" href="...">',
       'Use modern image formats (WebP, AVIF)',
       'Ensure image is properly sized (no layout shift)',
     );
-  \}
+  }
 
-  if (metric.value > 4000) \{
+  if (metric.value > 4000) {
     recommendations.push(
       'Reduce server response time (TTFB)',
       'Eliminate render-blocking resources',
       'Consider server-side rendering for critical content',
     );
-  \}
+  }
 
   recommendations.push(
     'Minimize critical CSS',
@@ -319,7 +317,7 @@ function getLCPRecommendations(metric: VitalMetric, element?: Element): string[]
   );
 
   return recommendations;
-\}
+}
 ```
 
 ### 3. Chrome DevTools Protocol
@@ -327,16 +325,16 @@ function getLCPRecommendations(metric: VitalMetric, element?: Element): string[]
 ```typescript
 import CDP from 'chrome-remote-interface';
 
-interface PerformanceTrace \{
+interface PerformanceTrace {
   timelineEvents: TimelineEvent[];
   networkRequests: NetworkRequest[];
   jsProfile: CPUProfile;
   heapSnapshot: HeapSnapshot;
-\}
+}
 
 // Connect to Chrome DevTools
-async function connectToDevTools(port: number = 9222): Promise\<CDP.Client> \{
-  const client = await CDP(\{ port \});
+async function connectToDevTools(port: number = 9222): Promise<CDP.Client> {
+  const client = await CDP({ port });
 
   // Enable required domains
   await Promise.all([
@@ -348,38 +346,38 @@ async function connectToDevTools(port: number = 9222): Promise\<CDP.Client> \{
   ]);
 
   return client;
-\}
+}
 
 // Capture performance trace
 async function capturePerformanceTrace(
   client: CDP.Client,
   url: string
-): Promise\<PerformanceTrace> \{
+): Promise<PerformanceTrace> {
   const networkRequests: NetworkRequest[] = [];
   const timelineEvents: TimelineEvent[] = [];
 
   // Collect network requests
-  client.Network.requestWillBeSent(params => \{
-    networkRequests.push(\{
+  client.Network.requestWillBeSent(params => {
+    networkRequests.push({
       requestId: params.requestId,
       url: params.request.url,
       method: params.request.method,
       timestamp: params.timestamp,
       type: params.type,
-    \});
-  \});
+    });
+  });
 
-  client.Network.responseReceived(params => \{
+  client.Network.responseReceived(params => {
     const request = networkRequests.find(r => r.requestId === params.requestId);
-    if (request) \{
+    if (request) {
       request.status = params.response.status;
       request.mimeType = params.response.mimeType;
       request.encodedDataLength = params.response.encodedDataLength;
-    \}
-  \});
+    }
+  });
 
   // Start tracing
-  await client.Tracing.start(\{
+  await client.Tracing.start({
     categories: [
       'devtools.timeline',
       'v8.execute',
@@ -387,39 +385,39 @@ async function capturePerformanceTrace(
       'loading',
       'painting',
     ].join(','),
-  \});
+  });
 
   // Navigate to page
-  await client.Page.navigate(\{ url \});
+  await client.Page.navigate({ url });
   await client.Page.loadEventFired();
 
   // Wait for network idle
   await waitForNetworkIdle(client);
 
   // Stop tracing
-  const \{ value: traceData \} = await client.Tracing.tracingComplete();
+  const { value: traceData } = await client.Tracing.tracingComplete();
 
   // Capture JS profile
   await client.Profiler.start();
   await new Promise(r => setTimeout(r, 2000)); // Profile for 2 seconds
-  const \{ profile: jsProfile \} = await client.Profiler.stop();
+  const { profile: jsProfile } = await client.Profiler.stop();
 
   // Capture heap snapshot
   const heapChunks: string[] = [];
-  client.HeapProfiler.addHeapSnapshotChunk((\{ chunk \}) => heapChunks.push(chunk));
+  client.HeapProfiler.addHeapSnapshotChunk(({ chunk }) => heapChunks.push(chunk));
   await client.HeapProfiler.takeHeapSnapshot();
   const heapSnapshot = JSON.parse(heapChunks.join(''));
 
-  return \{
+  return {
     timelineEvents: parseTraceData(traceData),
     networkRequests,
     jsProfile,
     heapSnapshot,
-  \};
-\}
+  };
+}
 
 // Analyze network waterfall
-function analyzeNetworkWaterfall(requests: NetworkRequest[]): WaterfallAnalysis \{
+function analyzeNetworkWaterfall(requests: NetworkRequest[]): WaterfallAnalysis {
   const sorted = [...requests].sort((a, b) => a.timestamp - b.timestamp);
   const totalTime = sorted[sorted.length - 1]?.endTime - sorted[0]?.timestamp;
 
@@ -437,7 +435,7 @@ function analyzeNetworkWaterfall(requests: NetworkRequest[]): WaterfallAnalysis 
   );
 
   // Calculate metrics
-  return \{
+  return {
     totalRequests: requests.length,
     totalTime,
     totalSize: requests.reduce((sum, r) => sum + (r.encodedDataLength || 0), 0),
@@ -445,68 +443,68 @@ function analyzeNetworkWaterfall(requests: NetworkRequest[]): WaterfallAnalysis 
     blockingResources,
     byType: groupByType(requests),
     recommendations: generateWaterfallRecommendations(requests),
-  \};
-\}
+  };
+}
 
 // Memory leak detection
 async function detectMemoryLeaks(
   client: CDP.Client,
-  actions: () => Promise\<void>,
+  actions: () => Promise<void>,
   iterations: number = 3
-): Promise\<MemoryLeakReport> \{
+): Promise<MemoryLeakReport> {
   const snapshots: HeapSnapshot[] = [];
 
   // Take initial snapshot
   snapshots.push(await takeHeapSnapshot(client));
 
   // Perform actions multiple times
-  for (let i = 0; i \< iterations; i++) \{
+  for (let i = 0; i < iterations; i++) {
     await actions();
     await client.HeapProfiler.collectGarbage();
     await new Promise(r => setTimeout(r, 100));
     snapshots.push(await takeHeapSnapshot(client));
-  \}
+  }
 
   // Analyze heap growth
   const heapGrowth = analyzeHeapGrowth(snapshots);
   const retainedObjects = findRetainedObjects(snapshots);
 
-  return \{
+  return {
     hasLeak: heapGrowth.trend === 'increasing',
     heapGrowth,
     retainedObjects,
     recommendations: generateMemoryRecommendations(retainedObjects),
-  \};
-\}
+  };
+}
 ```
 
 ### 4. Bundle Analysis
 
 ```typescript
-import \{ BundleAnalyzerPlugin \} from 'webpack-bundle-analyzer';
-import \{ visualizer \} from 'rollup-plugin-visualizer';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import { visualizer } from 'rollup-plugin-visualizer';
 
-interface BundleAnalysis \{
+interface BundleAnalysis {
   totalSize: number;
   gzipSize: number;
   modules: ModuleInfo[];
   duplicates: DuplicateModule[];
   largestModules: ModuleInfo[];
   recommendations: string[];
-\}
+}
 
 // Webpack bundle analysis
-function createBundleAnalyzerConfig(): BundleAnalyzerPlugin \{
-  return new BundleAnalyzerPlugin(\{
+function createBundleAnalyzerConfig(): BundleAnalyzerPlugin {
+  return new BundleAnalyzerPlugin({
     analyzerMode: 'json',
     reportFilename: 'bundle-report.json',
     generateStatsFile: true,
     statsFilename: 'bundle-stats.json',
-  \});
-\}
+  });
+}
 
 // Analyze bundle stats
-async function analyzeBundleStats(statsPath: string): Promise\<BundleAnalysis> \{
+async function analyzeBundleStats(statsPath: string): Promise<BundleAnalysis> {
   const stats = JSON.parse(await fs.readFile(statsPath, 'utf-8'));
 
   const modules = flattenModules(stats.modules);
@@ -521,211 +519,211 @@ async function analyzeBundleStats(statsPath: string): Promise\<BundleAnalysis> \
     .sort((a, b) => b.size - a.size)
     .slice(0, 20);
 
-  return \{
+  return {
     totalSize,
     gzipSize,
     modules,
     duplicates,
     largestModules,
-    recommendations: generateBundleRecommendations(\{
+    recommendations: generateBundleRecommendations({
       totalSize,
       duplicates,
       largestModules,
-    \}),
-  \};
-\}
+    }),
+  };
+}
 
 // Find duplicate modules
-function findDuplicates(modules: ModuleInfo[]): DuplicateModule[] \{
-  const modulesByName = new Map\<string, ModuleInfo[]>();
+function findDuplicates(modules: ModuleInfo[]): DuplicateModule[] {
+  const modulesByName = new Map<string, ModuleInfo[]>();
 
-  for (const module of modules) \{
+  for (const module of modules) {
     const name = getModuleName(module.identifier);
     const existing = modulesByName.get(name) || [];
     existing.push(module);
     modulesByName.set(name, existing);
-  \}
+  }
 
   return Array.from(modulesByName.entries())
     .filter(([_, instances]) => instances.length > 1)
-    .map(([name, instances]) => (\{
+    .map(([name, instances]) => ({
       name,
       instances: instances.length,
       totalSize: instances.reduce((sum, m) => sum + m.size, 0),
       versions: [...new Set(instances.map(m => getModuleVersion(m.identifier)))],
-    \}))
+    }))
     .sort((a, b) => b.totalSize - a.totalSize);
-\}
+}
 
 // Generate bundle recommendations
-function generateBundleRecommendations(analysis: \{
+function generateBundleRecommendations(analysis: {
   totalSize: number;
   duplicates: DuplicateModule[];
   largestModules: ModuleInfo[];
-\}): string[] \{
+}): string[] {
   const recommendations: string[] = [];
 
   // Size recommendations
-  if (analysis.totalSize > 500 * 1024) \{
+  if (analysis.totalSize > 500 * 1024) {
     recommendations.push(
       'Consider code splitting to reduce initial bundle size',
       'Use dynamic imports for routes and large components',
     );
-  \}
+  }
 
   // Duplicate recommendations
-  if (analysis.duplicates.length > 0) \{
+  if (analysis.duplicates.length > 0) {
     recommendations.push(
-      `Found $\{analysis.duplicates.length\} duplicate packages - dedupe with npm/yarn`,
+      `Found ${analysis.duplicates.length} duplicate packages - dedupe with npm/yarn`,
       'Consider using webpack.optimize.ModuleConcatenationPlugin',
     );
 
     const biggestDupe = analysis.duplicates[0];
-    if (biggestDupe) \{
+    if (biggestDupe) {
       recommendations.push(
-        `Largest duplicate: $\{biggestDupe.name\} ($\{formatBytes(biggestDupe.totalSize)\})`,
+        `Largest duplicate: ${biggestDupe.name} (${formatBytes(biggestDupe.totalSize)})`,
       );
-    \}
-  \}
+    }
+  }
 
   // Large module recommendations
   const veryLargeModules = analysis.largestModules.filter(m => m.size > 100 * 1024);
-  if (veryLargeModules.length > 0) \{
+  if (veryLargeModules.length > 0) {
     recommendations.push(
       'Large modules detected - consider lazy loading:',
       ...veryLargeModules.slice(0, 3).map(m =>
-        `  - $\{m.name\}: $\{formatBytes(m.size)\}`
+        `  - ${m.name}: ${formatBytes(m.size)}`
       ),
     );
-  \}
+  }
 
   return recommendations;
-\}
+}
 ```
 
 ### 5. Performance Budget
 
 ```typescript
-interface PerformanceBudget \{
+interface PerformanceBudget {
   metrics: MetricBudget[];
   resources: ResourceBudget[];
-\}
+}
 
-interface MetricBudget \{
+interface MetricBudget {
   metric: string;
   budget: number;
   unit: 'ms' | 'score' | 'bytes';
-\}
+}
 
-interface ResourceBudget \{
+interface ResourceBudget {
   type: string;
   budget: number;
   count?: number;
-\}
+}
 
 // Default performance budget
-const DEFAULT_BUDGET: PerformanceBudget = \{
+const DEFAULT_BUDGET: PerformanceBudget = {
   metrics: [
-    \{ metric: 'LCP', budget: 2500, unit: 'ms' \},
-    \{ metric: 'FID', budget: 100, unit: 'ms' \},
-    \{ metric: 'CLS', budget: 0.1, unit: 'score' \},
-    \{ metric: 'TTI', budget: 3800, unit: 'ms' \},
-    \{ metric: 'TBT', budget: 200, unit: 'ms' \},
+    { metric: 'LCP', budget: 2500, unit: 'ms' },
+    { metric: 'FID', budget: 100, unit: 'ms' },
+    { metric: 'CLS', budget: 0.1, unit: 'score' },
+    { metric: 'TTI', budget: 3800, unit: 'ms' },
+    { metric: 'TBT', budget: 200, unit: 'ms' },
   ],
   resources: [
-    \{ type: 'script', budget: 300 * 1024 \},
-    \{ type: 'stylesheet', budget: 50 * 1024 \},
-    \{ type: 'image', budget: 500 * 1024 \},
-    \{ type: 'font', budget: 100 * 1024 \},
-    \{ type: 'total', budget: 1000 * 1024 \},
+    { type: 'script', budget: 300 * 1024 },
+    { type: 'stylesheet', budget: 50 * 1024 },
+    { type: 'image', budget: 500 * 1024 },
+    { type: 'font', budget: 100 * 1024 },
+    { type: 'total', budget: 1000 * 1024 },
   ],
-\};
+};
 
 // Check budget violations
 function checkPerformanceBudget(
   metrics: PerformanceMetrics,
   resources: ResourceMetrics,
   budget: PerformanceBudget = DEFAULT_BUDGET
-): BudgetReport \{
+): BudgetReport {
   const violations: BudgetViolation[] = [];
 
   // Check metric budgets
-  for (const \{ metric, budget: limit, unit \} of budget.metrics) \{
+  for (const { metric, budget: limit, unit } of budget.metrics) {
     const actual = metrics[metric.toLowerCase()];
-    if (actual > limit) \{
-      violations.push(\{
+    if (actual > limit) {
+      violations.push({
         type: 'metric',
         name: metric,
         budget: limit,
         actual,
         unit,
         overBy: ((actual - limit) / limit * 100).toFixed(1) + '%',
-      \});
-    \}
-  \}
+      });
+    }
+  }
 
   // Check resource budgets
-  for (const \{ type, budget: limit, count \} of budget.resources) \{
+  for (const { type, budget: limit, count } of budget.resources) {
     const resource = resources[type];
-    if (resource.size > limit) \{
-      violations.push(\{
+    if (resource.size > limit) {
+      violations.push({
         type: 'resource',
         name: type,
         budget: limit,
         actual: resource.size,
         unit: 'bytes',
         overBy: formatBytes(resource.size - limit),
-      \});
-    \}
-    if (count && resource.count > count) \{
-      violations.push(\{
+      });
+    }
+    if (count && resource.count > count) {
+      violations.push({
         type: 'resource-count',
-        name: `$\{type\} count`,
+        name: `${type} count`,
         budget: count,
         actual: resource.count,
         unit: 'requests',
-      \});
-    \}
-  \}
+      });
+    }
+  }
 
-  return \{
+  return {
     passed: violations.length === 0,
     violations,
     summary: generateBudgetSummary(violations),
-  \};
-\}
+  };
+}
 
 // Performance regression test
 async function runPerformanceRegression(
   url: string,
   baseline: PerformanceMetrics,
   threshold: number = 0.1 // 10% regression threshold
-): Promise\<RegressionReport> \{
-  const current = await runLighthouseAudit(\{ url \});
+): Promise<RegressionReport> {
+  const current = await runLighthouseAudit({ url });
   const regressions: Regression[] = [];
 
-  for (const [metric, baselineValue] of Object.entries(baseline)) \{
+  for (const [metric, baselineValue] of Object.entries(baseline)) {
     const currentValue = current.metrics[metric];
     const change = (currentValue - baselineValue) / baselineValue;
 
-    if (change > threshold) \{
-      regressions.push(\{
+    if (change > threshold) {
+      regressions.push({
         metric,
         baseline: baselineValue,
         current: currentValue,
-        change: `+$\{(change * 100).toFixed(1)\}%`,
+        change: `+${(change * 100).toFixed(1)}%`,
         severity: change > 0.25 ? 'critical' : 'warning',
-      \});
-    \}
-  \}
+      });
+    }
+  }
 
-  return \{
+  return {
     passed: regressions.length === 0,
     regressions,
     metrics: current.metrics,
     comparison: generateComparison(baseline, current.metrics),
-  \};
-\}
+  };
+}
 ```
 
 ### 6. Automated Performance CI/CD
@@ -782,78 +780,78 @@ jobs:
 
 ```typescript
 // E-commerce specific performance audit
-async function auditEcommerceSite(baseUrl: string): Promise\<EcommerceAudit> \{
+async function auditEcommerceSite(baseUrl: string): Promise<EcommerceAudit> {
   const pages = [
-    \{ name: 'Home', path: '/' \},
-    \{ name: 'Category', path: '/products' \},
-    \{ name: 'Product', path: '/products/1' \},
-    \{ name: 'Cart', path: '/cart' \},
-    \{ name: 'Checkout', path: '/checkout' \},
+    { name: 'Home', path: '/' },
+    { name: 'Category', path: '/products' },
+    { name: 'Product', path: '/products/1' },
+    { name: 'Cart', path: '/cart' },
+    { name: 'Checkout', path: '/checkout' },
   ];
 
   const results = await Promise.all(
-    pages.map(async page => (\{
+    pages.map(async page => ({
       ...page,
-      audit: await runLighthouseAudit(\{
-        url: `$\{baseUrl\}$\{page.path\}`,
+      audit: await runLighthouseAudit({
+        url: `${baseUrl}${page.path}`,
         device: 'mobile',
-      \}),
-    \}))
+      }),
+    }))
   );
 
-  return \{
+  return {
     pages: results,
     criticalPath: identifyCriticalPath(results),
     conversionImpact: estimateConversionImpact(results),
     recommendations: prioritizeRecommendations(results),
-  \};
-\}
+  };
+}
 ```
 
 ### 2. SPA Performance Monitoring
 
 ```typescript
 // Single Page App performance monitoring
-function initSPAPerformanceMonitoring(): void \{
+function initSPAPerformanceMonitoring(): void {
   // Track route changes
   let routeStartTime: number;
 
-  router.beforeEach(() => \{
+  router.beforeEach(() => {
     routeStartTime = performance.now();
-  \});
+  });
 
-  router.afterEach((to) => \{
+  router.afterEach((to) => {
     const routeTime = performance.now() - routeStartTime;
 
     // Track custom metric
-    performance.measure(`route-$\{to.name\}`, \{
+    performance.measure(`route-${to.name}`, {
       start: routeStartTime,
       duration: routeTime,
-    \});
+    });
 
     // Report to analytics
-    analytics.track('route_performance', \{
+    analytics.track('route_performance', {
       route: to.name,
       duration: routeTime,
       timestamp: Date.now(),
-    \});
-  \});
+    });
+  });
 
   // Monitor long tasks
-  const observer = new PerformanceObserver((list) => \{
-    for (const entry of list.getEntries()) \{
-      if (entry.duration > 50) \{
+  const observer = new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      if (entry.duration > 50) {
         console.warn('Long task detected:', entry.duration, 'ms');
-        analytics.track('long_task', \{
+        analytics.track('long_task', {
           duration: entry.duration,
           startTime: entry.startTime,
-        \});
-      \}
-    \}
-  \});
+        });
+      }
+    }
+  });
 
-  observer.observe(\{ entryTypes: ['longtask'] \});
-\}
+  observer.observe({ entryTypes: ['longtask'] });
+}
 ```
 
 ## Best Practices
@@ -882,10 +880,10 @@ function initSPAPerformanceMonitoring(): void \{
 ## Pre-Launch Performance Checklist
 
 ### Core Web Vitals
-- [ ] LCP \< 2.5s on mobile
-- [ ] FID \< 100ms
-- [ ] CLS \< 0.1
-- [ ] INP \< 200ms
+- [ ] LCP < 2.5s on mobile
+- [ ] FID < 100ms
+- [ ] CLS < 0.1
+- [ ] INP < 200ms
 
 ### Resource Optimization
 - [ ] Images optimized (WebP/AVIF, lazy loaded)
@@ -918,6 +916,7 @@ function initSPAPerformanceMonitoring(): void \{
 - [Chrome DevTools Performance](https://developer.chrome.com/docs/devtools/performance/)
 - [web.dev Performance](https://web.dev/learn/performance/)
 
+
 ## Configuration
 
 You can customize skill behavior in your project config:
@@ -932,34 +931,19 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
-  <Card title="Devops" icon="cloud" href="/skills/overview#devops">
+  <Card title="Devops" icon="server" href="/skills/overview#devops">
     More devops skills
   </Card>
 </CardGroup>

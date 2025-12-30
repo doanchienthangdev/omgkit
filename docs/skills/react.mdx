@@ -7,9 +7,7 @@ icon: "layer-group"
 <Info>
   **Category:** Frameworks
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ React development. Use for React components, hooks, state management.
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # React Skill
 
@@ -32,14 +30,14 @@ When this skill is active, agents automatically apply:
 
 ### Functional Component
 ```tsx
-interface ButtonProps \{
+interface ButtonProps {
   onClick: () => void;
   children: React.ReactNode;
-\}
+}
 
-export function Button(\{ onClick, children \}: ButtonProps) \{
-  return \<button onClick=\{onClick\}>\{children\}\</button>;
-\}
+export function Button({ onClick, children }: ButtonProps) {
+  return <button onClick={onClick}>{children}</button>;
+}
 ```
 
 ### Hooks
@@ -48,15 +46,15 @@ export function Button(\{ onClick, children \}: ButtonProps) \{
 const [count, setCount] = useState(0);
 
 // useEffect
-useEffect(() => \{
+useEffect(() => {
   fetchData();
   return () => cleanup();
-\}, [dependency]);
+}, [dependency]);
 
 // useCallback
-const handleClick = useCallback(() => \{
+const handleClick = useCallback(() => {
   doSomething(value);
-\}, [value]);
+}, [value]);
 
 // useMemo
 const computed = useMemo(() => expensiveCalc(data), [data]);
@@ -64,16 +62,16 @@ const computed = useMemo(() => expensiveCalc(data), [data]);
 
 ### Custom Hook
 ```tsx
-function useUser(id: string) \{
-  const [user, setUser] = useState\<User | null>(null);
+function useUser(id: string) {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => \{
+  useEffect(() => {
     fetchUser(id).then(setUser).finally(() => setLoading(false));
-  \}, [id]);
+  }, [id]);
 
-  return \{ user, loading \};
-\}
+  return { user, loading };
+}
 ```
 
 ## Best Practices
@@ -82,6 +80,7 @@ function useUser(id: string) \{
 - Lift state up when needed
 - Use custom hooks for logic
 - Memoize expensive operations
+
 
 ## Configuration
 
@@ -97,32 +96,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Frameworks" icon="layer-group" href="/skills/overview#frameworks">
     More frameworks skills

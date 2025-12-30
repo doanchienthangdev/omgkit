@@ -1,15 +1,13 @@
 ---
 title: "advanced-ui-design"
 description: "Agency-grade interface design with systematic aesthetic framework (BEAUTIFUL → RIGHT → SATISFYING → PEAK)"
-icon: "wand-magic-sparkles"
+icon: "palette"
 ---
 
 <Info>
   **Category:** Frontend
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  **Triggers:** ui design, beautiful interface, professional design, aesthetic, agency quality, stunning ui
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ Agency-grade interface design with systematic aesthetic framework (BEAUTIFUL →
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Advanced UI Design
 
@@ -44,7 +42,7 @@ Transform ordinary interfaces into memorable experiences by applying:
 
 ### BEAUTIFUL (Visual Appeal)
 ```
-CHECKLIST: First Impression (\< 3 seconds)
+CHECKLIST: First Impression (< 3 seconds)
 ==========================================
 □ Color palette evokes intended emotion
 □ Typography is readable and elegant
@@ -116,7 +114,7 @@ SCORING:
 ### 1. Color System Design
 ```css
 /* Primary color with semantic variations */
-:root \{
+:root {
   /* Base palette */
   --primary-50: #eff6ff;
   --primary-100: #dbeafe;
@@ -140,7 +138,7 @@ SCORING:
   --surface-primary: var(--gray-50);
   --surface-elevated: white;
   --surface-overlay: rgba(0, 0, 0, 0.5);
-\}
+}
 
 /* Color usage rules:
    - Primary: CTAs, links, active states
@@ -153,7 +151,7 @@ SCORING:
 ### 2. Typography Hierarchy
 ```css
 /* Type scale based on 1.25 ratio */
-:root \{
+:root {
   --text-xs: 0.75rem;    /* 12px - Labels, captions */
   --text-sm: 0.875rem;   /* 14px - Secondary text */
   --text-base: 1rem;     /* 16px - Body text */
@@ -163,22 +161,22 @@ SCORING:
   --text-3xl: 1.875rem;  /* 30px - Page titles */
   --text-4xl: 2.25rem;   /* 36px - Hero headlines */
   --text-5xl: 3rem;      /* 48px - Display text */
-\}
+}
 
 /* Font weight usage */
-.heading \{ font-weight: 600; \} /* Semibold for headings */
-.body \{ font-weight: 400; \}    /* Regular for body */
-.emphasis \{ font-weight: 500; \} /* Medium for emphasis */
+.heading { font-weight: 600; } /* Semibold for headings */
+.body { font-weight: 400; }    /* Regular for body */
+.emphasis { font-weight: 500; } /* Medium for emphasis */
 
 /* Line height rules */
-.heading \{ line-height: 1.2; \}  /* Tight for headings */
-.body \{ line-height: 1.6; \}     /* Relaxed for body */
+.heading { line-height: 1.2; }  /* Tight for headings */
+.body { line-height: 1.6; }     /* Relaxed for body */
 ```
 
 ### 3. Spacing System (8-Point Grid)
 ```css
 /* Spacing scale */
-:root \{
+:root {
   --space-1: 0.25rem;   /* 4px - Tight spacing */
   --space-2: 0.5rem;    /* 8px - Related elements */
   --space-3: 0.75rem;   /* 12px - Form gaps */
@@ -188,7 +186,7 @@ SCORING:
   --space-12: 3rem;     /* 48px - Section margins */
   --space-16: 4rem;     /* 64px - Page sections */
   --space-24: 6rem;     /* 96px - Hero spacing */
-\}
+}
 
 /* Usage patterns:
    - space-1: Icon padding, badge spacing
@@ -202,70 +200,70 @@ SCORING:
 ### 4. Micro-Interaction Library
 ```css
 /* Button hover effect */
-.btn \{
+.btn {
   transition: all 0.2s ease;
-\}
-.btn:hover \{
+}
+.btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-\}
-.btn:active \{
+}
+.btn:active {
   transform: translateY(0);
-\}
+}
 
 /* Card hover effect */
-.card \{
+.card {
   transition: all 0.3s ease;
-\}
-.card:hover \{
+}
+.card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
-\}
+}
 
 /* Focus ring for accessibility */
-.interactive:focus-visible \{
+.interactive:focus-visible {
   outline: 2px solid var(--primary-500);
   outline-offset: 2px;
-\}
+}
 
 /* Loading skeleton pulse */
-@keyframes pulse \{
-  0%, 100% \{ opacity: 1; \}
-  50% \{ opacity: 0.5; \}
-\}
-.skeleton \{
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.skeleton {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-\}
+}
 ```
 
 ### 5. Emotional Design Patterns
 ```jsx
 // Success celebration
 const SuccessState = () => (
-  \<motion.div
-    initial={\{ scale: 0.8, opacity: 0 \}}
-    animate={\{ scale: 1, opacity: 1 \}}
-    transition={\{ type: "spring", stiffness: 200 \}}
+  <motion.div
+    initial={{ scale: 0.8, opacity: 0 }}
+    animate={{ scale: 1, opacity: 1 }}
+    transition={{ type: "spring", stiffness: 200 }}
   >
-    \<CheckCircle className="text-green-500 w-16 h-16" />
-    \<h2>Payment Successful!\</h2>
-    \<Confetti /> \{/* Subtle celebration */\}
-  \</motion.div>
+    <CheckCircle className="text-green-500 w-16 h-16" />
+    <h2>Payment Successful!</h2>
+    <Confetti /> {/* Subtle celebration */}
+  </motion.div>
 );
 
 // Empty state with personality
 const EmptyState = () => (
-  \<div className="text-center py-12">
-    \<Illustration name="empty-inbox" />
-    \<h3>No messages yet\</h3>
-    \<p className="text-gray-500">
+  <div className="text-center py-12">
+    <Illustration name="empty-inbox" />
+    <h3>No messages yet</h3>
+    <p className="text-gray-500">
       When you receive messages, they'll show up here.
-      \<br />
-      \<span className="text-sm">
+      <br />
+      <span className="text-sm">
         Pro tip: Say hi to someone! 👋
-      \</span>
-    \</p>
-  \</div>
+      </span>
+    </p>
+  </div>
 );
 ```
 
@@ -310,46 +308,46 @@ PRIORITY IMPROVEMENTS:
 ```jsx
 // Dashboard with BRSP principles
 
-export function Dashboard() \{
+export function Dashboard() {
   return (
-    \<div className="min-h-screen bg-gray-50">
-      \{/* BEAUTIFUL: Clean header with visual hierarchy */\}
-      \<header className="bg-white border-b border-gray-200 px-6 py-4">
-        \<h1 className="text-2xl font-semibold text-gray-900">
+    <div className="min-h-screen bg-gray-50">
+      {/* BEAUTIFUL: Clean header with visual hierarchy */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <h1 className="text-2xl font-semibold text-gray-900">
           Good morning, Sarah 👋
-        \</h1>
-        \<p className="text-gray-500 mt-1">
+        </h1>
+        <p className="text-gray-500 mt-1">
           Here's what's happening today
-        \</p>
-      \</header>
+        </p>
+      </header>
 
-      \{/* RIGHT: Clear information architecture */\}
-      \<main className="p-6 grid grid-cols-12 gap-6">
-        \{/* Key metrics - immediate visibility */\}
-        \<MetricCards className="col-span-12" />
+      {/* RIGHT: Clear information architecture */}
+      <main className="p-6 grid grid-cols-12 gap-6">
+        {/* Key metrics - immediate visibility */}
+        <MetricCards className="col-span-12" />
 
-        \{/* Primary content area */\}
-        \<ActivityFeed className="col-span-8" />
+        {/* Primary content area */}
+        <ActivityFeed className="col-span-8" />
 
-        \{/* Secondary information */\}
-        \<Sidebar className="col-span-4" />
-      \</main>
+        {/* Secondary information */}
+        <Sidebar className="col-span-4" />
+      </main>
 
-      \{/* SATISFYING: Helpful feedback */\}
-      \<Toast
+      {/* SATISFYING: Helpful feedback */}
+      <Toast
         type="success"
         message="Report exported successfully"
-        action={\{ label: "View", onClick: viewReport \}}
+        action={{ label: "View", onClick: viewReport }}
       />
 
-      \{/* PEAK: Delightful detail */\}
-      \<AchievementBadge
+      {/* PEAK: Delightful detail */}
+      <AchievementBadge
         title="First Week Complete!"
         description="You've been using the app for 7 days"
       />
-    \</div>
+    </div>
   );
-\}
+}
 ```
 
 ### E-commerce Product Page
@@ -440,6 +438,7 @@ Responsiveness:
 - [Dribbble](https://dribbble.com) - Visual inspiration
 - [Mobbin](https://mobbin.com) - Mobile pattern library
 
+
 ## Configuration
 
 You can customize skill behavior in your project config:
@@ -454,32 +453,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Frontend" icon="palette" href="/skills/overview#frontend">
     More frontend skills

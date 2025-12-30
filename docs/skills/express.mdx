@@ -7,9 +7,7 @@ icon: "layer-group"
 <Info>
   **Category:** Frameworks
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ Express.js development. Use for Express APIs, middleware, routing.
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Express.js Skill
 
@@ -40,35 +38,35 @@ app.use(express.json());
 
 ### Routes
 ```javascript
-app.get('/users', async (req, res) => \{
+app.get('/users', async (req, res) => {
   const users = await db.users.findMany();
   res.json(users);
-\});
+});
 
-app.post('/users', async (req, res) => \{
+app.post('/users', async (req, res) => {
   const user = await db.users.create(req.body);
   res.status(201).json(user);
-\});
+});
 ```
 
 ### Middleware
 ```javascript
-function authMiddleware(req, res, next) \{
+function authMiddleware(req, res, next) {
   const token = req.headers.authorization;
-  if (!token) return res.status(401).json(\{ error: 'Unauthorized' \});
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
   req.user = verifyToken(token);
   next();
-\}
+}
 
 app.use('/api', authMiddleware);
 ```
 
 ### Error Handler
 ```javascript
-app.use((err, req, res, next) => \{
+app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json(\{ error: 'Internal Server Error' \});
-\});
+  res.status(500).json({ error: 'Internal Server Error' });
+});
 ```
 
 ## Best Practices
@@ -76,6 +74,7 @@ app.use((err, req, res, next) => \{
 - Use middleware for cross-cutting concerns
 - Validate input
 - Use proper status codes
+
 
 ## Configuration
 
@@ -91,32 +90,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Frameworks" icon="layer-group" href="/skills/overview#frameworks">
     More frameworks skills

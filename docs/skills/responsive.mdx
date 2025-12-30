@@ -7,9 +7,7 @@ icon: "palette"
 <Info>
   **Category:** Frontend
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,23 +18,23 @@ Responsive design. Use for mobile-first, adaptive layouts.
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Responsive Design Skill
 
 ## Breakpoints
 ```css
 /* Mobile first */
-.element \{ /* Mobile styles */ \}
+.element { /* Mobile styles */ }
 
-@media (min-width: 640px) \{ /* sm */ \}
-@media (min-width: 768px) \{ /* md */ \}
-@media (min-width: 1024px) \{ /* lg */ \}
-@media (min-width: 1280px) \{ /* xl */ \}
+@media (min-width: 640px) { /* sm */ }
+@media (min-width: 768px) { /* md */ }
+@media (min-width: 1024px) { /* lg */ }
+@media (min-width: 1280px) { /* xl */ }
 ```
 
 ## Patterns
@@ -48,18 +46,18 @@ font-size: clamp(1rem, 2.5vw, 2rem);
 
 ### Responsive Grid
 ```css
-.grid \{
+.grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1rem;
-\}
+}
 ```
 
 ### Container Queries
 ```css
-@container (min-width: 400px) \{
-  .card \{ flex-direction: row; \}
-\}
+@container (min-width: 400px) {
+  .card { flex-direction: row; }
+}
 ```
 
 ## Best Practices
@@ -67,6 +65,7 @@ font-size: clamp(1rem, 2.5vw, 2rem);
 - Use relative units
 - Test on real devices
 - Consider touch targets (44px min)
+
 
 ## Configuration
 
@@ -82,32 +81,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Frontend" icon="palette" href="/skills/overview#frontend">
     More frontend skills

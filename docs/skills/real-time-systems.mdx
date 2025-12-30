@@ -1,15 +1,13 @@
 ---
 title: "real-time-systems"
 description: "WebSocket, Server-Sent Events, and real-time communication patterns for live features"
-icon: "signal"
+icon: "brain"
 ---
 
 <Info>
   **Category:** Backend
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  **Triggers:** real-time, websocket, socket.io, server-sent events, sse, live updates, presence
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ WebSocket, Server-Sent Events, and real-time communication patterns for live fea
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Real-Time Systems
 
@@ -46,122 +44,122 @@ Implement live features that users expect:
 ### 1. WebSocket Server with Socket.io
 
 ```typescript
-import \{ Server \} from 'socket.io';
-import \{ createAdapter \} from '@socket.io/redis-adapter';
-import \{ createClient \} from 'redis';
+import { Server } from 'socket.io';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { createClient } from 'redis';
 
 // Initialize Socket.io with Redis adapter for scaling
-async function createSocketServer(httpServer: http.Server) \{
-  const io = new Server(httpServer, \{
-    cors: \{
+async function createSocketServer(httpServer: http.Server) {
+  const io = new Server(httpServer, {
+    cors: {
       origin: process.env.CLIENT_URL,
       credentials: true,
-    \},
+    },
     pingTimeout: 60000,
     pingInterval: 25000,
-  \});
+  });
 
   // Redis adapter for multi-server deployment
-  const pubClient = createClient(\{ url: process.env.REDIS_URL \});
+  const pubClient = createClient({ url: process.env.REDIS_URL });
   const subClient = pubClient.duplicate();
   await Promise.all([pubClient.connect(), subClient.connect()]);
   io.adapter(createAdapter(pubClient, subClient));
 
   // Authentication middleware
-  io.use(async (socket, next) => \{
+  io.use(async (socket, next) => {
     const token = socket.handshake.auth.token;
 
-    if (!token) \{
+    if (!token) {
       return next(new Error('Authentication required'));
-    \}
+    }
 
-    try \{
+    try {
       const user = await verifyToken(token);
       socket.data.user = user;
       next();
-    \} catch (error) \{
+    } catch (error) {
       next(new Error('Invalid token'));
-    \}
-  \});
+    }
+  });
 
   // Connection handling
-  io.on('connection', (socket) => \{
+  io.on('connection', (socket) => {
     const userId = socket.data.user.id;
-    console.log(`User connected: $\{userId\}`);
+    console.log(`User connected: ${userId}`);
 
     // Join user's personal room
-    socket.join(`user:$\{userId\}`);
+    socket.join(`user:${userId}`);
 
     // Handle joining rooms
-    socket.on('join:room', async (roomId: string) => \{
+    socket.on('join:room', async (roomId: string) => {
       // Verify access
       const hasAccess = await checkRoomAccess(userId, roomId);
-      if (!hasAccess) \{
-        socket.emit('error', \{ message: 'Access denied' \});
+      if (!hasAccess) {
+        socket.emit('error', { message: 'Access denied' });
         return;
-      \}
+      }
 
-      socket.join(`room:$\{roomId\}`);
-      socket.to(`room:$\{roomId\}`).emit('user:joined', \{
+      socket.join(`room:${roomId}`);
+      socket.to(`room:${roomId}`).emit('user:joined', {
         userId,
         username: socket.data.user.name,
-      \});
-    \});
+      });
+    });
 
     // Handle messages
-    socket.on('message:send', async (data: \{ roomId: string; content: string \}) => \{
-      const message = await saveMessage(\{
+    socket.on('message:send', async (data: { roomId: string; content: string }) => {
+      const message = await saveMessage({
         roomId: data.roomId,
         userId,
         content: data.content,
-      \});
+      });
 
-      io.to(`room:$\{data.roomId\}`).emit('message:new', message);
-    \});
+      io.to(`room:${data.roomId}`).emit('message:new', message);
+    });
 
     // Typing indicators
-    socket.on('typing:start', (roomId: string) => \{
-      socket.to(`room:$\{roomId\}`).emit('typing:user', \{
+    socket.on('typing:start', (roomId: string) => {
+      socket.to(`room:${roomId}`).emit('typing:user', {
         userId,
         username: socket.data.user.name,
         typing: true,
-      \});
-    \});
+      });
+    });
 
-    socket.on('typing:stop', (roomId: string) => \{
-      socket.to(`room:$\{roomId\}`).emit('typing:user', \{
+    socket.on('typing:stop', (roomId: string) => {
+      socket.to(`room:${roomId}`).emit('typing:user', {
         userId,
         typing: false,
-      \});
-    \});
+      });
+    });
 
     // Presence
-    socket.on('presence:update', async (status: 'online' | 'away' | 'busy') => \{
+    socket.on('presence:update', async (status: 'online' | 'away' | 'busy') => {
       await updatePresence(userId, status);
-      io.emit('presence:changed', \{ userId, status \});
-    \});
+      io.emit('presence:changed', { userId, status });
+    });
 
     // Disconnect handling
-    socket.on('disconnect', async (reason) => \{
-      console.log(`User disconnected: $\{userId\}, reason: $\{reason\}`);
+    socket.on('disconnect', async (reason) => {
+      console.log(`User disconnected: ${userId}, reason: ${reason}`);
       await updatePresence(userId, 'offline');
-      io.emit('presence:changed', \{ userId, status: 'offline' \});
-    \});
-  \});
+      io.emit('presence:changed', { userId, status: 'offline' });
+    });
+  });
 
   return io;
-\}
+}
 ```
 
 ### 2. Server-Sent Events (SSE)
 
 ```typescript
-import \{ Router \} from 'express';
+import { Router } from 'express';
 
 const router = Router();
 
 // SSE endpoint for notifications
-router.get('/events/notifications', authenticate, (req, res) => \{
+router.get('/events/notifications', authenticate, (req, res) => {
   const userId = req.user.id;
 
   // Set SSE headers
@@ -171,29 +169,29 @@ router.get('/events/notifications', authenticate, (req, res) => \{
   res.setHeader('X-Accel-Buffering', 'no'); // Disable nginx buffering
 
   // Send initial connection event
-  res.write(`event: connected\ndata: $\{JSON.stringify(\{ userId \})\}\n\n`);
+  res.write(`event: connected\ndata: ${JSON.stringify({ userId })}\n\n`);
 
   // Keep-alive ping
-  const pingInterval = setInterval(() => \{
+  const pingInterval = setInterval(() => {
     res.write(`: ping\n\n`);
-  \}, 30000);
+  }, 30000);
 
   // Subscribe to user's notifications
-  const subscription = pubsub.subscribe(`notifications:$\{userId\}`, (message) => \{
-    res.write(`event: notification\ndata: $\{JSON.stringify(message)\}\n\n`);
-  \});
+  const subscription = pubsub.subscribe(`notifications:${userId}`, (message) => {
+    res.write(`event: notification\ndata: ${JSON.stringify(message)}\n\n`);
+  });
 
   // Cleanup on disconnect
-  req.on('close', () => \{
+  req.on('close', () => {
     clearInterval(pingInterval);
     subscription.unsubscribe();
-    console.log(`SSE connection closed for user $\{userId\}`);
-  \});
-\});
+    console.log(`SSE connection closed for user ${userId}`);
+  });
+});
 
 // SSE for live updates (e.g., stock prices, metrics)
-router.get('/events/stream/:channel', authenticate, async (req, res) => \{
-  const \{ channel \} = req.params;
+router.get('/events/stream/:channel', authenticate, async (req, res) => {
+  const { channel } = req.params;
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -201,63 +199,63 @@ router.get('/events/stream/:channel', authenticate, async (req, res) => \{
 
   // Send initial data
   const initialData = await getChannelData(channel);
-  res.write(`event: initial\ndata: $\{JSON.stringify(initialData)\}\n\n`);
+  res.write(`event: initial\ndata: ${JSON.stringify(initialData)}\n\n`);
 
   // Stream updates
-  const unsubscribe = subscribeToChannel(channel, (update) => \{
-    res.write(`event: update\ndata: $\{JSON.stringify(update)\}\n\n`);
-  \});
+  const unsubscribe = subscribeToChannel(channel, (update) => {
+    res.write(`event: update\ndata: ${JSON.stringify(update)}\n\n`);
+  });
 
   // Handle retry on reconnection
   res.write(`retry: 3000\n\n`);
 
-  req.on('close', () => \{
+  req.on('close', () => {
     unsubscribe();
-  \});
-\});
+  });
+});
 
 // Client-side SSE handling
-const EventSourceComponent = () => \{
-  useEffect(() => \{
-    const eventSource = new EventSource('/api/events/notifications', \{
+const EventSourceComponent = () => {
+  useEffect(() => {
+    const eventSource = new EventSource('/api/events/notifications', {
       withCredentials: true,
-    \});
+    });
 
-    eventSource.onopen = () => \{
+    eventSource.onopen = () => {
       console.log('SSE connected');
-    \};
+    };
 
-    eventSource.addEventListener('notification', (event) => \{
+    eventSource.addEventListener('notification', (event) => {
       const notification = JSON.parse(event.data);
       showNotification(notification);
-    \});
+    });
 
-    eventSource.onerror = (error) => \{
+    eventSource.onerror = (error) => {
       console.error('SSE error:', error);
       // EventSource auto-reconnects
-    \};
+    };
 
-    return () => \{
+    return () => {
       eventSource.close();
-    \};
-  \}, []);
+    };
+  }, []);
 
   return null;
-\};
+};
 ```
 
 ### 3. Pub/Sub with Redis
 
 ```typescript
-import \{ createClient \} from 'redis';
+import { createClient } from 'redis';
 
-class PubSubService \{
-  private publisher: ReturnType\<typeof createClient>;
-  private subscriber: ReturnType\<typeof createClient>;
-  private handlers: Map\<string, Set\<(message: any) => void>> = new Map();
+class PubSubService {
+  private publisher: ReturnType<typeof createClient>;
+  private subscriber: ReturnType<typeof createClient>;
+  private handlers: Map<string, Set<(message: any) => void>> = new Map();
 
-  async connect() \{
-    this.publisher = createClient(\{ url: process.env.REDIS_URL \});
+  async connect() {
+    this.publisher = createClient({ url: process.env.REDIS_URL });
     this.subscriber = this.publisher.duplicate();
 
     await Promise.all([
@@ -266,164 +264,164 @@ class PubSubService \{
     ]);
 
     // Handle incoming messages
-    this.subscriber.on('message', (channel, message) => \{
+    this.subscriber.on('message', (channel, message) => {
       const handlers = this.handlers.get(channel);
-      if (handlers) \{
+      if (handlers) {
         const parsed = JSON.parse(message);
         handlers.forEach(handler => handler(parsed));
-      \}
-    \});
-  \}
+      }
+    });
+  }
 
-  async publish(channel: string, message: any): Promise\<void> \{
+  async publish(channel: string, message: any): Promise<void> {
     await this.publisher.publish(channel, JSON.stringify(message));
-  \}
+  }
 
-  subscribe(channel: string, handler: (message: any) => void): () => void \{
-    if (!this.handlers.has(channel)) \{
+  subscribe(channel: string, handler: (message: any) => void): () => void {
+    if (!this.handlers.has(channel)) {
       this.handlers.set(channel, new Set());
       this.subscriber.subscribe(channel);
-    \}
+    }
 
     this.handlers.get(channel)!.add(handler);
 
     // Return unsubscribe function
-    return () => \{
+    return () => {
       const handlers = this.handlers.get(channel);
-      if (handlers) \{
+      if (handlers) {
         handlers.delete(handler);
-        if (handlers.size === 0) \{
+        if (handlers.size === 0) {
           this.handlers.delete(channel);
           this.subscriber.unsubscribe(channel);
-        \}
-      \}
-    \};
-  \}
+        }
+      }
+    };
+  }
 
   // Pattern subscription
-  async psubscribe(pattern: string, handler: (channel: string, message: any) => void): Promise\<() => void> \{
-    await this.subscriber.pSubscribe(pattern, (message, channel) => \{
+  async psubscribe(pattern: string, handler: (channel: string, message: any) => void): Promise<() => void> {
+    await this.subscriber.pSubscribe(pattern, (message, channel) => {
       handler(channel, JSON.parse(message));
-    \});
+    });
 
-    return () => \{
+    return () => {
       this.subscriber.pUnsubscribe(pattern);
-    \};
-  \}
-\}
+    };
+  }
+}
 
 const pubsub = new PubSubService();
 
 // Usage in services
-class NotificationService \{
-  async sendNotification(userId: string, notification: Notification): Promise\<void> \{
+class NotificationService {
+  async sendNotification(userId: string, notification: Notification): Promise<void> {
     // Save to database
-    await db.notification.create(\{ data: \{ ...notification, userId \} \});
+    await db.notification.create({ data: { ...notification, userId } });
 
     // Publish to real-time channel
-    await pubsub.publish(`notifications:$\{userId\}`, notification);
-  \}
+    await pubsub.publish(`notifications:${userId}`, notification);
+  }
 
-  async broadcastToRoom(roomId: string, event: string, data: any): Promise\<void> \{
-    await pubsub.publish(`room:$\{roomId\}`, \{ event, data \});
-  \}
-\}
+  async broadcastToRoom(roomId: string, event: string, data: any): Promise<void> {
+    await pubsub.publish(`room:${roomId}`, { event, data });
+  }
+}
 ```
 
 ### 4. Presence System
 
 ```typescript
-interface PresenceData \{
+interface PresenceData {
   status: 'online' | 'away' | 'busy' | 'offline';
   lastSeen: Date;
   socketIds: string[];
-\}
+}
 
-class PresenceService \{
-  private redis: ReturnType\<typeof createClient>;
+class PresenceService {
+  private redis: ReturnType<typeof createClient>;
   private readonly PRESENCE_TTL = 300; // 5 minutes
 
-  async setPresence(userId: string, socketId: string, status: string): Promise\<void> \{
-    const key = `presence:$\{userId\}`;
+  async setPresence(userId: string, socketId: string, status: string): Promise<void> {
+    const key = `presence:${userId}`;
 
     // Use MULTI for atomic operations
     await this.redis.multi()
-      .hSet(key, \{
+      .hSet(key, {
         status,
         lastSeen: Date.now().toString(),
-      \})
-      .sAdd(`$\{key\}:sockets`, socketId)
+      })
+      .sAdd(`${key}:sockets`, socketId)
       .expire(key, this.PRESENCE_TTL)
       .exec();
 
     // Publish presence change
-    await pubsub.publish('presence:updates', \{
+    await pubsub.publish('presence:updates', {
       userId,
       status,
       lastSeen: new Date(),
-    \});
-  \}
+    });
+  }
 
-  async removeSocket(userId: string, socketId: string): Promise\<void> \{
-    const key = `presence:$\{userId\}`;
+  async removeSocket(userId: string, socketId: string): Promise<void> {
+    const key = `presence:${userId}`;
 
-    await this.redis.sRem(`$\{key\}:sockets`, socketId);
-    const remaining = await this.redis.sCard(`$\{key\}:sockets`);
+    await this.redis.sRem(`${key}:sockets`, socketId);
+    const remaining = await this.redis.sCard(`${key}:sockets`);
 
-    if (remaining === 0) \{
+    if (remaining === 0) {
       await this.redis.hSet(key, 'status', 'offline');
-      await pubsub.publish('presence:updates', \{
+      await pubsub.publish('presence:updates', {
         userId,
         status: 'offline',
         lastSeen: new Date(),
-      \});
-    \}
-  \}
+      });
+    }
+  }
 
-  async getPresence(userId: string): Promise\<PresenceData | null> \{
-    const key = `presence:$\{userId\}`;
+  async getPresence(userId: string): Promise<PresenceData | null> {
+    const key = `presence:${userId}`;
     const data = await this.redis.hGetAll(key);
 
     if (!data.status) return null;
 
-    return \{
+    return {
       status: data.status as PresenceData['status'],
       lastSeen: new Date(parseInt(data.lastSeen)),
-      socketIds: await this.redis.sMembers(`$\{key\}:sockets`),
-    \};
-  \}
+      socketIds: await this.redis.sMembers(`${key}:sockets`),
+    };
+  }
 
-  async getMultiplePresence(userIds: string[]): Promise\<Map\<string, PresenceData>> \{
+  async getMultiplePresence(userIds: string[]): Promise<Map<string, PresenceData>> {
     const pipeline = this.redis.multi();
 
-    userIds.forEach(id => \{
-      pipeline.hGetAll(`presence:$\{id\}`);
-    \});
+    userIds.forEach(id => {
+      pipeline.hGetAll(`presence:${id}`);
+    });
 
     const results = await pipeline.exec();
-    const presenceMap = new Map\<string, PresenceData>();
+    const presenceMap = new Map<string, PresenceData>();
 
-    userIds.forEach((id, index) => \{
-      const data = results[index] as Record\<string, string>;
-      if (data?.status) \{
-        presenceMap.set(id, \{
+    userIds.forEach((id, index) => {
+      const data = results[index] as Record<string, string>;
+      if (data?.status) {
+        presenceMap.set(id, {
           status: data.status as PresenceData['status'],
           lastSeen: new Date(parseInt(data.lastSeen)),
           socketIds: [],
-        \});
-      \}
-    \});
+        });
+      }
+    });
 
     return presenceMap;
-  \}
-\}
+  }
+}
 ```
 
 ### 5. Connection Recovery
 
 ```typescript
 // Client-side reconnection logic
-class ReconnectingWebSocket \{
+class ReconnectingWebSocket {
   private ws: WebSocket | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
@@ -432,108 +430,108 @@ class ReconnectingWebSocket \{
 
   constructor(
     private url: string,
-    private options: \{
+    private options: {
       onMessage: (data: any) => void;
       onConnect: () => void;
       onDisconnect: () => void;
-    \}
-  ) \{
+    }
+  ) {
     this.connect();
-  \}
+  }
 
-  private connect(): void \{
+  private connect(): void {
     this.ws = new WebSocket(this.url);
 
-    this.ws.onopen = () => \{
+    this.ws.onopen = () => {
       console.log('WebSocket connected');
       this.reconnectAttempts = 0;
       this.options.onConnect();
 
       // Flush queued messages
-      while (this.messageQueue.length > 0) \{
+      while (this.messageQueue.length > 0) {
         const msg = this.messageQueue.shift();
         this.send(msg);
-      \}
-    \};
+      }
+    };
 
-    this.ws.onmessage = (event) => \{
+    this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       this.options.onMessage(data);
-    \};
+    };
 
-    this.ws.onclose = (event) => \{
+    this.ws.onclose = (event) => {
       console.log('WebSocket closed:', event.code, event.reason);
       this.options.onDisconnect();
       this.scheduleReconnect();
-    \};
+    };
 
-    this.ws.onerror = (error) => \{
+    this.ws.onerror = (error) => {
       console.error('WebSocket error:', error);
-    \};
-  \}
+    };
+  }
 
-  private scheduleReconnect(): void \{
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) \{
+  private scheduleReconnect(): void {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error('Max reconnection attempts reached');
       return;
-    \}
+    }
 
     const delay = Math.min(
       this.reconnectInterval * Math.pow(2, this.reconnectAttempts),
       30000 // Max 30 seconds
     );
 
-    console.log(`Reconnecting in $\{delay\}ms...`);
+    console.log(`Reconnecting in ${delay}ms...`);
 
-    setTimeout(() => \{
+    setTimeout(() => {
       this.reconnectAttempts++;
       this.connect();
-    \}, delay);
-  \}
+    }, delay);
+  }
 
-  send(data: any): void \{
-    if (this.ws?.readyState === WebSocket.OPEN) \{
+  send(data: any): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));
-    \} else \{
+    } else {
       // Queue message for when connection is restored
       this.messageQueue.push(data);
-    \}
-  \}
+    }
+  }
 
-  close(): void \{
+  close(): void {
     this.maxReconnectAttempts = 0; // Prevent reconnection
     this.ws?.close();
-  \}
-\}
+  }
+}
 
 // Server-side missed message recovery
-class MessageRecovery \{
-  async getMessagesSince(roomId: string, lastMessageId: string): Promise\<Message[]> \{
+class MessageRecovery {
+  async getMessagesSince(roomId: string, lastMessageId: string): Promise<Message[]> {
     // Fetch messages after the last seen message
-    return db.message.findMany(\{
-      where: \{
+    return db.message.findMany({
+      where: {
         roomId,
-        id: \{ gt: lastMessageId \},
-      \},
-      orderBy: \{ createdAt: 'asc' \},
+        id: { gt: lastMessageId },
+      },
+      orderBy: { createdAt: 'asc' },
       take: 100, // Limit recovery batch
-    \});
-  \}
+    });
+  }
 
-  async recoverClientState(userId: string, lastSyncTimestamp: number): Promise\<\{
+  async recoverClientState(userId: string, lastSyncTimestamp: number): Promise<{
     messages: Message[];
     notifications: Notification[];
     presenceUpdates: PresenceUpdate[];
-  \}> \{
+  }> {
     const since = new Date(lastSyncTimestamp);
 
-    return \{
+    return {
       messages: await this.getUnreadMessages(userId, since),
       notifications: await this.getUnreadNotifications(userId, since),
       presenceUpdates: await this.getPresenceChanges(since),
-    \};
-  \}
-\}
+    };
+  }
+}
 ```
 
 ### 6. Scaling WebSockets
@@ -541,15 +539,15 @@ class MessageRecovery \{
 ```typescript
 // Horizontal scaling with sticky sessions
 // nginx.conf
-upstream websocket_servers \{
+upstream websocket_servers {
     ip_hash; // Sticky sessions
     server ws1.example.com:3000;
     server ws2.example.com:3000;
     server ws3.example.com:3000;
-\}
+}
 
-server \{
-    location /socket.io/ \{
+server {
+    location /socket.io/ {
         proxy_pass http://websocket_servers;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
@@ -557,33 +555,33 @@ server \{
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_read_timeout 86400;
-    \}
-\}
+    }
+}
 
 // Broadcasting across servers
-class ScaledBroadcaster \{
-  async broadcastToRoom(roomId: string, event: string, data: any): Promise\<void> \{
+class ScaledBroadcaster {
+  async broadcastToRoom(roomId: string, event: string, data: any): Promise<void> {
     // Publish to Redis - all servers will receive
-    await pubsub.publish(`broadcast:room:$\{roomId\}`, \{
+    await pubsub.publish(`broadcast:room:${roomId}`, {
       event,
       data,
       timestamp: Date.now(),
-    \});
-  \}
+    });
+  }
 
   // Each server subscribes and emits locally
-  setupBroadcastListener(io: Server): void \{
-    pubsub.psubscribe('broadcast:*', (channel, message) => \{
+  setupBroadcastListener(io: Server): void {
+    pubsub.psubscribe('broadcast:*', (channel, message) => {
       const [, type, id] = channel.split(':');
 
-      if (type === 'room') \{
-        io.to(`room:$\{id\}`).emit(message.event, message.data);
-      \} else if (type === 'user') \{
-        io.to(`user:$\{id\}`).emit(message.event, message.data);
-      \}
-    \});
-  \}
-\}
+      if (type === 'room') {
+        io.to(`room:${id}`).emit(message.event, message.data);
+      } else if (type === 'user') {
+        io.to(`user:${id}`).emit(message.event, message.data);
+      }
+    });
+  }
+}
 ```
 
 ## Use Cases
@@ -592,28 +590,28 @@ class ScaledBroadcaster \{
 
 ```typescript
 // Real-time chat with typing indicators and read receipts
-socket.on('chat:message', async (data) => \{
+socket.on('chat:message', async (data) => {
   const message = await createMessage(data);
-  io.to(`room:$\{data.roomId\}`).emit('chat:message', message);
-\});
+  io.to(`room:${data.roomId}`).emit('chat:message', message);
+});
 
-socket.on('chat:read', async (\{ roomId, messageId \}) => \{
+socket.on('chat:read', async ({ roomId, messageId }) => {
   await markAsRead(socket.data.user.id, roomId, messageId);
-  socket.to(`room:$\{roomId\}`).emit('chat:read', \{
+  socket.to(`room:${roomId}`).emit('chat:read', {
     userId: socket.data.user.id,
     messageId,
-  \});
-\});
+  });
+});
 ```
 
 ### 2. Live Dashboard
 
 ```typescript
 // Real-time metrics with SSE
-setInterval(async () => \{
+setInterval(async () => {
   const metrics = await gatherMetrics();
   await pubsub.publish('dashboard:metrics', metrics);
-\}, 5000);
+}, 5000);
 ```
 
 ## Best Practices
@@ -648,6 +646,7 @@ setInterval(async () => \{
 - [WebSocket MDN](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
 - [SSE MDN](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events)
 
+
 ## Configuration
 
 You can customize skill behavior in your project config:
@@ -662,34 +661,19 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
-  <Card title="Backend" icon="server" href="/skills/overview#backend">
+  <Card title="Backend" icon="brain" href="/skills/overview#backend">
     More backend skills
   </Card>
 </CardGroup>

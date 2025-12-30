@@ -1,13 +1,13 @@
 ---
 title: "/brainstorm"
 description: "Interactive brainstorming session"
-icon: "lightbulb"
+icon: "map"
 ---
 
 <Info>
   **Category:** Planning
 
-  **Syntax:** `/brainstorm`
+  **Syntax:** `/brainstorm <topic>`
 </Info>
 
 ## Overview
@@ -17,12 +17,13 @@ Interactive brainstorming session
 ## Quick Start
 
 ```bash
-/brainstorm
+/brainstorm "topic"
 ```
 
-# 💡 Brainstorm: $ARGUMENTS
 
-Creative exploration for: **$ARGUMENTS**
+# 💡 Brainstorm: \<topic\>
+
+Creative exploration for: **\<topic\>**
 
 ## Process
 1. Define problem clearly
@@ -48,23 +49,24 @@ Creative exploration for: **$ARGUMENTS**
 3. **Quickest Win**: [why]
 ```
 
+
+
 ## Tools Used
 
-This command leverages the following capabilities:
+This command uses the following tools:
 
-<Check>**Task** - Orchestrates complex multi-step operations</Check>
-<Check>**Read** - Analyzes files and codebase context</Check>
-<Check>**Write** - Creates and modifies files</Check>
-<Check>**Bash** - Executes system commands</Check>
-<Check>**Grep** - Searches code patterns</Check>
-<Check>**Glob** - Finds files by pattern</Check>
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **WebSearch** - Enables websearch capabilities
+- **Glob** - Enables glob capabilities
+
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/brainstorm
+/brainstorm "your input here"
 ```
 
 ### With Context
@@ -74,29 +76,13 @@ This command leverages the following capabilities:
 /index
 
 # Then run the command
-/brainstorm
+/brainstorm "detailed description"
 ```
-
-### Combined with Other Commands
-
-```bash
-# Example workflow
-/plan "describe your goal"
-/brainstorm
-/commit
-```
-
-## Best Practices
-
-<Check>Be specific in your descriptions</Check>
-<Check>Include relevant file paths when applicable</Check>
-<Check>Use in combination with other commands for complex workflows</Check>
-<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, provide detailed descriptions and include relevant context about your project structure.
+For best results, be specific in your descriptions and include relevant file paths or context.
 </Note>
 
 ## Troubleshooting
@@ -107,9 +93,6 @@ For best results, provide detailed descriptions and include relevant context abo
   </Accordion>
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
-  </Accordion>
-  <Accordion title="Command taking too long">
-    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
   </Accordion>
 </AccordionGroup>
 

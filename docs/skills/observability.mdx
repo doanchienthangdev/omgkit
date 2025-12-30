@@ -1,15 +1,13 @@
 ---
 title: "observability"
 description: "Production observability with structured logging, metrics collection, distributed tracing, and alerting"
-icon: "chart-line"
+icon: "server"
 ---
 
 <Info>
   **Category:** Devops
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  **Triggers:** observability, logging, monitoring, distributed tracing, metrics, prometheus, opentelemetry, alerting
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ Production observability with structured logging, metrics collection, distribute
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Observability
 
@@ -47,168 +45,168 @@ Understand and debug production systems:
 
 ```typescript
 import pino from 'pino';
-import \{ v4 as uuid \} from 'uuid';
+import { v4 as uuid } from 'uuid';
 
 // Logger configuration
-const logger = pino(\{
+const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
-  formatters: \{
-    level: (label) => (\{ level: label \}),
-    bindings: () => (\{\}),
-  \},
-  timestamp: () => `,"timestamp":"$\{new Date().toISOString()\}"`,
-  base: \{
+  formatters: {
+    level: (label) => ({ level: label }),
+    bindings: () => ({}),
+  },
+  timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
+  base: {
     service: process.env.SERVICE_NAME,
     environment: process.env.NODE_ENV,
     version: process.env.APP_VERSION,
-  \},
+  },
   redact: ['password', 'token', 'authorization', 'cookie', '*.password'],
-\});
+});
 
 // Child logger with context
-function createRequestLogger(req: Request) \{
-  return logger.child(\{
+function createRequestLogger(req: Request) {
+  return logger.child({
     requestId: req.headers['x-request-id'] || uuid(),
     userId: req.user?.id,
     path: req.path,
     method: req.method,
-  \});
-\}
+  });
+}
 
 // Logging middleware
-function loggingMiddleware(req: Request, res: Response, next: NextFunction) \{
+function loggingMiddleware(req: Request, res: Response, next: NextFunction) {
   const log = createRequestLogger(req);
   req.log = log;
 
   const startTime = Date.now();
 
   // Log request
-  log.info(\{ type: 'request' \}, 'Incoming request');
+  log.info({ type: 'request' }, 'Incoming request');
 
   // Log response
-  res.on('finish', () => \{
+  res.on('finish', () => {
     const duration = Date.now() - startTime;
-    const logData = \{
+    const logData = {
       type: 'response',
       statusCode: res.statusCode,
       duration,
       contentLength: res.get('content-length'),
-    \};
+    };
 
-    if (res.statusCode >= 500) \{
+    if (res.statusCode >= 500) {
       log.error(logData, 'Request failed');
-    \} else if (res.statusCode >= 400) \{
+    } else if (res.statusCode >= 400) {
       log.warn(logData, 'Request error');
-    \} else \{
+    } else {
       log.info(logData, 'Request completed');
-    \}
-  \});
+    }
+  });
 
   next();
-\}
+}
 
 // Structured error logging
-function logError(error: Error, context?: Record\<string, any>) \{
-  logger.error(\{
-    error: \{
+function logError(error: Error, context?: Record<string, any>) {
+  logger.error({
+    error: {
       message: error.message,
       name: error.name,
       stack: error.stack,
       ...(error as any).details,
-    \},
+    },
     ...context,
-  \}, 'Error occurred');
-\}
+  }, 'Error occurred');
+}
 
 // Business event logging
-interface BusinessEvent \{
+interface BusinessEvent {
   event: string;
   userId?: string;
-  data: Record\<string, any>;
+  data: Record<string, any>;
   tags?: string[];
-\}
+}
 
-function logBusinessEvent(event: BusinessEvent) \{
-  logger.info(\{
+function logBusinessEvent(event: BusinessEvent) {
+  logger.info({
     type: 'business_event',
     event: event.event,
     userId: event.userId,
     data: event.data,
     tags: event.tags,
-  \}, `Business event: $\{event.event\}`);
-\}
+  }, `Business event: ${event.event}`);
+}
 
 // Usage
-logBusinessEvent(\{
+logBusinessEvent({
   event: 'order.completed',
   userId: 'user_123',
-  data: \{
+  data: {
     orderId: 'order_456',
     total: 99.99,
     items: 3,
-  \},
+  },
   tags: ['checkout', 'revenue'],
-\});
+});
 ```
 
 ### 2. Metrics with Prometheus
 
 ```typescript
-import \{ Registry, Counter, Histogram, Gauge, collectDefaultMetrics \} from 'prom-client';
+import { Registry, Counter, Histogram, Gauge, collectDefaultMetrics } from 'prom-client';
 
 // Create registry
 const register = new Registry();
 
 // Collect Node.js metrics
-collectDefaultMetrics(\{ register \});
+collectDefaultMetrics({ register });
 
 // Custom metrics
-const httpRequestDuration = new Histogram(\{
+const httpRequestDuration = new Histogram({
   name: 'http_request_duration_seconds',
   help: 'Duration of HTTP requests in seconds',
   labelNames: ['method', 'route', 'status_code'],
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
   registers: [register],
-\});
+});
 
-const httpRequestTotal = new Counter(\{
+const httpRequestTotal = new Counter({
   name: 'http_requests_total',
   help: 'Total number of HTTP requests',
   labelNames: ['method', 'route', 'status_code'],
   registers: [register],
-\});
+});
 
-const activeConnections = new Gauge(\{
+const activeConnections = new Gauge({
   name: 'active_connections',
   help: 'Number of active connections',
   registers: [register],
-\});
+});
 
-const businessMetrics = \{
-  ordersTotal: new Counter(\{
+const businessMetrics = {
+  ordersTotal: new Counter({
     name: 'orders_total',
     help: 'Total number of orders',
     labelNames: ['status', 'payment_method'],
     registers: [register],
-  \}),
-  orderValue: new Histogram(\{
+  }),
+  orderValue: new Histogram({
     name: 'order_value_dollars',
     help: 'Value of orders in dollars',
     buckets: [10, 50, 100, 250, 500, 1000],
     registers: [register],
-  \}),
-  activeUsers: new Gauge(\{
+  }),
+  activeUsers: new Gauge({
     name: 'active_users',
     help: 'Number of active users',
     registers: [register],
-  \}),
-\};
+  }),
+};
 
 // Metrics middleware
-function metricsMiddleware(req: Request, res: Response, next: NextFunction) \{
+function metricsMiddleware(req: Request, res: Response, next: NextFunction) {
   const start = Date.now();
 
-  res.on('finish', () => \{
+  res.on('finish', () => {
     const duration = (Date.now() - start) / 1000;
     const route = req.route?.path || req.path;
 
@@ -219,19 +217,19 @@ function metricsMiddleware(req: Request, res: Response, next: NextFunction) \{
     httpRequestTotal
       .labels(req.method, route, res.statusCode.toString())
       .inc();
-  \});
+  });
 
   next();
-\}
+}
 
 // Expose metrics endpoint
-app.get('/metrics', async (req, res) => \{
+app.get('/metrics', async (req, res) => {
   res.set('Content-Type', register.contentType);
   res.end(await register.metrics());
-\});
+});
 
 // Usage in business logic
-async function completeOrder(order: Order) \{
+async function completeOrder(order: Order) {
   await saveOrder(order);
 
   businessMetrics.ordersTotal
@@ -239,123 +237,123 @@ async function completeOrder(order: Order) \{
     .inc();
 
   businessMetrics.orderValue.observe(order.total);
-\}
+}
 ```
 
 ### 3. Distributed Tracing with OpenTelemetry
 
 ```typescript
-import \{ NodeSDK \} from '@opentelemetry/sdk-node';
-import \{ getNodeAutoInstrumentations \} from '@opentelemetry/auto-instrumentations-node';
-import \{ OTLPTraceExporter \} from '@opentelemetry/exporter-trace-otlp-http';
-import \{ Resource \} from '@opentelemetry/resources';
-import \{ SemanticResourceAttributes \} from '@opentelemetry/semantic-conventions';
-import \{ trace, SpanStatusCode, context \} from '@opentelemetry/api';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { trace, SpanStatusCode, context } from '@opentelemetry/api';
 
 // Initialize OpenTelemetry
-const sdk = new NodeSDK(\{
-  resource: new Resource(\{
+const sdk = new NodeSDK({
+  resource: new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: process.env.SERVICE_NAME,
     [SemanticResourceAttributes.SERVICE_VERSION]: process.env.APP_VERSION,
     [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV,
-  \}),
-  traceExporter: new OTLPTraceExporter(\{
+  }),
+  traceExporter: new OTLPTraceExporter({
     url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
-  \}),
+  }),
   instrumentations: [
-    getNodeAutoInstrumentations(\{
-      '@opentelemetry/instrumentation-http': \{
+    getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-http': {
         ignoreIncomingRequestHook: (req) => req.url === '/health',
-      \},
-      '@opentelemetry/instrumentation-express': \{\},
-      '@opentelemetry/instrumentation-pg': \{\},
-      '@opentelemetry/instrumentation-redis': \{\},
-    \}),
+      },
+      '@opentelemetry/instrumentation-express': {},
+      '@opentelemetry/instrumentation-pg': {},
+      '@opentelemetry/instrumentation-redis': {},
+    }),
   ],
-\});
+});
 
 sdk.start();
 
 // Custom spans
 const tracer = trace.getTracer('my-service');
 
-async function processOrder(orderId: string): Promise\<void> \{
-  return tracer.startActiveSpan('processOrder', async (span) => \{
-    try \{
-      span.setAttributes(\{
+async function processOrder(orderId: string): Promise<void> {
+  return tracer.startActiveSpan('processOrder', async (span) => {
+    try {
+      span.setAttributes({
         'order.id': orderId,
-      \});
+      });
 
       // Child span for validation
-      await tracer.startActiveSpan('validateOrder', async (validationSpan) => \{
+      await tracer.startActiveSpan('validateOrder', async (validationSpan) => {
         const isValid = await validateOrder(orderId);
-        validationSpan.setAttributes(\{ 'order.valid': isValid \});
+        validationSpan.setAttributes({ 'order.valid': isValid });
         validationSpan.end();
-      \});
+      });
 
       // Child span for payment
-      await tracer.startActiveSpan('processPayment', async (paymentSpan) => \{
+      await tracer.startActiveSpan('processPayment', async (paymentSpan) => {
         const payment = await chargeCard(orderId);
-        paymentSpan.setAttributes(\{
+        paymentSpan.setAttributes({
           'payment.id': payment.id,
           'payment.amount': payment.amount,
-        \});
+        });
         paymentSpan.end();
-      \});
+      });
 
-      span.setStatus(\{ code: SpanStatusCode.OK \});
-    \} catch (error) \{
-      span.setStatus(\{
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span.setStatus({
         code: SpanStatusCode.ERROR,
         message: error.message,
-      \});
+      });
       span.recordException(error);
       throw error;
-    \} finally \{
+    } finally {
       span.end();
-    \}
-  \});
-\}
+    }
+  });
+}
 
 // Propagate context across services
-async function callExternalService(endpoint: string, data: any) \{
-  return tracer.startActiveSpan('externalServiceCall', async (span) => \{
-    span.setAttributes(\{
+async function callExternalService(endpoint: string, data: any) {
+  return tracer.startActiveSpan('externalServiceCall', async (span) => {
+    span.setAttributes({
       'http.url': endpoint,
       'http.method': 'POST',
-    \});
+    });
 
     // Inject trace context into headers
-    const headers: Record\<string, string> = \{\};
+    const headers: Record<string, string> = {};
     const propagator = trace.getTracerProvider();
 
-    const response = await fetch(endpoint, \{
+    const response = await fetch(endpoint, {
       method: 'POST',
-      headers: \{
+      headers: {
         'Content-Type': 'application/json',
         ...headers,
-      \},
+      },
       body: JSON.stringify(data),
-    \});
+    });
 
-    span.setAttributes(\{
+    span.setAttributes({
       'http.status_code': response.status,
-    \});
+    });
 
     span.end();
     return response;
-  \});
-\}
+  });
+}
 ```
 
 ### 4. Error Tracking
 
 ```typescript
 import * as Sentry from '@sentry/node';
-import \{ ProfilingIntegration \} from '@sentry/profiling-node';
+import { ProfilingIntegration } from '@sentry/profiling-node';
 
 // Initialize Sentry
-Sentry.init(\{
+Sentry.init({
   dsn: process.env.SENTRY_DSN,
   environment: process.env.NODE_ENV,
   release: process.env.APP_VERSION,
@@ -364,50 +362,50 @@ Sentry.init(\{
   ],
   tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
   profilesSampleRate: 0.1,
-  beforeSend(event, hint) \{
+  beforeSend(event, hint) {
     // Filter out known errors
     const error = hint.originalException as Error;
-    if (error?.message?.includes('ECONNRESET')) \{
+    if (error?.message?.includes('ECONNRESET')) {
       return null;
-    \}
+    }
     return event;
-  \},
-\});
+  },
+});
 
 // Error handler middleware
-app.use(Sentry.Handlers.errorHandler(\{
-  shouldHandleError(error) \{
+app.use(Sentry.Handlers.errorHandler({
+  shouldHandleError(error) {
     // Only report 5xx errors
     return error.status >= 500;
-  \},
-\}));
+  },
+}));
 
 // Custom error reporting
-function reportError(error: Error, context?: Record\<string, any>) \{
-  Sentry.withScope((scope) => \{
-    if (context) \{
+function reportError(error: Error, context?: Record<string, any>) {
+  Sentry.withScope((scope) => {
+    if (context) {
       scope.setExtras(context);
-    \}
-    scope.setTags(\{
+    }
+    scope.setTags({
       component: context?.component || 'unknown',
-    \});
+    });
     Sentry.captureException(error);
-  \});
+  });
 
   // Also log
   logError(error, context);
-\}
+}
 
 // Capture user context
-app.use((req, res, next) => \{
-  if (req.user) \{
-    Sentry.setUser(\{
+app.use((req, res, next) => {
+  if (req.user) {
+    Sentry.setUser({
       id: req.user.id,
       email: req.user.email,
-    \});
-  \}
+    });
+  }
   next();
-\});
+});
 ```
 
 ### 5. Alerting Configuration
@@ -420,7 +418,7 @@ groups:
       # High error rate
       - alert: HighErrorRate
         expr: |
-          sum(rate(http_requests_total\{status_code=~"5.."\}[5m]))
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
           /
           sum(rate(http_requests_total[5m]))
           > 0.05
@@ -429,7 +427,7 @@ groups:
           severity: critical
         annotations:
           summary: High error rate detected
-          description: Error rate is {\{ $value | humanizePercentage \}}
+          description: Error rate is {{ $value | humanizePercentage }}
 
       # Slow response time
       - alert: SlowResponseTime
@@ -442,7 +440,7 @@ groups:
           severity: warning
         annotations:
           summary: Slow response times detected
-          description: 95th percentile latency is {\{ $value \}}s
+          description: 95th percentile latency is {{ $value }}s
 
       # High memory usage
       - alert: HighMemoryUsage
@@ -453,7 +451,7 @@ groups:
           severity: warning
         annotations:
           summary: High memory usage
-          description: Memory usage is {\{ $value | humanize \}}GB
+          description: Memory usage is {{ $value | humanize }}GB
 
       # Service down
       - alert: ServiceDown
@@ -463,25 +461,25 @@ groups:
           severity: critical
         annotations:
           summary: Service is down
-          description: "{\{ $labels.instance \}} has been down for more than 1 minute"
+          description: "{{ $labels.instance }} has been down for more than 1 minute"
 
   - name: business
     rules:
       # Low order volume
       - alert: LowOrderVolume
         expr: |
-          sum(rate(orders_total\{status="completed"\}[1h])) \< 10
+          sum(rate(orders_total{status="completed"}[1h])) < 10
         for: 30m
         labels:
           severity: warning
         annotations:
           summary: Low order volume
-          description: Order rate is {\{ $value \}} orders/hour
+          description: Order rate is {{ $value }} orders/hour
 
       # Payment failures
       - alert: HighPaymentFailureRate
         expr: |
-          sum(rate(orders_total\{status="payment_failed"\}[15m]))
+          sum(rate(orders_total{status="payment_failed"}[15m]))
           /
           sum(rate(orders_total[15m]))
           > 0.1
@@ -490,29 +488,29 @@ groups:
           severity: critical
         annotations:
           summary: High payment failure rate
-          description: Payment failure rate is {\{ $value | humanizePercentage \}}
+          description: Payment failure rate is {{ $value | humanizePercentage }}
 ```
 
 ### 6. Health Checks
 
 ```typescript
-import \{ HealthCheck, HealthCheckResult, HttpHealthIndicator, DiskHealthIndicator, MemoryHealthIndicator \} from '@nestjs/terminus';
+import { HealthCheck, HealthCheckResult, HttpHealthIndicator, DiskHealthIndicator, MemoryHealthIndicator } from '@nestjs/terminus';
 
-interface HealthStatus \{
+interface HealthStatus {
   status: 'healthy' | 'degraded' | 'unhealthy';
-  checks: Record\<string, CheckResult>;
+  checks: Record<string, CheckResult>;
   timestamp: string;
   version: string;
-\}
+}
 
-interface CheckResult \{
+interface CheckResult {
   status: 'pass' | 'fail' | 'warn';
   duration: number;
   message?: string;
-\}
+}
 
-async function healthCheck(): Promise\<HealthStatus> \{
-  const checks: Record\<string, CheckResult> = \{\};
+async function healthCheck(): Promise<HealthStatus> {
+  const checks: Record<string, CheckResult> = {};
   let overallStatus: HealthStatus['status'] = 'healthy';
 
   // Database check
@@ -525,57 +523,57 @@ async function healthCheck(): Promise\<HealthStatus> \{
 
   // External API check
   checks.externalApi = await checkExternalApi();
-  if (checks.externalApi.status === 'warn') \{
+  if (checks.externalApi.status === 'warn') {
     overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
-  \}
+  }
 
   // Memory check
   checks.memory = checkMemory();
-  if (checks.memory.status === 'warn') \{
+  if (checks.memory.status === 'warn') {
     overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
-  \}
+  }
 
-  return \{
+  return {
     status: overallStatus,
     checks,
     timestamp: new Date().toISOString(),
     version: process.env.APP_VERSION || 'unknown',
-  \};
-\}
+  };
+}
 
-async function checkDatabase(): Promise\<CheckResult> \{
+async function checkDatabase(): Promise<CheckResult> {
   const start = Date.now();
-  try \{
+  try {
     await db.$queryRaw`SELECT 1`;
-    return \{
+    return {
       status: 'pass',
       duration: Date.now() - start,
-    \};
-  \} catch (error) \{
-    return \{
+    };
+  } catch (error) {
+    return {
       status: 'fail',
       duration: Date.now() - start,
       message: error.message,
-    \};
-  \}
-\}
+    };
+  }
+}
 
 // Endpoints
-app.get('/health', async (req, res) => \{
+app.get('/health', async (req, res) => {
   const health = await healthCheck();
   const statusCode = health.status === 'healthy' ? 200 :
                      health.status === 'degraded' ? 200 : 503;
   res.status(statusCode).json(health);
-\});
+});
 
-app.get('/health/live', (req, res) => \{
-  res.status(200).json(\{ status: 'alive' \});
-\});
+app.get('/health/live', (req, res) => {
+  res.status(200).json({ status: 'alive' });
+});
 
-app.get('/health/ready', async (req, res) => \{
+app.get('/health/ready', async (req, res) => {
   const health = await healthCheck();
   res.status(health.status === 'unhealthy' ? 503 : 200).json(health);
-\});
+});
 ```
 
 ## Use Cases
@@ -585,12 +583,12 @@ app.get('/health/ready', async (req, res) => \{
 ```typescript
 // Correlation ID for request tracing
 const correlationId = req.headers['x-correlation-id'] || uuid();
-req.log = logger.child(\{ correlationId \});
+req.log = logger.child({ correlationId });
 
 // Log at decision points
-req.log.info(\{ userId, action: 'checkout.started' \});
+req.log.info({ userId, action: 'checkout.started' });
 // ... process ...
-req.log.info(\{ orderId, action: 'order.created' \});
+req.log.info({ orderId, action: 'order.created' });
 ```
 
 ### 2. Performance Monitoring
@@ -634,6 +632,7 @@ businessMetrics.cacheHitRate.set(hits / total);
 - [Grafana Documentation](https://grafana.com/docs/)
 - [Pino Logger](https://getpino.io/)
 
+
 ## Configuration
 
 You can customize skill behavior in your project config:
@@ -648,34 +647,19 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
-  <Card title="Devops" icon="cloud" href="/skills/overview#devops">
+  <Card title="Devops" icon="server" href="/skills/overview#devops">
     More devops skills
   </Card>
 </CardGroup>

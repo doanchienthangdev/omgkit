@@ -1,15 +1,13 @@
 ---
 title: "ai-integration"
 description: "AI/ML model integration including vision, audio, embeddings, and RAG implementation patterns"
-icon: "robot"
+icon: "brain"
 ---
 
 <Info>
   **Category:** Integrations
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  **Triggers:** ai integration, ai ml, embeddings, rag, vision api, audio transcription, openai, anthropic
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ AI/ML model integration including vision, audio, embeddings, and RAG implementat
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # AI Integration
 
@@ -56,48 +54,48 @@ const openai = new OpenAI();
 async function analyzeImageWithClaude(
   imageUrl: string | Buffer,
   prompt: string
-): Promise\<string> \{
+): Promise<string> {
   const imageSource = typeof imageUrl === 'string'
-    ? \{ type: 'url' as const, url: imageUrl \}
-    : \{
+    ? { type: 'url' as const, url: imageUrl }
+    : {
         type: 'base64' as const,
         media_type: 'image/jpeg' as const,
         data: imageUrl.toString('base64'),
-      \};
+      };
 
-  const response = await anthropic.messages.create(\{
+  const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1024,
-    messages: [\{
+    messages: [{
       role: 'user',
       content: [
-        \{
+        {
           type: 'image',
           source: imageSource,
-        \},
-        \{
+        },
+        {
           type: 'text',
           text: prompt,
-        \},
+        },
       ],
-    \}],
-  \});
+    }],
+  });
 
   return response.content[0].type === 'text'
     ? response.content[0].text
     : '';
-\}
+}
 
 // Extract structured data from image
-interface ProductInfo \{
+interface ProductInfo {
   name: string;
   description: string;
   price?: string;
   category?: string;
   features: string[];
-\}
+}
 
-async function extractProductFromImage(imageBuffer: Buffer): Promise\<ProductInfo> \{
+async function extractProductFromImage(imageBuffer: Buffer): Promise<ProductInfo> {
   const prompt = `Analyze this product image and extract:
 1. Product name
 2. Description (2-3 sentences)
@@ -109,169 +107,169 @@ Return as JSON only, no explanation.`;
 
   const response = await analyzeImageWithClaude(imageBuffer, prompt);
 
-  try \{
+  try {
     return JSON.parse(response);
-  \} catch \{
+  } catch {
     throw new Error('Failed to parse product information');
-  \}
-\}
+  }
+}
 
 // OCR with GPT-4 Vision
-async function extractTextFromImage(imageUrl: string): Promise\<string> \{
-  const response = await openai.chat.completions.create(\{
+async function extractTextFromImage(imageUrl: string): Promise<string> {
+  const response = await openai.chat.completions.create({
     model: 'gpt-4o',
-    messages: [\{
+    messages: [{
       role: 'user',
       content: [
-        \{
+        {
           type: 'image_url',
-          image_url: \{ url: imageUrl, detail: 'high' \},
-        \},
-        \{
+          image_url: { url: imageUrl, detail: 'high' },
+        },
+        {
           type: 'text',
           text: 'Extract all text from this image. Preserve the original formatting and structure as much as possible.',
-        \},
+        },
       ],
-    \}],
+    }],
     max_tokens: 4096,
-  \});
+  });
 
   return response.choices[0].message.content || '';
-\}
+}
 
 // Batch image processing
 async function batchAnalyzeImages(
-  images: Array\<\{ id: string; url: string \}>,
+  images: Array<{ id: string; url: string }>,
   prompt: string,
   concurrency: number = 3
-): Promise\<Map\<string, string>> \{
-  const results = new Map\<string, string>();
-  const queue = new PQueue(\{ concurrency \});
+): Promise<Map<string, string>> {
+  const results = new Map<string, string>();
+  const queue = new PQueue({ concurrency });
 
   await Promise.all(
     images.map(image =>
-      queue.add(async () => \{
-        try \{
+      queue.add(async () => {
+        try {
           const result = await analyzeImageWithClaude(image.url, prompt);
           results.set(image.id, result);
-        \} catch (error) \{
-          results.set(image.id, `Error: $\{error.message\}`);
-        \}
-      \})
+        } catch (error) {
+          results.set(image.id, `Error: ${error.message}`);
+        }
+      })
     )
   );
 
   return results;
-\}
+}
 ```
 
 ### 2. Audio Processing
 
 ```typescript
-import \{ Readable \} from 'stream';
+import { Readable } from 'stream';
 
 // Transcribe audio with Whisper
 async function transcribeAudio(
   audioFile: Buffer | string,
-  options: \{
+  options: {
     language?: string;
     prompt?: string;
     responseFormat?: 'json' | 'text' | 'srt' | 'vtt';
     timestamps?: boolean;
-  \} = \{\}
-): Promise\<TranscriptionResult> \{
-  const \{
+  } = {}
+): Promise<TranscriptionResult> {
+  const {
     language,
     prompt,
     responseFormat = 'json',
     timestamps = false,
-  \} = options;
+  } = options;
 
   const file = typeof audioFile === 'string'
     ? fs.createReadStream(audioFile)
     : Readable.from(audioFile);
 
-  const response = await openai.audio.transcriptions.create(\{
+  const response = await openai.audio.transcriptions.create({
     file,
     model: 'whisper-1',
     language,
     prompt,
     response_format: timestamps ? 'verbose_json' : responseFormat,
-  \});
+  });
 
-  if (timestamps && typeof response !== 'string') \{
-    return \{
+  if (timestamps && typeof response !== 'string') {
+    return {
       text: response.text,
-      segments: response.segments?.map(seg => (\{
+      segments: response.segments?.map(seg => ({
         start: seg.start,
         end: seg.end,
         text: seg.text,
-      \})),
+      })),
       language: response.language,
-    \};
-  \}
+    };
+  }
 
-  return \{ text: typeof response === 'string' ? response : response.text \};
-\}
+  return { text: typeof response === 'string' ? response : response.text };
+}
 
 // Real-time transcription with streaming
 async function* streamTranscription(
   audioStream: ReadableStream
-): AsyncGenerator\<string> \{
+): AsyncGenerator<string> {
   // For real-time, use Deepgram or AssemblyAI
   const deepgram = new Deepgram(process.env.DEEPGRAM_API_KEY!);
 
-  const connection = await deepgram.transcription.live(\{
+  const connection = await deepgram.transcription.live({
     model: 'nova-2',
     language: 'en',
     smart_format: true,
     interim_results: true,
-  \});
+  });
 
-  connection.on('transcriptReceived', (message) => \{
+  connection.on('transcriptReceived', (message) => {
     const transcript = message.channel?.alternatives?.[0]?.transcript;
-    if (transcript) \{
+    if (transcript) {
       yield transcript;
-    \}
-  \});
+    }
+  });
 
   // Pipe audio to connection
   const reader = audioStream.getReader();
-  while (true) \{
-    const \{ done, value \} = await reader.read();
+  while (true) {
+    const { done, value } = await reader.read();
     if (done) break;
     connection.send(value);
-  \}
+  }
 
   connection.close();
-\}
+}
 
 // Generate speech from text
 async function generateSpeech(
   text: string,
-  options: \{
+  options: {
     voice?: 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
     model?: 'tts-1' | 'tts-1-hd';
     speed?: number;
-  \} = \{\}
-): Promise\<Buffer> \{
-  const \{ voice = 'alloy', model = 'tts-1', speed = 1 \} = options;
+  } = {}
+): Promise<Buffer> {
+  const { voice = 'alloy', model = 'tts-1', speed = 1 } = options;
 
-  const response = await openai.audio.speech.create(\{
+  const response = await openai.audio.speech.create({
     model,
     voice,
     input: text,
     speed,
-  \});
+  });
 
   return Buffer.from(await response.arrayBuffer());
-\}
+}
 ```
 
 ### 3. Embeddings & Vector Search
 
 ```typescript
-import \{ Pinecone \} from '@pinecone-database/pinecone';
+import { Pinecone } from '@pinecone-database/pinecone';
 
 const pinecone = new Pinecone();
 
@@ -279,214 +277,214 @@ const pinecone = new Pinecone();
 async function generateEmbeddings(
   texts: string[],
   model: string = 'text-embedding-3-small'
-): Promise\<number[][]> \{
-  const response = await openai.embeddings.create(\{
+): Promise<number[][]> {
+  const response = await openai.embeddings.create({
     model,
     input: texts,
-  \});
+  });
 
   return response.data.map(d => d.embedding);
-\}
+}
 
 // Index documents
-interface Document \{
+interface Document {
   id: string;
   content: string;
-  metadata?: Record\<string, any>;
-\}
+  metadata?: Record<string, any>;
+}
 
 async function indexDocuments(
   documents: Document[],
   indexName: string,
   namespace: string = 'default'
-): Promise\<void> \{
+): Promise<void> {
   const index = pinecone.index(indexName);
 
   // Process in batches
   const batchSize = 100;
-  for (let i = 0; i \< documents.length; i += batchSize) \{
+  for (let i = 0; i < documents.length; i += batchSize) {
     const batch = documents.slice(i, i + batchSize);
 
     const embeddings = await generateEmbeddings(
       batch.map(d => d.content)
     );
 
-    const vectors = batch.map((doc, j) => (\{
+    const vectors = batch.map((doc, j) => ({
       id: doc.id,
       values: embeddings[j],
-      metadata: \{
+      metadata: {
         content: doc.content.substring(0, 1000), // Store truncated content
         ...doc.metadata,
-      \},
-    \}));
+      },
+    }));
 
     await index.namespace(namespace).upsert(vectors);
-  \}
-\}
+  }
+}
 
 // Semantic search
-interface SearchResult \{
+interface SearchResult {
   id: string;
   score: number;
   content: string;
-  metadata?: Record\<string, any>;
-\}
+  metadata?: Record<string, any>;
+}
 
 async function semanticSearch(
   query: string,
   indexName: string,
-  options: \{
+  options: {
     namespace?: string;
     topK?: number;
-    filter?: Record\<string, any>;
+    filter?: Record<string, any>;
     minScore?: number;
-  \} = \{\}
-): Promise\<SearchResult[]> \{
-  const \{
+  } = {}
+): Promise<SearchResult[]> {
+  const {
     namespace = 'default',
     topK = 10,
     filter,
     minScore = 0.7,
-  \} = options;
+  } = options;
 
   const [queryEmbedding] = await generateEmbeddings([query]);
 
   const index = pinecone.index(indexName);
-  const results = await index.namespace(namespace).query(\{
+  const results = await index.namespace(namespace).query({
     vector: queryEmbedding,
     topK,
     filter,
     includeMetadata: true,
-  \});
+  });
 
   return results.matches
     ?.filter(m => m.score && m.score >= minScore)
-    .map(match => (\{
+    .map(match => ({
       id: match.id,
       score: match.score || 0,
       content: match.metadata?.content as string || '',
       metadata: match.metadata,
-    \})) || [];
-\}
+    })) || [];
+}
 ```
 
 ### 4. RAG Implementation
 
 ```typescript
-interface RAGConfig \{
+interface RAGConfig {
   indexName: string;
   namespace?: string;
   topK?: number;
   model?: string;
   systemPrompt?: string;
-\}
+}
 
-class RAGSystem \{
+class RAGSystem {
   private config: RAGConfig;
 
-  constructor(config: RAGConfig) \{
-    this.config = \{
+  constructor(config: RAGConfig) {
+    this.config = {
       namespace: 'default',
       topK: 5,
       model: 'claude-sonnet-4-20250514',
       systemPrompt: 'You are a helpful assistant. Answer based on the provided context.',
       ...config,
-    \};
-  \}
+    };
+  }
 
-  async query(question: string): Promise\<RAGResponse> \{
+  async query(question: string): Promise<RAGResponse> {
     // Step 1: Retrieve relevant documents
-    const context = await semanticSearch(question, this.config.indexName, \{
+    const context = await semanticSearch(question, this.config.indexName, {
       namespace: this.config.namespace,
       topK: this.config.topK,
-    \});
+    });
 
-    if (context.length === 0) \{
-      return \{
+    if (context.length === 0) {
+      return {
         answer: "I couldn't find relevant information to answer your question.",
         sources: [],
         confidence: 0,
-      \};
-    \}
+      };
+    }
 
     // Step 2: Build context string
     const contextText = context
-      .map((doc, i) => `[$\{i + 1\}] $\{doc.content\}`)
+      .map((doc, i) => `[${i + 1}] ${doc.content}`)
       .join('\n\n');
 
     // Step 3: Generate answer
-    const response = await anthropic.messages.create(\{
+    const response = await anthropic.messages.create({
       model: this.config.model!,
       max_tokens: 2048,
-      system: `$\{this.config.systemPrompt\}
+      system: `${this.config.systemPrompt}
 
 Use the following context to answer the user's question. If the answer is not in the context, say so.
 
 Context:
-$\{contextText\}`,
-      messages: [\{
+${contextText}`,
+      messages: [{
         role: 'user',
         content: question,
-      \}],
-    \});
+      }],
+    });
 
     const answer = response.content[0].type === 'text'
       ? response.content[0].text
       : '';
 
-    return \{
+    return {
       answer,
-      sources: context.map(c => (\{
+      sources: context.map(c => ({
         id: c.id,
         content: c.content,
         score: c.score,
-      \})),
+      })),
       confidence: Math.max(...context.map(c => c.score)),
-    \};
-  \}
+    };
+  }
 
   // Hybrid search (keyword + semantic)
   async hybridQuery(
     question: string,
     keywords?: string[]
-  ): Promise\<RAGResponse> \{
+  ): Promise<RAGResponse> {
     // Semantic search
-    const semanticResults = await semanticSearch(question, this.config.indexName, \{
+    const semanticResults = await semanticSearch(question, this.config.indexName, {
       namespace: this.config.namespace,
       topK: this.config.topK! * 2,
-    \});
+    });
 
     // Keyword filter (if provided)
     let results = semanticResults;
-    if (keywords && keywords.length > 0) \{
+    if (keywords && keywords.length > 0) {
       results = semanticResults.filter(r =>
         keywords.some(k =>
           r.content.toLowerCase().includes(k.toLowerCase())
         )
       );
-    \}
+    }
 
     // Rerank and take top K
     const topResults = results.slice(0, this.config.topK);
 
     // Generate answer using top results
     return this.generateAnswer(question, topResults);
-  \}
+  }
 
   private async generateAnswer(
     question: string,
     context: SearchResult[]
-  ): Promise\<RAGResponse> \{
+  ): Promise<RAGResponse> {
     // ... same generation logic
-  \}
-\}
+  }
+}
 
 // Usage
-const rag = new RAGSystem(\{
+const rag = new RAGSystem({
   indexName: 'knowledge-base',
   topK: 5,
   systemPrompt: 'You are a customer support agent. Be helpful and concise.',
-\});
+});
 
 const response = await rag.query('How do I reset my password?');
 ```
@@ -494,86 +492,86 @@ const response = await rag.query('How do I reset my password?');
 ### 5. Structured Output
 
 ```typescript
-import \{ z \} from 'zod';
-import \{ zodResponseFormat \} from 'openai/helpers/zod';
+import { z } from 'zod';
+import { zodResponseFormat } from 'openai/helpers/zod';
 
 // Define schema
-const SentimentSchema = z.object(\{
+const SentimentSchema = z.object({
   sentiment: z.enum(['positive', 'negative', 'neutral']),
   confidence: z.number().min(0).max(1),
   topics: z.array(z.string()),
   summary: z.string(),
-\});
+});
 
-type SentimentAnalysis = z.infer\<typeof SentimentSchema>;
+type SentimentAnalysis = z.infer<typeof SentimentSchema>;
 
 // Get structured output
-async function analyzeSentiment(text: string): Promise\<SentimentAnalysis> \{
-  const response = await openai.beta.chat.completions.parse(\{
+async function analyzeSentiment(text: string): Promise<SentimentAnalysis> {
+  const response = await openai.beta.chat.completions.parse({
     model: 'gpt-4o',
-    messages: [\{
+    messages: [{
       role: 'system',
       content: 'Analyze the sentiment of the provided text.',
-    \}, \{
+    }, {
       role: 'user',
       content: text,
-    \}],
+    }],
     response_format: zodResponseFormat(SentimentSchema, 'sentiment_analysis'),
-  \});
+  });
 
   return response.choices[0].message.parsed!;
-\}
+}
 
 // Claude tool use for structured output
-async function extractEntities(text: string): Promise\<\{
+async function extractEntities(text: string): Promise<{
   people: string[];
   organizations: string[];
   locations: string[];
   dates: string[];
-\}> \{
-  const response = await anthropic.messages.create(\{
+}> {
+  const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1024,
-    tools: [\{
+    tools: [{
       name: 'extract_entities',
       description: 'Extract named entities from text',
-      input_schema: \{
+      input_schema: {
         type: 'object',
-        properties: \{
-          people: \{
+        properties: {
+          people: {
             type: 'array',
-            items: \{ type: 'string' \},
+            items: { type: 'string' },
             description: 'Names of people mentioned',
-          \},
-          organizations: \{
+          },
+          organizations: {
             type: 'array',
-            items: \{ type: 'string' \},
+            items: { type: 'string' },
             description: 'Organization names',
-          \},
-          locations: \{
+          },
+          locations: {
             type: 'array',
-            items: \{ type: 'string' \},
+            items: { type: 'string' },
             description: 'Location names',
-          \},
-          dates: \{
+          },
+          dates: {
             type: 'array',
-            items: \{ type: 'string' \},
+            items: { type: 'string' },
             description: 'Dates mentioned',
-          \},
-        \},
+          },
+        },
         required: ['people', 'organizations', 'locations', 'dates'],
-      \},
-    \}],
-    tool_choice: \{ type: 'tool', name: 'extract_entities' \},
-    messages: [\{
+      },
+    }],
+    tool_choice: { type: 'tool', name: 'extract_entities' },
+    messages: [{
       role: 'user',
-      content: `Extract entities from: $\{text\}`,
-    \}],
-  \});
+      content: `Extract entities from: ${text}`,
+    }],
+  });
 
   const toolUse = response.content.find(c => c.type === 'tool_use');
   return toolUse?.input as any;
-\}
+}
 ```
 
 ### 6. Production Patterns
@@ -582,85 +580,85 @@ async function extractEntities(text: string): Promise\<\{
 // Rate limiting and retry
 import Bottleneck from 'bottleneck';
 
-const limiter = new Bottleneck(\{
+const limiter = new Bottleneck({
   reservoir: 100, // Initial tokens
   reservoirRefreshAmount: 100,
   reservoirRefreshInterval: 60 * 1000, // Per minute
   maxConcurrent: 10,
-\});
+});
 
-async function withRateLimit\<T>(fn: () => Promise\<T>): Promise\<T> \{
+async function withRateLimit<T>(fn: () => Promise<T>): Promise<T> {
   return limiter.schedule(fn);
-\}
+}
 
 // Retry with exponential backoff
-async function withRetry\<T>(
-  fn: () => Promise\<T>,
+async function withRetry<T>(
+  fn: () => Promise<T>,
   maxRetries: number = 3,
   baseDelay: number = 1000
-): Promise\<T> \{
+): Promise<T> {
   let lastError: Error;
 
-  for (let attempt = 0; attempt \< maxRetries; attempt++) \{
-    try \{
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
       return await fn();
-    \} catch (error) \{
+    } catch (error) {
       lastError = error as Error;
 
       // Check if retryable
-      if (error.status === 429 || error.status >= 500) \{
+      if (error.status === 429 || error.status >= 500) {
         const delay = baseDelay * Math.pow(2, attempt);
         await new Promise(r => setTimeout(r, delay));
         continue;
-      \}
+      }
 
       throw error;
-    \}
-  \}
+    }
+  }
 
   throw lastError!;
-\}
+}
 
 // Caching layer
-const cache = new Map\<string, \{ data: any; expires: number \}>();
+const cache = new Map<string, { data: any; expires: number }>();
 
 async function cachedEmbedding(
   text: string,
   ttl: number = 3600000 // 1 hour
-): Promise\<number[]> \{
-  const key = `embedding:$\{hashString(text)\}`;
+): Promise<number[]> {
+  const key = `embedding:${hashString(text)}`;
   const cached = cache.get(key);
 
-  if (cached && cached.expires > Date.now()) \{
+  if (cached && cached.expires > Date.now()) {
     return cached.data;
-  \}
+  }
 
   const [embedding] = await generateEmbeddings([text]);
-  cache.set(key, \{ data: embedding, expires: Date.now() + ttl \});
+  cache.set(key, { data: embedding, expires: Date.now() + ttl });
 
   return embedding;
-\}
+}
 
 // Cost tracking
-class CostTracker \{
-  private costs: Map\<string, number> = new Map();
+class CostTracker {
+  private costs: Map<string, number> = new Map();
 
-  track(model: string, inputTokens: number, outputTokens: number): void \{
-    const pricing = MODEL_PRICING[model] || \{ input: 0, output: 0 \};
+  track(model: string, inputTokens: number, outputTokens: number): void {
+    const pricing = MODEL_PRICING[model] || { input: 0, output: 0 };
     const cost = (inputTokens * pricing.input + outputTokens * pricing.output) / 1000;
 
     const current = this.costs.get(model) || 0;
     this.costs.set(model, current + cost);
-  \}
+  }
 
-  getReport(): Record\<string, number> \{
+  getReport(): Record<string, number> {
     return Object.fromEntries(this.costs);
-  \}
+  }
 
-  getTotalCost(): number \{
+  getTotalCost(): number {
     return Array.from(this.costs.values()).reduce((a, b) => a + b, 0);
-  \}
-\}
+  }
+}
 ```
 
 ## Use Cases
@@ -669,44 +667,44 @@ class CostTracker \{
 
 ```typescript
 // Build document Q&A
-async function buildDocumentQA(documents: string[]): Promise\<RAGSystem> \{
+async function buildDocumentQA(documents: string[]): Promise<RAGSystem> {
   // Chunk documents
   const chunks = documents.flatMap((doc, docIndex) =>
-    chunkText(doc, 500, 50).map((chunk, chunkIndex) => (\{
-      id: `doc-$\{docIndex\}-chunk-$\{chunkIndex\}`,
+    chunkText(doc, 500, 50).map((chunk, chunkIndex) => ({
+      id: `doc-${docIndex}-chunk-${chunkIndex}`,
       content: chunk,
-      metadata: \{ documentIndex: docIndex \},
-    \}))
+      metadata: { documentIndex: docIndex },
+    }))
   );
 
   // Index chunks
   await indexDocuments(chunks, 'document-qa');
 
   // Return RAG system
-  return new RAGSystem(\{
+  return new RAGSystem({
     indexName: 'document-qa',
     topK: 5,
     systemPrompt: 'Answer questions based on the provided documents.',
-  \});
-\}
+  });
+}
 ```
 
 ### 2. Content Moderation
 
 ```typescript
 // Moderate content with AI
-async function moderateContent(content: string): Promise\<ModerationResult> \{
-  const response = await openai.moderations.create(\{ input: content \});
+async function moderateContent(content: string): Promise<ModerationResult> {
+  const response = await openai.moderations.create({ input: content });
   const result = response.results[0];
 
-  return \{
+  return {
     flagged: result.flagged,
     categories: Object.entries(result.categories)
       .filter(([_, flagged]) => flagged)
       .map(([category]) => category),
     scores: result.category_scores,
-  \};
-\}
+  };
+}
 ```
 
 ## Best Practices
@@ -742,6 +740,7 @@ async function moderateContent(content: string): Promise\<ModerationResult> \{
 - [Pinecone Documentation](https://docs.pinecone.io/)
 - [LangChain Documentation](https://js.langchain.com/)
 
+
 ## Configuration
 
 You can customize skill behavior in your project config:
@@ -756,34 +755,19 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
-  <Card title="Integrations" icon="plug" href="/skills/overview#integrations">
+  <Card title="Integrations" icon="brain" href="/skills/overview#integrations">
     More integrations skills
   </Card>
 </CardGroup>

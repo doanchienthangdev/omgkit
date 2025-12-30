@@ -7,9 +7,7 @@ icon: "layer-group"
 <Info>
   **Category:** Frameworks
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ Spring Boot development. Use for Spring projects, REST APIs, JPA.
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Spring Boot Skill
 
@@ -34,56 +32,56 @@ When this skill is active, agents automatically apply:
 ```java
 @RestController
 @RequestMapping("/api/users")
-public class UserController \{
+public class UserController {
     @Autowired
     private UserService userService;
 
     @GetMapping
-    public List\<User> findAll() \{
+    public List<User> findAll() {
         return userService.findAll();
-    \}
+    }
 
     @PostMapping
-    public ResponseEntity\<User> create(@RequestBody CreateUserDto dto) \{
+    public ResponseEntity<User> create(@RequestBody CreateUserDto dto) {
         User user = userService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
-    \}
-\}
+    }
+}
 ```
 
 ### Service
 ```java
 @Service
-public class UserService \{
+public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public List\<User> findAll() \{
+    public List<User> findAll() {
         return userRepository.findAll();
-    \}
-\}
+    }
+}
 ```
 
 ### Repository
 ```java
 @Repository
-public interface UserRepository extends JpaRepository\<User, Long> \{
-    Optional\<User> findByEmail(String email);
-\}
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findByEmail(String email);
+}
 ```
 
 ### Entity
 ```java
 @Entity
 @Table(name = "users")
-public class User \{
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique = true)
     private String email;
-\}
+}
 ```
 
 ## Best Practices
@@ -91,6 +89,7 @@ public class User \{
 - Use DTOs for API contracts
 - Use @Transactional for writes
 - Use Spring Security
+
 
 ## Configuration
 
@@ -106,32 +105,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Frameworks" icon="layer-group" href="/skills/overview#frameworks">
     More frameworks skills

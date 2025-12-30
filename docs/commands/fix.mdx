@@ -1,13 +1,13 @@
 ---
 title: "/fix"
 description: "Debug and fix bugs"
-icon: "wrench"
+icon: "code"
 ---
 
 <Info>
   **Category:** Dev
 
-  **Syntax:** `/fix`
+  **Syntax:** `/fix <error or issue>`
 </Info>
 
 ## Overview
@@ -17,12 +17,13 @@ Debug and fix bugs
 ## Quick Start
 
 ```bash
-/fix
+/fix "error
 ```
 
-# 🔧 Fix: $ARGUMENTS
 
-Fix issue: **$ARGUMENTS**
+# 🔧 Fix: \<error or issue\>
+
+Fix issue: **\<error or issue\>**
 
 ## Workflow
 1. **Investigate** (debugger) - Find root cause
@@ -37,23 +38,26 @@ Fix issue: **$ARGUMENTS**
 4. Implement minimal fix
 5. Add regression test
 
+
+
 ## Tools Used
 
-This command leverages the following capabilities:
+This command uses the following tools:
 
-<Check>**Task** - Orchestrates complex multi-step operations</Check>
-<Check>**Read** - Analyzes files and codebase context</Check>
-<Check>**Write** - Creates and modifies files</Check>
-<Check>**Bash** - Executes system commands</Check>
-<Check>**Grep** - Searches code patterns</Check>
-<Check>**Glob** - Finds files by pattern</Check>
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/fix
+/fix "your input here"
 ```
 
 ### With Context
@@ -63,29 +67,13 @@ This command leverages the following capabilities:
 /index
 
 # Then run the command
-/fix
+/fix "detailed description"
 ```
-
-### Combined with Other Commands
-
-```bash
-# Example workflow
-/plan "describe your goal"
-/fix
-/commit
-```
-
-## Best Practices
-
-<Check>Be specific in your descriptions</Check>
-<Check>Include relevant file paths when applicable</Check>
-<Check>Use in combination with other commands for complex workflows</Check>
-<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, provide detailed descriptions and include relevant context about your project structure.
+For best results, be specific in your descriptions and include relevant file paths or context.
 </Note>
 
 ## Troubleshooting
@@ -96,9 +84,6 @@ For best results, provide detailed descriptions and include relevant context abo
   </Accordion>
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
-  </Accordion>
-  <Accordion title="Command taking too long">
-    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
   </Accordion>
 </AccordionGroup>
 

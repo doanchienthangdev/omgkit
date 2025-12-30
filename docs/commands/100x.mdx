@@ -1,13 +1,13 @@
 ---
 title: "/100x"
 description: "Find 100x paradigm shift"
-icon: "chart-line"
+icon: "wand-magic-sparkles"
 ---
 
 <Info>
   **Category:** Omega
 
-  **Syntax:** `/100x`
+  **Syntax:** `/100x <topic>`
 </Info>
 
 ## Overview
@@ -17,12 +17,13 @@ Find 100x paradigm shift
 ## Quick Start
 
 ```bash
-/100x
+/100x "topic"
 ```
 
-# 🌟 100x: $ARGUMENTS
 
-Find 100x paradigm shift for: **$ARGUMENTS**
+# 🌟 100x: \<topic\>
+
+Find 100x paradigm shift for: **\<topic\>**
 
 100x requires fundamental rethinking.
 
@@ -36,7 +37,7 @@ Find 100x paradigm shift for: **$ARGUMENTS**
 7. ⚛️ Quantum - All possibilities
 
 ## Output
-Save to: `docs/omega/100x-\<topic>.md`
+Save to: `docs/omega/100x-<topic>.md`
 
 ```markdown
 # 100x Analysis: [Topic]
@@ -54,23 +55,26 @@ Save to: `docs/omega/100x-\<topic>.md`
 [How to get there]
 ```
 
+
+
 ## Tools Used
 
-This command leverages the following capabilities:
+This command uses the following tools:
 
-<Check>**Task** - Orchestrates complex multi-step operations</Check>
-<Check>**Read** - Analyzes files and codebase context</Check>
-<Check>**Write** - Creates and modifies files</Check>
-<Check>**Bash** - Executes system commands</Check>
-<Check>**Grep** - Searches code patterns</Check>
-<Check>**Glob** - Finds files by pattern</Check>
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+- **WebSearch** - Enables websearch capabilities
+- **WebFetch** - Enables webfetch capabilities
+
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/100x
+/100x "your input here"
 ```
 
 ### With Context
@@ -80,29 +84,13 @@ This command leverages the following capabilities:
 /index
 
 # Then run the command
-/100x
+/100x "detailed description"
 ```
-
-### Combined with Other Commands
-
-```bash
-# Example workflow
-/plan "describe your goal"
-/100x
-/commit
-```
-
-## Best Practices
-
-<Check>Be specific in your descriptions</Check>
-<Check>Include relevant file paths when applicable</Check>
-<Check>Use in combination with other commands for complex workflows</Check>
-<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, provide detailed descriptions and include relevant context about your project structure.
+For best results, be specific in your descriptions and include relevant file paths or context.
 </Note>
 
 ## Troubleshooting
@@ -114,9 +102,6 @@ For best results, provide detailed descriptions and include relevant context abo
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
   </Accordion>
-  <Accordion title="Command taking too long">
-    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
-  </Accordion>
 </AccordionGroup>
 
 ## Related Commands
@@ -125,7 +110,7 @@ For best results, provide detailed descriptions and include relevant context abo
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="Omega Commands" icon="star" href="/commands/overview#omega">
+  <Card title="Omega Commands" icon="wand-magic-sparkles" href="/commands/overview#omega">
     More omega commands
   </Card>
 </CardGroup>

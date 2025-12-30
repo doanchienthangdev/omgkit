@@ -1,15 +1,13 @@
 ---
 title: "research-validation"
 description: "Multi-source validation framework for technology decisions, best practices verification, and evidence-based implementation"
-icon: "magnifying-glass-chart"
+icon: "diagram-project"
 ---
 
 <Info>
   **Category:** Methodology
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  **Triggers:** research validation, source verification, technology selection, best practices, evidence based, multi-source, fact checking
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ Multi-source validation framework for technology decisions, best practices verif
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Research Validation
 
@@ -92,16 +90,16 @@ Avoid costly mistakes from outdated or incorrect information:
 ### 2. Validation Process
 
 ```typescript
-interface ResearchValidation \{
+interface ResearchValidation {
   topic: string;
   sources: ValidatedSource[];
   consensus: ConsensusAnalysis;
   contradictions: Contradiction[];
   confidence: ConfidenceAssessment;
   recommendation: string;
-\}
+}
 
-interface ValidatedSource \{
+interface ValidatedSource {
   url: string;
   title: string;
   author?: string;
@@ -110,27 +108,27 @@ interface ValidatedSource \{
   keyFindings: string[];
   relevance: number; // 0-1
   bias?: string;
-\}
+}
 
 // Validation workflow
 async function validateTechnologyDecision(
   topic: string,
   question: string
-): Promise\<ResearchValidation> \{
+): Promise<ResearchValidation> {
   // Step 1: Gather sources from multiple tiers
-  const sources = await gatherSources(topic, \{
+  const sources = await gatherSources(topic, {
     minTier1: 1,  // At least 1 official source
     minTier2: 2,  // At least 2 trusted sources
     maxSources: 10,
-  \});
+  });
 
   // Step 2: Extract and categorize findings
   const findings = sources.flatMap(s =>
-    s.keyFindings.map(f => (\{
+    s.keyFindings.map(f => ({
       finding: f,
       source: s,
       confidence: calculateFindingConfidence(s, f),
-    \}))
+    }))
   );
 
   // Step 3: Analyze consensus
@@ -140,33 +138,33 @@ async function validateTechnologyDecision(
   const contradictions = findContradictions(findings);
 
   // Step 5: Calculate overall confidence
-  const confidence = assessConfidence(\{
+  const confidence = assessConfidence({
     sources,
     consensus,
     contradictions,
     recency: assessRecency(sources),
-  \});
+  });
 
   // Step 6: Generate recommendation
-  const recommendation = generateRecommendation(\{
+  const recommendation = generateRecommendation({
     question,
     consensus,
     confidence,
     contradictions,
-  \});
+  });
 
-  return \{
+  return {
     topic,
     sources,
     consensus,
     contradictions,
     confidence,
     recommendation,
-  \};
-\}
+  };
+}
 
 // Consensus analysis
-function analyzeConsensus(findings: Finding[]): ConsensusAnalysis \{
+function analyzeConsensus(findings: Finding[]): ConsensusAnalysis {
   // Group similar findings
   const clusters = clusterFindings(findings);
 
@@ -178,7 +176,7 @@ function analyzeConsensus(findings: Finding[]): ConsensusAnalysis \{
   // Calculate agreement percentage
   const agreementRatio = majorityCluster.findings.length / findings.length;
 
-  return \{
+  return {
     level: agreementRatio > 0.8 ? 'strong' :
            agreementRatio > 0.6 ? 'moderate' : 'weak',
     majorityPosition: majorityCluster.summary,
@@ -187,8 +185,8 @@ function analyzeConsensus(findings: Finding[]): ConsensusAnalysis \{
       .filter(c => c !== majorityCluster)
       .map(c => c.summary),
     evidenceStrength: calculateEvidenceStrength(majorityCluster),
-  \};
-\}
+  };
+}
 ```
 
 ### 3. Technology Selection Matrix
@@ -199,7 +197,7 @@ function analyzeConsensus(findings: Finding[]): ConsensusAnalysis \{
 ### Step 1: Define Requirements
 | Category | Requirement | Priority | Weight |
 |----------|-------------|----------|--------|
-| Performance | \< 100ms response time | Must | 10 |
+| Performance | < 100ms response time | Must | 10 |
 | Scalability | 10k concurrent users | Must | 10 |
 | Learning curve | Team familiar in 2 weeks | Should | 7 |
 | Community | Active community support | Should | 6 |
@@ -208,41 +206,41 @@ function analyzeConsensus(findings: Finding[]): ConsensusAnalysis \{
 ### Step 2: Gather Evidence for Each Option
 
 ```typescript
-interface TechnologyEvaluation \{
+interface TechnologyEvaluation {
   technology: string;
   criteria: CriteriaScore[];
   sources: ValidatedSource[];
   risks: Risk[];
   totalScore: number;
-\}
+}
 
 function evaluateTechnology(
   tech: string,
   requirements: Requirement[]
-): TechnologyEvaluation \{
+): TechnologyEvaluation {
   const scores: CriteriaScore[] = [];
 
-  for (const req of requirements) \{
+  for (const req of requirements) {
     // Research this specific criteria
     const evidence = researchCriteria(tech, req.category);
 
-    scores.push(\{
+    scores.push({
       criteria: req.category,
       score: calculateScore(evidence),
       evidence: evidence.sources,
       confidence: evidence.confidence,
       notes: evidence.notes,
-    \});
-  \}
+    });
+  }
 
-  return \{
+  return {
     technology: tech,
     criteria: scores,
     sources: aggregateSources(scores),
     risks: identifyRisks(scores),
     totalScore: calculateWeightedScore(scores, requirements),
-  \};
-\}
+  };
+}
 ```
 
 ### Step 3: Comparison Template
@@ -263,29 +261,29 @@ function evaluateTechnology(
 ### 4. Best Practice Verification
 
 ```typescript
-interface BestPracticeValidation \{
+interface BestPracticeValidation {
   practice: string;
   status: 'verified' | 'outdated' | 'contested' | 'context-dependent';
   context: string[];
   sources: ValidatedSource[];
   alternatives?: string[];
   updatedPractice?: string;
-\}
+}
 
 // Verify if a best practice is still valid
 async function verifyBestPractice(
   practice: string,
-  context: \{
+  context: {
     technology: string;
     version?: string;
     useCase?: string;
-  \}
-): Promise\<BestPracticeValidation> \{
+  }
+): Promise<BestPracticeValidation> {
   // Search for current recommendations
   const currentSources = await searchOfficialDocs(
     context.technology,
     practice,
-    \{ recency: '2years' \}
+    { recency: '2years' }
   );
 
   // Check for deprecation notices
@@ -308,17 +306,17 @@ async function verifyBestPractice(
   // Determine status
   let status: BestPracticeValidation['status'];
 
-  if (isDeprecated) \{
+  if (isDeprecated) {
     status = 'outdated';
-  \} else if (communityConsensus.mixed) \{
+  } else if (communityConsensus.mixed) {
     status = 'contested';
-  \} else if (communityConsensus.contextual) \{
+  } else if (communityConsensus.contextual) {
     status = 'context-dependent';
-  \} else \{
+  } else {
     status = 'verified';
-  \}
+  }
 
-  return \{
+  return {
     practice,
     status,
     context: identifyValidContexts(currentSources, communityDiscussion),
@@ -327,23 +325,23 @@ async function verifyBestPractice(
     updatedPractice: status === 'outdated'
       ? generateUpdatedPractice(practice, deprecationInfo)
       : undefined,
-  \};
-\}
+  };
+}
 
 // Example usage
 const validation = await verifyBestPractice(
   'Use componentWillMount for data fetching',
-  \{ technology: 'React', version: '18' \}
+  { technology: 'React', version: '18' }
 );
 
 // Result:
-// \{
+// {
 //   practice: 'Use componentWillMount for data fetching',
 //   status: 'outdated',
 //   context: ['Legacy React class components only'],
 //   alternatives: ['useEffect hook', 'React Query', 'SWR'],
 //   updatedPractice: 'Use useEffect hook or data fetching libraries...'
-// \}
+// }
 ```
 
 ### 5. Evidence Documentation
@@ -435,22 +433,22 @@ const validation = await verifyBestPractice(
 ### 6. Recency Validation
 
 ```typescript
-interface RecencyAssessment \{
+interface RecencyAssessment {
   sourceAge: 'current' | 'recent' | 'dated' | 'outdated';
-  technologyVersion: \{
+  technologyVersion: {
     sourceVersion?: string;
     currentVersion: string;
     versionsBehind: number;
-  \};
+  };
   significantChanges: string[];
   recommendation: string;
-\}
+}
 
 // Assess if source information is still current
 async function assessRecency(
   source: ValidatedSource,
   technology: string
-): Promise\<RecencyAssessment> \{
+): Promise<RecencyAssessment> {
   const currentVersion = await getCurrentVersion(technology);
   const sourceVersion = extractVersionFromSource(source);
 
@@ -469,51 +467,51 @@ async function assessRecency(
   const ageInMonths = monthsSince(source.date);
 
   let sourceAge: RecencyAssessment['sourceAge'];
-  if (ageInMonths \< 6 && breakingChanges.length === 0) \{
+  if (ageInMonths < 6 && breakingChanges.length === 0) {
     sourceAge = 'current';
-  \} else if (ageInMonths \< 12 && relevantChanges.length \< 3) \{
+  } else if (ageInMonths < 12 && relevantChanges.length < 3) {
     sourceAge = 'recent';
-  \} else if (ageInMonths \< 24) \{
+  } else if (ageInMonths < 24) {
     sourceAge = 'dated';
-  \} else \{
+  } else {
     sourceAge = 'outdated';
-  \}
+  }
 
-  return \{
+  return {
     sourceAge,
-    technologyVersion: \{
+    technologyVersion: {
       sourceVersion,
       currentVersion,
       versionsBehind: calculateVersionsBehind(sourceVersion, currentVersion),
-    \},
+    },
     significantChanges: relevantChanges.map(c => c.description),
     recommendation: generateRecencyRecommendation(sourceAge, relevantChanges),
-  \};
-\}
+  };
+}
 
 // Version change impact analysis
 function analyzeVersionImpact(
   findings: string[],
   changes: VersionChange[]
-): VersionImpactAnalysis \{
+): VersionImpactAnalysis {
   const impactedFindings: ImpactedFinding[] = [];
 
-  for (const finding of findings) \{
+  for (const finding of findings) {
     const relatedChanges = changes.filter(c =>
       c.keywords.some(k => finding.toLowerCase().includes(k.toLowerCase()))
     );
 
-    if (relatedChanges.length > 0) \{
-      impactedFindings.push(\{
+    if (relatedChanges.length > 0) {
+      impactedFindings.push({
         finding,
         changes: relatedChanges,
         severity: relatedChanges.some(c => c.breaking) ? 'breaking' : 'minor',
         updatedGuidance: generateUpdatedGuidance(finding, relatedChanges),
-      \});
-    \}
-  \}
+      });
+    }
+  }
 
-  return \{
+  return {
     impactedFindings,
     unaffectedFindings: findings.filter(f =>
       !impactedFindings.some(i => i.finding === f)
@@ -523,8 +521,8 @@ function analyzeVersionImpact(
       : impactedFindings.length > 0
         ? 'moderate'
         : 'none',
-  \};
-\}
+  };
+}
 ```
 
 ## Use Cases
@@ -574,7 +572,7 @@ Which frontend framework best fits our team's needs for a dashboard application?
 // Verify security recommendation
 const validation = await verifyBestPractice(
   'Use bcrypt for password hashing',
-  \{ technology: 'Node.js', useCase: 'authentication' \}
+  { technology: 'Node.js', useCase: 'authentication' }
 );
 
 // Result includes:
@@ -681,6 +679,7 @@ Our mobile app needs:
 - [DORA Research](https://dora.dev/research/)
 - [Google Scholar](https://scholar.google.com/) - For academic sources
 
+
 ## Configuration
 
 You can customize skill behavior in your project config:
@@ -695,34 +694,19 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
-  <Card title="Methodology" icon="brain" href="/skills/overview#methodology">
+  <Card title="Methodology" icon="diagram-project" href="/skills/overview#methodology">
     More methodology skills
   </Card>
 </CardGroup>

@@ -7,9 +7,7 @@ icon: "palette"
 <Info>
   **Category:** Frontend
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,50 +18,50 @@ Accessibility (a11y). Use for WCAG compliance, screen readers, keyboard navigati
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Accessibility Skill
 
 ## Semantic HTML
 ```html
-\<header>
-\<nav aria-label="Main">
-\<main>
-\<article>
-\<aside>
-\<footer>
+<header>
+<nav aria-label="Main">
+<main>
+<article>
+<aside>
+<footer>
 ```
 
 ## ARIA
 ```html
-\<button aria-label="Close" aria-pressed="false">
-\<div role="alert" aria-live="polite">
-\<input aria-describedby="hint-id">
+<button aria-label="Close" aria-pressed="false">
+<div role="alert" aria-live="polite">
+<input aria-describedby="hint-id">
 ```
 
 ## Keyboard Navigation
 ```tsx
-function handleKeyDown(e: KeyboardEvent) \{
-  if (e.key === 'Enter' || e.key === ' ') \{
+function handleKeyDown(e: KeyboardEvent) {
+  if (e.key === 'Enter' || e.key === ' ') {
     activate();
-  \}
-  if (e.key === 'Escape') \{
+  }
+  if (e.key === 'Escape') {
     close();
-  \}
-\}
+  }
+}
 ```
 
 ## Focus Management
 ```tsx
-const ref = useRef\<HTMLButtonElement>(null);
+const ref = useRef<HTMLButtonElement>(null);
 
-useEffect(() => \{
+useEffect(() => {
   if (isOpen) ref.current?.focus();
-\}, [isOpen]);
+}, [isOpen]);
 ```
 
 ## Checklist
@@ -73,6 +71,7 @@ useEffect(() => \{
 - [ ] Alt text on images
 - [ ] Form labels
 - [ ] Skip links
+
 
 ## Configuration
 
@@ -88,32 +87,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Frontend" icon="palette" href="/skills/overview#frontend">
     More frontend skills

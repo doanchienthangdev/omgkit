@@ -1,13 +1,13 @@
 ---
 title: "/refactor"
 description: "Improve code structure"
-icon: "wand-magic-sparkles"
+icon: "shield-check"
 ---
 
 <Info>
   **Category:** Quality
 
-  **Syntax:** `/refactor`
+  **Syntax:** `/refactor <file or directory>`
 </Info>
 
 ## Overview
@@ -17,12 +17,13 @@ Improve code structure
 ## Quick Start
 
 ```bash
-/refactor
+/refactor "file
 ```
 
-# ♻️ Refactor: $ARGUMENTS
 
-Improve code structure of: **$ARGUMENTS**
+# ♻️ Refactor: \<file or directory\>
+
+Improve code structure of: **\<file or directory\>**
 
 ## Goals
 - Remove duplication
@@ -37,23 +38,26 @@ Improve code structure of: **$ARGUMENTS**
 4. Verify tests pass
 5. Document changes
 
+
+
 ## Tools Used
 
-This command leverages the following capabilities:
+This command uses the following tools:
 
-<Check>**Task** - Orchestrates complex multi-step operations</Check>
-<Check>**Read** - Analyzes files and codebase context</Check>
-<Check>**Write** - Creates and modifies files</Check>
-<Check>**Bash** - Executes system commands</Check>
-<Check>**Grep** - Searches code patterns</Check>
-<Check>**Glob** - Finds files by pattern</Check>
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/refactor
+/refactor "your input here"
 ```
 
 ### With Context
@@ -63,29 +67,13 @@ This command leverages the following capabilities:
 /index
 
 # Then run the command
-/refactor
+/refactor "detailed description"
 ```
-
-### Combined with Other Commands
-
-```bash
-# Example workflow
-/plan "describe your goal"
-/refactor
-/commit
-```
-
-## Best Practices
-
-<Check>Be specific in your descriptions</Check>
-<Check>Include relevant file paths when applicable</Check>
-<Check>Use in combination with other commands for complex workflows</Check>
-<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, provide detailed descriptions and include relevant context about your project structure.
+For best results, be specific in your descriptions and include relevant file paths or context.
 </Note>
 
 ## Troubleshooting
@@ -97,9 +85,6 @@ For best results, provide detailed descriptions and include relevant context abo
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
   </Accordion>
-  <Accordion title="Command taking too long">
-    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
-  </Accordion>
 </AccordionGroup>
 
 ## Related Commands
@@ -108,7 +93,7 @@ For best results, provide detailed descriptions and include relevant context abo
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="Quality Commands" icon="check-double" href="/commands/overview#quality">
+  <Card title="Quality Commands" icon="shield-check" href="/commands/overview#quality">
     More quality commands
   </Card>
 </CardGroup>

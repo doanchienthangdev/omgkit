@@ -1,13 +1,13 @@
 ---
 title: "/spawn"
 description: "Launch parallel background task"
-icon: "users"
+icon: "layer-group"
 ---
 
 <Info>
   **Category:** Context
 
-  **Syntax:** `/spawn`
+  **Syntax:** `/spawn <task description>`
 </Info>
 
 ## Overview
@@ -17,12 +17,13 @@ Launch parallel background task
 ## Quick Start
 
 ```bash
-/spawn
+/spawn "task
 ```
 
-# 🔀 Spawn: $ARGUMENTS
 
-Launch parallel task: **$ARGUMENTS**
+# 🔀 Spawn: \<task description\>
+
+Launch parallel task: **\<task description\>**
 
 ## Usage
 Spawn background tasks that run in parallel.
@@ -35,23 +36,21 @@ Spawn background tasks that run in parallel.
 
 Use `/spawn:collect` to gather results.
 
+
+
 ## Tools Used
 
-This command leverages the following capabilities:
+This command uses the following tools:
 
-<Check>**Task** - Orchestrates complex multi-step operations</Check>
-<Check>**Read** - Analyzes files and codebase context</Check>
-<Check>**Write** - Creates and modifies files</Check>
-<Check>**Bash** - Executes system commands</Check>
-<Check>**Grep** - Searches code patterns</Check>
-<Check>**Glob** - Finds files by pattern</Check>
+- **Task** - Enables task capabilities
+
 
 ## Examples
 
 ### Basic Usage
 
 ```bash
-/spawn
+/spawn "your input here"
 ```
 
 ### With Context
@@ -61,29 +60,13 @@ This command leverages the following capabilities:
 /index
 
 # Then run the command
-/spawn
+/spawn "detailed description"
 ```
-
-### Combined with Other Commands
-
-```bash
-# Example workflow
-/plan "describe your goal"
-/spawn
-/commit
-```
-
-## Best Practices
-
-<Check>Be specific in your descriptions</Check>
-<Check>Include relevant file paths when applicable</Check>
-<Check>Use in combination with other commands for complex workflows</Check>
-<Check>Run `/index` first for full codebase context</Check>
 
 ## Tips
 
 <Note>
-For best results, provide detailed descriptions and include relevant context about your project structure.
+For best results, be specific in your descriptions and include relevant file paths or context.
 </Note>
 
 ## Troubleshooting
@@ -95,9 +78,6 @@ For best results, provide detailed descriptions and include relevant context abo
   <Accordion title="Unexpected results">
     Try running `/index` first to refresh codebase context.
   </Accordion>
-  <Accordion title="Command taking too long">
-    For complex tasks, break them down into smaller steps or use `/mode token-efficient`.
-  </Accordion>
 </AccordionGroup>
 
 ## Related Commands
@@ -106,7 +86,7 @@ For best results, provide detailed descriptions and include relevant context abo
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 54 commands
   </Card>
-  <Card title="Context Commands" icon="bookmark" href="/commands/overview#context">
+  <Card title="Context Commands" icon="layer-group" href="/commands/overview#context">
     More context commands
   </Card>
 </CardGroup>

@@ -7,9 +7,7 @@ icon: "database"
 <Info>
   **Category:** Databases
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,42 +18,42 @@ MongoDB database. Use for document storage, aggregation, NoSQL.
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # MongoDB Skill
 
 ## Document Design
 ```javascript
-\{
+{
   _id: ObjectId(),
   email: "user@example.com",
-  profile: \{
+  profile: {
     name: "John",
     avatar: "url"
-  \},
+  },
   createdAt: ISODate()
-\}
+}
 ```
 
 ## Query Patterns
 ```javascript
 // Find
-db.users.find(\{ email: /example.com/ \});
+db.users.find({ email: /example.com/ });
 
 // Aggregation
 db.users.aggregate([
-  \{ $match: \{ active: true \} \},
-  \{ $group: \{ _id: "$role", count: \{ $sum: 1 \} \} \}
+  { $match: { active: true } },
+  { $group: { _id: "$role", count: { $sum: 1 } } }
 ]);
 
 // Update
 db.users.updateOne(
-  \{ _id: id \},
-  \{ $set: \{ name: "New Name" \} \}
+  { _id: id },
+  { $set: { name: "New Name" } }
 );
 ```
 
@@ -64,6 +62,7 @@ db.users.updateOne(
 - Embed related data
 - Use indexes
 - Avoid deep nesting
+
 
 ## Configuration
 
@@ -79,32 +78,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Databases" icon="database" href="/skills/overview#databases">
     More databases skills

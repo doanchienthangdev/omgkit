@@ -7,9 +7,7 @@ icon: "palette"
 <Info>
   **Category:** Frontend
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,38 +18,38 @@ Tailwind CSS styling. Use when styling with utility classes.
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # Tailwind CSS Skill
 
 ## Core Utilities
 ```html
-\<!-- Spacing -->
-\<div class="p-4 m-2 space-y-4">
+<!-- Spacing -->
+<div class="p-4 m-2 space-y-4">
 
-\<!-- Flexbox -->
-\<div class="flex items-center justify-between gap-4">
+<!-- Flexbox -->
+<div class="flex items-center justify-between gap-4">
 
-\<!-- Grid -->
-\<div class="grid grid-cols-3 gap-4">
+<!-- Grid -->
+<div class="grid grid-cols-3 gap-4">
 
-\<!-- Typography -->
-\<p class="text-lg font-bold text-gray-900">
+<!-- Typography -->
+<p class="text-lg font-bold text-gray-900">
 ```
 
 ## Responsive
 ```html
-\<div class="text-sm md:text-base lg:text-lg">
-\<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+<div class="text-sm md:text-base lg:text-lg">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
 ```
 
 ## Component Pattern
 ```html
-\<button class="
+<button class="
   px-4 py-2
   bg-blue-500 hover:bg-blue-600
   text-white font-medium
@@ -60,12 +58,12 @@ When this skill is active, agents automatically apply:
   focus:outline-none focus:ring-2 focus:ring-blue-500
 ">
   Click me
-\</button>
+</button>
 ```
 
 ## Dark Mode
 ```html
-\<div class="bg-white dark:bg-gray-900 text-black dark:text-white">
+<div class="bg-white dark:bg-gray-900 text-black dark:text-white">
 ```
 
 ## Best Practices
@@ -73,6 +71,7 @@ When this skill is active, agents automatically apply:
 - Mobile-first responsive
 - Extract common patterns
 - Use @apply sparingly
+
 
 ## Configuration
 
@@ -88,32 +87,17 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
   <Card title="Frontend" icon="palette" href="/skills/overview#frontend">
     More frontend skills

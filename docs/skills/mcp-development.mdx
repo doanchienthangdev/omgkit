@@ -1,15 +1,13 @@
 ---
 title: "mcp-development"
 description: "Create Model Context Protocol servers, tools, and resources for AI assistant integration"
-icon: "microchip"
+icon: "brain"
 ---
 
 <Info>
   **Category:** Tools
 
-  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files and context.
-
-  **Triggers:** mcp server, model context protocol, claude tools, ai tools, mcp development, fastmcp, tool creation
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
 </Info>
 
 ## Overview
@@ -20,11 +18,11 @@ Create Model Context Protocol servers, tools, and resources for AI assistant int
 
 When this skill is active, agents automatically apply:
 
-<Check>Industry best practices and patterns</Check>
-<Check>Production-ready code examples</Check>
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
 <Check>Security considerations</Check>
 <Check>Performance optimizations</Check>
-<Check>Comprehensive error handling</Check>
+
 
 # MCP Development
 
@@ -63,14 +61,14 @@ def get_weather(city: str) -> str:
         Weather information as a formatted string
     """
     # Fetch from weather API
-    response = requests.get(f"https://api.weather.com/\{city\}")
+    response = requests.get(f"https://api.weather.com/{city}")
     data = response.json()
 
     return f"""
-    Weather in \{city\}:
-    Temperature: \{data['temp']\}°F
-    Conditions: \{data['conditions']\}
-    Humidity: \{data['humidity']\}%
+    Weather in {city}:
+    Temperature: {data['temp']}°F
+    Conditions: {data['conditions']}
+    Humidity: {data['humidity']}%
     """
 
 # Tool with complex parameters
@@ -92,12 +90,12 @@ def search_database(
     Returns:
         List of matching records
     """
-    sql = f"SELECT * FROM \{table\} WHERE content LIKE %s"
+    sql = f"SELECT * FROM {table} WHERE content LIKE %s"
     if not include_deleted:
         sql += " AND deleted_at IS NULL"
-    sql += f" LIMIT \{limit\}"
+    sql += f" LIMIT {limit}"
 
-    return db.execute(sql, [f"%\{query\}%"]).fetchall()
+    return db.execute(sql, [f"%{query}%"]).fetchall()
 
 # Resource exposure
 @mcp.resource("config://settings")
@@ -106,7 +104,7 @@ def get_settings() -> str:
     return json.dumps(load_settings(), indent=2)
 
 # Dynamic resource with URI template
-@mcp.resource("user://\{user_id\}/profile")
+@mcp.resource("user://{user_id}/profile")
 def get_user_profile(user_id: str) -> str:
     """Get user profile data.
 
@@ -126,10 +124,10 @@ def analyze_code(code: str, language: str = "python") -> str:
         language: Programming language
     """
     return f"""
-    Please analyze the following \{language\} code:
+    Please analyze the following {language} code:
 
-    ```\{language\}
-    \{code\}
+    ```{language}
+    {code}
     ```
 
     Provide:
@@ -148,190 +146,190 @@ if __name__ == "__main__":
 ### 2. TypeScript MCP Server
 
 ```typescript
-import \{ Server \} from "@modelcontextprotocol/sdk/server/index.js";
-import \{ StdioServerTransport \} from "@modelcontextprotocol/sdk/server/stdio.js";
-import \{
+import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
   CallToolRequestSchema,
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
-\} from "@modelcontextprotocol/sdk/types.js";
-import \{ z \} from "zod";
+} from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
 
 // Server configuration
 const server = new Server(
-  \{
+  {
     name: "my-mcp-server",
     version: "1.0.0",
-  \},
-  \{
-    capabilities: \{
-      tools: \{\},
-      resources: \{\},
-      prompts: \{\},
-    \},
-  \}
+  },
+  {
+    capabilities: {
+      tools: {},
+      resources: {},
+      prompts: {},
+    },
+  }
 );
 
 // Tool definitions with Zod schemas
-const FileSearchSchema = z.object(\{
+const FileSearchSchema = z.object({
   query: z.string().describe("Search query"),
   directory: z.string().optional().describe("Directory to search in"),
   fileTypes: z.array(z.string()).optional().describe("File extensions to include"),
   maxResults: z.number().optional().default(20).describe("Maximum results"),
-\});
+});
 
-const DatabaseQuerySchema = z.object(\{
+const DatabaseQuerySchema = z.object({
   sql: z.string().describe("SQL query to execute"),
   params: z.array(z.unknown()).optional().describe("Query parameters"),
-\});
+});
 
 // Register tools
-server.setRequestHandler(ListToolsRequestSchema, async () => (\{
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
-    \{
+    {
       name: "file_search",
       description: "Search for files matching a query",
-      inputSchema: \{
+      inputSchema: {
         type: "object",
-        properties: \{
-          query: \{ type: "string", description: "Search query" \},
-          directory: \{ type: "string", description: "Directory to search" \},
-          fileTypes: \{
+        properties: {
+          query: { type: "string", description: "Search query" },
+          directory: { type: "string", description: "Directory to search" },
+          fileTypes: {
             type: "array",
-            items: \{ type: "string" \},
+            items: { type: "string" },
             description: "File extensions",
-          \},
-          maxResults: \{
+          },
+          maxResults: {
             type: "number",
             description: "Max results",
             default: 20,
-          \},
-        \},
+          },
+        },
         required: ["query"],
-      \},
-    \},
-    \{
+      },
+    },
+    {
       name: "database_query",
       description: "Execute a read-only database query",
-      inputSchema: \{
+      inputSchema: {
         type: "object",
-        properties: \{
-          sql: \{ type: "string", description: "SQL query" \},
-          params: \{ type: "array", description: "Query parameters" \},
-        \},
+        properties: {
+          sql: { type: "string", description: "SQL query" },
+          params: { type: "array", description: "Query parameters" },
+        },
         required: ["sql"],
-      \},
-    \},
+      },
+    },
   ],
-\}));
+}));
 
 // Handle tool calls
-server.setRequestHandler(CallToolRequestSchema, async (request) => \{
-  const \{ name, arguments: args \} = request.params;
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  const { name, arguments: args } = request.params;
 
-  try \{
-    switch (name) \{
-      case "file_search": \{
+  try {
+    switch (name) {
+      case "file_search": {
         const params = FileSearchSchema.parse(args);
         const results = await searchFiles(params);
-        return \{
+        return {
           content: [
-            \{
+            {
               type: "text",
               text: JSON.stringify(results, null, 2),
-            \},
+            },
           ],
-        \};
-      \}
+        };
+      }
 
-      case "database_query": \{
+      case "database_query": {
         const params = DatabaseQuerySchema.parse(args);
         // Validate read-only
-        if (!isReadOnlyQuery(params.sql)) \{
+        if (!isReadOnlyQuery(params.sql)) {
           throw new Error("Only SELECT queries are allowed");
-        \}
+        }
         const results = await executeQuery(params.sql, params.params);
-        return \{
+        return {
           content: [
-            \{
+            {
               type: "text",
               text: JSON.stringify(results, null, 2),
-            \},
+            },
           ],
-        \};
-      \}
+        };
+      }
 
       default:
-        throw new Error(`Unknown tool: $\{name\}`);
-    \}
-  \} catch (error) \{
-    return \{
+        throw new Error(`Unknown tool: ${name}`);
+    }
+  } catch (error) {
+    return {
       content: [
-        \{
+        {
           type: "text",
-          text: `Error: $\{error instanceof Error ? error.message : "Unknown error"\}`,
-        \},
+          text: `Error: ${error instanceof Error ? error.message : "Unknown error"}`,
+        },
       ],
       isError: true,
-    \};
-  \}
-\});
+    };
+  }
+});
 
 // Resource handlers
-server.setRequestHandler(ListResourcesRequestSchema, async () => (\{
+server.setRequestHandler(ListResourcesRequestSchema, async () => ({
   resources: [
-    \{
+    {
       uri: "config://app",
       name: "Application Configuration",
       description: "Current application configuration",
       mimeType: "application/json",
-    \},
-    \{
+    },
+    {
       uri: "schema://database",
       name: "Database Schema",
       description: "Database table definitions",
       mimeType: "application/json",
-    \},
+    },
   ],
-\}));
+}));
 
-server.setRequestHandler(ReadResourceRequestSchema, async (request) => \{
-  const \{ uri \} = request.params;
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  const { uri } = request.params;
 
-  if (uri === "config://app") \{
-    return \{
+  if (uri === "config://app") {
+    return {
       contents: [
-        \{
+        {
           uri,
           mimeType: "application/json",
           text: JSON.stringify(getAppConfig(), null, 2),
-        \},
+        },
       ],
-    \};
-  \}
+    };
+  }
 
-  if (uri === "schema://database") \{
-    return \{
+  if (uri === "schema://database") {
+    return {
       contents: [
-        \{
+        {
           uri,
           mimeType: "application/json",
           text: JSON.stringify(getDatabaseSchema(), null, 2),
-        \},
+        },
       ],
-    \};
-  \}
+    };
+  }
 
-  throw new Error(`Unknown resource: $\{uri\}`);
-\});
+  throw new Error(`Unknown resource: ${uri}`);
+});
 
 // Start server
-async function main() \{
+async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("MCP server running on stdio");
-\}
+}
 
 main().catch(console.error);
 ```
@@ -370,11 +368,11 @@ async def analyze_file(ctx: Context, file_path: str) -> str:
     quality_metrics = await analyze_quality(content)
     await ctx.report_progress(100, 100, "Analysis complete")
 
-    return json.dumps(\{
+    return json.dumps({
         "syntax": syntax_check,
         "security": security_scan,
         "quality": quality_metrics,
-    \}, indent=2)
+    }, indent=2)
 
 # Streaming tool for long operations
 @mcp.tool()
@@ -432,17 +430,17 @@ def query_with_pagination(
     results = db.search(query, limit=page_size, offset=offset)
     total = db.count(query)
 
-    return \{
+    return {
         "data": results,
-        "pagination": \{
+        "pagination": {
             "page": page,
             "page_size": page_size,
             "total_items": total,
             "total_pages": (total + page_size - 1) // page_size,
-            "has_next": page * page_size \< total,
+            "has_next": page * page_size < total,
             "has_prev": page > 1,
-        \}
-    \}
+        }
+    }
 
 # Error handling wrapper
 @mcp.tool()
@@ -458,32 +456,32 @@ def safe_operation(operation: str, params: dict) -> dict:
     """
     try:
         result = execute_operation(operation, params)
-        return \{
+        return {
             "success": True,
             "data": result,
             "timestamp": datetime.utcnow().isoformat(),
-        \}
+        }
     except ValidationError as e:
-        return \{
+        return {
             "success": False,
             "error": "validation_error",
             "message": str(e),
             "fields": e.errors(),
-        \}
+        }
     except PermissionError as e:
-        return \{
+        return {
             "success": False,
             "error": "permission_denied",
             "message": str(e),
-        \}
+        }
     except Exception as e:
         logger.exception("Operation failed")
-        return \{
+        return {
             "success": False,
             "error": "internal_error",
             "message": "An unexpected error occurred",
             "reference_id": generate_error_id(),
-        \}
+        }
 ```
 
 ### 4. Resource Management
@@ -499,15 +497,15 @@ mcp = FastMCP("resource-server")
 @mcp.resource("config://database")
 def database_config() -> str:
     """Database configuration resource."""
-    return yaml.dump(\{
+    return yaml.dump({
         "host": os.getenv("DB_HOST", "localhost"),
         "port": int(os.getenv("DB_PORT", 5432)),
         "database": os.getenv("DB_NAME", "app"),
         "pool_size": 10,
-    \})
+    })
 
 # Dynamic resource with template
-@mcp.resource("table://\{schema\}/\{table\}/schema")
+@mcp.resource("table://{schema}/{table}/schema")
 def table_schema(schema: str, table: str) -> str:
     """Get schema definition for a specific table.
 
@@ -516,25 +514,25 @@ def table_schema(schema: str, table: str) -> str:
         table: Table name
     """
     columns = db.get_table_schema(schema, table)
-    return json.dumps(\{
+    return json.dumps({
         "schema": schema,
         "table": table,
         "columns": [
-            \{
+            {
                 "name": col.name,
                 "type": col.type,
                 "nullable": col.nullable,
                 "default": col.default,
                 "primary_key": col.primary_key,
-            \}
+            }
             for col in columns
         ],
         "indexes": db.get_indexes(schema, table),
         "foreign_keys": db.get_foreign_keys(schema, table),
-    \}, indent=2)
+    }, indent=2)
 
 # Resource with MIME type
-@mcp.resource("file://\{path\}", mime_type="text/plain")
+@mcp.resource("file://{path}", mime_type="text/plain")
 def file_content(path: str) -> str:
     """Read file content as resource.
 
@@ -551,7 +549,7 @@ def file_content(path: str) -> str:
         return f.read()
 
 # Binary resource
-@mcp.resource("image://\{image_id\}", mime_type="image/png")
+@mcp.resource("image://{image_id}", mime_type="image/png")
 def get_image(image_id: str) -> bytes:
     """Get image data as binary resource.
 
@@ -564,14 +562,14 @@ def get_image(image_id: str) -> bytes:
 @mcp.resource("project://overview")
 def project_overview() -> str:
     """Get complete project overview."""
-    return json.dumps(\{
+    return json.dumps({
         "name": project.name,
         "version": project.version,
         "dependencies": project.get_dependencies(),
         "scripts": project.get_scripts(),
         "structure": project.get_directory_tree(),
         "recent_changes": project.get_recent_commits(10),
-    \}, indent=2)
+    }, indent=2)
 ```
 
 ### 5. Server Lifecycle and Configuration
@@ -613,12 +611,12 @@ config = ServerConfig()
 async def logging_middleware(request, call_next):
     """Log all tool calls."""
     start_time = time.time()
-    logger.info(f"Tool call: \{request.method\} - \{request.params\}")
+    logger.info(f"Tool call: {request.method} - {request.params}")
 
     response = await call_next(request)
 
     duration = time.time() - start_time
-    logger.info(f"Completed in \{duration:.2f\}s")
+    logger.info(f"Completed in {duration:.2f}s")
 
     return response
 
@@ -637,19 +635,19 @@ async def rate_limit_middleware(request, call_next):
 @mcp.resource("health://status")
 def health_status() -> str:
     """Server health status."""
-    return json.dumps(\{
+    return json.dumps({
         "status": "healthy",
         "uptime": get_uptime(),
-        "connections": \{
+        "connections": {
             "database": database.is_connected(),
             "cache": cache.is_connected(),
-        \},
-        "metrics": \{
+        },
+        "metrics": {
             "requests_total": metrics.requests_total,
             "errors_total": metrics.errors_total,
             "avg_response_time": metrics.avg_response_time,
-        \},
-    \})
+        },
+    })
 ```
 
 ### 6. Testing MCP Servers
@@ -666,7 +664,7 @@ def client():
 class TestMCPServer:
     async def test_tool_execution(self, client):
         """Test basic tool execution."""
-        result = await client.call_tool("get_weather", \{"city": "Seattle"\})
+        result = await client.call_tool("get_weather", {"city": "Seattle"})
 
         assert result.success
         assert "Temperature" in result.content
@@ -674,7 +672,7 @@ class TestMCPServer:
 
     async def test_tool_validation(self, client):
         """Test parameter validation."""
-        result = await client.call_tool("get_weather", \{\})
+        result = await client.call_tool("get_weather", {})
 
         assert not result.success
         assert "city" in result.error.lower()
@@ -699,10 +697,10 @@ class TestMCPServer:
 
     async def test_error_handling(self, client):
         """Test error responses."""
-        result = await client.call_tool("safe_operation", \{
+        result = await client.call_tool("safe_operation", {
             "operation": "invalid",
-            "params": \{\},
-        \})
+            "params": {},
+        })
 
         assert result.content["success"] is False
         assert "error" in result.content
@@ -713,15 +711,15 @@ class TestMCPIntegration:
         """Test complete workflow."""
         # Setup test data
         mock_db.insert_users([
-            \{"id": 1, "name": "Alice"\},
-            \{"id": 2, "name": "Bob"\},
+            {"id": 1, "name": "Alice"},
+            {"id": 2, "name": "Bob"},
         ])
 
         # Search users
-        result = await client.call_tool("search_database", \{
+        result = await client.call_tool("search_database", {
             "query": "Alice",
             "table": "users",
-        \})
+        })
 
         assert result.success
         users = json.loads(result.content)
@@ -751,11 +749,11 @@ async def query(sql: str, params: list = None) -> dict:
 
     async with pool.acquire() as conn:
         rows = await conn.fetch(sql, *(params or []))
-        return \{
+        return {
             "columns": list(rows[0].keys()) if rows else [],
             "rows": [dict(row) for row in rows],
             "count": len(rows),
-        \}
+        }
 
 @mcp.tool()
 async def describe_table(table_name: str) -> dict:
@@ -767,10 +765,10 @@ async def describe_table(table_name: str) -> dict:
             WHERE table_name = $1
         """, table_name)
 
-        return \{
+        return {
             "table": table_name,
             "columns": [dict(col) for col in columns],
-        \}
+        }
 
 @mcp.resource("schema://tables")
 async def list_tables() -> str:
@@ -807,12 +805,12 @@ def list_directory(path: str = ".") -> list[dict]:
     dir_path = validate_path(path)
 
     return [
-        \{
+        {
             "name": item.name,
             "type": "directory" if item.is_dir() else "file",
             "size": item.stat().st_size if item.is_file() else None,
             "modified": item.stat().st_mtime,
-        \}
+        }
         for item in dir_path.iterdir()
     ]
 
@@ -875,11 +873,11 @@ class SecurityValidator:
     @staticmethod
     def sanitize_output(data: dict) -> dict:
         """Remove sensitive fields from output."""
-        sensitive_keys = \{"password", "secret", "token", "api_key"\}
-        return \{
+        sensitive_keys = {"password", "secret", "token", "api_key"}
+        return {
             k: v for k, v in data.items()
             if k.lower() not in sensitive_keys
-        \}
+        }
 ```
 
 ## Related Skills
@@ -896,6 +894,7 @@ class SecurityValidator:
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [Claude MCP Guide](https://docs.anthropic.com/en/docs/build-with-claude/mcp)
 
+
 ## Configuration
 
 You can customize skill behavior in your project config:
@@ -910,34 +909,19 @@ skills:
 
 ## When This Skill Activates
 
-OMGKIT detects and activates this skill when:
+OMGKIT detects and activates this skill when it finds:
 
-- You mention relevant keywords in your prompts
-- Project files match the skill's domain
-- Configuration files indicate this technology
-- Package dependencies suggest this skill is needed
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Skill not activating">
-    Ensure your project has relevant files or explicitly mention the technology in your prompt.
-  </Accordion>
-  <Accordion title="Unexpected patterns suggested">
-    Check your project's configuration to ensure it matches your actual stack.
-  </Accordion>
-  <Accordion title="Missing best practices">
-    Run `/index` to refresh codebase context and ensure full analysis.
-  </Accordion>
-</AccordionGroup>
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
 
 ## Related Skills
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 72 skills
+    See all 43 skills
   </Card>
-  <Card title="Tools" icon="wrench" href="/skills/overview#tools">
+  <Card title="Tools" icon="brain" href="/skills/overview#tools">
     More tools skills
   </Card>
 </CardGroup>
