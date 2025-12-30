@@ -1,0 +1,260 @@
+---
+name: sequential-thinking
+description: Numbered thought sequences for complex problem decomposition and structured reasoning
+category: methodology
+triggers:
+  - complex problem
+  - step by step
+  - think through
+  - reasoning chain
+  - decompose
+---
+
+# Sequential Thinking
+
+Master the art of **structured reasoning** through numbered thought sequences. This skill enables systematic problem decomposition, dependency tracking, and clear reasoning chains for complex challenges.
+
+## Purpose
+
+Sequential thinking transforms chaotic problem-solving into organized, traceable reasoning. It's essential when:
+
+- Problems have multiple interdependent components
+- Solutions require building on previous insights
+- Team communication needs clear reasoning trails
+- Debugging requires systematic elimination
+- Decisions need documented justification
+
+## Features
+
+### 1. Numbered Thought Chains
+```
+THOUGHT 1: Identify the core problem
+  - What exactly is failing?
+  - What is the expected behavior?
+
+THOUGHT 2: Establish constraints (depends on THOUGHT 1)
+  - What cannot change?
+  - What resources are available?
+
+THOUGHT 3: Generate hypotheses (depends on THOUGHT 1, 2)
+  - Hypothesis A: Configuration issue
+  - Hypothesis B: Data corruption
+  - Hypothesis C: Race condition
+```
+
+### 2. Dependency Tracking
+```
+[THOUGHT 4] ← depends on [THOUGHT 2, 3]
+This ensures we don't proceed without establishing prerequisites.
+Mark dependencies explicitly to enable:
+  - Parallel thinking on independent thoughts
+  - Clear revision paths when assumptions change
+  - Better collaboration handoffs
+```
+
+### 3. Revision and Backtracking
+```
+REVISION: Updating THOUGHT 3 based on new evidence
+  - Original: Assumed single-threaded execution
+  - New insight: System uses worker threads
+  - Impact: Hypothesis C (race condition) now most likely
+
+BACKTRACK: Returning to THOUGHT 2
+  - Constraint we missed: 100ms timeout requirement
+  - This invalidates THOUGHT 5-7, need to restart from here
+```
+
+### 4. Checkpoint Summaries
+```
+=== CHECKPOINT after THOUGHT 10 ===
+KEY FINDINGS:
+1. Root cause identified: Memory leak in cache layer
+2. Two viable solutions identified
+3. Solution A preferred (lower risk)
+
+OPEN QUESTIONS:
+- Performance impact of Solution A?
+- Rollback strategy needed?
+
+NEXT STEPS:
+- THOUGHT 11: Benchmark Solution A
+- THOUGHT 12: Design rollback procedure
+===================================
+```
+
+### 5. Visual Thought Mapping
+```
+                    [THOUGHT 1: Problem Definition]
+                           |
+              +------------+------------+
+              |                         |
+    [THOUGHT 2: Constraints]  [THOUGHT 3: Context]
+              |                         |
+              +------------+------------+
+                           |
+                [THOUGHT 4: Hypotheses]
+                     /    |    \
+                   /      |      \
+            [T5: H1]  [T6: H2]  [T7: H3]
+                         |
+                   [THOUGHT 8: Solution]
+```
+
+## Use Cases
+
+### Complex Algorithm Design
+```
+THOUGHT 1: Define the problem space
+  - Input: Unsorted array of N integers
+  - Output: K largest elements
+  - Constraint: O(N log K) time complexity
+
+THOUGHT 2: Evaluate known approaches
+  - Full sort: O(N log N) - too slow
+  - Min-heap of size K: O(N log K) - meets requirement
+  - QuickSelect: O(N) average - better but unstable
+
+THOUGHT 3: Select approach (depends on THOUGHT 2)
+  - Choose min-heap for guaranteed performance
+  - QuickSelect as optimization for large N
+
+THOUGHT 4: Design implementation (depends on THOUGHT 3)
+  - Initialize min-heap with first K elements
+  - For remaining elements, compare with heap root
+  - If larger, replace root and heapify
+```
+
+### System Architecture Decisions
+```
+THOUGHT 1: Identify scaling bottleneck
+  - Database reads: 10,000 QPS
+  - Current capacity: 2,000 QPS
+  - Gap: 5x improvement needed
+
+THOUGHT 2: List scaling options
+  - Read replicas
+  - Caching layer
+  - Database sharding
+  - Query optimization
+
+THOUGHT 3: Evaluate trade-offs (depends on THOUGHT 1, 2)
+  | Option          | Complexity | Time | Cost  |
+  |-----------------|------------|------|-------|
+  | Read replicas   | Low        | 1w   | $500  |
+  | Caching         | Medium     | 2w   | $200  |
+  | Sharding        | High       | 4w   | $1000 |
+  | Query optimize  | Low        | 3d   | $0    |
+
+THOUGHT 4: Recommendation
+  - Immediate: Query optimization (quick win)
+  - Short-term: Caching layer
+  - Long-term: Read replicas as traffic grows
+```
+
+### Debugging Multi-Component Issues
+```
+THOUGHT 1: Reproduce the issue
+  - Steps: Login → Dashboard → Click "Export"
+  - Result: 500 error after 30 seconds
+  - Frequency: 100% reproducible
+
+THOUGHT 2: Identify affected components
+  - Frontend: React dashboard
+  - API: Node.js Express server
+  - Database: PostgreSQL
+  - External: S3 for file storage
+
+THOUGHT 3: Isolate the failure point (depends on THOUGHT 2)
+  - Frontend logs: Request sent successfully
+  - API logs: Request received, DB query started
+  - DB logs: Query completed in 2 seconds
+  - API logs: S3 upload started... [timeout]
+
+  FINDING: Issue is S3 upload timeout
+
+THOUGHT 4: Root cause analysis (depends on THOUGHT 3)
+  - S3 region: us-east-1
+  - Server region: eu-west-1
+  - File size: 50MB
+  - Network latency: 150ms
+
+  ROOT CAUSE: Cross-region upload with large file
+```
+
+## Best Practices
+
+### Do's
+- **Number every thought explicitly** - Enables reference and revision
+- **Mark dependencies clearly** - "This depends on THOUGHT 3"
+- **Allow revision** - "REVISION: Updating THOUGHT 2 based on..."
+- **Summarize at checkpoints** - Every 5-10 thoughts
+- **Time-box thoughts** - Prevent infinite exploration
+
+### Don'ts
+- Don't skip numbering for "obvious" thoughts
+- Don't hide dependencies in prose
+- Don't delete invalid thoughts (strike through instead)
+- Don't exceed 20 thoughts without a checkpoint
+- Don't branch more than 3 levels deep
+
+### Templates
+
+**Problem Analysis Template:**
+```
+THOUGHT 1: Problem statement
+THOUGHT 2: Success criteria
+THOUGHT 3: Constraints
+THOUGHT 4: Assumptions (validate these!)
+THOUGHT 5-N: Solution exploration
+CHECKPOINT: Summary and decision
+```
+
+**Decision Making Template:**
+```
+THOUGHT 1: Decision to make
+THOUGHT 2: Options identified
+THOUGHT 3-N: Evaluate each option
+THOUGHT N+1: Comparison matrix
+THOUGHT N+2: Recommendation with rationale
+```
+
+## Related Skills
+
+- **writing-plans** - Use sequential thinking to create detailed plans
+- **brainstorming** - Generate options in THOUGHT steps
+- **problem-solving** - Apply systematic approaches
+- **root-cause-tracing** - Use numbered investigation steps
+- **systematic-debugging** - Structure debugging as thought chain
+
+## Integration Example
+
+```markdown
+# Feature: User Authentication Redesign
+
+## Sequential Analysis
+
+THOUGHT 1: Current pain points
+- Session timeout too aggressive (15 min)
+- No "remember me" option
+- MFA required on every login
+
+THOUGHT 2: User research findings (external input)
+- 73% want "remember me"
+- 45% frustrated by frequent MFA
+- Security team requires MFA for sensitive actions
+
+THOUGHT 3: Design constraints (depends on THOUGHT 1, 2)
+- Must maintain SOC2 compliance
+- Cannot increase session beyond 24h
+- MFA must protect financial transactions
+
+THOUGHT 4: Proposed solution (depends on THOUGHT 3)
+- Implement "remember device" (30 days)
+- Step-up MFA only for sensitive actions
+- Extend session to 60 min with activity
+
+=== CHECKPOINT ===
+Solution balances security and UX.
+Next: Security review before implementation.
+==================
+```

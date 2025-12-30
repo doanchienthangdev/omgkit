@@ -1,0 +1,831 @@
+---
+name: media-processing
+description: Audio and video processing with ffmpeg including transcoding, streaming, and batch operations
+category: tools
+triggers:
+  - media processing
+  - ffmpeg
+  - video transcoding
+  - audio processing
+  - video editing
+  - media conversion
+  - streaming
+---
+
+# Media Processing
+
+Enterprise **audio and video processing** with ffmpeg. This skill covers transcoding, format conversion, streaming protocols, and batch processing pipelines.
+
+## Purpose
+
+Handle media processing requirements efficiently:
+
+- Transcode videos between formats
+- Extract and process audio tracks
+- Generate thumbnails and previews
+- Implement adaptive streaming (HLS/DASH)
+- Process user-uploaded media
+- Build automated media pipelines
+
+## Features
+
+### 1. Video Transcoding
+
+```typescript
+import ffmpeg from 'fluent-ffmpeg';
+import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
+import { path as ffprobePath } from '@ffprobe-installer/ffprobe';
+
+ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfprobePath(ffprobePath);
+
+interface TranscodeOptions {
+  inputPath: string;
+  outputPath: string;
+  format?: 'mp4' | 'webm' | 'mov';
+  codec?: 'h264' | 'h265' | 'vp9';
+  resolution?: '1080p' | '720p' | '480p' | '360p';
+  bitrate?: string;
+  fps?: number;
+  onProgress?: (progress: number) => void;
+}
+
+const RESOLUTIONS = {
+  '1080p': { width: 1920, height: 1080 },
+  '720p': { width: 1280, height: 720 },
+  '480p': { width: 854, height: 480 },
+  '360p': { width: 640, height: 360 },
+};
+
+const CODECS = {
+  h264: { video: 'libx264', audio: 'aac' },
+  h265: { video: 'libx265', audio: 'aac' },
+  vp9: { video: 'libvpx-vp9', audio: 'libopus' },
+};
+
+async function transcodeVideo(options: TranscodeOptions): Promise<void> {
+  const {
+    inputPath,
+    outputPath,
+    format = 'mp4',
+    codec = 'h264',
+    resolution = '720p',
+    bitrate,
+    fps,
+    onProgress,
+  } = options;
+
+  const { width, height } = RESOLUTIONS[resolution];
+  const { video: videoCodec, audio: audioCodec } = CODECS[codec];
+
+  return new Promise((resolve, reject) => {
+    let command = ffmpeg(inputPath)
+      .videoCodec(videoCodec)
+      .audioCodec(audioCodec)
+      .size(`${width}x${height}`)
+      .autopad()
+      .format(format);
+
+    // Apply bitrate if specified
+    if (bitrate) {
+      command = command.videoBitrate(bitrate);
+    }
+
+    // Apply FPS if specified
+    if (fps) {
+      command = command.fps(fps);
+    }
+
+    // H.264 specific options for better compatibility
+    if (codec === 'h264') {
+      command = command.outputOptions([
+        '-preset medium',
+        '-profile:v high',
+        '-level 4.0',
+        '-movflags +faststart', // Web optimization
+      ]);
+    }
+
+    command
+      .on('progress', (progress) => {
+        onProgress?.(progress.percent || 0);
+      })
+      .on('end', () => resolve())
+      .on('error', reject)
+      .save(outputPath);
+  });
+}
+
+// Get video metadata
+interface VideoMetadata {
+  duration: number;
+  width: number;
+  height: number;
+  codec: string;
+  bitrate: number;
+  fps: number;
+  audioCodec?: string;
+  audioChannels?: number;
+}
+
+async function getVideoMetadata(filePath: string): Promise<VideoMetadata> {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(filePath, (err, metadata) => {
+      if (err) return reject(err);
+
+      const videoStream = metadata.streams.find(s => s.codec_type === 'video');
+      const audioStream = metadata.streams.find(s => s.codec_type === 'audio');
+
+      if (!videoStream) {
+        return reject(new Error('No video stream found'));
+      }
+
+      resolve({
+        duration: metadata.format.duration || 0,
+        width: videoStream.width || 0,
+        height: videoStream.height || 0,
+        codec: videoStream.codec_name || '',
+        bitrate: parseInt(metadata.format.bit_rate || '0'),
+        fps: eval(videoStream.r_frame_rate || '0'),
+        audioCodec: audioStream?.codec_name,
+        audioChannels: audioStream?.channels,
+      });
+    });
+  });
+}
+```
+
+### 2. Thumbnail Generation
+
+```typescript
+interface ThumbnailOptions {
+  inputPath: string;
+  outputDir: string;
+  count?: number;
+  size?: string;
+  filename?: string;
+  timestamps?: number[]; // Specific timestamps in seconds
+}
+
+async function generateThumbnails(options: ThumbnailOptions): Promise<string[]> {
+  const {
+    inputPath,
+    outputDir,
+    count = 1,
+    size = '320x180',
+    filename = 'thumb_%i.jpg',
+    timestamps,
+  } = options;
+
+  await fs.mkdir(outputDir, { recursive: true });
+
+  return new Promise((resolve, reject) => {
+    const command = ffmpeg(inputPath).screenshots({
+      count: timestamps ? undefined : count,
+      folder: outputDir,
+      size,
+      filename,
+      timemarks: timestamps,
+    });
+
+    const generatedFiles: string[] = [];
+
+    command
+      .on('filenames', (filenames) => {
+        generatedFiles.push(...filenames.map(f => path.join(outputDir, f)));
+      })
+      .on('end', () => resolve(generatedFiles))
+      .on('error', reject);
+  });
+}
+
+// Generate video preview (animated GIF or short clip)
+async function generatePreview(
+  inputPath: string,
+  outputPath: string,
+  options: {
+    duration?: number;
+    startTime?: number;
+    fps?: number;
+    width?: number;
+    format?: 'gif' | 'webm';
+  } = {}
+): Promise<void> {
+  const {
+    duration = 5,
+    startTime = 0,
+    fps = 10,
+    width = 320,
+    format = 'gif',
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    let command = ffmpeg(inputPath)
+      .setStartTime(startTime)
+      .setDuration(duration)
+      .fps(fps)
+      .size(`${width}x?`);
+
+    if (format === 'gif') {
+      command = command.outputOptions([
+        '-vf', `fps=${fps},scale=${width}:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse`,
+      ]);
+    }
+
+    command
+      .on('end', () => resolve())
+      .on('error', reject)
+      .save(outputPath);
+  });
+}
+
+// Generate video sprite sheet for preview scrubbing
+async function generateSpriteSheet(
+  inputPath: string,
+  outputPath: string,
+  options: {
+    cols?: number;
+    rows?: number;
+    thumbWidth?: number;
+    interval?: number; // Seconds between frames
+  } = {}
+): Promise<{ spritePath: string; vttPath: string }> {
+  const { cols = 10, rows = 10, thumbWidth = 160, interval = 5 } = options;
+  const totalFrames = cols * rows;
+
+  const metadata = await getVideoMetadata(inputPath);
+  const actualInterval = Math.max(interval, metadata.duration / totalFrames);
+
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .outputOptions([
+        `-vf`, `fps=1/${actualInterval},scale=${thumbWidth}:-1,tile=${cols}x${rows}`,
+        '-frames:v', '1',
+      ])
+      .on('end', async () => {
+        // Generate VTT file for sprite coordinates
+        const vttPath = outputPath.replace(/\.\w+$/, '.vtt');
+        const vttContent = generateVTT(metadata.duration, cols, rows, thumbWidth, actualInterval);
+        await fs.writeFile(vttPath, vttContent);
+        resolve({ spritePath: outputPath, vttPath });
+      })
+      .on('error', reject)
+      .save(outputPath);
+  });
+}
+```
+
+### 3. Audio Processing
+
+```typescript
+interface AudioOptions {
+  inputPath: string;
+  outputPath: string;
+  format?: 'mp3' | 'aac' | 'flac' | 'wav' | 'ogg';
+  bitrate?: string;
+  sampleRate?: number;
+  channels?: 1 | 2;
+  normalize?: boolean;
+}
+
+async function processAudio(options: AudioOptions): Promise<void> {
+  const {
+    inputPath,
+    outputPath,
+    format = 'mp3',
+    bitrate = '192k',
+    sampleRate = 44100,
+    channels = 2,
+    normalize = false,
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    let command = ffmpeg(inputPath)
+      .audioCodec(getAudioCodec(format))
+      .audioBitrate(bitrate)
+      .audioFrequency(sampleRate)
+      .audioChannels(channels);
+
+    if (normalize) {
+      command = command.audioFilters('loudnorm=I=-16:TP=-1.5:LRA=11');
+    }
+
+    command
+      .on('end', () => resolve())
+      .on('error', reject)
+      .save(outputPath);
+  });
+}
+
+function getAudioCodec(format: string): string {
+  const codecs: Record<string, string> = {
+    mp3: 'libmp3lame',
+    aac: 'aac',
+    flac: 'flac',
+    wav: 'pcm_s16le',
+    ogg: 'libvorbis',
+  };
+  return codecs[format] || 'aac';
+}
+
+// Extract audio from video
+async function extractAudio(
+  videoPath: string,
+  outputPath: string,
+  options: Partial<AudioOptions> = {}
+): Promise<void> {
+  return processAudio({
+    inputPath: videoPath,
+    outputPath,
+    ...options,
+  });
+}
+
+// Merge audio tracks
+async function mergeAudioTracks(
+  tracks: string[],
+  outputPath: string,
+  options: {
+    crossfade?: number;
+    normalize?: boolean;
+  } = {}
+): Promise<void> {
+  const { crossfade = 0, normalize = true } = options;
+
+  return new Promise((resolve, reject) => {
+    let command = ffmpeg();
+
+    // Add all input files
+    tracks.forEach(track => {
+      command = command.input(track);
+    });
+
+    // Build filter complex for concatenation
+    const filterInputs = tracks.map((_, i) => `[${i}:a]`).join('');
+    let filter = `${filterInputs}concat=n=${tracks.length}:v=0:a=1`;
+
+    if (crossfade > 0) {
+      filter = tracks.map((_, i) => `[${i}:a]`).join('') +
+        `acrossfade=d=${crossfade}:c1=tri:c2=tri`;
+    }
+
+    if (normalize) {
+      filter += ',loudnorm=I=-16:TP=-1.5:LRA=11';
+    }
+
+    filter += '[out]';
+
+    command
+      .complexFilter(filter)
+      .outputOptions(['-map', '[out]'])
+      .on('end', () => resolve())
+      .on('error', reject)
+      .save(outputPath);
+  });
+}
+
+// Generate waveform visualization
+async function generateWaveform(
+  audioPath: string,
+  outputPath: string,
+  options: {
+    width?: number;
+    height?: number;
+    color?: string;
+    background?: string;
+  } = {}
+): Promise<void> {
+  const {
+    width = 1920,
+    height = 200,
+    color = '0x00FF00',
+    background = '0x000000',
+  } = options;
+
+  return new Promise((resolve, reject) => {
+    ffmpeg(audioPath)
+      .complexFilter([
+        `showwavespic=s=${width}x${height}:colors=${color}`,
+        `drawbox=c=${background}@0.5:replace=1:t=fill`,
+      ])
+      .outputOptions(['-frames:v', '1'])
+      .on('end', () => resolve())
+      .on('error', reject)
+      .save(outputPath);
+  });
+}
+```
+
+### 4. HLS/DASH Streaming
+
+```typescript
+interface StreamingOptions {
+  inputPath: string;
+  outputDir: string;
+  qualities: StreamQuality[];
+  segmentDuration?: number;
+  playlistType?: 'vod' | 'event';
+}
+
+interface StreamQuality {
+  name: string;
+  resolution: string;
+  bitrate: string;
+  audioBitrate?: string;
+}
+
+const DEFAULT_QUALITIES: StreamQuality[] = [
+  { name: '1080p', resolution: '1920x1080', bitrate: '5000k', audioBitrate: '192k' },
+  { name: '720p', resolution: '1280x720', bitrate: '2500k', audioBitrate: '128k' },
+  { name: '480p', resolution: '854x480', bitrate: '1000k', audioBitrate: '96k' },
+  { name: '360p', resolution: '640x360', bitrate: '500k', audioBitrate: '64k' },
+];
+
+async function generateHLSStream(options: StreamingOptions): Promise<string> {
+  const {
+    inputPath,
+    outputDir,
+    qualities = DEFAULT_QUALITIES,
+    segmentDuration = 6,
+    playlistType = 'vod',
+  } = options;
+
+  await fs.mkdir(outputDir, { recursive: true });
+
+  // Generate each quality level
+  const variants: string[] = [];
+
+  for (const quality of qualities) {
+    const qualityDir = path.join(outputDir, quality.name);
+    await fs.mkdir(qualityDir, { recursive: true });
+
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg(inputPath)
+        .videoCodec('libx264')
+        .audioCodec('aac')
+        .size(quality.resolution)
+        .videoBitrate(quality.bitrate)
+        .audioBitrate(quality.audioBitrate || '128k')
+        .outputOptions([
+          '-preset fast',
+          '-profile:v main',
+          '-level 3.1',
+          '-start_number 0',
+          `-hls_time ${segmentDuration}`,
+          `-hls_playlist_type ${playlistType}`,
+          '-hls_segment_filename', path.join(qualityDir, 'segment_%03d.ts'),
+          '-f hls',
+        ])
+        .on('end', () => resolve())
+        .on('error', reject)
+        .save(path.join(qualityDir, 'playlist.m3u8'));
+    });
+
+    variants.push({
+      bandwidth: parseInt(quality.bitrate) * 1000,
+      resolution: quality.resolution,
+      path: `${quality.name}/playlist.m3u8`,
+    });
+  }
+
+  // Generate master playlist
+  const masterPlaylist = generateMasterPlaylist(variants);
+  const masterPath = path.join(outputDir, 'master.m3u8');
+  await fs.writeFile(masterPath, masterPlaylist);
+
+  return masterPath;
+}
+
+function generateMasterPlaylist(variants: Array<{
+  bandwidth: number;
+  resolution: string;
+  path: string;
+}>): string {
+  let content = '#EXTM3U\n#EXT-X-VERSION:3\n\n';
+
+  for (const variant of variants.sort((a, b) => b.bandwidth - a.bandwidth)) {
+    content += `#EXT-X-STREAM-INF:BANDWIDTH=${variant.bandwidth},RESOLUTION=${variant.resolution}\n`;
+    content += `${variant.path}\n\n`;
+  }
+
+  return content;
+}
+
+// Generate DASH manifest
+async function generateDASHStream(
+  inputPath: string,
+  outputDir: string,
+  qualities: StreamQuality[] = DEFAULT_QUALITIES
+): Promise<string> {
+  await fs.mkdir(outputDir, { recursive: true });
+
+  return new Promise((resolve, reject) => {
+    let command = ffmpeg(inputPath);
+
+    // Add output for each quality
+    const maps: string[] = [];
+    const adaptationSet: string[] = [];
+
+    qualities.forEach((quality, index) => {
+      command = command
+        .output(path.join(outputDir, `stream_${index}.mp4`))
+        .videoCodec('libx264')
+        .size(quality.resolution)
+        .videoBitrate(quality.bitrate);
+
+      maps.push(`-map 0:v:0 -map 0:a:0`);
+    });
+
+    command
+      .outputOptions([
+        '-f dash',
+        '-init_seg_name', 'init_$RepresentationID$.m4s',
+        '-media_seg_name', 'chunk_$RepresentationID$_$Number%05d$.m4s',
+        '-use_timeline 1',
+        '-use_template 1',
+        '-adaptation_sets', 'id=0,streams=v id=1,streams=a',
+      ])
+      .on('end', () => resolve(path.join(outputDir, 'manifest.mpd')))
+      .on('error', reject)
+      .save(path.join(outputDir, 'manifest.mpd'));
+  });
+}
+```
+
+### 5. Batch Processing Pipeline
+
+```typescript
+import PQueue from 'p-queue';
+
+interface BatchJob {
+  id: string;
+  inputPath: string;
+  outputPath: string;
+  operation: 'transcode' | 'thumbnail' | 'extract-audio' | 'hls';
+  options: Record<string, any>;
+}
+
+interface BatchResult {
+  id: string;
+  success: boolean;
+  outputPath?: string;
+  error?: string;
+  duration: number;
+}
+
+class MediaProcessingPipeline {
+  private queue: PQueue;
+  private results: Map<string, BatchResult> = new Map();
+
+  constructor(concurrency: number = 2) {
+    this.queue = new PQueue({ concurrency });
+  }
+
+  async processBatch(
+    jobs: BatchJob[],
+    onProgress?: (completed: number, total: number, current: BatchJob) => void
+  ): Promise<BatchResult[]> {
+    let completed = 0;
+
+    const tasks = jobs.map(job =>
+      this.queue.add(async () => {
+        const startTime = Date.now();
+
+        try {
+          onProgress?.(completed, jobs.length, job);
+
+          const outputPath = await this.processJob(job);
+
+          const result: BatchResult = {
+            id: job.id,
+            success: true,
+            outputPath,
+            duration: Date.now() - startTime,
+          };
+
+          this.results.set(job.id, result);
+          completed++;
+          return result;
+        } catch (error) {
+          const result: BatchResult = {
+            id: job.id,
+            success: false,
+            error: error.message,
+            duration: Date.now() - startTime,
+          };
+
+          this.results.set(job.id, result);
+          completed++;
+          return result;
+        }
+      })
+    );
+
+    return Promise.all(tasks);
+  }
+
+  private async processJob(job: BatchJob): Promise<string> {
+    switch (job.operation) {
+      case 'transcode':
+        await transcodeVideo({
+          inputPath: job.inputPath,
+          outputPath: job.outputPath,
+          ...job.options,
+        });
+        return job.outputPath;
+
+      case 'thumbnail':
+        const thumbs = await generateThumbnails({
+          inputPath: job.inputPath,
+          outputDir: path.dirname(job.outputPath),
+          ...job.options,
+        });
+        return thumbs[0];
+
+      case 'extract-audio':
+        await extractAudio(job.inputPath, job.outputPath, job.options);
+        return job.outputPath;
+
+      case 'hls':
+        return generateHLSStream({
+          inputPath: job.inputPath,
+          outputDir: job.outputPath,
+          ...job.options,
+        });
+
+      default:
+        throw new Error(`Unknown operation: ${job.operation}`);
+    }
+  }
+
+  getResult(jobId: string): BatchResult | undefined {
+    return this.results.get(jobId);
+  }
+
+  async waitForCompletion(): Promise<void> {
+    await this.queue.onIdle();
+  }
+}
+
+// Usage example
+async function processUserUploads(uploads: Upload[]): Promise<void> {
+  const pipeline = new MediaProcessingPipeline(2);
+
+  const jobs: BatchJob[] = uploads.map(upload => ({
+    id: upload.id,
+    inputPath: upload.tempPath,
+    outputPath: path.join(MEDIA_DIR, upload.id, 'video.mp4'),
+    operation: 'transcode',
+    options: {
+      resolution: '720p',
+      format: 'mp4',
+    },
+  }));
+
+  // Add thumbnail jobs
+  uploads.forEach(upload => {
+    jobs.push({
+      id: `${upload.id}-thumb`,
+      inputPath: upload.tempPath,
+      outputPath: path.join(MEDIA_DIR, upload.id, 'thumbnails'),
+      operation: 'thumbnail',
+      options: { count: 5 },
+    });
+  });
+
+  const results = await pipeline.processBatch(jobs, (completed, total, current) => {
+    console.log(`Processing ${completed}/${total}: ${current.id}`);
+  });
+
+  // Update database with results
+  for (const result of results) {
+    if (result.success) {
+      await db.media.update({
+        where: { id: result.id.replace('-thumb', '') },
+        data: { processedPath: result.outputPath, status: 'ready' },
+      });
+    } else {
+      await db.media.update({
+        where: { id: result.id },
+        data: { status: 'failed', error: result.error },
+      });
+    }
+  }
+}
+```
+
+## Use Cases
+
+### 1. Video Upload Processing
+
+```typescript
+// Complete video upload processing workflow
+async function handleVideoUpload(file: Express.Multer.File, userId: string): Promise<Video> {
+  const videoId = generateId();
+  const baseDir = path.join(MEDIA_DIR, videoId);
+
+  // Create video record
+  const video = await db.video.create({
+    data: {
+      id: videoId,
+      userId,
+      originalName: file.originalname,
+      status: 'processing',
+    },
+  });
+
+  // Process asynchronously
+  processVideoAsync(videoId, file.path, baseDir);
+
+  return video;
+}
+
+async function processVideoAsync(videoId: string, inputPath: string, outputDir: string): Promise<void> {
+  try {
+    await fs.mkdir(outputDir, { recursive: true });
+
+    // Get metadata
+    const metadata = await getVideoMetadata(inputPath);
+
+    // Generate thumbnails
+    const thumbnails = await generateThumbnails({
+      inputPath,
+      outputDir: path.join(outputDir, 'thumbnails'),
+      count: 10,
+    });
+
+    // Transcode to web format
+    await transcodeVideo({
+      inputPath,
+      outputPath: path.join(outputDir, 'video.mp4'),
+      format: 'mp4',
+      codec: 'h264',
+      resolution: '720p',
+    });
+
+    // Generate HLS for streaming
+    await generateHLSStream({
+      inputPath,
+      outputDir: path.join(outputDir, 'hls'),
+      qualities: [
+        { name: '720p', resolution: '1280x720', bitrate: '2500k' },
+        { name: '480p', resolution: '854x480', bitrate: '1000k' },
+      ],
+    });
+
+    // Update database
+    await db.video.update({
+      where: { id: videoId },
+      data: {
+        status: 'ready',
+        duration: metadata.duration,
+        width: metadata.width,
+        height: metadata.height,
+        thumbnailUrl: `/media/${videoId}/thumbnails/thumb_1.jpg`,
+        streamUrl: `/media/${videoId}/hls/master.m3u8`,
+      },
+    });
+
+    // Cleanup original
+    await fs.unlink(inputPath);
+  } catch (error) {
+    await db.video.update({
+      where: { id: videoId },
+      data: { status: 'failed', error: error.message },
+    });
+  }
+}
+```
+
+## Best Practices
+
+### Do's
+
+- **Use hardware acceleration** - Enable NVENC/VAAPI when available
+- **Implement progress tracking** - Monitor long-running operations
+- **Handle large files with streaming** - Don't load entire files in memory
+- **Set reasonable timeouts** - Prevent hung processes
+- **Validate input formats** - Check before processing
+- **Clean up temporary files** - Prevent disk exhaustion
+
+### Don'ts
+
+- Don't process untrusted files without validation
+- Don't use synchronous operations for large files
+- Don't ignore ffmpeg exit codes
+- Don't skip error handling
+- Don't process without concurrency limits
+- Don't forget to set output format explicitly
+
+## Related Skills
+
+- **document-processing** - Similar processing patterns
+- **image-processing** - Companion skill for images
+- **backend-development** - Integration patterns
+
+## Reference Resources
+
+- [FFmpeg Documentation](https://ffmpeg.org/documentation.html)
+- [fluent-ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg)
+- [HLS Specification](https://datatracker.ietf.org/doc/html/rfc8216)
+- [DASH Specification](https://dashif.org/docs/DASH-IF-IOP-v4.3.pdf)

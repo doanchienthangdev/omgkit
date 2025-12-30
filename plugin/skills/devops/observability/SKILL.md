@@ -1,0 +1,622 @@
+---
+name: observability
+description: Production observability with structured logging, metrics collection, distributed tracing, and alerting
+category: devops
+triggers:
+  - observability
+  - logging
+  - monitoring
+  - distributed tracing
+  - metrics
+  - prometheus
+  - opentelemetry
+  - alerting
+---
+
+# Observability
+
+Implement **production observability** with structured logging, metrics, distributed tracing, and alerting. This skill covers the three pillars of observability for production systems.
+
+## Purpose
+
+Understand and debug production systems:
+
+- Implement structured, searchable logging
+- Collect and visualize application metrics
+- Trace requests across distributed services
+- Set up meaningful alerts
+- Create actionable dashboards
+- Debug production issues efficiently
+
+## Features
+
+### 1. Structured Logging
+
+```typescript
+import pino from 'pino';
+import { v4 as uuid } from 'uuid';
+
+// Logger configuration
+const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  formatters: {
+    level: (label) => ({ level: label }),
+    bindings: () => ({}),
+  },
+  timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
+  base: {
+    service: process.env.SERVICE_NAME,
+    environment: process.env.NODE_ENV,
+    version: process.env.APP_VERSION,
+  },
+  redact: ['password', 'token', 'authorization', 'cookie', '*.password'],
+});
+
+// Child logger with context
+function createRequestLogger(req: Request) {
+  return logger.child({
+    requestId: req.headers['x-request-id'] || uuid(),
+    userId: req.user?.id,
+    path: req.path,
+    method: req.method,
+  });
+}
+
+// Logging middleware
+function loggingMiddleware(req: Request, res: Response, next: NextFunction) {
+  const log = createRequestLogger(req);
+  req.log = log;
+
+  const startTime = Date.now();
+
+  // Log request
+  log.info({ type: 'request' }, 'Incoming request');
+
+  // Log response
+  res.on('finish', () => {
+    const duration = Date.now() - startTime;
+    const logData = {
+      type: 'response',
+      statusCode: res.statusCode,
+      duration,
+      contentLength: res.get('content-length'),
+    };
+
+    if (res.statusCode >= 500) {
+      log.error(logData, 'Request failed');
+    } else if (res.statusCode >= 400) {
+      log.warn(logData, 'Request error');
+    } else {
+      log.info(logData, 'Request completed');
+    }
+  });
+
+  next();
+}
+
+// Structured error logging
+function logError(error: Error, context?: Record<string, any>) {
+  logger.error({
+    error: {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      ...(error as any).details,
+    },
+    ...context,
+  }, 'Error occurred');
+}
+
+// Business event logging
+interface BusinessEvent {
+  event: string;
+  userId?: string;
+  data: Record<string, any>;
+  tags?: string[];
+}
+
+function logBusinessEvent(event: BusinessEvent) {
+  logger.info({
+    type: 'business_event',
+    event: event.event,
+    userId: event.userId,
+    data: event.data,
+    tags: event.tags,
+  }, `Business event: ${event.event}`);
+}
+
+// Usage
+logBusinessEvent({
+  event: 'order.completed',
+  userId: 'user_123',
+  data: {
+    orderId: 'order_456',
+    total: 99.99,
+    items: 3,
+  },
+  tags: ['checkout', 'revenue'],
+});
+```
+
+### 2. Metrics with Prometheus
+
+```typescript
+import { Registry, Counter, Histogram, Gauge, collectDefaultMetrics } from 'prom-client';
+
+// Create registry
+const register = new Registry();
+
+// Collect Node.js metrics
+collectDefaultMetrics({ register });
+
+// Custom metrics
+const httpRequestDuration = new Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status_code'],
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+  registers: [register],
+});
+
+const httpRequestTotal = new Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status_code'],
+  registers: [register],
+});
+
+const activeConnections = new Gauge({
+  name: 'active_connections',
+  help: 'Number of active connections',
+  registers: [register],
+});
+
+const businessMetrics = {
+  ordersTotal: new Counter({
+    name: 'orders_total',
+    help: 'Total number of orders',
+    labelNames: ['status', 'payment_method'],
+    registers: [register],
+  }),
+  orderValue: new Histogram({
+    name: 'order_value_dollars',
+    help: 'Value of orders in dollars',
+    buckets: [10, 50, 100, 250, 500, 1000],
+    registers: [register],
+  }),
+  activeUsers: new Gauge({
+    name: 'active_users',
+    help: 'Number of active users',
+    registers: [register],
+  }),
+};
+
+// Metrics middleware
+function metricsMiddleware(req: Request, res: Response, next: NextFunction) {
+  const start = Date.now();
+
+  res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000;
+    const route = req.route?.path || req.path;
+
+    httpRequestDuration
+      .labels(req.method, route, res.statusCode.toString())
+      .observe(duration);
+
+    httpRequestTotal
+      .labels(req.method, route, res.statusCode.toString())
+      .inc();
+  });
+
+  next();
+}
+
+// Expose metrics endpoint
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
+// Usage in business logic
+async function completeOrder(order: Order) {
+  await saveOrder(order);
+
+  businessMetrics.ordersTotal
+    .labels('completed', order.paymentMethod)
+    .inc();
+
+  businessMetrics.orderValue.observe(order.total);
+}
+```
+
+### 3. Distributed Tracing with OpenTelemetry
+
+```typescript
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { trace, SpanStatusCode, context } from '@opentelemetry/api';
+
+// Initialize OpenTelemetry
+const sdk = new NodeSDK({
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: process.env.SERVICE_NAME,
+    [SemanticResourceAttributes.SERVICE_VERSION]: process.env.APP_VERSION,
+    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV,
+  }),
+  traceExporter: new OTLPTraceExporter({
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+  }),
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-http': {
+        ignoreIncomingRequestHook: (req) => req.url === '/health',
+      },
+      '@opentelemetry/instrumentation-express': {},
+      '@opentelemetry/instrumentation-pg': {},
+      '@opentelemetry/instrumentation-redis': {},
+    }),
+  ],
+});
+
+sdk.start();
+
+// Custom spans
+const tracer = trace.getTracer('my-service');
+
+async function processOrder(orderId: string): Promise<void> {
+  return tracer.startActiveSpan('processOrder', async (span) => {
+    try {
+      span.setAttributes({
+        'order.id': orderId,
+      });
+
+      // Child span for validation
+      await tracer.startActiveSpan('validateOrder', async (validationSpan) => {
+        const isValid = await validateOrder(orderId);
+        validationSpan.setAttributes({ 'order.valid': isValid });
+        validationSpan.end();
+      });
+
+      // Child span for payment
+      await tracer.startActiveSpan('processPayment', async (paymentSpan) => {
+        const payment = await chargeCard(orderId);
+        paymentSpan.setAttributes({
+          'payment.id': payment.id,
+          'payment.amount': payment.amount,
+        });
+        paymentSpan.end();
+      });
+
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: error.message,
+      });
+      span.recordException(error);
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+}
+
+// Propagate context across services
+async function callExternalService(endpoint: string, data: any) {
+  return tracer.startActiveSpan('externalServiceCall', async (span) => {
+    span.setAttributes({
+      'http.url': endpoint,
+      'http.method': 'POST',
+    });
+
+    // Inject trace context into headers
+    const headers: Record<string, string> = {};
+    const propagator = trace.getTracerProvider();
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers,
+      },
+      body: JSON.stringify(data),
+    });
+
+    span.setAttributes({
+      'http.status_code': response.status,
+    });
+
+    span.end();
+    return response;
+  });
+}
+```
+
+### 4. Error Tracking
+
+```typescript
+import * as Sentry from '@sentry/node';
+import { ProfilingIntegration } from '@sentry/profiling-node';
+
+// Initialize Sentry
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  release: process.env.APP_VERSION,
+  integrations: [
+    new ProfilingIntegration(),
+  ],
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
+  profilesSampleRate: 0.1,
+  beforeSend(event, hint) {
+    // Filter out known errors
+    const error = hint.originalException as Error;
+    if (error?.message?.includes('ECONNRESET')) {
+      return null;
+    }
+    return event;
+  },
+});
+
+// Error handler middleware
+app.use(Sentry.Handlers.errorHandler({
+  shouldHandleError(error) {
+    // Only report 5xx errors
+    return error.status >= 500;
+  },
+}));
+
+// Custom error reporting
+function reportError(error: Error, context?: Record<string, any>) {
+  Sentry.withScope((scope) => {
+    if (context) {
+      scope.setExtras(context);
+    }
+    scope.setTags({
+      component: context?.component || 'unknown',
+    });
+    Sentry.captureException(error);
+  });
+
+  // Also log
+  logError(error, context);
+}
+
+// Capture user context
+app.use((req, res, next) => {
+  if (req.user) {
+    Sentry.setUser({
+      id: req.user.id,
+      email: req.user.email,
+    });
+  }
+  next();
+});
+```
+
+### 5. Alerting Configuration
+
+```yaml
+# prometheus/alerts.yml
+groups:
+  - name: application
+    rules:
+      # High error rate
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate detected
+          description: Error rate is {{ $value | humanizePercentage }}
+
+      # Slow response time
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Slow response times detected
+          description: 95th percentile latency is {{ $value }}s
+
+      # High memory usage
+      - alert: HighMemoryUsage
+        expr: |
+          process_resident_memory_bytes / 1024 / 1024 / 1024 > 2
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage
+          description: Memory usage is {{ $value | humanize }}GB
+
+      # Service down
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Service is down
+          description: "{{ $labels.instance }} has been down for more than 1 minute"
+
+  - name: business
+    rules:
+      # Low order volume
+      - alert: LowOrderVolume
+        expr: |
+          sum(rate(orders_total{status="completed"}[1h])) < 10
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: Low order volume
+          description: Order rate is {{ $value }} orders/hour
+
+      # Payment failures
+      - alert: HighPaymentFailureRate
+        expr: |
+          sum(rate(orders_total{status="payment_failed"}[15m]))
+          /
+          sum(rate(orders_total[15m]))
+          > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High payment failure rate
+          description: Payment failure rate is {{ $value | humanizePercentage }}
+```
+
+### 6. Health Checks
+
+```typescript
+import { HealthCheck, HealthCheckResult, HttpHealthIndicator, DiskHealthIndicator, MemoryHealthIndicator } from '@nestjs/terminus';
+
+interface HealthStatus {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  checks: Record<string, CheckResult>;
+  timestamp: string;
+  version: string;
+}
+
+interface CheckResult {
+  status: 'pass' | 'fail' | 'warn';
+  duration: number;
+  message?: string;
+}
+
+async function healthCheck(): Promise<HealthStatus> {
+  const checks: Record<string, CheckResult> = {};
+  let overallStatus: HealthStatus['status'] = 'healthy';
+
+  // Database check
+  checks.database = await checkDatabase();
+  if (checks.database.status === 'fail') overallStatus = 'unhealthy';
+
+  // Redis check
+  checks.redis = await checkRedis();
+  if (checks.redis.status === 'fail') overallStatus = 'unhealthy';
+
+  // External API check
+  checks.externalApi = await checkExternalApi();
+  if (checks.externalApi.status === 'warn') {
+    overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
+  }
+
+  // Memory check
+  checks.memory = checkMemory();
+  if (checks.memory.status === 'warn') {
+    overallStatus = overallStatus === 'healthy' ? 'degraded' : overallStatus;
+  }
+
+  return {
+    status: overallStatus,
+    checks,
+    timestamp: new Date().toISOString(),
+    version: process.env.APP_VERSION || 'unknown',
+  };
+}
+
+async function checkDatabase(): Promise<CheckResult> {
+  const start = Date.now();
+  try {
+    await db.$queryRaw`SELECT 1`;
+    return {
+      status: 'pass',
+      duration: Date.now() - start,
+    };
+  } catch (error) {
+    return {
+      status: 'fail',
+      duration: Date.now() - start,
+      message: error.message,
+    };
+  }
+}
+
+// Endpoints
+app.get('/health', async (req, res) => {
+  const health = await healthCheck();
+  const statusCode = health.status === 'healthy' ? 200 :
+                     health.status === 'degraded' ? 200 : 503;
+  res.status(statusCode).json(health);
+});
+
+app.get('/health/live', (req, res) => {
+  res.status(200).json({ status: 'alive' });
+});
+
+app.get('/health/ready', async (req, res) => {
+  const health = await healthCheck();
+  res.status(health.status === 'unhealthy' ? 503 : 200).json(health);
+});
+```
+
+## Use Cases
+
+### 1. Debugging Production Issues
+
+```typescript
+// Correlation ID for request tracing
+const correlationId = req.headers['x-correlation-id'] || uuid();
+req.log = logger.child({ correlationId });
+
+// Log at decision points
+req.log.info({ userId, action: 'checkout.started' });
+// ... process ...
+req.log.info({ orderId, action: 'order.created' });
+```
+
+### 2. Performance Monitoring
+
+```typescript
+// Track key business metrics
+businessMetrics.apiLatency.observe(duration);
+businessMetrics.cacheHitRate.set(hits / total);
+```
+
+## Best Practices
+
+### Do's
+
+- **Use correlation IDs** - Trace requests across services
+- **Log at appropriate levels** - Don't log everything as error
+- **Set meaningful alerts** - Alert on symptoms, not causes
+- **Create actionable dashboards** - Show what matters
+- **Implement log rotation** - Prevent disk exhaustion
+- **Sample high-volume traces** - Balance detail vs cost
+
+### Don'ts
+
+- Don't log sensitive data
+- Don't ignore alert fatigue
+- Don't skip structured logging
+- Don't forget log levels
+- Don't alert on every error
+- Don't neglect log retention policies
+
+## Related Skills
+
+- **kubernetes** - Container orchestration
+- **backend-development** - Application code
+- **performance-profiling** - Performance analysis
+
+## Reference Resources
+
+- [OpenTelemetry Documentation](https://opentelemetry.io/docs/)
+- [Prometheus Documentation](https://prometheus.io/docs/)
+- [Grafana Documentation](https://grafana.com/docs/)
+- [Pino Logger](https://getpino.io/)

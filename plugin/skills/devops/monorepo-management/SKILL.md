@@ -1,0 +1,595 @@
+---
+name: monorepo-management
+description: Enterprise monorepo patterns with Turborepo and Nx including task orchestration, caching, and CI/CD optimization
+category: devops
+triggers:
+  - monorepo
+  - turborepo
+  - nx
+  - workspace
+  - task orchestration
+  - build caching
+---
+
+# Monorepo Management
+
+Master **monorepo architecture** with Turborepo and Nx. This skill covers workspace configuration, task orchestration, caching strategies, and CI/CD optimization for large-scale codebases.
+
+## Purpose
+
+Manage complex multi-package codebases efficiently:
+
+- Configure workspace tooling and dependencies
+- Orchestrate builds with optimal task scheduling
+- Implement remote caching for faster builds
+- Optimize CI/CD for affected packages only
+- Share code and configurations across packages
+- Scale to hundreds of packages
+
+## Features
+
+### 1. Turborepo Setup
+
+```json
+// turbo.json - Pipeline configuration
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [".env", "tsconfig.base.json"],
+  "globalEnv": ["NODE_ENV", "CI"],
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "build/**"],
+      "env": ["NODE_ENV"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.ts", "src/**/*.tsx", "tests/**"]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}
+```
+
+```
+# Project structure
+my-monorepo/
+├── apps/
+│   ├── web/                 # Next.js frontend
+│   │   ├── package.json
+│   │   └── ...
+│   ├── api/                 # Express backend
+│   │   ├── package.json
+│   │   └── ...
+│   └── mobile/              # React Native app
+│       ├── package.json
+│       └── ...
+├── packages/
+│   ├── ui/                  # Shared component library
+│   │   ├── package.json
+│   │   └── ...
+│   ├── config/              # Shared configs
+│   │   ├── eslint/
+│   │   ├── typescript/
+│   │   └── tailwind/
+│   ├── database/            # Prisma schema & client
+│   │   ├── package.json
+│   │   └── ...
+│   └── utils/               # Shared utilities
+│       ├── package.json
+│       └── ...
+├── turbo.json
+├── package.json
+└── pnpm-workspace.yaml
+```
+
+```yaml
+# pnpm-workspace.yaml
+packages:
+  - "apps/*"
+  - "packages/*"
+```
+
+### 2. Nx Configuration
+
+```json
+// nx.json
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"],
+      "cache": true
+    },
+    "test": {
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "cache": true
+    },
+    "lint": {
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "cache": true
+    }
+  },
+  "namedInputs": {
+    "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "production": [
+      "default",
+      "!{projectRoot}/**/*.spec.ts",
+      "!{projectRoot}/jest.config.ts"
+    ],
+    "sharedGlobals": [
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/nx.json"
+    ]
+  },
+  "parallel": 3,
+  "cacheDirectory": ".nx/cache",
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": ["build", "test", "lint", "e2e"]
+      }
+    }
+  },
+  "affected": {
+    "defaultBase": "main"
+  }
+}
+```
+
+```json
+// project.json (per project)
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/web/src",
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/web"
+      },
+      "configurations": {
+        "production": {
+          "outputPath": "dist/apps/web"
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "web:build",
+        "dev": true
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/apps/web"],
+      "options": {
+        "jestConfig": "apps/web/jest.config.ts"
+      }
+    }
+  },
+  "tags": ["type:app", "scope:web"]
+}
+```
+
+### 3. Task Orchestration
+
+```typescript
+// scripts/orchestrate.ts
+import { execSync, spawn } from 'child_process';
+
+interface TaskConfig {
+  name: string;
+  command: string;
+  dependsOn?: string[];
+  parallel?: boolean;
+  cwd?: string;
+}
+
+// Topological sort for dependency resolution
+function topologicalSort(tasks: Map<string, TaskConfig>): string[] {
+  const visited = new Set<string>();
+  const result: string[] = [];
+
+  function visit(name: string) {
+    if (visited.has(name)) return;
+    visited.add(name);
+
+    const task = tasks.get(name);
+    if (task?.dependsOn) {
+      for (const dep of task.dependsOn) {
+        visit(dep);
+      }
+    }
+    result.push(name);
+  }
+
+  for (const name of tasks.keys()) {
+    visit(name);
+  }
+
+  return result;
+}
+
+// Execute tasks with concurrency control
+async function runTasks(
+  taskNames: string[],
+  tasks: Map<string, TaskConfig>,
+  concurrency: number = 4
+): Promise<void> {
+  const sorted = topologicalSort(tasks);
+  const filtered = sorted.filter(t => taskNames.includes(t) || taskNames.length === 0);
+
+  const running = new Map<string, Promise<void>>();
+  const completed = new Set<string>();
+
+  for (const name of filtered) {
+    const task = tasks.get(name)!;
+
+    // Wait for dependencies
+    if (task.dependsOn) {
+      await Promise.all(
+        task.dependsOn
+          .filter(dep => running.has(dep))
+          .map(dep => running.get(dep))
+      );
+    }
+
+    // Wait if at concurrency limit
+    while (running.size >= concurrency) {
+      await Promise.race(running.values());
+    }
+
+    // Start task
+    const promise = runTask(task).then(() => {
+      completed.add(name);
+      running.delete(name);
+    });
+
+    running.set(name, promise);
+  }
+
+  // Wait for all to complete
+  await Promise.all(running.values());
+}
+
+async function runTask(task: TaskConfig): Promise<void> {
+  console.log(`Starting: ${task.name}`);
+  const startTime = Date.now();
+
+  return new Promise((resolve, reject) => {
+    const proc = spawn('sh', ['-c', task.command], {
+      cwd: task.cwd || process.cwd(),
+      stdio: 'inherit',
+    });
+
+    proc.on('close', (code) => {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      if (code === 0) {
+        console.log(`✓ ${task.name} (${duration}s)`);
+        resolve();
+      } else {
+        console.error(`✗ ${task.name} failed`);
+        reject(new Error(`Task ${task.name} exited with code ${code}`));
+      }
+    });
+  });
+}
+```
+
+### 4. Remote Caching
+
+```typescript
+// Turborepo remote cache setup
+// turbo.json
+{
+  "remoteCache": {
+    "signature": true
+  }
+}
+
+// Environment variables
+// TURBO_TOKEN=your_token
+// TURBO_TEAM=your_team
+// TURBO_REMOTE_ONLY=true (optional)
+
+// Custom cache handler
+// .turbo/config.json
+{
+  "teamId": "team_xxx",
+  "apiUrl": "https://cache.example.com"
+}
+
+// Self-hosted cache server
+import express from 'express';
+import { createHash } from 'crypto';
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+
+const app = express();
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+// PUT artifact
+app.put('/v8/artifacts/:hash', async (req, res) => {
+  const { hash } = req.params;
+  const teamId = req.headers['x-artifact-client-ci'];
+
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) {
+    chunks.push(chunk);
+  }
+  const body = Buffer.concat(chunks);
+
+  await s3.send(new PutObjectCommand({
+    Bucket: process.env.CACHE_BUCKET,
+    Key: `${teamId}/${hash}`,
+    Body: body,
+  }));
+
+  res.status(200).json({ success: true });
+});
+
+// GET artifact
+app.get('/v8/artifacts/:hash', async (req, res) => {
+  const { hash } = req.params;
+  const teamId = req.headers['x-artifact-client-ci'];
+
+  try {
+    const response = await s3.send(new GetObjectCommand({
+      Bucket: process.env.CACHE_BUCKET,
+      Key: `${teamId}/${hash}`,
+    }));
+
+    res.setHeader('Content-Type', 'application/octet-stream');
+    response.Body?.pipe(res);
+  } catch {
+    res.status(404).json({ error: 'Not found' });
+  }
+});
+
+app.listen(3000);
+```
+
+### 5. CI/CD Optimization
+
+```yaml
+# .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for affected detection
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Only run affected packages
+      - name: Build affected packages
+        run: pnpm turbo build --filter='...[origin/main]'
+
+      - name: Test affected packages
+        run: pnpm turbo test --filter='...[origin/main]'
+
+      - name: Lint affected packages
+        run: pnpm turbo lint --filter='...[origin/main]'
+
+  deploy-preview:
+    needs: build
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+
+      # Deploy only changed apps
+      - name: Deploy preview
+        run: |
+          CHANGED=$(pnpm turbo build --filter='...[origin/main]' --dry-run=json | jq -r '.packages[]')
+          for app in $CHANGED; do
+            if [[ $app == apps/* ]]; then
+              pnpm turbo deploy --filter=$app
+            fi
+          done
+
+  deploy-production:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo build
+      - run: pnpm turbo deploy
+```
+
+### 6. Shared Configurations
+
+```typescript
+// packages/config/eslint/index.js
+module.exports = {
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+  ],
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
+  rules: {
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/explicit-function-return-type': 'off',
+  },
+  ignorePatterns: ['dist', 'node_modules', '.turbo'],
+};
+
+// packages/config/eslint/react.js
+module.exports = {
+  extends: [
+    './index.js',
+    'plugin:react/recommended',
+    'plugin:react-hooks/recommended',
+  ],
+  plugins: ['react', 'react-hooks'],
+  settings: {
+    react: { version: 'detect' },
+  },
+  rules: {
+    'react/react-in-jsx-scope': 'off',
+    'react/prop-types': 'off',
+  },
+};
+
+// packages/config/typescript/base.json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "exclude": ["node_modules", "dist"]
+}
+
+// packages/config/typescript/react.json
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx"
+  }
+}
+```
+
+## Use Cases
+
+### 1. Multi-App Platform
+
+```
+# Build and deploy specific apps
+pnpm turbo build --filter=web --filter=api
+
+# Run dev for specific app with dependencies
+pnpm turbo dev --filter=web...
+
+# Test only affected by changes
+pnpm turbo test --filter='...[HEAD~1]'
+```
+
+### 2. Component Library Publishing
+
+```json
+// packages/ui/package.json
+{
+  "name": "@myorg/ui",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
+  }
+}
+```
+
+## Best Practices
+
+### Do's
+
+- **Use remote caching** - Dramatically speeds up CI
+- **Define clear package boundaries** - Single responsibility
+- **Run affected only** - Don't rebuild unchanged packages
+- **Share configurations** - Consistent tooling
+- **Use workspace protocol** - `workspace:*` for internal deps
+- **Document dependency graph** - Keep architecture clear
+
+### Don'ts
+
+- Don't create circular dependencies
+- Don't skip input/output definitions
+- Don't ignore cache invalidation
+- Don't duplicate configurations
+- Don't over-share packages
+- Don't skip CI optimization
+
+## Related Skills
+
+- **github-actions** - CI/CD pipelines
+- **docker** - Containerization
+- **typescript** - Type-safe development
+
+## Reference Resources
+
+- [Turborepo Documentation](https://turbo.build/repo/docs)
+- [Nx Documentation](https://nx.dev/getting-started/intro)
+- [pnpm Workspaces](https://pnpm.io/workspaces)

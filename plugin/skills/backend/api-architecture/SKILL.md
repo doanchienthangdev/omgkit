@@ -1,0 +1,857 @@
+---
+name: api-architecture
+description: Enterprise API design with REST, GraphQL, gRPC patterns including versioning, pagination, and error handling
+category: backend
+triggers:
+  - api architecture
+  - api design
+  - rest api
+  - graphql
+  - grpc
+  - api versioning
+  - pagination
+---
+
+# API Architecture
+
+Enterprise-grade **API design patterns** following BigTech standards. This skill covers REST, GraphQL, and gRPC design with versioning, pagination, rate limiting, and comprehensive error handling.
+
+## Purpose
+
+Design APIs that scale and delight developers:
+
+- Apply REST best practices consistently
+- Implement GraphQL for flexible queries
+- Design gRPC for high-performance services
+- Handle versioning without breaking clients
+- Implement robust pagination patterns
+- Create comprehensive error responses
+
+## Features
+
+### 1. RESTful API Design
+
+```typescript
+// Express router with best practices
+import express from 'express';
+import { z } from 'zod';
+
+const router = express.Router();
+
+// Resource naming conventions
+// ✓ /users (collection)
+// ✓ /users/:id (resource)
+// ✓ /users/:id/posts (sub-collection)
+// ✗ /getUsers, /createUser (verbs in URL)
+
+// GET /api/v1/users - List users with pagination
+const ListUsersSchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(20),
+  sort: z.enum(['created_at', 'name', 'email']).default('created_at'),
+  order: z.enum(['asc', 'desc']).default('desc'),
+  status: z.enum(['active', 'inactive', 'all']).optional(),
+});
+
+router.get('/users', async (req, res) => {
+  const query = ListUsersSchema.parse(req.query);
+
+  const { users, total } = await userService.list(query);
+
+  // Consistent response envelope
+  res.json({
+    data: users,
+    pagination: {
+      page: query.page,
+      limit: query.limit,
+      total,
+      totalPages: Math.ceil(total / query.limit),
+      hasMore: query.page * query.limit < total,
+    },
+    links: {
+      self: `/api/v1/users?page=${query.page}&limit=${query.limit}`,
+      first: `/api/v1/users?page=1&limit=${query.limit}`,
+      last: `/api/v1/users?page=${Math.ceil(total / query.limit)}&limit=${query.limit}`,
+      next: query.page * query.limit < total
+        ? `/api/v1/users?page=${query.page + 1}&limit=${query.limit}`
+        : null,
+      prev: query.page > 1
+        ? `/api/v1/users?page=${query.page - 1}&limit=${query.limit}`
+        : null,
+    },
+  });
+});
+
+// GET /api/v1/users/:id - Get single user
+router.get('/users/:id', async (req, res) => {
+  const user = await userService.findById(req.params.id);
+
+  if (!user) {
+    return res.status(404).json({
+      error: {
+        code: 'USER_NOT_FOUND',
+        message: 'User not found',
+        details: { id: req.params.id },
+      },
+    });
+  }
+
+  res.json({ data: user });
+});
+
+// POST /api/v1/users - Create user
+const CreateUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(2).max(100),
+  password: z.string().min(8),
+  role: z.enum(['user', 'admin']).default('user'),
+});
+
+router.post('/users', async (req, res) => {
+  const data = CreateUserSchema.parse(req.body);
+
+  const user = await userService.create(data);
+
+  // Return 201 with Location header
+  res.status(201)
+    .location(`/api/v1/users/${user.id}`)
+    .json({ data: user });
+});
+
+// PATCH /api/v1/users/:id - Partial update
+const UpdateUserSchema = CreateUserSchema.partial().omit({ password: true });
+
+router.patch('/users/:id', async (req, res) => {
+  const data = UpdateUserSchema.parse(req.body);
+
+  const user = await userService.update(req.params.id, data);
+
+  if (!user) {
+    return res.status(404).json({
+      error: { code: 'USER_NOT_FOUND', message: 'User not found' },
+    });
+  }
+
+  res.json({ data: user });
+});
+
+// DELETE /api/v1/users/:id - Delete user
+router.delete('/users/:id', async (req, res) => {
+  const deleted = await userService.delete(req.params.id);
+
+  if (!deleted) {
+    return res.status(404).json({
+      error: { code: 'USER_NOT_FOUND', message: 'User not found' },
+    });
+  }
+
+  res.status(204).send();
+});
+```
+
+### 2. Error Handling Standards
+
+```typescript
+// Standard error response format
+interface APIError {
+  code: string;           // Machine-readable error code
+  message: string;        // Human-readable message
+  details?: unknown;      // Additional context
+  requestId?: string;     // For debugging
+  documentation?: string; // Link to docs
+}
+
+// HTTP status codes mapping
+const ERROR_STATUS_MAP: Record<string, number> = {
+  VALIDATION_ERROR: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  RATE_LIMITED: 429,
+  INTERNAL_ERROR: 500,
+  SERVICE_UNAVAILABLE: 503,
+};
+
+// Error class hierarchy
+class APIException extends Error {
+  constructor(
+    public code: string,
+    message: string,
+    public details?: unknown,
+    public statusCode: number = ERROR_STATUS_MAP[code] || 500
+  ) {
+    super(message);
+    this.name = 'APIException';
+  }
+
+  toJSON(): APIError {
+    return {
+      code: this.code,
+      message: this.message,
+      details: this.details,
+    };
+  }
+}
+
+class ValidationException extends APIException {
+  constructor(errors: z.ZodError) {
+    super(
+      'VALIDATION_ERROR',
+      'Request validation failed',
+      errors.errors.map(e => ({
+        field: e.path.join('.'),
+        message: e.message,
+        code: e.code,
+      })),
+      400
+    );
+  }
+}
+
+class NotFoundException extends APIException {
+  constructor(resource: string, id: string) {
+    super(
+      'NOT_FOUND',
+      `${resource} not found`,
+      { resource, id },
+      404
+    );
+  }
+}
+
+// Global error handler
+function errorHandler(
+  err: Error,
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  const requestId = req.headers['x-request-id'] as string;
+
+  // Log error
+  logger.error({
+    requestId,
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+  });
+
+  if (err instanceof APIException) {
+    return res.status(err.statusCode).json({
+      error: {
+        ...err.toJSON(),
+        requestId,
+      },
+    });
+  }
+
+  if (err instanceof z.ZodError) {
+    return res.status(400).json({
+      error: new ValidationException(err).toJSON(),
+    });
+  }
+
+  // Internal errors - don't leak details
+  res.status(500).json({
+    error: {
+      code: 'INTERNAL_ERROR',
+      message: 'An unexpected error occurred',
+      requestId,
+    },
+  });
+}
+```
+
+### 3. API Versioning
+
+```typescript
+// URL versioning (recommended)
+// /api/v1/users
+// /api/v2/users
+
+// Version router
+const v1Router = express.Router();
+const v2Router = express.Router();
+
+// V1 response format
+v1Router.get('/users/:id', async (req, res) => {
+  const user = await userService.findById(req.params.id);
+  res.json(user); // Direct response
+});
+
+// V2 response format (with envelope)
+v2Router.get('/users/:id', async (req, res) => {
+  const user = await userService.findById(req.params.id);
+  res.json({
+    data: user,
+    meta: { version: 'v2' },
+  });
+});
+
+app.use('/api/v1', v1Router);
+app.use('/api/v2', v2Router);
+
+// Header versioning alternative
+function versionMiddleware(req: Request, res: Response, next: NextFunction) {
+  const version = req.headers['api-version'] || req.headers['accept-version'] || 'v1';
+  req.apiVersion = version;
+  next();
+}
+
+// Content negotiation
+app.get('/users/:id', (req, res) => {
+  const user = await userService.findById(req.params.id);
+
+  if (req.apiVersion === 'v2') {
+    return res.json({ data: user });
+  }
+
+  res.json(user);
+});
+
+// Sunset header for deprecation
+router.use('/v1/*', (req, res, next) => {
+  res.set('Sunset', 'Sat, 31 Dec 2025 23:59:59 GMT');
+  res.set('Deprecation', 'true');
+  res.set('Link', '</api/v2>; rel="successor-version"');
+  next();
+});
+```
+
+### 4. Rate Limiting
+
+```typescript
+import rateLimit from 'express-rate-limit';
+import RedisStore from 'rate-limit-redis';
+import Redis from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URL);
+
+// Basic rate limiter
+const basicLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // 100 requests per minute
+  standardHeaders: true, // Return rate limit info in headers
+  legacyHeaders: false,
+  store: new RedisStore({
+    sendCommand: (...args: string[]) => redis.call(...args),
+  }),
+  handler: (req, res) => {
+    res.status(429).json({
+      error: {
+        code: 'RATE_LIMITED',
+        message: 'Too many requests',
+        retryAfter: res.getHeader('Retry-After'),
+      },
+    });
+  },
+});
+
+// Tiered rate limiting based on subscription
+function createTieredLimiter(tier: 'free' | 'pro' | 'enterprise') {
+  const limits = {
+    free: { windowMs: 60000, max: 60 },
+    pro: { windowMs: 60000, max: 600 },
+    enterprise: { windowMs: 60000, max: 6000 },
+  };
+
+  return rateLimit({
+    ...limits[tier],
+    keyGenerator: (req) => `${tier}:${req.user?.id || req.ip}`,
+    store: new RedisStore({ sendCommand: (...args) => redis.call(...args) }),
+  });
+}
+
+// Per-endpoint rate limiting
+const strictLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  message: { error: { code: 'RATE_LIMITED', message: 'Rate limit exceeded for this endpoint' } },
+});
+
+router.post('/auth/login', strictLimiter, loginHandler);
+
+// Sliding window with Redis
+async function slidingWindowRateLimit(
+  key: string,
+  limit: number,
+  windowSeconds: number
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  const now = Date.now();
+  const windowStart = now - windowSeconds * 1000;
+
+  const multi = redis.multi();
+
+  // Remove old entries
+  multi.zremrangebyscore(key, 0, windowStart);
+  // Add current request
+  multi.zadd(key, now.toString(), `${now}-${Math.random()}`);
+  // Count requests in window
+  multi.zcard(key);
+  // Set expiry
+  multi.expire(key, windowSeconds);
+
+  const results = await multi.exec();
+  const count = results?.[2]?.[1] as number;
+
+  return {
+    allowed: count <= limit,
+    remaining: Math.max(0, limit - count),
+    resetAt: Math.ceil((windowStart + windowSeconds * 1000) / 1000),
+  };
+}
+```
+
+### 5. GraphQL Schema Design
+
+```typescript
+import { makeExecutableSchema } from '@graphql-tools/schema';
+
+const typeDefs = `#graphql
+  type Query {
+    user(id: ID!): User
+    users(
+      first: Int
+      after: String
+      filter: UserFilter
+      orderBy: UserOrderBy
+    ): UserConnection!
+  }
+
+  type Mutation {
+    createUser(input: CreateUserInput!): CreateUserPayload!
+    updateUser(id: ID!, input: UpdateUserInput!): UpdateUserPayload!
+    deleteUser(id: ID!): DeleteUserPayload!
+  }
+
+  # Relay-style pagination
+  type UserConnection {
+    edges: [UserEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+
+  type UserEdge {
+    cursor: String!
+    node: User!
+  }
+
+  type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String
+    endCursor: String
+  }
+
+  type User {
+    id: ID!
+    email: String!
+    name: String!
+    status: UserStatus!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    posts(first: Int, after: String): PostConnection!
+  }
+
+  enum UserStatus {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+  }
+
+  input UserFilter {
+    status: UserStatus
+    search: String
+    createdAfter: DateTime
+    createdBefore: DateTime
+  }
+
+  input UserOrderBy {
+    field: UserOrderField!
+    direction: OrderDirection!
+  }
+
+  enum UserOrderField {
+    CREATED_AT
+    NAME
+    EMAIL
+  }
+
+  enum OrderDirection {
+    ASC
+    DESC
+  }
+
+  # Input types for mutations
+  input CreateUserInput {
+    email: String!
+    name: String!
+    password: String!
+  }
+
+  # Payload types for mutations
+  type CreateUserPayload {
+    user: User
+    errors: [UserError!]
+  }
+
+  type UserError {
+    field: String!
+    message: String!
+    code: String!
+  }
+
+  scalar DateTime
+`;
+
+const resolvers = {
+  Query: {
+    user: async (_, { id }, ctx) => {
+      return ctx.loaders.user.load(id);
+    },
+
+    users: async (_, args, ctx) => {
+      const { first = 20, after, filter, orderBy } = args;
+
+      const { users, total, hasMore } = await userService.list({
+        limit: first,
+        cursor: after ? decodeCursor(after) : undefined,
+        filter,
+        orderBy,
+      });
+
+      const edges = users.map(user => ({
+        cursor: encodeCursor(user.id),
+        node: user,
+      }));
+
+      return {
+        edges,
+        totalCount: total,
+        pageInfo: {
+          hasNextPage: hasMore,
+          hasPreviousPage: !!after,
+          startCursor: edges[0]?.cursor,
+          endCursor: edges[edges.length - 1]?.cursor,
+        },
+      };
+    },
+  },
+
+  Mutation: {
+    createUser: async (_, { input }, ctx) => {
+      try {
+        const user = await userService.create(input);
+        return { user, errors: [] };
+      } catch (error) {
+        return {
+          user: null,
+          errors: [{ field: 'email', message: error.message, code: 'VALIDATION_ERROR' }],
+        };
+      }
+    },
+  },
+
+  User: {
+    posts: async (user, args, ctx) => {
+      return ctx.loaders.userPosts.load({ userId: user.id, ...args });
+    },
+  },
+};
+
+// DataLoader for N+1 prevention
+import DataLoader from 'dataloader';
+
+function createLoaders() {
+  return {
+    user: new DataLoader(async (ids: string[]) => {
+      const users = await userService.findByIds(ids);
+      return ids.map(id => users.find(u => u.id === id));
+    }),
+
+    userPosts: new DataLoader(async (keys) => {
+      // Batch load posts for multiple users
+      const userIds = keys.map(k => k.userId);
+      const posts = await postService.findByUserIds(userIds);
+
+      return keys.map(key =>
+        posts.filter(p => p.userId === key.userId)
+      );
+    }),
+  };
+}
+```
+
+### 6. OpenAPI Specification
+
+```yaml
+openapi: 3.1.0
+info:
+  title: User API
+  version: 1.0.0
+  description: User management API
+  contact:
+    email: api@example.com
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production
+  - url: https://staging-api.example.com/v1
+    description: Staging
+
+paths:
+  /users:
+    get:
+      summary: List users
+      operationId: listUsers
+      tags: [Users]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/UserStatus'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      summary: Create user
+      operationId: createUser
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserInput'
+      responses:
+        '201':
+          description: User created
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+
+components:
+  schemas:
+    User:
+      type: object
+      required: [id, email, name, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/UserStatus'
+        createdAt:
+          type: string
+          format: date-time
+
+    UserStatus:
+      type: string
+      enum: [active, inactive, suspended]
+
+    CreateUserInput:
+      type: object
+      required: [email, name, password]
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        password:
+          type: string
+          minLength: 8
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasMore:
+          type: boolean
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                $ref: '#/components/schemas/Error'
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+```
+
+## Use Cases
+
+### 1. Public API Design
+
+```typescript
+// Design for external developers
+router.get('/products', async (req, res) => {
+  // Always include request ID for support
+  const requestId = req.headers['x-request-id'] || generateRequestId();
+  res.set('X-Request-ID', requestId);
+
+  // Rate limit headers
+  res.set('X-RateLimit-Limit', '1000');
+  res.set('X-RateLimit-Remaining', String(remaining));
+  res.set('X-RateLimit-Reset', String(resetTime));
+
+  // Response
+  res.json({
+    data: products,
+    pagination: { ... },
+    meta: {
+      requestId,
+      apiVersion: 'v1',
+    },
+  });
+});
+```
+
+### 2. Internal Microservice API
+
+```typescript
+// gRPC for internal services
+// proto/user.proto
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (User);
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse);
+  rpc CreateUser(CreateUserRequest) returns (User);
+}
+
+message User {
+  string id = 1;
+  string email = 2;
+  string name = 3;
+  UserStatus status = 4;
+}
+
+enum UserStatus {
+  UNKNOWN = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+}
+```
+
+## Best Practices
+
+### Do's
+
+- **Use consistent naming** - Plural nouns for collections
+- **Return appropriate status codes** - 201 for create, 204 for delete
+- **Include request IDs** - For debugging and support
+- **Document everything** - OpenAPI/Swagger specs
+- **Version from day one** - Avoid breaking changes
+- **Implement idempotency** - For POST/PUT operations
+
+### Don'ts
+
+- Don't use verbs in URLs
+- Don't return 200 for errors
+- Don't expose internal errors
+- Don't skip pagination
+- Don't ignore cache headers
+- Don't forget rate limiting
+
+## Related Skills
+
+- **backend-development** - Implementation patterns
+- **security** - API security
+- **caching-strategies** - Response caching
+
+## Reference Resources
+
+- [REST API Design](https://restfulapi.net/)
+- [GraphQL Best Practices](https://graphql.org/learn/best-practices/)
+- [Google API Design Guide](https://cloud.google.com/apis/design)
+- [Microsoft REST Guidelines](https://github.com/microsoft/api-guidelines)

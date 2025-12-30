@@ -1,0 +1,905 @@
+---
+name: performance-profiling
+description: Browser automation, Chrome DevTools Protocol, Lighthouse audits, and Core Web Vitals optimization
+category: devops
+triggers:
+  - performance profiling
+  - lighthouse audit
+  - core web vitals
+  - page speed
+  - chrome devtools
+  - performance optimization
+  - bundle analysis
+---
+
+# Performance Profiling
+
+Master **browser performance profiling** using Chrome DevTools Protocol, Lighthouse, and Core Web Vitals monitoring. This skill enables automated performance audits, bottleneck identification, and optimization guidance.
+
+## Purpose
+
+Performance directly impacts user experience and business metrics:
+
+- Run automated Lighthouse audits with detailed analysis
+- Monitor Core Web Vitals (LCP, FID, CLS, INP)
+- Identify JavaScript performance bottlenecks
+- Analyze network waterfalls and resource loading
+- Detect memory leaks and optimize memory usage
+- Create performance budgets and regression testing
+
+## Features
+
+### 1. Lighthouse Automation
+
+```typescript
+import lighthouse from 'lighthouse';
+import * as chromeLauncher from 'chrome-launcher';
+
+interface LighthouseConfig {
+  url: string;
+  categories?: ('performance' | 'accessibility' | 'best-practices' | 'seo')[];
+  device?: 'mobile' | 'desktop';
+  throttling?: ThrottlingConfig;
+}
+
+interface LighthouseResult {
+  scores: Record<string, number>;
+  metrics: PerformanceMetrics;
+  opportunities: Opportunity[];
+  diagnostics: Diagnostic[];
+}
+
+// Run Lighthouse audit
+async function runLighthouseAudit(config: LighthouseConfig): Promise<LighthouseResult> {
+  const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless'] });
+
+  try {
+    const options = {
+      port: chrome.port,
+      output: 'json',
+      onlyCategories: config.categories || ['performance'],
+      formFactor: config.device || 'mobile',
+      throttling: config.throttling || {
+        rttMs: 150,
+        throughputKbps: 1638,
+        cpuSlowdownMultiplier: 4,
+      },
+    };
+
+    const result = await lighthouse(config.url, options);
+    const lhr = result?.lhr;
+
+    if (!lhr) throw new Error('Lighthouse failed to generate report');
+
+    return {
+      scores: {
+        performance: lhr.categories.performance?.score ?? 0,
+        accessibility: lhr.categories.accessibility?.score ?? 0,
+        bestPractices: lhr.categories['best-practices']?.score ?? 0,
+        seo: lhr.categories.seo?.score ?? 0,
+      },
+      metrics: extractMetrics(lhr),
+      opportunities: extractOpportunities(lhr),
+      diagnostics: extractDiagnostics(lhr),
+    };
+  } finally {
+    await chrome.kill();
+  }
+}
+
+// Extract key metrics
+function extractMetrics(lhr: LH.Result): PerformanceMetrics {
+  const audits = lhr.audits;
+
+  return {
+    // Core Web Vitals
+    lcp: {
+      value: audits['largest-contentful-paint']?.numericValue ?? 0,
+      score: audits['largest-contentful-paint']?.score ?? 0,
+      displayValue: audits['largest-contentful-paint']?.displayValue ?? '',
+    },
+    fid: {
+      value: audits['max-potential-fid']?.numericValue ?? 0,
+      score: audits['max-potential-fid']?.score ?? 0,
+      displayValue: audits['max-potential-fid']?.displayValue ?? '',
+    },
+    cls: {
+      value: audits['cumulative-layout-shift']?.numericValue ?? 0,
+      score: audits['cumulative-layout-shift']?.score ?? 0,
+      displayValue: audits['cumulative-layout-shift']?.displayValue ?? '',
+    },
+
+    // Additional metrics
+    fcp: audits['first-contentful-paint']?.numericValue ?? 0,
+    ttfb: audits['server-response-time']?.numericValue ?? 0,
+    tti: audits['interactive']?.numericValue ?? 0,
+    tbt: audits['total-blocking-time']?.numericValue ?? 0,
+    speedIndex: audits['speed-index']?.numericValue ?? 0,
+  };
+}
+
+// Extract optimization opportunities
+function extractOpportunities(lhr: LH.Result): Opportunity[] {
+  const opportunityAudits = [
+    'render-blocking-resources',
+    'unused-css-rules',
+    'unused-javascript',
+    'modern-image-formats',
+    'offscreen-images',
+    'unminified-css',
+    'unminified-javascript',
+    'efficient-animated-content',
+    'duplicated-javascript',
+  ];
+
+  return opportunityAudits
+    .map(id => lhr.audits[id])
+    .filter(audit => audit && audit.score !== null && audit.score < 1)
+    .map(audit => ({
+      id: audit.id,
+      title: audit.title,
+      description: audit.description,
+      savings: audit.details?.overallSavingsMs ?? 0,
+      items: audit.details?.items ?? [],
+    }))
+    .sort((a, b) => b.savings - a.savings);
+}
+```
+
+### 2. Core Web Vitals Monitoring
+
+```typescript
+import { onLCP, onFID, onCLS, onINP, onTTFB } from 'web-vitals';
+
+interface WebVitalsReport {
+  lcp: VitalMetric;
+  fid: VitalMetric;
+  cls: VitalMetric;
+  inp: VitalMetric;
+  ttfb: VitalMetric;
+}
+
+interface VitalMetric {
+  value: number;
+  rating: 'good' | 'needs-improvement' | 'poor';
+  entries: PerformanceEntry[];
+}
+
+// Real User Monitoring (RUM) setup
+function initWebVitalsMonitoring(onReport: (report: WebVitalsReport) => void): void {
+  const metrics: Partial<WebVitalsReport> = {};
+
+  const reportIfComplete = () => {
+    if (metrics.lcp && metrics.fid && metrics.cls && metrics.inp && metrics.ttfb) {
+      onReport(metrics as WebVitalsReport);
+    }
+  };
+
+  onLCP((metric) => {
+    metrics.lcp = {
+      value: metric.value,
+      rating: metric.rating,
+      entries: metric.entries,
+    };
+    reportIfComplete();
+  });
+
+  onFID((metric) => {
+    metrics.fid = {
+      value: metric.value,
+      rating: metric.rating,
+      entries: metric.entries,
+    };
+    reportIfComplete();
+  });
+
+  onCLS((metric) => {
+    metrics.cls = {
+      value: metric.value,
+      rating: metric.rating,
+      entries: metric.entries,
+    };
+    reportIfComplete();
+  });
+
+  onINP((metric) => {
+    metrics.inp = {
+      value: metric.value,
+      rating: metric.rating,
+      entries: metric.entries,
+    };
+    reportIfComplete();
+  });
+
+  onTTFB((metric) => {
+    metrics.ttfb = {
+      value: metric.value,
+      rating: metric.rating,
+      entries: metric.entries,
+    };
+    reportIfComplete();
+  });
+}
+
+// Web Vitals thresholds
+const WEB_VITALS_THRESHOLDS = {
+  LCP: { good: 2500, poor: 4000 },     // milliseconds
+  FID: { good: 100, poor: 300 },        // milliseconds
+  CLS: { good: 0.1, poor: 0.25 },       // score
+  INP: { good: 200, poor: 500 },        // milliseconds
+  TTFB: { good: 800, poor: 1800 },      // milliseconds
+};
+
+// Analyze and provide recommendations
+function analyzeWebVitals(report: WebVitalsReport): VitalsAnalysis {
+  const issues: VitalIssue[] = [];
+
+  // LCP analysis
+  if (report.lcp.rating !== 'good') {
+    const lcpElement = report.lcp.entries[0]?.element;
+    issues.push({
+      metric: 'LCP',
+      value: report.lcp.value,
+      rating: report.lcp.rating,
+      element: lcpElement,
+      recommendations: getLCPRecommendations(report.lcp, lcpElement),
+    });
+  }
+
+  // CLS analysis
+  if (report.cls.rating !== 'good') {
+    const clsSources = report.cls.entries.flatMap(
+      entry => (entry as LayoutShift).sources || []
+    );
+    issues.push({
+      metric: 'CLS',
+      value: report.cls.value,
+      rating: report.cls.rating,
+      sources: clsSources,
+      recommendations: getCLSRecommendations(clsSources),
+    });
+  }
+
+  // INP analysis
+  if (report.inp.rating !== 'good') {
+    issues.push({
+      metric: 'INP',
+      value: report.inp.value,
+      rating: report.inp.rating,
+      recommendations: getINPRecommendations(report.inp),
+    });
+  }
+
+  return {
+    overallRating: calculateOverallRating(report),
+    issues,
+    score: calculateVitalsScore(report),
+  };
+}
+
+// LCP optimization recommendations
+function getLCPRecommendations(metric: VitalMetric, element?: Element): string[] {
+  const recommendations: string[] = [];
+
+  if (element?.tagName === 'IMG') {
+    recommendations.push(
+      'Add fetchpriority="high" to the LCP image',
+      'Preload the LCP image: <link rel="preload" as="image" href="...">',
+      'Use modern image formats (WebP, AVIF)',
+      'Ensure image is properly sized (no layout shift)',
+    );
+  }
+
+  if (metric.value > 4000) {
+    recommendations.push(
+      'Reduce server response time (TTFB)',
+      'Eliminate render-blocking resources',
+      'Consider server-side rendering for critical content',
+    );
+  }
+
+  recommendations.push(
+    'Minimize critical CSS',
+    'Use efficient cache policy for static assets',
+    'Consider using a CDN',
+  );
+
+  return recommendations;
+}
+```
+
+### 3. Chrome DevTools Protocol
+
+```typescript
+import CDP from 'chrome-remote-interface';
+
+interface PerformanceTrace {
+  timelineEvents: TimelineEvent[];
+  networkRequests: NetworkRequest[];
+  jsProfile: CPUProfile;
+  heapSnapshot: HeapSnapshot;
+}
+
+// Connect to Chrome DevTools
+async function connectToDevTools(port: number = 9222): Promise<CDP.Client> {
+  const client = await CDP({ port });
+
+  // Enable required domains
+  await Promise.all([
+    client.Page.enable(),
+    client.Network.enable(),
+    client.Performance.enable(),
+    client.Profiler.enable(),
+    client.HeapProfiler.enable(),
+  ]);
+
+  return client;
+}
+
+// Capture performance trace
+async function capturePerformanceTrace(
+  client: CDP.Client,
+  url: string
+): Promise<PerformanceTrace> {
+  const networkRequests: NetworkRequest[] = [];
+  const timelineEvents: TimelineEvent[] = [];
+
+  // Collect network requests
+  client.Network.requestWillBeSent(params => {
+    networkRequests.push({
+      requestId: params.requestId,
+      url: params.request.url,
+      method: params.request.method,
+      timestamp: params.timestamp,
+      type: params.type,
+    });
+  });
+
+  client.Network.responseReceived(params => {
+    const request = networkRequests.find(r => r.requestId === params.requestId);
+    if (request) {
+      request.status = params.response.status;
+      request.mimeType = params.response.mimeType;
+      request.encodedDataLength = params.response.encodedDataLength;
+    }
+  });
+
+  // Start tracing
+  await client.Tracing.start({
+    categories: [
+      'devtools.timeline',
+      'v8.execute',
+      'blink.user_timing',
+      'loading',
+      'painting',
+    ].join(','),
+  });
+
+  // Navigate to page
+  await client.Page.navigate({ url });
+  await client.Page.loadEventFired();
+
+  // Wait for network idle
+  await waitForNetworkIdle(client);
+
+  // Stop tracing
+  const { value: traceData } = await client.Tracing.tracingComplete();
+
+  // Capture JS profile
+  await client.Profiler.start();
+  await new Promise(r => setTimeout(r, 2000)); // Profile for 2 seconds
+  const { profile: jsProfile } = await client.Profiler.stop();
+
+  // Capture heap snapshot
+  const heapChunks: string[] = [];
+  client.HeapProfiler.addHeapSnapshotChunk(({ chunk }) => heapChunks.push(chunk));
+  await client.HeapProfiler.takeHeapSnapshot();
+  const heapSnapshot = JSON.parse(heapChunks.join(''));
+
+  return {
+    timelineEvents: parseTraceData(traceData),
+    networkRequests,
+    jsProfile,
+    heapSnapshot,
+  };
+}
+
+// Analyze network waterfall
+function analyzeNetworkWaterfall(requests: NetworkRequest[]): WaterfallAnalysis {
+  const sorted = [...requests].sort((a, b) => a.timestamp - b.timestamp);
+  const totalTime = sorted[sorted.length - 1]?.endTime - sorted[0]?.timestamp;
+
+  // Identify critical path
+  const criticalPath = sorted.filter(r =>
+    r.type === 'Document' ||
+    (r.type === 'Script' && !r.url.includes('async')) ||
+    r.type === 'Stylesheet'
+  );
+
+  // Find blocking resources
+  const blockingResources = sorted.filter(r =>
+    r.renderBlocking ||
+    (r.type === 'Script' && !r.async && !r.defer)
+  );
+
+  // Calculate metrics
+  return {
+    totalRequests: requests.length,
+    totalTime,
+    totalSize: requests.reduce((sum, r) => sum + (r.encodedDataLength || 0), 0),
+    criticalPath,
+    blockingResources,
+    byType: groupByType(requests),
+    recommendations: generateWaterfallRecommendations(requests),
+  };
+}
+
+// Memory leak detection
+async function detectMemoryLeaks(
+  client: CDP.Client,
+  actions: () => Promise<void>,
+  iterations: number = 3
+): Promise<MemoryLeakReport> {
+  const snapshots: HeapSnapshot[] = [];
+
+  // Take initial snapshot
+  snapshots.push(await takeHeapSnapshot(client));
+
+  // Perform actions multiple times
+  for (let i = 0; i < iterations; i++) {
+    await actions();
+    await client.HeapProfiler.collectGarbage();
+    await new Promise(r => setTimeout(r, 100));
+    snapshots.push(await takeHeapSnapshot(client));
+  }
+
+  // Analyze heap growth
+  const heapGrowth = analyzeHeapGrowth(snapshots);
+  const retainedObjects = findRetainedObjects(snapshots);
+
+  return {
+    hasLeak: heapGrowth.trend === 'increasing',
+    heapGrowth,
+    retainedObjects,
+    recommendations: generateMemoryRecommendations(retainedObjects),
+  };
+}
+```
+
+### 4. Bundle Analysis
+
+```typescript
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
+import { visualizer } from 'rollup-plugin-visualizer';
+
+interface BundleAnalysis {
+  totalSize: number;
+  gzipSize: number;
+  modules: ModuleInfo[];
+  duplicates: DuplicateModule[];
+  largestModules: ModuleInfo[];
+  recommendations: string[];
+}
+
+// Webpack bundle analysis
+function createBundleAnalyzerConfig(): BundleAnalyzerPlugin {
+  return new BundleAnalyzerPlugin({
+    analyzerMode: 'json',
+    reportFilename: 'bundle-report.json',
+    generateStatsFile: true,
+    statsFilename: 'bundle-stats.json',
+  });
+}
+
+// Analyze bundle stats
+async function analyzeBundleStats(statsPath: string): Promise<BundleAnalysis> {
+  const stats = JSON.parse(await fs.readFile(statsPath, 'utf-8'));
+
+  const modules = flattenModules(stats.modules);
+  const duplicates = findDuplicates(modules);
+
+  // Calculate sizes
+  const totalSize = modules.reduce((sum, m) => sum + m.size, 0);
+  const gzipSize = await calculateGzipSize(statsPath);
+
+  // Sort by size
+  const largestModules = [...modules]
+    .sort((a, b) => b.size - a.size)
+    .slice(0, 20);
+
+  return {
+    totalSize,
+    gzipSize,
+    modules,
+    duplicates,
+    largestModules,
+    recommendations: generateBundleRecommendations({
+      totalSize,
+      duplicates,
+      largestModules,
+    }),
+  };
+}
+
+// Find duplicate modules
+function findDuplicates(modules: ModuleInfo[]): DuplicateModule[] {
+  const modulesByName = new Map<string, ModuleInfo[]>();
+
+  for (const module of modules) {
+    const name = getModuleName(module.identifier);
+    const existing = modulesByName.get(name) || [];
+    existing.push(module);
+    modulesByName.set(name, existing);
+  }
+
+  return Array.from(modulesByName.entries())
+    .filter(([_, instances]) => instances.length > 1)
+    .map(([name, instances]) => ({
+      name,
+      instances: instances.length,
+      totalSize: instances.reduce((sum, m) => sum + m.size, 0),
+      versions: [...new Set(instances.map(m => getModuleVersion(m.identifier)))],
+    }))
+    .sort((a, b) => b.totalSize - a.totalSize);
+}
+
+// Generate bundle recommendations
+function generateBundleRecommendations(analysis: {
+  totalSize: number;
+  duplicates: DuplicateModule[];
+  largestModules: ModuleInfo[];
+}): string[] {
+  const recommendations: string[] = [];
+
+  // Size recommendations
+  if (analysis.totalSize > 500 * 1024) {
+    recommendations.push(
+      'Consider code splitting to reduce initial bundle size',
+      'Use dynamic imports for routes and large components',
+    );
+  }
+
+  // Duplicate recommendations
+  if (analysis.duplicates.length > 0) {
+    recommendations.push(
+      `Found ${analysis.duplicates.length} duplicate packages - dedupe with npm/yarn`,
+      'Consider using webpack.optimize.ModuleConcatenationPlugin',
+    );
+
+    const biggestDupe = analysis.duplicates[0];
+    if (biggestDupe) {
+      recommendations.push(
+        `Largest duplicate: ${biggestDupe.name} (${formatBytes(biggestDupe.totalSize)})`,
+      );
+    }
+  }
+
+  // Large module recommendations
+  const veryLargeModules = analysis.largestModules.filter(m => m.size > 100 * 1024);
+  if (veryLargeModules.length > 0) {
+    recommendations.push(
+      'Large modules detected - consider lazy loading:',
+      ...veryLargeModules.slice(0, 3).map(m =>
+        `  - ${m.name}: ${formatBytes(m.size)}`
+      ),
+    );
+  }
+
+  return recommendations;
+}
+```
+
+### 5. Performance Budget
+
+```typescript
+interface PerformanceBudget {
+  metrics: MetricBudget[];
+  resources: ResourceBudget[];
+}
+
+interface MetricBudget {
+  metric: string;
+  budget: number;
+  unit: 'ms' | 'score' | 'bytes';
+}
+
+interface ResourceBudget {
+  type: string;
+  budget: number;
+  count?: number;
+}
+
+// Default performance budget
+const DEFAULT_BUDGET: PerformanceBudget = {
+  metrics: [
+    { metric: 'LCP', budget: 2500, unit: 'ms' },
+    { metric: 'FID', budget: 100, unit: 'ms' },
+    { metric: 'CLS', budget: 0.1, unit: 'score' },
+    { metric: 'TTI', budget: 3800, unit: 'ms' },
+    { metric: 'TBT', budget: 200, unit: 'ms' },
+  ],
+  resources: [
+    { type: 'script', budget: 300 * 1024 },
+    { type: 'stylesheet', budget: 50 * 1024 },
+    { type: 'image', budget: 500 * 1024 },
+    { type: 'font', budget: 100 * 1024 },
+    { type: 'total', budget: 1000 * 1024 },
+  ],
+};
+
+// Check budget violations
+function checkPerformanceBudget(
+  metrics: PerformanceMetrics,
+  resources: ResourceMetrics,
+  budget: PerformanceBudget = DEFAULT_BUDGET
+): BudgetReport {
+  const violations: BudgetViolation[] = [];
+
+  // Check metric budgets
+  for (const { metric, budget: limit, unit } of budget.metrics) {
+    const actual = metrics[metric.toLowerCase()];
+    if (actual > limit) {
+      violations.push({
+        type: 'metric',
+        name: metric,
+        budget: limit,
+        actual,
+        unit,
+        overBy: ((actual - limit) / limit * 100).toFixed(1) + '%',
+      });
+    }
+  }
+
+  // Check resource budgets
+  for (const { type, budget: limit, count } of budget.resources) {
+    const resource = resources[type];
+    if (resource.size > limit) {
+      violations.push({
+        type: 'resource',
+        name: type,
+        budget: limit,
+        actual: resource.size,
+        unit: 'bytes',
+        overBy: formatBytes(resource.size - limit),
+      });
+    }
+    if (count && resource.count > count) {
+      violations.push({
+        type: 'resource-count',
+        name: `${type} count`,
+        budget: count,
+        actual: resource.count,
+        unit: 'requests',
+      });
+    }
+  }
+
+  return {
+    passed: violations.length === 0,
+    violations,
+    summary: generateBudgetSummary(violations),
+  };
+}
+
+// Performance regression test
+async function runPerformanceRegression(
+  url: string,
+  baseline: PerformanceMetrics,
+  threshold: number = 0.1 // 10% regression threshold
+): Promise<RegressionReport> {
+  const current = await runLighthouseAudit({ url });
+  const regressions: Regression[] = [];
+
+  for (const [metric, baselineValue] of Object.entries(baseline)) {
+    const currentValue = current.metrics[metric];
+    const change = (currentValue - baselineValue) / baselineValue;
+
+    if (change > threshold) {
+      regressions.push({
+        metric,
+        baseline: baselineValue,
+        current: currentValue,
+        change: `+${(change * 100).toFixed(1)}%`,
+        severity: change > 0.25 ? 'critical' : 'warning',
+      });
+    }
+  }
+
+  return {
+    passed: regressions.length === 0,
+    regressions,
+    metrics: current.metrics,
+    comparison: generateComparison(baseline, current.metrics),
+  };
+}
+```
+
+### 6. Automated Performance CI/CD
+
+```yaml
+# .github/workflows/performance.yml
+name: Performance Audit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Start server
+        run: npm run start &
+
+      - name: Run Lighthouse
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          urls: |
+            http://localhost:3000
+            http://localhost:3000/products
+          budgetPath: ./performance-budget.json
+          uploadArtifacts: true
+
+      - name: Check performance budget
+        run: |
+          node scripts/check-performance-budget.js \
+            --budget ./performance-budget.json \
+            --results .lighthouseci/*.json
+```
+
+## Use Cases
+
+### 1. E-commerce Performance Optimization
+
+```typescript
+// E-commerce specific performance audit
+async function auditEcommerceSite(baseUrl: string): Promise<EcommerceAudit> {
+  const pages = [
+    { name: 'Home', path: '/' },
+    { name: 'Category', path: '/products' },
+    { name: 'Product', path: '/products/1' },
+    { name: 'Cart', path: '/cart' },
+    { name: 'Checkout', path: '/checkout' },
+  ];
+
+  const results = await Promise.all(
+    pages.map(async page => ({
+      ...page,
+      audit: await runLighthouseAudit({
+        url: `${baseUrl}${page.path}`,
+        device: 'mobile',
+      }),
+    }))
+  );
+
+  return {
+    pages: results,
+    criticalPath: identifyCriticalPath(results),
+    conversionImpact: estimateConversionImpact(results),
+    recommendations: prioritizeRecommendations(results),
+  };
+}
+```
+
+### 2. SPA Performance Monitoring
+
+```typescript
+// Single Page App performance monitoring
+function initSPAPerformanceMonitoring(): void {
+  // Track route changes
+  let routeStartTime: number;
+
+  router.beforeEach(() => {
+    routeStartTime = performance.now();
+  });
+
+  router.afterEach((to) => {
+    const routeTime = performance.now() - routeStartTime;
+
+    // Track custom metric
+    performance.measure(`route-${to.name}`, {
+      start: routeStartTime,
+      duration: routeTime,
+    });
+
+    // Report to analytics
+    analytics.track('route_performance', {
+      route: to.name,
+      duration: routeTime,
+      timestamp: Date.now(),
+    });
+  });
+
+  // Monitor long tasks
+  const observer = new PerformanceObserver((list) => {
+    for (const entry of list.getEntries()) {
+      if (entry.duration > 50) {
+        console.warn('Long task detected:', entry.duration, 'ms');
+        analytics.track('long_task', {
+          duration: entry.duration,
+          startTime: entry.startTime,
+        });
+      }
+    }
+  });
+
+  observer.observe({ entryTypes: ['longtask'] });
+}
+```
+
+## Best Practices
+
+### Do's
+
+- **Test in production-like conditions** - Use throttling and real device testing
+- **Monitor continuously** - Set up RUM for ongoing performance tracking
+- **Focus on user-centric metrics** - Prioritize Core Web Vitals
+- **Automate testing** - Include performance tests in CI/CD
+- **Set budgets** - Define and enforce performance budgets
+- **Profile incrementally** - Test before and after changes
+
+### Don'ts
+
+- Don't test only on fast connections
+- Don't ignore mobile performance
+- Don't optimize prematurely without data
+- Don't rely solely on synthetic testing
+- Don't forget about third-party scripts
+- Don't ignore cumulative layout shift
+
+### Performance Checklist
+
+```markdown
+## Pre-Launch Performance Checklist
+
+### Core Web Vitals
+- [ ] LCP < 2.5s on mobile
+- [ ] FID < 100ms
+- [ ] CLS < 0.1
+- [ ] INP < 200ms
+
+### Resource Optimization
+- [ ] Images optimized (WebP/AVIF, lazy loaded)
+- [ ] JavaScript bundled and minified
+- [ ] CSS optimized and critical CSS inlined
+- [ ] Fonts optimized (preload, font-display)
+
+### Caching
+- [ ] Proper cache headers set
+- [ ] Service worker for offline support
+- [ ] CDN configured
+
+### Monitoring
+- [ ] RUM implemented
+- [ ] Performance budget defined
+- [ ] CI/CD performance tests
+```
+
+## Related Skills
+
+- **frontend-design** - UI performance considerations
+- **devops** - Infrastructure optimization
+- **docker** - Container performance
+- **kubernetes** - Scaling for performance
+
+## Reference Resources
+
+- [Web Vitals](https://web.dev/vitals/)
+- [Lighthouse Documentation](https://developer.chrome.com/docs/lighthouse/)
+- [Chrome DevTools Performance](https://developer.chrome.com/docs/devtools/performance/)
+- [web.dev Performance](https://web.dev/learn/performance/)

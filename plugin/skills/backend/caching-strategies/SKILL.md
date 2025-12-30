@@ -1,0 +1,755 @@
+---
+name: caching-strategies
+description: Multi-layer caching with Redis, CDN, and browser caching for optimal application performance
+category: backend
+triggers:
+  - caching strategies
+  - redis cache
+  - cdn caching
+  - cache invalidation
+  - http caching
+  - performance caching
+---
+
+# Caching Strategies
+
+Implement **multi-layer caching** for optimal performance. This skill covers Redis patterns, CDN configuration, HTTP cache headers, and cache invalidation strategies.
+
+## Purpose
+
+Dramatically improve application performance through strategic caching:
+
+- Reduce database load with application caching
+- Minimize latency with edge caching
+- Optimize bandwidth with browser caching
+- Handle cache invalidation correctly
+- Implement cache-aside and write-through patterns
+- Monitor cache effectiveness
+
+## Features
+
+### 1. Redis Caching Patterns
+
+```typescript
+import Redis from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URL);
+
+// Basic cache operations
+class CacheService {
+  private prefix: string;
+  private defaultTTL: number;
+
+  constructor(prefix: string = 'app', defaultTTL: number = 3600) {
+    this.prefix = prefix;
+    this.defaultTTL = defaultTTL;
+  }
+
+  private key(key: string): string {
+    return `${this.prefix}:${key}`;
+  }
+
+  async get<T>(key: string): Promise<T | null> {
+    const data = await redis.get(this.key(key));
+    return data ? JSON.parse(data) : null;
+  }
+
+  async set<T>(key: string, value: T, ttl?: number): Promise<void> {
+    const serialized = JSON.stringify(value);
+    await redis.setex(this.key(key), ttl || this.defaultTTL, serialized);
+  }
+
+  async del(key: string): Promise<void> {
+    await redis.del(this.key(key));
+  }
+
+  async exists(key: string): Promise<boolean> {
+    return (await redis.exists(this.key(key))) === 1;
+  }
+
+  // Get or set pattern
+  async getOrSet<T>(
+    key: string,
+    factory: () => Promise<T>,
+    ttl?: number
+  ): Promise<T> {
+    const cached = await this.get<T>(key);
+    if (cached !== null) return cached;
+
+    const value = await factory();
+    await this.set(key, value, ttl);
+    return value;
+  }
+
+  // Bulk operations
+  async mget<T>(keys: string[]): Promise<(T | null)[]> {
+    const prefixedKeys = keys.map(k => this.key(k));
+    const values = await redis.mget(prefixedKeys);
+    return values.map(v => (v ? JSON.parse(v) : null));
+  }
+
+  async mset<T>(entries: Array<{ key: string; value: T; ttl?: number }>): Promise<void> {
+    const pipeline = redis.pipeline();
+
+    for (const entry of entries) {
+      pipeline.setex(
+        this.key(entry.key),
+        entry.ttl || this.defaultTTL,
+        JSON.stringify(entry.value)
+      );
+    }
+
+    await pipeline.exec();
+  }
+
+  // Pattern-based invalidation
+  async invalidatePattern(pattern: string): Promise<number> {
+    const keys = await redis.keys(this.key(pattern));
+    if (keys.length === 0) return 0;
+    return redis.del(...keys);
+  }
+}
+
+// Usage
+const cache = new CacheService('users', 3600);
+
+async function getUser(id: string): Promise<User> {
+  return cache.getOrSet(`user:${id}`, () => db.user.findUnique({ where: { id } }));
+}
+```
+
+### 2. Cache-Aside Pattern
+
+```typescript
+// Cache-aside with database fallback
+class UserRepository {
+  private cache: CacheService;
+
+  constructor() {
+    this.cache = new CacheService('users', 3600);
+  }
+
+  async findById(id: string): Promise<User | null> {
+    // Try cache first
+    const cached = await this.cache.get<User>(`${id}`);
+    if (cached) {
+      metrics.increment('cache.hit', { type: 'user' });
+      return cached;
+    }
+
+    metrics.increment('cache.miss', { type: 'user' });
+
+    // Fetch from database
+    const user = await db.user.findUnique({ where: { id } });
+
+    // Cache the result (even null to prevent cache stampede)
+    if (user) {
+      await this.cache.set(`${id}`, user);
+    } else {
+      // Cache null with shorter TTL
+      await this.cache.set(`${id}`, null, 60);
+    }
+
+    return user;
+  }
+
+  async update(id: string, data: Partial<User>): Promise<User> {
+    const user = await db.user.update({ where: { id }, data });
+
+    // Invalidate cache
+    await this.cache.del(`${id}`);
+
+    return user;
+  }
+
+  async delete(id: string): Promise<void> {
+    await db.user.delete({ where: { id } });
+    await this.cache.del(`${id}`);
+  }
+}
+
+// Cache stampede prevention with locking
+async function getWithLock<T>(
+  key: string,
+  factory: () => Promise<T>,
+  ttl: number = 3600
+): Promise<T> {
+  const cache = new CacheService();
+  const lockKey = `lock:${key}`;
+
+  // Try to get cached value
+  const cached = await cache.get<T>(key);
+  if (cached !== null) return cached;
+
+  // Try to acquire lock
+  const acquired = await redis.set(lockKey, '1', 'EX', 10, 'NX');
+
+  if (!acquired) {
+    // Another process is fetching, wait and retry
+    await new Promise(r => setTimeout(r, 100));
+    return getWithLock(key, factory, ttl);
+  }
+
+  try {
+    // Double-check after acquiring lock
+    const cached = await cache.get<T>(key);
+    if (cached !== null) return cached;
+
+    // Fetch and cache
+    const value = await factory();
+    await cache.set(key, value, ttl);
+    return value;
+  } finally {
+    await redis.del(lockKey);
+  }
+}
+```
+
+### 3. Write-Through & Write-Behind
+
+```typescript
+// Write-through cache
+class WriteThroughCache<T> {
+  constructor(
+    private cache: CacheService,
+    private repository: Repository<T>
+  ) {}
+
+  async create(entity: T): Promise<T> {
+    // Write to database first
+    const saved = await this.repository.create(entity);
+
+    // Then update cache
+    await this.cache.set(this.getKey(saved), saved);
+
+    return saved;
+  }
+
+  async update(id: string, data: Partial<T>): Promise<T> {
+    // Write to database
+    const updated = await this.repository.update(id, data);
+
+    // Update cache
+    await this.cache.set(this.getKey(updated), updated);
+
+    return updated;
+  }
+
+  private getKey(entity: T): string {
+    return `${(entity as any).id}`;
+  }
+}
+
+// Write-behind (async write) cache
+class WriteBehindCache<T> {
+  private writeQueue: Array<{ key: string; data: T }> = [];
+  private flushInterval: NodeJS.Timer;
+
+  constructor(
+    private cache: CacheService,
+    private repository: Repository<T>,
+    flushIntervalMs: number = 5000
+  ) {
+    this.flushInterval = setInterval(() => this.flush(), flushIntervalMs);
+  }
+
+  async set(key: string, data: T): Promise<void> {
+    // Write to cache immediately
+    await this.cache.set(key, data);
+
+    // Queue for async database write
+    this.writeQueue.push({ key, data });
+  }
+
+  private async flush(): Promise<void> {
+    if (this.writeQueue.length === 0) return;
+
+    const batch = this.writeQueue.splice(0, 100);
+
+    try {
+      await this.repository.bulkUpsert(batch.map(b => b.data));
+    } catch (error) {
+      // Re-queue failed items
+      this.writeQueue.unshift(...batch);
+      console.error('Write-behind flush failed:', error);
+    }
+  }
+
+  async stop(): Promise<void> {
+    clearInterval(this.flushInterval);
+    await this.flush();
+  }
+}
+```
+
+### 4. HTTP Caching Headers
+
+```typescript
+// Cache control middleware
+interface CacheOptions {
+  maxAge?: number;
+  sMaxAge?: number;
+  staleWhileRevalidate?: number;
+  staleIfError?: number;
+  private?: boolean;
+  noStore?: boolean;
+  mustRevalidate?: boolean;
+}
+
+function cacheControl(options: CacheOptions) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const directives: string[] = [];
+
+    if (options.noStore) {
+      directives.push('no-store');
+    } else {
+      if (options.private) {
+        directives.push('private');
+      } else {
+        directives.push('public');
+      }
+
+      if (options.maxAge !== undefined) {
+        directives.push(`max-age=${options.maxAge}`);
+      }
+
+      if (options.sMaxAge !== undefined) {
+        directives.push(`s-maxage=${options.sMaxAge}`);
+      }
+
+      if (options.staleWhileRevalidate !== undefined) {
+        directives.push(`stale-while-revalidate=${options.staleWhileRevalidate}`);
+      }
+
+      if (options.staleIfError !== undefined) {
+        directives.push(`stale-if-error=${options.staleIfError}`);
+      }
+
+      if (options.mustRevalidate) {
+        directives.push('must-revalidate');
+      }
+    }
+
+    res.set('Cache-Control', directives.join(', '));
+    next();
+  };
+}
+
+// Route examples
+// Static assets - cache for 1 year
+app.use(
+  '/static',
+  cacheControl({ maxAge: 31536000 }),
+  express.static('public')
+);
+
+// API responses - no caching for dynamic data
+app.get(
+  '/api/user/profile',
+  cacheControl({ noStore: true }),
+  profileHandler
+);
+
+// Public data - cache with revalidation
+app.get(
+  '/api/products',
+  cacheControl({
+    maxAge: 60,
+    sMaxAge: 300,
+    staleWhileRevalidate: 86400,
+  }),
+  productsHandler
+);
+
+// ETag support
+import etag from 'etag';
+
+app.get('/api/products/:id', async (req, res) => {
+  const product = await getProduct(req.params.id);
+
+  if (!product) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
+  // Generate ETag
+  const body = JSON.stringify(product);
+  const tag = etag(body);
+
+  res.set('ETag', tag);
+  res.set('Cache-Control', 'private, max-age=0, must-revalidate');
+
+  // Check If-None-Match
+  if (req.headers['if-none-match'] === tag) {
+    return res.status(304).end();
+  }
+
+  res.json(product);
+});
+```
+
+### 5. CDN Configuration
+
+```typescript
+// Vercel Edge Config
+// vercel.json
+{
+  "headers": [
+    {
+      "source": "/api/public/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, s-maxage=60, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/_next/static/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ]
+}
+
+// Cloudflare Cache Rules
+// Using Page Rules or Cache Rules API
+const cacheRules = {
+  rules: [
+    {
+      expression: '(http.request.uri.path matches "^/api/public/")',
+      action: 'set_cache_settings',
+      action_parameters: {
+        edge_ttl: {
+          mode: 'override_origin',
+          default: 300,
+        },
+        browser_ttl: {
+          mode: 'override_origin',
+          default: 60,
+        },
+      },
+    },
+    {
+      expression: '(http.request.uri.path matches "^/static/")',
+      action: 'set_cache_settings',
+      action_parameters: {
+        cache: true,
+        edge_ttl: { mode: 'override_origin', default: 86400 * 30 },
+      },
+    },
+  ],
+};
+
+// Purge cache via API
+async function purgeCloudflareCache(urls: string[]): Promise<void> {
+  await fetch(
+    `https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CF_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ files: urls }),
+    }
+  );
+}
+
+// Purge by tag
+async function purgeCacheByTag(tags: string[]): Promise<void> {
+  await fetch(
+    `https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache`,
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${CF_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tags }),
+    }
+  );
+}
+```
+
+### 6. Cache Invalidation
+
+```typescript
+// Event-based cache invalidation
+import { EventEmitter } from 'events';
+
+class CacheInvalidator extends EventEmitter {
+  private cache: CacheService;
+
+  constructor() {
+    super();
+    this.cache = new CacheService();
+    this.setupListeners();
+  }
+
+  private setupListeners(): void {
+    // User events
+    this.on('user:updated', async (userId: string) => {
+      await this.cache.del(`user:${userId}`);
+      await this.cache.invalidatePattern(`user:${userId}:*`);
+    });
+
+    this.on('user:deleted', async (userId: string) => {
+      await this.cache.invalidatePattern(`user:${userId}*`);
+    });
+
+    // Product events
+    this.on('product:updated', async (productId: string) => {
+      await this.cache.del(`product:${productId}`);
+      // Also invalidate category cache
+      const product = await db.product.findUnique({ where: { id: productId } });
+      if (product) {
+        await this.cache.del(`category:${product.categoryId}:products`);
+      }
+    });
+
+    // Bulk invalidation
+    this.on('cache:purge:all', async () => {
+      await redis.flushdb();
+    });
+  }
+}
+
+const invalidator = new CacheInvalidator();
+
+// Use in services
+class ProductService {
+  async update(id: string, data: UpdateProductInput): Promise<Product> {
+    const product = await db.product.update({ where: { id }, data });
+    invalidator.emit('product:updated', id);
+    return product;
+  }
+}
+
+// Time-based invalidation with scheduled jobs
+import { CronJob } from 'cron';
+
+// Invalidate daily stats cache at midnight
+new CronJob('0 0 * * *', async () => {
+  await cache.invalidatePattern('stats:daily:*');
+}).start();
+
+// Refresh popular products cache every hour
+new CronJob('0 * * * *', async () => {
+  const products = await getPopularProducts();
+  await cache.set('products:popular', products, 3600);
+}).start();
+```
+
+### 7. Multi-Layer Caching
+
+```typescript
+// L1: In-memory (fastest, smallest)
+// L2: Redis (fast, shared)
+// L3: Database (slowest, source of truth)
+
+import LRUCache from 'lru-cache';
+
+class MultiLayerCache<T> {
+  private l1: LRUCache<string, T>;
+  private l2: CacheService;
+
+  constructor(options: {
+    l1MaxSize: number;
+    l1TTL: number;
+    l2Prefix: string;
+    l2TTL: number;
+  }) {
+    this.l1 = new LRUCache({
+      max: options.l1MaxSize,
+      ttl: options.l1TTL * 1000,
+    });
+    this.l2 = new CacheService(options.l2Prefix, options.l2TTL);
+  }
+
+  async get(key: string): Promise<T | null> {
+    // Check L1 (in-memory)
+    const l1Value = this.l1.get(key);
+    if (l1Value !== undefined) {
+      metrics.increment('cache.l1.hit');
+      return l1Value;
+    }
+
+    // Check L2 (Redis)
+    const l2Value = await this.l2.get<T>(key);
+    if (l2Value !== null) {
+      metrics.increment('cache.l2.hit');
+      // Promote to L1
+      this.l1.set(key, l2Value);
+      return l2Value;
+    }
+
+    metrics.increment('cache.miss');
+    return null;
+  }
+
+  async set(key: string, value: T, l1TTL?: number, l2TTL?: number): Promise<void> {
+    // Set in both layers
+    this.l1.set(key, value, { ttl: l1TTL ? l1TTL * 1000 : undefined });
+    await this.l2.set(key, value, l2TTL);
+  }
+
+  async getOrSet(
+    key: string,
+    factory: () => Promise<T>,
+    l1TTL?: number,
+    l2TTL?: number
+  ): Promise<T> {
+    const cached = await this.get(key);
+    if (cached !== null) return cached;
+
+    const value = await factory();
+    await this.set(key, value, l1TTL, l2TTL);
+    return value;
+  }
+
+  async invalidate(key: string): Promise<void> {
+    this.l1.delete(key);
+    await this.l2.del(key);
+  }
+}
+
+// Usage
+const userCache = new MultiLayerCache<User>({
+  l1MaxSize: 1000,
+  l1TTL: 60, // 1 minute in memory
+  l2Prefix: 'users',
+  l2TTL: 3600, // 1 hour in Redis
+});
+
+async function getUser(id: string): Promise<User | null> {
+  return userCache.getOrSet(
+    `user:${id}`,
+    () => db.user.findUnique({ where: { id } })
+  );
+}
+```
+
+## Use Cases
+
+### 1. API Response Caching
+
+```typescript
+// Middleware for caching API responses
+function apiCache(options: {
+  ttl: number;
+  keyGenerator?: (req: Request) => string;
+  condition?: (req: Request) => boolean;
+}) {
+  const cache = new CacheService('api');
+
+  return async (req: Request, res: Response, next: NextFunction) => {
+    // Skip caching for non-GET or if condition fails
+    if (req.method !== 'GET' || (options.condition && !options.condition(req))) {
+      return next();
+    }
+
+    const key = options.keyGenerator?.(req) || req.originalUrl;
+    const cached = await cache.get<{ body: any; headers: Record<string, string> }>(key);
+
+    if (cached) {
+      Object.entries(cached.headers).forEach(([k, v]) => res.set(k, v));
+      res.set('X-Cache', 'HIT');
+      return res.json(cached.body);
+    }
+
+    // Capture response
+    const originalJson = res.json.bind(res);
+    res.json = (body: any) => {
+      cache.set(key, { body, headers: res.getHeaders() as any }, options.ttl);
+      res.set('X-Cache', 'MISS');
+      return originalJson(body);
+    };
+
+    next();
+  };
+}
+
+// Apply to routes
+app.get('/api/products', apiCache({ ttl: 300 }), getProducts);
+```
+
+### 2. Session Caching
+
+```typescript
+// Redis session store
+import session from 'express-session';
+import RedisStore from 'connect-redis';
+
+app.use(session({
+  store: new RedisStore({ client: redis }),
+  secret: process.env.SESSION_SECRET!,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  },
+}));
+```
+
+## Best Practices
+
+### Do's
+
+- **Cache close to the user** - Browser > CDN > App > Database
+- **Use appropriate TTLs** - Balance freshness vs. performance
+- **Implement cache warming** - Pre-populate for critical paths
+- **Monitor hit rates** - Target > 90% for hot data
+- **Plan invalidation** - Know when and how to invalidate
+- **Use consistent hashing** - For distributed caches
+
+### Don'ts
+
+- Don't cache sensitive data in shared caches
+- Don't forget cache key namespacing
+- Don't ignore cache stampede scenarios
+- Don't cache errors with long TTLs
+- Don't skip monitoring
+- Don't assume cache is always available
+
+### Cache Strategy Checklist
+
+```markdown
+## Cache Implementation Checklist
+
+### Design
+- [ ] Identified cacheable data
+- [ ] Defined appropriate TTLs
+- [ ] Planned invalidation strategy
+- [ ] Considered cache layers
+
+### Implementation
+- [ ] Added cache-aside logic
+- [ ] Implemented stampede prevention
+- [ ] Set up monitoring
+- [ ] Added cache headers
+
+### Operations
+- [ ] Monitoring hit/miss ratios
+- [ ] Alerting on cache failures
+- [ ] Regular cache analysis
+- [ ] Invalidation testing
+```
+
+## Related Skills
+
+- **redis** - Redis operations
+- **performance-profiling** - Measuring cache impact
+- **api-architecture** - API caching patterns
+
+## Reference Resources
+
+- [Redis Documentation](https://redis.io/documentation)
+- [HTTP Caching MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Caching)
+- [Cloudflare Caching](https://developers.cloudflare.com/cache/)
+- [Cache-Control Header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control)

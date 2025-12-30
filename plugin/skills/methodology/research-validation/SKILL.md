@@ -1,0 +1,668 @@
+---
+name: research-validation
+description: Multi-source validation framework for technology decisions, best practices verification, and evidence-based implementation
+category: methodology
+triggers:
+  - research validation
+  - source verification
+  - technology selection
+  - best practices
+  - evidence based
+  - multi-source
+  - fact checking
+---
+
+# Research Validation
+
+Systematic **multi-source validation** for technology decisions and implementation approaches. This skill provides frameworks for verifying information, assessing source credibility, and making evidence-based decisions.
+
+## Purpose
+
+Avoid costly mistakes from outdated or incorrect information:
+
+- Validate technology recommendations before implementation
+- Cross-reference best practices across multiple sources
+- Assess source credibility and recency
+- Identify consensus and contradictions
+- Document confidence levels and uncertainties
+- Make informed decisions with proper evidence
+
+## Features
+
+### 1. Source Credibility Framework
+
+```markdown
+## Source Credibility Tiers
+
+### Tier 1: Official Sources (Highest Authority)
+- Official documentation
+- RFC/specification documents
+- Vendor technical blogs
+- Official GitHub repositories
+- Academic papers (peer-reviewed)
+
+**Credibility Score: 9-10/10**
+**Typical Recency: Updated with releases**
+
+### Tier 2: Trusted Community Sources
+- Stack Overflow (high-vote answers)
+- Popular technical blogs (known authors)
+- Conference talks (major conferences)
+- Well-maintained GitHub projects
+- Technical books (recent editions)
+
+**Credibility Score: 7-8/10**
+**Typical Recency: Varies, check dates**
+
+### Tier 3: Community Sources
+- Medium/Dev.to articles
+- Reddit discussions
+- YouTube tutorials
+- Personal blogs
+- Forum posts
+
+**Credibility Score: 4-6/10**
+**Typical Recency: Often outdated**
+
+### Tier 4: Unverified Sources
+- AI-generated content (uncited)
+- Outdated documentation
+- Anonymous posts
+- Marketing content
+- SEO-optimized articles
+
+**Credibility Score: 1-3/10**
+**Typical Recency: Unknown**
+```
+
+### 2. Validation Process
+
+```typescript
+interface ResearchValidation {
+  topic: string;
+  sources: ValidatedSource[];
+  consensus: ConsensusAnalysis;
+  contradictions: Contradiction[];
+  confidence: ConfidenceAssessment;
+  recommendation: string;
+}
+
+interface ValidatedSource {
+  url: string;
+  title: string;
+  author?: string;
+  date: Date;
+  tier: 1 | 2 | 3 | 4;
+  keyFindings: string[];
+  relevance: number; // 0-1
+  bias?: string;
+}
+
+// Validation workflow
+async function validateTechnologyDecision(
+  topic: string,
+  question: string
+): Promise<ResearchValidation> {
+  // Step 1: Gather sources from multiple tiers
+  const sources = await gatherSources(topic, {
+    minTier1: 1,  // At least 1 official source
+    minTier2: 2,  // At least 2 trusted sources
+    maxSources: 10,
+  });
+
+  // Step 2: Extract and categorize findings
+  const findings = sources.flatMap(s =>
+    s.keyFindings.map(f => ({
+      finding: f,
+      source: s,
+      confidence: calculateFindingConfidence(s, f),
+    }))
+  );
+
+  // Step 3: Analyze consensus
+  const consensus = analyzeConsensus(findings);
+
+  // Step 4: Identify contradictions
+  const contradictions = findContradictions(findings);
+
+  // Step 5: Calculate overall confidence
+  const confidence = assessConfidence({
+    sources,
+    consensus,
+    contradictions,
+    recency: assessRecency(sources),
+  });
+
+  // Step 6: Generate recommendation
+  const recommendation = generateRecommendation({
+    question,
+    consensus,
+    confidence,
+    contradictions,
+  });
+
+  return {
+    topic,
+    sources,
+    consensus,
+    contradictions,
+    confidence,
+    recommendation,
+  };
+}
+
+// Consensus analysis
+function analyzeConsensus(findings: Finding[]): ConsensusAnalysis {
+  // Group similar findings
+  const clusters = clusterFindings(findings);
+
+  // Find majority opinion
+  const majorityCluster = clusters.reduce((max, c) =>
+    c.findings.length > max.findings.length ? c : max
+  );
+
+  // Calculate agreement percentage
+  const agreementRatio = majorityCluster.findings.length / findings.length;
+
+  return {
+    level: agreementRatio > 0.8 ? 'strong' :
+           agreementRatio > 0.6 ? 'moderate' : 'weak',
+    majorityPosition: majorityCluster.summary,
+    agreementPercentage: agreementRatio * 100,
+    minorityPositions: clusters
+      .filter(c => c !== majorityCluster)
+      .map(c => c.summary),
+    evidenceStrength: calculateEvidenceStrength(majorityCluster),
+  };
+}
+```
+
+### 3. Technology Selection Matrix
+
+```markdown
+## Technology Selection Validation Framework
+
+### Step 1: Define Requirements
+| Category | Requirement | Priority | Weight |
+|----------|-------------|----------|--------|
+| Performance | < 100ms response time | Must | 10 |
+| Scalability | 10k concurrent users | Must | 10 |
+| Learning curve | Team familiar in 2 weeks | Should | 7 |
+| Community | Active community support | Should | 6 |
+| Maintenance | Regular updates | Should | 5 |
+
+### Step 2: Gather Evidence for Each Option
+
+```typescript
+interface TechnologyEvaluation {
+  technology: string;
+  criteria: CriteriaScore[];
+  sources: ValidatedSource[];
+  risks: Risk[];
+  totalScore: number;
+}
+
+function evaluateTechnology(
+  tech: string,
+  requirements: Requirement[]
+): TechnologyEvaluation {
+  const scores: CriteriaScore[] = [];
+
+  for (const req of requirements) {
+    // Research this specific criteria
+    const evidence = researchCriteria(tech, req.category);
+
+    scores.push({
+      criteria: req.category,
+      score: calculateScore(evidence),
+      evidence: evidence.sources,
+      confidence: evidence.confidence,
+      notes: evidence.notes,
+    });
+  }
+
+  return {
+    technology: tech,
+    criteria: scores,
+    sources: aggregateSources(scores),
+    risks: identifyRisks(scores),
+    totalScore: calculateWeightedScore(scores, requirements),
+  };
+}
+```
+
+### Step 3: Comparison Template
+
+| Criteria | Option A | Option B | Option C |
+|----------|----------|----------|----------|
+| Performance | 9/10 (✓ Verified) | 7/10 (⚠ Limited data) | 8/10 (✓ Verified) |
+| Scalability | 8/10 (✓ Verified) | 9/10 (✓ Verified) | 6/10 (⚠ Concerns) |
+| Learning curve | 7/10 (△ Mixed) | 5/10 (✓ Verified) | 8/10 (✓ Verified) |
+| **Total** | **24/30** | **21/30** | **22/30** |
+
+### Step 4: Risk Assessment
+- Option A: Low risk, well-established
+- Option B: Medium risk, steeper learning curve
+- Option C: Medium risk, scalability concerns need mitigation
+```
+
+### 4. Best Practice Verification
+
+```typescript
+interface BestPracticeValidation {
+  practice: string;
+  status: 'verified' | 'outdated' | 'contested' | 'context-dependent';
+  context: string[];
+  sources: ValidatedSource[];
+  alternatives?: string[];
+  updatedPractice?: string;
+}
+
+// Verify if a best practice is still valid
+async function verifyBestPractice(
+  practice: string,
+  context: {
+    technology: string;
+    version?: string;
+    useCase?: string;
+  }
+): Promise<BestPracticeValidation> {
+  // Search for current recommendations
+  const currentSources = await searchOfficialDocs(
+    context.technology,
+    practice,
+    { recency: '2years' }
+  );
+
+  // Check for deprecation notices
+  const deprecationInfo = await checkDeprecations(
+    context.technology,
+    practice
+  );
+
+  // Search for community discussion
+  const communityDiscussion = await searchCommunity(
+    practice,
+    context.technology
+  );
+
+  // Analyze findings
+  const isDeprecated = deprecationInfo.deprecated;
+  const hasAlternative = deprecationInfo.replacement !== null;
+  const communityConsensus = analyzeSentiment(communityDiscussion);
+
+  // Determine status
+  let status: BestPracticeValidation['status'];
+
+  if (isDeprecated) {
+    status = 'outdated';
+  } else if (communityConsensus.mixed) {
+    status = 'contested';
+  } else if (communityConsensus.contextual) {
+    status = 'context-dependent';
+  } else {
+    status = 'verified';
+  }
+
+  return {
+    practice,
+    status,
+    context: identifyValidContexts(currentSources, communityDiscussion),
+    sources: [...currentSources, ...communityDiscussion],
+    alternatives: hasAlternative ? [deprecationInfo.replacement] : undefined,
+    updatedPractice: status === 'outdated'
+      ? generateUpdatedPractice(practice, deprecationInfo)
+      : undefined,
+  };
+}
+
+// Example usage
+const validation = await verifyBestPractice(
+  'Use componentWillMount for data fetching',
+  { technology: 'React', version: '18' }
+);
+
+// Result:
+// {
+//   practice: 'Use componentWillMount for data fetching',
+//   status: 'outdated',
+//   context: ['Legacy React class components only'],
+//   alternatives: ['useEffect hook', 'React Query', 'SWR'],
+//   updatedPractice: 'Use useEffect hook or data fetching libraries...'
+// }
+```
+
+### 5. Evidence Documentation
+
+```markdown
+## Evidence Documentation Template
+
+### Research Topic
+[Clear statement of what is being researched]
+
+### Research Question
+[Specific question to be answered]
+
+---
+
+### Source 1: [Title]
+**URL:** [link]
+**Author:** [name or organization]
+**Date:** [publication date]
+**Tier:** [1-4]
+**Relevance:** [High/Medium/Low]
+
+**Key Findings:**
+1. [Finding 1]
+2. [Finding 2]
+
+**Limitations:**
+- [Any biases or limitations]
+
+**Quote:** "[Relevant quote if applicable]"
+
+---
+
+### Source 2: [Title]
+[Same structure...]
+
+---
+
+### Consensus Analysis
+
+**Agreement Level:** [Strong/Moderate/Weak/None]
+
+**Majority Position:**
+[Summary of what most sources agree on]
+
+**Minority Positions:**
+1. [Alternative view 1]
+2. [Alternative view 2]
+
+**Contradictions Found:**
+| Topic | Source A Says | Source B Says | Resolution |
+|-------|---------------|---------------|------------|
+| [topic] | [position] | [position] | [how resolved] |
+
+---
+
+### Confidence Assessment
+
+**Overall Confidence:** [High/Medium/Low]
+
+**Factors:**
+- Source quality: [assessment]
+- Recency: [assessment]
+- Consensus level: [assessment]
+- Evidence completeness: [assessment]
+
+**Uncertainties:**
+1. [Uncertainty 1]
+2. [Uncertainty 2]
+
+---
+
+### Recommendation
+
+**Decision:** [Clear recommendation]
+
+**Rationale:**
+[Why this recommendation based on evidence]
+
+**Caveats:**
+- [Caveat 1]
+- [Caveat 2]
+
+**Action Items:**
+1. [Next step 1]
+2. [Next step 2]
+```
+
+### 6. Recency Validation
+
+```typescript
+interface RecencyAssessment {
+  sourceAge: 'current' | 'recent' | 'dated' | 'outdated';
+  technologyVersion: {
+    sourceVersion?: string;
+    currentVersion: string;
+    versionsBehind: number;
+  };
+  significantChanges: string[];
+  recommendation: string;
+}
+
+// Assess if source information is still current
+async function assessRecency(
+  source: ValidatedSource,
+  technology: string
+): Promise<RecencyAssessment> {
+  const currentVersion = await getCurrentVersion(technology);
+  const sourceVersion = extractVersionFromSource(source);
+
+  // Get changelog between versions
+  const changes = sourceVersion
+    ? await getChangesBetweenVersions(technology, sourceVersion, currentVersion)
+    : [];
+
+  // Identify breaking changes
+  const breakingChanges = changes.filter(c => c.breaking);
+  const relevantChanges = changes.filter(c =>
+    c.affects.some(a => source.keyFindings.some(f => f.includes(a)))
+  );
+
+  // Calculate age
+  const ageInMonths = monthsSince(source.date);
+
+  let sourceAge: RecencyAssessment['sourceAge'];
+  if (ageInMonths < 6 && breakingChanges.length === 0) {
+    sourceAge = 'current';
+  } else if (ageInMonths < 12 && relevantChanges.length < 3) {
+    sourceAge = 'recent';
+  } else if (ageInMonths < 24) {
+    sourceAge = 'dated';
+  } else {
+    sourceAge = 'outdated';
+  }
+
+  return {
+    sourceAge,
+    technologyVersion: {
+      sourceVersion,
+      currentVersion,
+      versionsBehind: calculateVersionsBehind(sourceVersion, currentVersion),
+    },
+    significantChanges: relevantChanges.map(c => c.description),
+    recommendation: generateRecencyRecommendation(sourceAge, relevantChanges),
+  };
+}
+
+// Version change impact analysis
+function analyzeVersionImpact(
+  findings: string[],
+  changes: VersionChange[]
+): VersionImpactAnalysis {
+  const impactedFindings: ImpactedFinding[] = [];
+
+  for (const finding of findings) {
+    const relatedChanges = changes.filter(c =>
+      c.keywords.some(k => finding.toLowerCase().includes(k.toLowerCase()))
+    );
+
+    if (relatedChanges.length > 0) {
+      impactedFindings.push({
+        finding,
+        changes: relatedChanges,
+        severity: relatedChanges.some(c => c.breaking) ? 'breaking' : 'minor',
+        updatedGuidance: generateUpdatedGuidance(finding, relatedChanges),
+      });
+    }
+  }
+
+  return {
+    impactedFindings,
+    unaffectedFindings: findings.filter(f =>
+      !impactedFindings.some(i => i.finding === f)
+    ),
+    overallImpact: impactedFindings.some(f => f.severity === 'breaking')
+      ? 'significant'
+      : impactedFindings.length > 0
+        ? 'moderate'
+        : 'none',
+  };
+}
+```
+
+## Use Cases
+
+### 1. Framework Selection
+
+```markdown
+## Research: React vs Vue vs Svelte for New Project
+
+### Question
+Which frontend framework best fits our team's needs for a dashboard application?
+
+### Requirements
+- Performance: High (real-time data updates)
+- Learning curve: Moderate (team knows React basics)
+- Ecosystem: Rich (need charting, data tables)
+- Long-term support: Essential
+
+### Source Summary
+
+| Source | Type | Finding | Confidence |
+|--------|------|---------|------------|
+| React Docs | Official | Mature ecosystem, concurrent features | High |
+| Vue Docs | Official | Easier learning curve, good performance | High |
+| Svelte Docs | Official | Best performance, smaller bundle | High |
+| State of JS 2023 | Survey | React most used, Svelte highest satisfaction | Medium |
+| Tech Radar | Analysis | All recommended, React for large teams | Medium |
+
+### Consensus
+- All frameworks capable for the use case
+- React has largest ecosystem
+- Vue has gentler learning curve
+- Svelte has best performance but smaller ecosystem
+
+### Recommendation
+**React** - Team familiarity + ecosystem maturity outweighs marginal performance gains from alternatives.
+
+### Confidence: High
+- Multiple official sources consulted
+- Aligned with industry trends
+- Team context factored in
+```
+
+### 2. Security Best Practice Verification
+
+```typescript
+// Verify security recommendation
+const validation = await verifyBestPractice(
+  'Use bcrypt for password hashing',
+  { technology: 'Node.js', useCase: 'authentication' }
+);
+
+// Result includes:
+// - Current status: verified (still best practice)
+// - Context: Web applications, when not using managed auth
+// - Alternatives: Argon2 (newer, may be better for some cases)
+// - Sources: OWASP, Node.js security best practices, etc.
+```
+
+### 3. API Design Decision
+
+```markdown
+## Research: REST vs GraphQL for Mobile API
+
+### Evidence Summary
+
+**For REST:**
+- Official: HTTP caching well-supported
+- Community: Simpler for CRUD operations
+- Benchmarks: Lower overhead per request
+
+**For GraphQL:**
+- Official: Reduces over/under-fetching
+- Community: Better for complex, nested data
+- Benchmarks: Fewer round trips for complex queries
+
+### Context Analysis
+Our mobile app needs:
+- Multiple related entities per screen ✓ GraphQL advantage
+- Real-time updates ✓ Both support (subscriptions/SSE)
+- Caching required ✓ REST advantage with standard caching
+
+### Recommendation
+**REST with BFF pattern** - Simpler caching meets our CDN strategy. Create Backend-for-Frontend to aggregate data.
+
+### Confidence: Medium
+- Trade-offs are context-dependent
+- Team experience with REST
+- Could revisit if complexity increases
+```
+
+## Best Practices
+
+### Do's
+
+- **Use minimum 3 sources** - Never rely on single source
+- **Prefer official docs** - Start with Tier 1 sources
+- **Check publication dates** - Technology moves fast
+- **Document uncertainties** - Be explicit about unknowns
+- **Consider context** - Best practices vary by situation
+- **Verify version compatibility** - Check against your version
+
+### Don'ts
+
+- Don't trust outdated sources without verification
+- Don't ignore minority opinions without investigation
+- Don't skip official documentation
+- Don't assume consensus means correctness
+- Don't let recency bias override quality
+- Don't ignore context in recommendations
+
+### Validation Checklist
+
+```markdown
+## Pre-Implementation Validation Checklist
+
+### Source Quality
+- [ ] At least 1 official/Tier 1 source consulted
+- [ ] At least 2 additional credible sources
+- [ ] Publication dates within 2 years
+- [ ] Authors/organizations verified
+
+### Analysis
+- [ ] Consensus level assessed
+- [ ] Contradictions identified and resolved
+- [ ] Context applicability verified
+- [ ] Version compatibility confirmed
+
+### Documentation
+- [ ] Sources documented with links
+- [ ] Key findings summarized
+- [ ] Confidence level stated
+- [ ] Uncertainties noted
+
+### Decision
+- [ ] Recommendation clearly stated
+- [ ] Rationale documented
+- [ ] Alternatives considered
+- [ ] Risks identified
+```
+
+## Related Skills
+
+- **brainstorming** - Generating options to research
+- **writing-plans** - Documenting research findings
+- **sequential-thinking** - Structured research process
+- **problem-solving** - Applying research to solutions
+
+## Reference Resources
+
+- [How to Read a Paper](https://web.stanford.edu/class/ee384m/Handouts/HowtoReadPaper.pdf)
+- [ThoughtWorks Technology Radar](https://www.thoughtworks.com/radar)
+- [State of JS Survey](https://stateofjs.com/)
+- [DORA Research](https://dora.dev/research/)
+- [Google Scholar](https://scholar.google.com/) - For academic sources
