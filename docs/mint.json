@@ -255,7 +255,8 @@
     {
       "group": "Skills Overview",
       "pages": [
-        "skills/overview"
+        "skills/overview",
+        "skills/all"
       ]
     },
     {
