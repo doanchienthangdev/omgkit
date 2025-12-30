@@ -100,7 +100,7 @@
       ]
     },
     {
-      "group": "Overview",
+      "group": "Agents Overview",
       "pages": [
         "agents/overview"
       ]
@@ -154,7 +154,7 @@
       ]
     },
     {
-      "group": "Overview",
+      "group": "Commands Overview",
       "pages": [
         "commands/overview"
       ]
@@ -258,7 +258,7 @@
       ]
     },
     {
-      "group": "Overview",
+      "group": "Skills Overview",
       "pages": [
         "skills/overview"
       ]
