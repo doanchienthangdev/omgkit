@@ -27,13 +27,11 @@ jobs:
         run: npm test
 
   publish-npm:
-    name: Publish to npm (OIDC)
+    name: Publish to npm
     needs: test
     runs-on: ubuntu-latest
-    environment: omg-npm-publish  # Must match npm trusted publisher config
     permissions:
       contents: read
-      id-token: write  # Required for OIDC trusted publishing
 
     steps:
       - name: Checkout repository
@@ -63,9 +61,10 @@ jobs:
             echo "Version already matches: $CURRENT_VERSION"
           fi
 
-      - name: Publish to npm with provenance
-        run: npm publish --access public --provenance
-        # No NODE_AUTH_TOKEN needed - uses OIDC!
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   create-release:
     name: Create GitHub Release
