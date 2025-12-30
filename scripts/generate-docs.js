@@ -736,7 +736,7 @@ OMGKIT provides **54 slash commands** covering the entire development lifecycle.
   <Card title="23" icon="robot">
     Backing Agents
   </Card>
-  <Card title="9" icon="sliders">
+  <Card title="10" icon="sliders">
     Mode-Aware
   </Card>
 </CardGroup>
@@ -888,7 +888,7 @@ Switch modes with \`/mode <mode-name>\`.
     23 agents that power these commands
   </Card>
   <Card title="Modes" icon="sliders" href="/modes/overview">
-    9 behavioral modes
+    10 behavioral modes
   </Card>
   <Card title="Skills" icon="brain" href="/skills/overview">
     43 domain expertise modules
@@ -1160,7 +1160,7 @@ skills:
     54 commands available
   </Card>
   <Card title="Modes" icon="sliders" href="/modes/overview">
-    9 behavioral modes
+    10 behavioral modes
   </Card>
 </CardGroup>
 `;
@@ -1260,7 +1260,7 @@ You can temporarily switch modes for specific commands, then switch back to your
 
 <CardGroup cols={2}>
   <Card title="All Modes" icon="sliders" href="/modes/overview">
-    See all 9 modes
+    See all 10 modes
   </Card>
   <Card title="Configuration" icon="gear" href="/getting-started/configuration">
     Configure default mode
@@ -1286,7 +1286,7 @@ You can temporarily switch modes for specific commands, then switch back to your
   // Generate overview page with enhanced structure
   const overviewDoc = `---
 title: "Modes Overview"
-description: "9 behavioral modes for different development contexts"
+description: "10 behavioral modes for different development contexts"
 icon: "sliders"
 ---
 
@@ -1295,7 +1295,7 @@ Modes change how OMGKIT behaves. Switch modes to **optimize for different tasks*
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="9" icon="sliders">
+  <Card title="10" icon="sliders">
     Total Modes
   </Card>
   <Card title="4" icon="folder">
@@ -1313,7 +1313,7 @@ Modes change how OMGKIT behaves. Switch modes to **optimize for different tasks*
 
 <CardGroup cols={2}>
   <Card title="Standard Modes" icon="sliders" href="#standard">
-    **${(modesByCategory['Standard'] || []).length} modes** - Everyday development (Default, Implementation, Review)
+    **${(modesByCategory['Standard'] || []).length} modes** - Everyday development (Default, Implementation, Review, Tutor)
   </Card>
   <Card title="Creative Modes" icon="lightbulb" href="#creative">
     **${(modesByCategory['Creative'] || []).length} modes** - Exploration and analysis (Brainstorm, Deep Research)
@@ -1343,6 +1343,9 @@ Modes change how OMGKIT behaves. Switch modes to **optimize for different tasks*
   </Accordion>
   <Accordion title="I want less confirmation prompts">
     Use **Autonomous Mode** - Faster execution, less interruption.
+  </Accordion>
+  <Accordion title="I want to learn while working">
+    Use **Tutor Mode** - Deep explanations with Feynman technique and Socratic reasoning.
   </Accordion>
 </AccordionGroup>
 

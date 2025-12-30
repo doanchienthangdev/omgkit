@@ -183,9 +183,9 @@ describe('Documentation Generator', () => {
       expect(skillsOverview).toContain('Omega');
     });
 
-    it('should generate 9 mode docs', () => {
+    it('should generate 10 mode docs', () => {
       const modeOverview = readFileSync(join(DOCS_DIR, 'modes/overview.mdx'), 'utf8');
-      expect(modeOverview).toContain('9');
+      expect(modeOverview).toContain('10');
     });
   });
 
