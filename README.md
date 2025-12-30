@@ -1,5 +1,9 @@
 # 🔮 OMGKIT - Omega-Level Development Kit
 
+[![CI](https://github.com/doanchienthangdev/omgkit/actions/workflows/ci.yml/badge.svg)](https://github.com/doanchienthangdev/omgkit/actions/workflows/ci.yml)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 > **AI Team System for Claude Code**
 > 23 Agents • 54 Commands • 43 Skills • 9 Modes
 > *"Think Omega. Build Omega. Be Omega."*
