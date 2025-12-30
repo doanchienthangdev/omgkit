@@ -1,0 +1,285 @@
+---
+name: managing-database-migrations
+description: AI agent implements safe database migrations with zero-downtime strategies, rollback plans, and expand-contract patterns. Use when creating migrations, deploying schema changes, or implementing zero-downtime database updates.
+category: databases
+triggers:
+  - migration
+  - schema change
+  - database migration
+  - zero downtime
+  - rollback
+  - prisma migrate
+  - flyway
+---
+
+# Managing Database Migrations
+
+## Purpose
+
+Implement safe, reversible database migrations for production environments:
+
+- Apply expand-contract pattern for zero-downtime changes
+- Design rollback strategies for every migration
+- Handle large table alterations safely
+- Integrate migrations with CI/CD pipelines
+- Test migrations before production deployment
+
+## Quick Start
+
+```bash
+# Prisma
+npx prisma migrate dev --name add_user_roles
+npx prisma migrate deploy  # Production
+
+# TypeORM
+npm run typeorm migration:generate -- -n AddUserRoles
+npm run typeorm migration:run
+
+# Raw SQL with naming convention
+# migrations/20241230_001_add_user_roles.sql
+```
+
+```typescript
+// Prisma migration example
+// prisma/migrations/20241230_add_user_roles/migration.sql
+ALTER TABLE "users" ADD COLUMN "role" VARCHAR(50) DEFAULT 'user';
+CREATE INDEX "idx_users_role" ON "users"("role");
+```
+
+## Features
+
+| Feature | Strategy | When to Use |
+|---------|----------|-------------|
+| Add Column | Add nullable, then backfill, then NOT NULL | Always safe |
+| Remove Column | Stop using, deploy, then remove | Expand-contract |
+| Rename Column | Add new, copy data, remove old | Zero-downtime required |
+| Change Type | Add new column, migrate, swap | Data transformation |
+| Add Index | CREATE CONCURRENTLY | Large tables (>1M rows) |
+| Drop Table | Rename first, drop after verification | Reversible delete |
+
+## Common Patterns
+
+### Expand-Contract Pattern
+
+```sql
+-- EXPAND: Add new structure (backward compatible)
+-- Migration 1: Add new column
+ALTER TABLE users ADD COLUMN full_name VARCHAR(255);
+
+-- Application: Write to BOTH columns
+UPDATE users SET full_name = first_name || ' ' || last_name;
+
+-- Deploy application that reads from new column
+
+-- CONTRACT: Remove old structure
+-- Migration 2: (after app deployed)
+ALTER TABLE users DROP COLUMN first_name;
+ALTER TABLE users DROP COLUMN last_name;
+```
+
+### Safe Column Addition
+
+```sql
+-- Step 1: Add nullable column
+ALTER TABLE orders ADD COLUMN shipping_method VARCHAR(50);
+
+-- Step 2: Backfill in batches (avoid locking)
+UPDATE orders SET shipping_method = 'standard'
+WHERE id IN (SELECT id FROM orders WHERE shipping_method IS NULL LIMIT 10000);
+
+-- Step 3: Add NOT NULL constraint
+ALTER TABLE orders ALTER COLUMN shipping_method SET NOT NULL;
+ALTER TABLE orders ALTER COLUMN shipping_method SET DEFAULT 'standard';
+```
+
+### Safe Column Removal
+
+```sql
+-- Step 1: Stop application from using column
+-- (Deploy code that no longer reads/writes to column)
+
+-- Step 2: Drop default and constraints
+ALTER TABLE users ALTER COLUMN legacy_field DROP DEFAULT;
+ALTER TABLE users ALTER COLUMN legacy_field DROP NOT NULL;
+
+-- Step 3: Remove column (after verification period)
+ALTER TABLE users DROP COLUMN legacy_field;
+```
+
+### Safe Index Creation (Large Tables)
+
+```sql
+-- WRONG: Locks table for duration
+CREATE INDEX idx_orders_status ON orders(status);
+
+-- CORRECT: Non-blocking for PostgreSQL
+CREATE INDEX CONCURRENTLY idx_orders_status ON orders(status);
+
+-- Note: CONCURRENTLY cannot run in transaction
+-- For Prisma, use raw SQL migration:
+-- prisma/migrations/xxx/migration.sql
+-- /* Disable transaction for this migration */
+CREATE INDEX CONCURRENTLY idx_orders_status ON orders(status);
+```
+
+### Prisma Migration Workflow
+
+```bash
+# Development: Create and apply migration
+npx prisma migrate dev --name add_user_roles
+
+# Preview SQL without applying
+npx prisma migrate diff \
+  --from-schema-datamodel prisma/schema.prisma \
+  --to-schema-datamodel prisma/schema.prisma.new \
+  --script
+
+# Production deployment
+npx prisma migrate deploy
+
+# Reset for development (DESTRUCTIVE)
+npx prisma migrate reset
+```
+
+```prisma
+// schema.prisma - Example with relations
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  role      Role     @default(USER)
+  posts     Post[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+```
+
+### TypeORM Migration
+
+```typescript
+// migrations/1703936400000-AddUserRoles.ts
+import { MigrationInterface, QueryRunner } from 'typeorm';
+
+export class AddUserRoles1703936400000 implements MigrationInterface {
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
+      ALTER TABLE "users" ADD COLUMN "role" VARCHAR(50) DEFAULT 'user'
+    `);
+    await queryRunner.query(`
+      CREATE INDEX "idx_users_role" ON "users"("role")
+    `);
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP INDEX "idx_users_role"`);
+    await queryRunner.query(`ALTER TABLE "users" DROP COLUMN "role"`);
+  }
+}
+```
+
+### Data Migration Pattern
+
+```typescript
+// Separate data migration from schema migration
+export class MigrateUserNames1703936500000 implements MigrationInterface {
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    // Batch process to avoid memory issues
+    const batchSize = 1000;
+    let offset = 0;
+
+    while (true) {
+      const result = await queryRunner.query(`
+        UPDATE users
+        SET full_name = first_name || ' ' || last_name
+        WHERE full_name IS NULL
+        LIMIT ${batchSize}
+      `);
+
+      if (result.affectedRows === 0) break;
+      offset += batchSize;
+
+      // Optional: Add delay to reduce load
+      await new Promise(r => setTimeout(r, 100));
+    }
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    // Data migrations often aren't reversible
+    console.log('Data migration rollback: manual intervention required');
+  }
+}
+```
+
+## Use Cases
+
+- Adding new features requiring schema changes
+- Refactoring database structure safely
+- Splitting or merging tables
+- Changing column data types
+- Large-scale data migrations
+
+## Best Practices
+
+| Do | Avoid |
+|----|-------|
+| Test migrations on production-like data | Testing only on empty databases |
+| Use expand-contract for breaking changes | Direct column renames in production |
+| Create CONCURRENTLY for large table indexes | Blocking index creation on live tables |
+| Batch large data updates | Updating millions of rows in one transaction |
+| Include rollback in every migration | Forward-only migrations without escape |
+| Run migrations in CI before deploy | Manual migration execution |
+| Version control all migrations | Modifying applied migrations |
+| Separate schema and data migrations | Mixing DDL and large DML in one migration |
+
+## Migration Checklist
+
+```
+Pre-Migration:
+[ ] Migration tested on staging with production data volume
+[ ] Rollback script written and tested
+[ ] Estimated execution time documented
+[ ] Backup verified
+
+During Migration:
+[ ] Monitor database locks and connections
+[ ] Check application error rates
+[ ] Verify migration progress
+
+Post-Migration:
+[ ] Verify data integrity
+[ ] Check application functionality
+[ ] Monitor performance metrics
+[ ] Document completion
+```
+
+## CI/CD Integration
+
+```yaml
+# GitHub Actions example
+- name: Run Migrations
+  run: |
+    # Wait for healthy database
+    until pg_isready -h $DB_HOST; do sleep 1; done
+
+    # Run migrations with timeout
+    timeout 600 npx prisma migrate deploy
+
+    # Verify migration status
+    npx prisma migrate status
+  env:
+    DATABASE_URL: ${{ secrets.DATABASE_URL }}
+```
+
+## Related Skills
+
+See also these related skill documents:
+
+- **designing-database-schemas** - Schema design principles
+- **managing-databases** - DBA operations and maintenance
+- **optimizing-databases** - Performance tuning

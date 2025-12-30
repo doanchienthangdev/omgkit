@@ -1,0 +1,327 @@
+---
+title: "building-with-supabase"
+description: "AI agent builds full-stack applications with Supabase PostgreSQL, authentication, Row Level Security, Edge Functions, and real-time subscriptions. Use when building apps with Supabase, implementing RLS policies, or setting up Supabase Auth."
+icon: "database"
+---
+
+<Info>
+  **Category:** Databases
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+AI agent builds full-stack applications with Supabase PostgreSQL, authentication, Row Level Security, Edge Functions, and real-time subscriptions. Use when building apps with Supabase, implementing RLS policies, or setting up Supabase Auth.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Building with Supabase
+
+## Purpose
+
+Build secure, scalable applications using Supabase's PostgreSQL platform:
+
+- Design tables with proper Row Level Security (RLS)
+- Implement authentication flows (email, OAuth, magic link)
+- Create real-time subscriptions for live updates
+- Build Edge Functions for serverless logic
+- Manage file storage with security policies
+
+## Quick Start
+
+```typescript
+// Initialize Supabase client
+import { createClient } from '@supabase/supabase-js';
+import { Database } from './types/supabase';
+
+export const supabase = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// Server-side with service role (bypasses RLS)
+import { createClient } from '@supabase/supabase-js';
+export const supabaseAdmin = createClient<Database>(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+```
+
+## Features
+
+| Feature | Description | Guide |
+|---------|-------------|-------|
+| PostgreSQL | Full Postgres with extensions (pgvector, PostGIS) | Direct SQL or Supabase client |
+| Row Level Security | Per-row access control policies | Enable RLS + create policies |
+| Authentication | Email, OAuth, magic link, phone OTP | Built-in auth.users table |
+| Real-time | Live database change subscriptions | Channel subscriptions |
+| Edge Functions | Deno serverless functions | TypeScript at edge |
+| Storage | S3-compatible file storage | Buckets with RLS policies |
+
+## Common Patterns
+
+### RLS Policy Patterns
+
+```sql
+-- Enable RLS on table
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+
+-- Owner-based access
+CREATE POLICY "Users can CRUD own posts" ON posts
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Public read, authenticated write
+CREATE POLICY "Anyone can read posts" ON posts
+  FOR SELECT USING (published = true);
+
+CREATE POLICY "Authenticated users can create" ON posts
+  FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Team-based access
+CREATE POLICY "Team members can access" ON documents
+  FOR ALL
+  USING (
+    team_id IN (
+      SELECT team_id FROM team_members
+      WHERE user_id = auth.uid()
+    )
+  );
+
+-- Role-based access using JWT claims
+CREATE POLICY "Admins can do anything" ON users
+  FOR ALL
+  USING (auth.jwt() ->> 'role' = 'admin');
+```
+
+### Authentication Flow
+
+```typescript
+// Sign up with email
+const { data, error } = await supabase.auth.signUp({
+  email: 'user@example.com',
+  password: 'secure-password',
+  options: {
+    data: { full_name: 'John Doe' },  // Custom user metadata
+    emailRedirectTo: 'https://app.com/auth/callback',
+  },
+});
+
+// OAuth sign in
+const { data, error } = await supabase.auth.signInWithOAuth({
+  provider: 'google',
+  options: {
+    redirectTo: 'https://app.com/auth/callback',
+    scopes: 'email profile',
+  },
+});
+
+// Magic link
+const { error } = await supabase.auth.signInWithOtp({
+  email: 'user@example.com',
+  options: { emailRedirectTo: 'https://app.com/auth/callback' },
+});
+
+// Get current user
+const { data: { user } } = await supabase.auth.getUser();
+
+// Sign out
+await supabase.auth.signOut();
+```
+
+### Real-time Subscriptions
+
+```typescript
+// Subscribe to table changes
+const channel = supabase
+  .channel('posts-changes')
+  .on(
+    'postgres_changes',
+    {
+      event: '*',  // INSERT, UPDATE, DELETE, or *
+      schema: 'public',
+      table: 'posts',
+      filter: 'user_id=eq.' + userId,  // Optional filter
+    },
+    (payload) => {
+      console.log('Change:', payload.eventType, payload.new);
+    }
+  )
+  .subscribe();
+
+// Cleanup
+channel.unsubscribe();
+```
+
+### Edge Functions
+
+```typescript
+// supabase/functions/process-webhook/index.ts
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+serve(async (req) => {
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  );
+
+  const { record } = await req.json();
+
+  // Process webhook...
+  await supabase.from('processed').insert({ data: record });
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+});
+```
+
+### Storage with Policies
+
+```sql
+-- Create bucket
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true);
+
+-- Storage policies
+CREATE POLICY "Users can upload own avatar" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'avatars' AND
+    auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+CREATE POLICY "Anyone can view avatars" ON storage.objects
+  FOR SELECT USING (bucket_id = 'avatars');
+```
+
+```typescript
+// Upload file
+const { data, error } = await supabase.storage
+  .from('avatars')
+  .upload(`${userId}/avatar.png`, file, {
+    cacheControl: '3600',
+    upsert: true,
+  });
+
+// Get public URL
+const { data: { publicUrl } } = supabase.storage
+  .from('avatars')
+  .getPublicUrl(`${userId}/avatar.png`);
+```
+
+### Next.js Server Components
+
+```typescript
+// app/api/posts/route.ts
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+
+export async function GET() {
+  const supabase = createRouteHandlerClient({ cookies });
+  const { data: posts } = await supabase.from('posts').select('*');
+  return Response.json(posts);
+}
+
+// Server Component
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+
+export default async function Page() {
+  const supabase = createServerComponentClient({ cookies });
+  const { data: posts } = await supabase.from('posts').select('*');
+  return <PostList posts={posts} />;
+}
+```
+
+## Use Cases
+
+- Building SaaS applications with multi-tenant RLS
+- Real-time collaborative applications
+- Mobile app backends with authentication
+- Serverless APIs with Edge Functions
+- File upload systems with access control
+
+## Best Practices
+
+| Do | Avoid |
+|----|-------|
+| Enable RLS on all tables | Disabling RLS "temporarily" in production |
+| Use `auth.uid()` in policies, not session data | Trusting client-side user ID |
+| Create service role client only server-side | Exposing service role key to client |
+| Use TypeScript types from `supabase gen types` | Manual type definitions |
+| Filter subscriptions to reduce bandwidth | Subscribing to entire tables |
+| Use `supabase db push` for dev, migrations for prod | Pushing directly to production |
+| Set up proper bucket policies | Public buckets for sensitive files |
+| Use `signInWithOAuth` for social auth | Custom OAuth implementations |
+
+## CLI Commands
+
+```bash
+# Local development
+supabase start                      # Start local Supabase
+supabase db reset                   # Reset with migrations + seed
+
+# Migrations
+supabase migration new add_posts    # Create migration
+supabase db push                    # Push to linked project (dev only)
+supabase db diff --use-migra        # Generate migration from diff
+
+# Type generation
+supabase gen types typescript --local > types/supabase.ts
+
+# Edge Functions
+supabase functions serve            # Local development
+supabase functions deploy my-func   # Deploy to production
+```
+
+## Related Skills
+
+See also these related skill documents:
+
+- **designing-database-schemas** - Schema design patterns
+- **managing-database-migrations** - Migration strategies
+- **implementing-oauth** - OAuth flow details
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  supabase:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Databases" icon="database" href="/skills/overview#databases">
+    More databases skills
+  </Card>
+</CardGroup>

@@ -1,0 +1,239 @@
+---
+title: "designing-database-schemas"
+description: "AI agent designs production-grade database schemas with proper normalization, indexing strategies, and data modeling patterns. Use when creating new databases, designing tables, modeling relationships, or reviewing schema architecture."
+icon: "database"
+---
+
+<Info>
+  **Category:** Databases
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+AI agent designs production-grade database schemas with proper normalization, indexing strategies, and data modeling patterns. Use when creating new databases, designing tables, modeling relationships, or reviewing schema architecture.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Designing Database Schemas
+
+## Purpose
+
+Design scalable, maintainable database schemas that balance normalization with query performance:
+
+- Apply normalization principles (1NF-BCNF) appropriately
+- Choose optimal data types and constraints
+- Design efficient indexing strategies
+- Implement common patterns (audit trails, soft deletes, multi-tenancy)
+- Create clear entity relationships
+
+## Quick Start
+
+```sql
+-- Well-designed table with proper constraints
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL UNIQUE,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended', 'deleted')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ  -- Soft delete
+);
+
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_status ON users(status) WHERE deleted_at IS NULL;
+```
+
+## Features
+
+| Feature | Description | Pattern |
+|---------|-------------|---------|
+| Normalization | Eliminate redundancy while maintaining query efficiency | 3NF for OLTP, denormalize for read-heavy |
+| Primary Keys | UUID vs serial, natural vs surrogate keys | UUID for distributed, serial for simple apps |
+| Foreign Keys | Referential integrity with cascade options | CASCADE for owned data, RESTRICT for referenced |
+| Indexes | Query optimization with minimal write overhead | B-tree default, GIN for JSONB/arrays |
+| Constraints | Data integrity at database level | CHECK, UNIQUE, NOT NULL, EXCLUSION |
+| Partitioning | Horizontal scaling for large tables | Range (time), List (category), Hash (even dist) |
+
+## Common Patterns
+
+### Audit Trail Pattern
+
+```sql
+-- Add to every auditable table
+ALTER TABLE orders ADD COLUMN
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_by UUID REFERENCES users(id),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+-- Automatic updated_at trigger
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER orders_updated_at
+  BEFORE UPDATE ON orders
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+```
+
+### Multi-Tenancy (Row-Level)
+
+```sql
+-- Tenant isolation with RLS
+CREATE TABLE projects (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES tenants(id),
+  name VARCHAR(255) NOT NULL,
+  -- Always include tenant_id in indexes
+  UNIQUE (tenant_id, name)
+);
+
+CREATE INDEX idx_projects_tenant ON projects(tenant_id);
+
+-- Row Level Security
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation ON projects
+  USING (tenant_id = current_setting('app.tenant_id')::uuid);
+```
+
+### Polymorphic Associations
+
+```sql
+-- Option 1: Separate junction tables (recommended)
+CREATE TABLE comments (
+  id UUID PRIMARY KEY,
+  body TEXT NOT NULL,
+  author_id UUID REFERENCES users(id)
+);
+
+CREATE TABLE post_comments (
+  comment_id UUID PRIMARY KEY REFERENCES comments(id),
+  post_id UUID NOT NULL REFERENCES posts(id)
+);
+
+CREATE TABLE task_comments (
+  comment_id UUID PRIMARY KEY REFERENCES comments(id),
+  task_id UUID NOT NULL REFERENCES tasks(id)
+);
+
+-- Option 2: JSONB for flexible relations (when schema varies)
+CREATE TABLE activities (
+  id UUID PRIMARY KEY,
+  subject_type VARCHAR(50) NOT NULL,
+  subject_id UUID NOT NULL,
+  metadata JSONB DEFAULT '{}',
+  CHECK (subject_type IN ('post', 'task', 'comment'))
+);
+CREATE INDEX idx_activities_subject ON activities(subject_type, subject_id);
+```
+
+### JSONB for Semi-Structured Data
+
+```sql
+-- Good: Configuration, metadata, varying attributes
+CREATE TABLE products (
+  id UUID PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  base_price DECIMAL(10,2) NOT NULL,
+  attributes JSONB DEFAULT '{}'  -- Color, size, custom fields
+);
+
+CREATE INDEX idx_products_attrs ON products USING GIN (attributes);
+
+-- Query JSONB
+SELECT * FROM products
+WHERE attributes @> '{"color": "red"}'
+  AND (attributes->>'size')::int > 10;
+```
+
+## Use Cases
+
+- Greenfield database design for new applications
+- Schema reviews and optimization recommendations
+- Migration from NoSQL to relational or vice versa
+- Multi-tenant SaaS database architecture
+- Audit and compliance requirements implementation
+
+## Best Practices
+
+| Do | Avoid |
+|----|-------|
+| Use UUID for distributed systems, serial for simple apps | Auto-incrementing IDs exposed to users (enumeration risk) |
+| Apply 3NF for OLTP, denormalize strategically for reads | Over-normalizing lookup tables (country codes, etc.) |
+| Create indexes matching query WHERE/ORDER BY patterns | Indexing every column (write performance penalty) |
+| Use CHECK constraints for enum-like values | Storing booleans as strings or integers |
+| Add NOT NULL unless truly optional | Nullable columns without clear semantics |
+| Prefix indexes with table name: `idx_users_email` | Generic index names like `index1` |
+| Use TIMESTAMPTZ for all timestamps | Storing timestamps without timezone |
+| Design for the 80% use case first | Premature optimization for edge cases |
+
+## Schema Review Checklist
+
+```
+[ ] All tables have primary keys
+[ ] Foreign keys have appropriate ON DELETE actions
+[ ] Indexes exist for all foreign keys
+[ ] Indexes match common query patterns
+[ ] No nullable columns without clear use case
+[ ] Timestamps use TIMESTAMPTZ
+[ ] Audit columns (created_at, updated_at) present
+[ ] Naming follows consistent convention
+[ ] JSONB used only for truly variable schema
+[ ] Partitioning considered for tables > 10M rows
+```
+
+## Related Skills
+
+See also these related skill documents:
+
+- **managing-database-migrations** - Safe schema evolution patterns
+- **optimizing-databases** - Query and index optimization
+- **building-with-supabase** - PostgreSQL with RLS patterns
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  database-schema-design:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Databases" icon="database" href="/skills/overview#databases">
+    More databases skills
+  </Card>
+</CardGroup>
