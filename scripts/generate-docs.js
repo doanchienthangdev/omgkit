@@ -601,7 +601,9 @@ async function generateCommandDocs() {
         const tools = (frontmatter['allowed-tools'] || '').split(',').map(t => t.trim()).filter(Boolean);
 
         // Replace $ARGUMENTS placeholder with argument-hint or generic text
-        const argumentHint = frontmatter['argument-hint'] || '<your input>';
+        // Escape angle brackets for MDX compatibility (they get interpreted as HTML tags)
+        const rawHint = frontmatter['argument-hint'] || '<your input>';
+        const argumentHint = rawHint.replace(/</g, '\\<').replace(/>/g, '\\>');
         const processedBody = body
           .replace(/\$ARGUMENTS/g, argumentHint)
           .replace(/\$\{ARGUMENTS\}/g, argumentHint);
