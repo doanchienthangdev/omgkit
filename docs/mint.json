@@ -298,6 +298,10 @@
         "skills/mongodb",
         "skills/redis",
         "skills/prisma",
+        "skills/supabase",
+        "skills/database-schema-design",
+        "skills/database-migration",
+        "skills/database-management",
         "skills/database-optimization"
       ]
     },
