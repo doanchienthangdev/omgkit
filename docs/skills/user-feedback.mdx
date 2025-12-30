@@ -1,0 +1,215 @@
+---
+title: "user-feedback"
+description: "Collecting and using user feedback - explicit/implicit signals, feedback analysis, improvement loops, A/B testing. Use when improving AI systems, understanding user satisfaction, or iterating on quality."
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ai-engineering
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Collecting and using user feedback - explicit/implicit signals, feedback analysis, improvement loops, A/B testing. Use when improving AI systems, understanding user satisfaction, or iterating on quality.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# User Feedback Skill
+
+Leveraging feedback to improve AI systems.
+
+## Feedback Collection
+
+### Explicit Feedback
+```python
+class FeedbackCollector:
+    def collect_explicit(self, response_id, feedback):
+        self.db.save({
+            "type": "explicit",
+            "response_id": response_id,
+            "rating": feedback.get("rating"),      # 1-5
+            "thumbs": feedback.get("thumbs"),      # up/down
+            "comment": feedback.get("comment"),
+            "timestamp": datetime.now()
+        })
+```
+
+### Implicit Feedback
+```python
+def extract_implicit(conversation):
+    signals = []
+
+    for i, turn in enumerate(conversation[1:], 1):
+        prev = conversation[i-1]
+
+        # Negative signals
+        if is_correction(turn, prev):
+            signals.append(("correction", i))
+        if is_repetition(turn, prev):
+            signals.append(("repetition", i))
+        if is_abandonment(turn):
+            signals.append(("abandonment", i))
+
+        # Positive signals
+        if is_acceptance(turn, prev):
+            signals.append(("acceptance", i))
+        if is_follow_up(turn, prev):
+            signals.append(("engagement", i))
+
+    return signals
+```
+
+### Natural Language Feedback
+```python
+def extract_from_text(turn, model):
+    prompt = f"""Extract feedback signal from user message.
+
+Message: {turn}
+
+Sentiment (positive/negative/neutral):
+Specific issue (if any):
+Suggestion (if any):"""
+
+    return model.generate(prompt)
+```
+
+## Feedback Analysis
+
+```python
+class FeedbackAnalyzer:
+    def categorize(self, feedbacks):
+        prompt = f"""Categorize these feedback items:
+
+{json.dumps(feedbacks)}
+
+Categories:
+1. Accuracy issues
+2. Format issues
+3. Relevance issues
+4. Safety issues
+5. Missing features
+
+Summary:"""
+        return self.llm.generate(prompt)
+
+    def find_patterns(self, feedbacks):
+        # Cluster similar complaints
+        embeddings = [self.embed(f["text"]) for f in feedbacks]
+        clusters = self.cluster(embeddings)
+
+        patterns = {}
+        for cluster_id, indices in clusters.items():
+            cluster_feedback = [feedbacks[i] for i in indices]
+            patterns[cluster_id] = {
+                "count": len(cluster_feedback),
+                "summary": self.summarize(cluster_feedback),
+                "examples": cluster_feedback[:3]
+            }
+
+        return patterns
+```
+
+## Improvement Loop
+
+```python
+class FeedbackLoop:
+    def run_cycle(self):
+        # 1. Collect
+        recent = self.db.get_recent(days=7)
+        analysis = self.analyze(recent)
+
+        # 2. Identify improvements
+        if analysis["accuracy_issues"] > threshold:
+            training_data = self.create_training_data(
+                analysis["corrections"]
+            )
+
+            # 3. Improve
+            if len(training_data) > 1000:
+                self.finetune(training_data)
+            else:
+                self.update_prompts(analysis)
+
+        # 4. Evaluate
+        metrics = self.evaluate(self.test_set)
+
+        # 5. Deploy if improved
+        if metrics["quality"] > self.baseline:
+            self.deploy()
+
+        return metrics
+```
+
+## A/B Testing
+
+```python
+class ABTest:
+    def __init__(self, variants):
+        self.variants = variants
+        self.results = {v: {"count": 0, "positive": 0} for v in variants}
+
+    def assign(self, user_id):
+        # Consistent assignment
+        return self.variants[hash(user_id) % len(self.variants)]
+
+    def record(self, user_id, positive):
+        variant = self.assign(user_id)
+        self.results[variant]["count"] += 1
+        if positive:
+            self.results[variant]["positive"] += 1
+
+    def analyze(self):
+        for variant, data in self.results.items():
+            rate = data["positive"] / max(data["count"], 1)
+            print(f"{variant}: {rate:.2%} ({data['count']} samples)")
+```
+
+## Best Practices
+
+1. Collect both explicit and implicit feedback
+2. Analyze patterns, not individual feedback
+3. Close the loop (feedback → improvement)
+4. A/B test changes
+5. Monitor long-term trends
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  user-feedback:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ai-engineering" icon="brain" href="/skills/overview#ai-engineering">
+    More ai-engineering skills
+  </Card>
+</CardGroup>

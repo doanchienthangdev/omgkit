@@ -1,0 +1,157 @@
+---
+name: ai-agents
+description: Building AI agents - tool use, planning strategies (ReAct, Plan-and-Execute), memory systems, agent evaluation. Use when building autonomous AI systems, tool-augmented apps, or multi-step workflows.
+---
+
+# AI Agents
+
+Building AI agents with tools and planning.
+
+## Agent Architecture
+
+```
+┌─────────────────────────────────────┐
+│            AI AGENT                  │
+├─────────────────────────────────────┤
+│  ┌──────────┐                       │
+│  │  BRAIN   │  (Foundation Model)   │
+│  │ Planning │                       │
+│  │ Reasoning│                       │
+│  └────┬─────┘                       │
+│       │                             │
+│   ┌───┴───┐                         │
+│   ↓       ↓                         │
+│ ┌─────┐ ┌──────┐                    │
+│ │TOOLS│ │MEMORY│                    │
+│ └─────┘ └──────┘                    │
+└─────────────────────────────────────┘
+```
+
+## Tool Definition
+
+```python
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "search_database",
+        "description": "Search products by query",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string"},
+                "category": {"type": "string", "enum": ["electronics", "clothing"]},
+                "max_price": {"type": "number"}
+            },
+            "required": ["query"]
+        }
+    }
+}]
+```
+
+## Planning Strategies
+
+### ReAct (Reasoning + Acting)
+```python
+REACT_PROMPT = """Tools: {tools}
+
+Format:
+Thought: [reasoning]
+Action: [tool_name]
+Action Input: [JSON]
+Observation: [result]
+... repeat ...
+Final Answer: [answer]
+
+Question: {question}
+Thought:"""
+
+def react_agent(question, tools, max_steps=10):
+    prompt = REACT_PROMPT.format(...)
+
+    for _ in range(max_steps):
+        response = llm.generate(prompt)
+
+        if "Final Answer:" in response:
+            return extract_answer(response)
+
+        action, input = parse_action(response)
+        observation = execute(tools[action], input)
+        prompt += f"\nObservation: {observation}\nThought:"
+```
+
+### Plan-and-Execute
+```python
+def plan_and_execute(task, tools):
+    # Step 1: Create plan
+    plan = llm.generate(f"Create step-by-step plan for: {task}")
+    steps = parse_plan(plan)
+
+    # Step 2: Execute each step
+    results = []
+    for step in steps:
+        result = execute_step(step, tools)
+        results.append(result)
+
+    # Step 3: Synthesize
+    return synthesize(task, results)
+```
+
+### Reflexion (Self-Reflection)
+```python
+def reflexion_agent(task, max_attempts=3):
+    memory = []
+
+    for attempt in range(max_attempts):
+        solution = generate(task, memory)
+        success, feedback = evaluate(solution)
+
+        if success:
+            return solution
+
+        reflection = reflect(task, solution, feedback)
+        memory.append({"solution": solution, "reflection": reflection})
+```
+
+## Memory Systems
+
+```python
+class AgentMemory:
+    def __init__(self):
+        self.short_term = []        # Recent turns
+        self.long_term = VectorDB() # Persistent
+
+    def add(self, message):
+        self.short_term.append(message)
+        if len(self.short_term) > 20:
+            self.consolidate()
+
+    def consolidate(self):
+        summary = summarize(self.short_term[:10])
+        self.long_term.add(summary)
+        self.short_term = self.short_term[10:]
+
+    def retrieve(self, query, k=5):
+        return {
+            "recent": self.short_term[-5:],
+            "relevant": self.long_term.search(query, k),
+        }
+```
+
+## Agent Evaluation
+
+```python
+def evaluate_agent(agent, test_cases):
+    return {
+        "task_success": mean([agent.run(c["task"]) == c["expected"] for c in test_cases]),
+        "avg_steps": mean([agent.step_count for _ in test_cases]),
+        "avg_latency": mean([measure_time(agent.run, c["task"]) for c in test_cases]),
+    }
+```
+
+## Best Practices
+
+1. Start with simple tools, add complexity gradually
+2. Add reflection for complex tasks
+3. Limit max steps to prevent infinite loops
+4. Log all agent actions for debugging
+5. Use evaluation to measure progress

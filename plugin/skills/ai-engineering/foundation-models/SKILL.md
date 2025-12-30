@@ -1,0 +1,90 @@
+---
+name: foundation-models
+description: Understanding Foundation Models - architecture, sampling parameters, structured outputs, post-training. Use when configuring LLM generation, selecting models, or understanding model behavior.
+---
+
+# Foundation Models
+
+Deep understanding of how Foundation Models work.
+
+## Sampling Parameters
+
+```python
+# Temperature Guide
+TEMPERATURE = {
+    "factual_qa": 0.0,           # Deterministic
+    "code_generation": 0.2,       # Slightly creative
+    "translation": 0.3,           # Mostly deterministic
+    "creative_writing": 0.9,      # Creative
+    "brainstorming": 1.2,         # Very creative
+}
+
+# Key parameters
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[...],
+    temperature=0.7,    # 0.0-2.0, controls randomness
+    top_p=0.9,          # Nucleus sampling (0.0-1.0)
+    max_tokens=1000,    # Maximum output length
+)
+```
+
+## Structured Outputs
+
+```python
+# JSON Mode
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[...],
+    response_format={"type": "json_object"}
+)
+
+# Function Calling
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+            },
+            "required": ["location"]
+        }
+    }
+}]
+```
+
+## Post-Training Stages
+
+| Stage | Purpose | Result |
+|-------|---------|--------|
+| Pre-training | Learn language patterns | Base model |
+| SFT | Instruction following | Chat model |
+| RLHF/DPO | Human preference alignment | Aligned model |
+
+## Model Selection Factors
+
+| Factor | Consideration |
+|--------|---------------|
+| Context length | 4K-128K+ tokens |
+| Multilingual | Tokenization costs (up to 10x for non-Latin) |
+| Domain | General vs specialized (code, medical, legal) |
+| Latency | TTFT, tokens/second |
+| Cost | Input/output token pricing |
+
+## Best Practices
+
+1. Match temperature to task type
+2. Use structured outputs when parsing needed
+3. Consider context length limits
+4. Test sampling parameters systematically
+5. Account for knowledge cutoff dates
+
+## Common Pitfalls
+
+- High temperature for factual tasks
+- Ignoring tokenization costs for multilingual
+- Not accounting for context length limits
+- Expecting determinism without temperature=0

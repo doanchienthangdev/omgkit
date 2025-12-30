@@ -1,0 +1,148 @@
+---
+title: "ai-system-evaluation"
+description: "End-to-end AI system evaluation - model selection, benchmarks, cost/latency analysis, build vs buy decisions. Use when selecting models, designing eval pipelines, or making architecture decisions."
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ai-engineering
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+End-to-end AI system evaluation - model selection, benchmarks, cost/latency analysis, build vs buy decisions. Use when selecting models, designing eval pipelines, or making architecture decisions.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# AI System Evaluation
+
+Evaluating AI systems end-to-end.
+
+## Evaluation Criteria
+
+### 1. Domain-Specific Capability
+
+| Domain | Benchmarks |
+|--------|------------|
+| Math & Reasoning | GSM-8K, MATH |
+| Code | HumanEval, MBPP |
+| Knowledge | MMLU, ARC |
+| Multi-turn Chat | MT-Bench |
+
+### 2. Generation Quality
+
+| Criterion | Measurement |
+|-----------|-------------|
+| Factual Consistency | NLI, SAFE, SelfCheckGPT |
+| Coherence | AI judge rubric |
+| Relevance | Semantic similarity |
+| Fluency | Perplexity |
+
+### 3. Cost & Latency
+
+```python
+@dataclass
+class PerformanceMetrics:
+    ttft: float      # Time to First Token (seconds)
+    tpot: float      # Time Per Output Token
+    throughput: float # Tokens/second
+
+    def cost(self, input_tokens, output_tokens, prices):
+        return input_tokens * prices["input"] + output_tokens * prices["output"]
+```
+
+## Model Selection Workflow
+
+```
+1. Define Requirements
+   ├── Task type
+   ├── Quality threshold
+   ├── Latency requirements (<2s TTFT)
+   ├── Cost budget
+   └── Deployment constraints
+
+2. Filter Options
+   ├── API vs Self-hosted
+   ├── Open source vs Proprietary
+   └── Size constraints
+
+3. Benchmark on Your Data
+   ├── Create eval dataset (100+ examples)
+   ├── Run experiments
+   └── Analyze results
+
+4. Make Decision
+   └── Balance quality, cost, latency
+```
+
+## Build vs Buy
+
+| Factor | API | Self-Host |
+|--------|-----|-----------|
+| Data Privacy | Less control | Full control |
+| Performance | Best models | Slightly behind |
+| Cost at Scale | Expensive | Amortized |
+| Customization | Limited | Full control |
+| Maintenance | Zero | Significant |
+
+## Public Benchmarks
+
+| Benchmark | Focus |
+|-----------|-------|
+| MMLU | Knowledge (57 subjects) |
+| HumanEval | Code generation |
+| GSM-8K | Math reasoning |
+| TruthfulQA | Factuality |
+| MT-Bench | Multi-turn chat |
+
+**Caution**: Benchmarks can be gamed. Data contamination is common. Always evaluate on YOUR data.
+
+## Best Practices
+
+1. Test on domain-specific data
+2. Measure both quality and cost
+3. Consider latency requirements
+4. Plan for fallback models
+5. Re-evaluate periodically
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  ai-system-evaluation:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ai-engineering" icon="brain" href="/skills/overview#ai-engineering">
+    More ai-engineering skills
+  </Card>
+</CardGroup>

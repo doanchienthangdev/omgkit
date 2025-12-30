@@ -1,0 +1,93 @@
+---
+name: evaluation-methodology
+description: Methods for evaluating AI model outputs - exact match, semantic similarity, LLM-as-judge, comparative evaluation, ELO ranking. Use when measuring AI quality, building eval pipelines, or comparing models.
+---
+
+# Evaluation Methodology
+
+Methods for evaluating Foundation Model outputs.
+
+## Evaluation Approaches
+
+### 1. Exact Evaluation
+
+| Method | Use Case | Example |
+|--------|----------|---------|
+| Exact Match | QA, Math | `"5" == "5"` |
+| Functional Correctness | Code | Pass test cases |
+| BLEU/ROUGE | Translation | N-gram overlap |
+| Semantic Similarity | Open-ended | Embedding cosine |
+
+```python
+# Semantic Similarity
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+emb1 = model.encode([generated])
+emb2 = model.encode([reference])
+similarity = cosine_similarity(emb1, emb2)[0][0]
+```
+
+### 2. AI as Judge
+
+```python
+JUDGE_PROMPT = """Rate the response on a scale of 1-5.
+
+Criteria:
+- Accuracy: Is information correct?
+- Helpfulness: Does it address the need?
+- Clarity: Is it easy to understand?
+
+Query: {query}
+Response: {response}
+
+Return JSON: {"score": N, "reasoning": "..."}"""
+
+# Multi-judge for reliability
+judges = ["gpt-4", "claude-3"]
+scores = [get_score(judge, response) for judge in judges]
+final_score = sum(scores) / len(scores)
+```
+
+### 3. Comparative Evaluation (ELO)
+
+```python
+COMPARE_PROMPT = """Compare these responses.
+
+Query: {query}
+A: {response_a}
+B: {response_b}
+
+Which is better? Return: A, B, or tie"""
+
+def update_elo(rating_a, rating_b, winner, k=32):
+    expected_a = 1 / (1 + 10**((rating_b - rating_a) / 400))
+    score_a = 1 if winner == "A" else 0 if winner == "B" else 0.5
+    return rating_a + k * (score_a - expected_a)
+```
+
+## Evaluation Pipeline
+
+```
+1. Define Criteria (accuracy, helpfulness, safety)
+   ↓
+2. Create Scoring Rubric with Examples
+   ↓
+3. Select Methods (exact + AI judge + human)
+   ↓
+4. Create Evaluation Dataset
+   ↓
+5. Run Evaluation
+   ↓
+6. Analyze & Iterate
+```
+
+## Best Practices
+
+1. Use multiple evaluation methods
+2. Calibrate AI judges with human data
+3. Include both automatic and human evaluation
+4. Version your evaluation datasets
+5. Track metrics over time
+6. Test for position bias in comparisons

@@ -1,0 +1,137 @@
+---
+name: rag-systems
+description: Retrieval-Augmented Generation - chunking strategies, embedding, vector search, hybrid retrieval, reranking, query transformation. Use when building RAG pipelines, knowledge bases, or context-augmented applications.
+---
+
+# RAG Systems
+
+Building Retrieval-Augmented Generation systems.
+
+## RAG Architecture
+
+```
+INDEXING (Offline)
+Documents → Chunking → Embedding → Vector DB
+
+QUERYING (Online)
+Query → Embed → Search → Retrieved Docs
+                              ↓
+Response ← LLM ← Context + Query
+```
+
+## Retrieval Algorithms
+
+### Term-Based (BM25)
+```python
+from rank_bm25 import BM25Okapi
+
+tokenized_docs = [doc.split() for doc in documents]
+bm25 = BM25Okapi(tokenized_docs)
+scores = bm25.get_scores(query.split())
+```
+
+### Embedding-Based
+```python
+from sentence_transformers import SentenceTransformer
+import faiss
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
+embeddings = model.encode(documents)
+
+index = faiss.IndexFlatIP(embeddings.shape[1])
+faiss.normalize_L2(embeddings)
+index.add(embeddings)
+
+# Query
+query_emb = model.encode([query])
+faiss.normalize_L2(query_emb)
+distances, indices = index.search(query_emb, k=5)
+```
+
+### Hybrid Retrieval
+```python
+def hybrid_retrieve(query, k=5, alpha=0.5):
+    bm25_scores = normalize(bm25.get_scores(query.split()))
+    dense_scores = normalize(index.search(embed(query), len(docs))[0])
+
+    hybrid = alpha * bm25_scores + (1-alpha) * dense_scores
+    return [docs[i] for i in np.argsort(hybrid)[::-1][:k]]
+```
+
+## Chunking Strategies
+
+### Fixed Size
+```python
+def fixed_chunk(text, size=500, overlap=50):
+    chunks = []
+    for i in range(0, len(text), size - overlap):
+        chunks.append(text[i:i+size])
+    return chunks
+```
+
+### Semantic Chunking
+```python
+def semantic_chunk(text, model, threshold=0.5):
+    sentences = sent_tokenize(text)
+    chunks, current = [], []
+
+    for sent in sentences:
+        current.append(sent)
+        if len(current) > 1:
+            sim = similarity(current[-2], current[-1], model)
+            if sim < threshold:
+                chunks.append(" ".join(current[:-1]))
+                current = [sent]
+
+    if current:
+        chunks.append(" ".join(current))
+    return chunks
+```
+
+## Retrieval Optimization
+
+### Query Expansion
+```python
+def expand_query(query, model):
+    prompt = f"Generate 3 alternative phrasings:\n{query}"
+    return [query] + model.generate(prompt).split("\n")
+```
+
+### HyDE (Hypothetical Document)
+```python
+def hyde(query, model):
+    prompt = f"Write a paragraph answering:\n{query}"
+    return model.generate(prompt)  # Use this for retrieval
+```
+
+### Reranking
+```python
+from sentence_transformers import CrossEncoder
+
+reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+def rerank(query, docs, k=5):
+    pairs = [(query, doc) for doc in docs]
+    scores = reranker.predict(pairs)
+    return sorted(zip(docs, scores), key=lambda x: -x[1])[:k]
+```
+
+## RAG Evaluation
+
+```python
+def rag_metrics(query, response, context, ground_truth):
+    return {
+        "retrieval_precision": precision(retrieved, relevant),
+        "retrieval_recall": recall(retrieved, relevant),
+        "answer_relevance": similarity(response, ground_truth),
+        "faithfulness": check_hallucination(response, context),
+    }
+```
+
+## Best Practices
+
+1. Use hybrid retrieval (BM25 + dense)
+2. Add reranking for quality
+3. Chunk with overlap (10-20%)
+4. Experiment with chunk sizes (200-1000 tokens)
+5. Evaluate retrieval separately from generation

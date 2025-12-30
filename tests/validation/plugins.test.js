@@ -169,8 +169,8 @@ describe('Plugin Validation', () => {
 
     const skillFiles = getSkillFiles(skillsDir);
 
-    it('should have at least 43 skill files', () => {
-      expect(skillFiles.length).toBeGreaterThanOrEqual(43);
+    it('should have at least 55 skill files', () => {
+      expect(skillFiles.length).toBeGreaterThanOrEqual(55);
     });
 
     it.each(skillFiles.map(f => [f.replace(PLUGIN_DIR, ''), f]))(
@@ -188,7 +188,8 @@ describe('Plugin Validation', () => {
 
       const expectedCategories = [
         'languages', 'frameworks', 'databases', 'frontend',
-        'devops', 'security', 'testing', 'methodology', 'omega'
+        'devops', 'security', 'testing', 'methodology', 'omega',
+        'ai-engineering'
       ];
 
       expectedCategories.forEach(cat => {

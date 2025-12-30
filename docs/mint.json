@@ -400,6 +400,23 @@
         "skills/omega-architecture",
         "skills/omega-sprint"
       ]
+    },
+    {
+      "group": "AI Engineering",
+      "pages": [
+        "skills/foundation-models",
+        "skills/evaluation-methodology",
+        "skills/ai-system-evaluation",
+        "skills/prompt-engineering",
+        "skills/rag-systems",
+        "skills/ai-agents",
+        "skills/finetuning",
+        "skills/dataset-engineering",
+        "skills/inference-optimization",
+        "skills/ai-architecture",
+        "skills/guardrails-safety",
+        "skills/user-feedback"
+      ]
     }
   ],
   "footerSocials": {

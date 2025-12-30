@@ -1,0 +1,186 @@
+---
+title: "finetuning"
+description: "Finetuning Foundation Models - when to finetune, LoRA, QLoRA, PEFT techniques, memory optimization, model merging. Use when adapting models to specific domains, reducing costs, or improving performance."
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ai-engineering
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Finetuning Foundation Models - when to finetune, LoRA, QLoRA, PEFT techniques, memory optimization, model merging. Use when adapting models to specific domains, reducing costs, or improving performance.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Finetuning
+
+Adapting Foundation Models for specific tasks.
+
+## When to Finetune
+
+### DO Finetune
+- Improve quality on specific domain
+- Reduce latency (smaller model)
+- Reduce cost (fewer tokens)
+- Ensure consistent style
+- Add specialized capabilities
+
+### DON'T Finetune
+- Prompt engineering is enough
+- Insufficient data (<1000 examples)
+- Need frequent updates
+- RAG can solve the problem
+
+## Memory Requirements
+
+```python
+def training_memory_gb(num_params_billion, precision="fp16"):
+    bytes_per = {"fp32": 4, "fp16": 2, "int8": 1}
+
+    model = num_params_billion * 1e9 * bytes_per[precision]
+    optimizer = num_params_billion * 1e9 * 4 * 2  # AdamW states
+    gradients = num_params_billion * 1e9 * bytes_per[precision]
+
+    return (model + optimizer + gradients) / 1e9
+
+# 7B model full finetuning: ~112 GB!
+# With LoRA: ~16 GB
+# With QLoRA: ~6 GB
+```
+
+## LoRA (Low-Rank Adaptation)
+
+```python
+from peft import LoraConfig, get_peft_model
+
+config = LoraConfig(
+    r=8,                          # Rank (lower = fewer params)
+    lora_alpha=32,                # Scaling factor
+    target_modules=["q_proj", "v_proj"],
+    lora_dropout=0.05,
+    task_type="CAUSAL_LM"
+)
+
+model = get_peft_model(base_model, config)
+
+# ~0.06% of 7B trainable!
+trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+```
+
+## QLoRA (4-bit + LoRA)
+
+```python
+from transformers import BitsAndBytesConfig
+
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16,
+    bnb_4bit_use_double_quant=True
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    quantization_config=bnb_config,
+    device_map="auto"
+)
+
+model = get_peft_model(model, lora_config)
+# 7B on 16GB GPU!
+```
+
+## Training
+
+```python
+from transformers import Trainer, TrainingArguments
+
+args = TrainingArguments(
+    output_dir="./results",
+    num_train_epochs=3,
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=4,
+    learning_rate=2e-5,
+    warmup_steps=100,
+    fp16=True,
+    gradient_checkpointing=True,
+    optim="paged_adamw_8bit"
+)
+
+trainer = Trainer(
+    model=model,
+    args=args,
+    train_dataset=train_data,
+    eval_dataset=eval_data
+)
+
+trainer.train()
+
+# Merge LoRA back
+merged = model.merge_and_unload()
+merged.save_pretrained("./finetuned")
+```
+
+## Model Merging
+
+### Task Arithmetic
+```python
+def task_vector_merge(base, finetuned_models, scale=0.3):
+    merged = base.state_dict()
+    for ft in finetuned_models:
+        for key in merged:
+            task_vector = ft.state_dict()[key] - merged[key]
+            merged[key] += scale * task_vector
+    return merged
+```
+
+## Best Practices
+
+1. Start with small rank (r=8)
+2. Use QLoRA for limited GPU
+3. Monitor validation loss
+4. Test merged models carefully
+5. Keep base model for comparison
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  finetuning:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ai-engineering" icon="brain" href="/skills/overview#ai-engineering">
+    More ai-engineering skills
+  </Card>
+</CardGroup>
