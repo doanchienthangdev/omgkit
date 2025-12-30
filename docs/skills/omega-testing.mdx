@@ -1,6 +1,6 @@
 ---
 title: "omega-testing"
-description: "Comprehensive Omega testing. Use for thorough test coverage."
+description: "Comprehensive testing strategies covering all dimensions - accuracy, performance, security, and accessibility"
 icon: "wand-magic-sparkles"
 ---
 
@@ -12,7 +12,7 @@ icon: "wand-magic-sparkles"
 
 ## Overview
 
-Comprehensive Omega testing. Use for thorough test coverage.
+Comprehensive testing strategies covering all dimensions - accuracy, performance, security, and accessibility
 
 ## What You Get
 
@@ -24,72 +24,962 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Omega Testing Skill
+# Omega Testing
 
-## Testing Pyramid
+Master **comprehensive testing strategies** that cover all quality dimensions - accuracy, performance, security, and accessibility. This skill provides frameworks for building confidence in your code through systematic, thorough testing.
+
+## Purpose
+
+Achieve Omega-level quality assurance:
+
+- Design test strategies that catch bugs before production
+- Build layered test suites (unit, integration, E2E)
+- Test all quality dimensions, not just functionality
+- Create maintainable, fast, and reliable tests
+- Implement property-based and mutation testing
+- Achieve meaningful coverage metrics
+- Enable confident refactoring and deployment
+
+## Features
+
+### 1. The Omega Testing Pyramid
+
+```markdown
+## Multi-Dimensional Testing Pyramid
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      OMEGA TESTING PYRAMID                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│                            /\                                           │
+│                           /E2E\           ← Critical paths only        │
+│                          /─────\            Slowest, most expensive    │
+│                         /       \                                       │
+│                        / Visual  \        ← Screenshot comparisons     │
+│                       /───────────\                                     │
+│                      /             \                                    │
+│                     / Integration   \     ← Service boundaries         │
+│                    /─────────────────\      API contracts              │
+│                   /                   \                                 │
+│                  /    Component        \   ← UI components isolated    │
+│                 /───────────────────────\                               │
+│                /                         \                              │
+│               /          Unit             \  ← Fast, isolated          │
+│              /─────────────────────────────\   Business logic          │
+│                                                                         │
+│  Target Coverage by Layer:                                              │
+│  • Unit: 80%+ (pure functions, business logic)                         │
+│  • Component: 70%+ (UI components with mocks)                          │
+│  • Integration: 60%+ (API endpoints, data flow)                        │
+│  • E2E: Critical paths 100% (happy paths, auth, checkout)              │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
-        /\
-       /E2E\
-      /─────\
-     /Integ. \
-    /─────────\
-   /   Unit    \
-  /─────────────\
-```
 
-## Coverage Targets
-- Unit: 80%+
-- Integration: 60%+
-- E2E: Critical paths 100%
+### 2. Four Dimensions of Quality Testing
 
-## Test Categories
-
-### 1. Happy Path
 ```typescript
-it('creates user successfully', async () => {
-  const user = await createUser({ email: 'test@example.com' });
-  expect(user.email).toBe('test@example.com');
+/**
+ * Omega Testing covers ALL quality dimensions
+ * Don't just test functionality - test quality
+ */
+
+type QualityDimension =
+  | 'accuracy'       // Does it work correctly?
+  | 'performance'    // Does it work fast enough?
+  | 'security'       // Is it safe from attacks?
+  | 'accessibility'; // Can everyone use it?
+
+interface OmegaTestSuite {
+  accuracy: AccuracyTests;
+  performance: PerformanceTests;
+  security: SecurityTests;
+  accessibility: AccessibilityTests;
+}
+
+// Dimension 1: Accuracy (Functional Correctness)
+interface AccuracyTests {
+  happyPath: Test[];      // Normal use cases work
+  edgeCases: Test[];      // Boundary conditions handled
+  errorCases: Test[];     // Failures handled gracefully
+  regressions: Test[];    // Previously fixed bugs stay fixed
+}
+
+// Dimension 2: Performance
+interface PerformanceTests {
+  responseTime: Test[];   // Operations complete in time
+  throughput: Test[];     // System handles expected load
+  memory: Test[];         // No memory leaks
+  scalability: Test[];    // Performance under scale
+}
+
+// Dimension 3: Security
+interface SecurityTests {
+  authentication: Test[]; // Auth works correctly
+  authorization: Test[];  // Permissions enforced
+  injection: Test[];      // SQL, XSS, etc. prevented
+  dataProtection: Test[]; // Sensitive data secured
+}
+
+// Dimension 4: Accessibility
+interface AccessibilityTests {
+  screenReader: Test[];   // Works with assistive tech
+  keyboard: Test[];       // Keyboard navigation works
+  contrast: Test[];       // Visual contrast sufficient
+  motion: Test[];         // Respects motion preferences
+}
+```
+
+### 3. Unit Testing Patterns
+
+```typescript
+/**
+ * Unit Tests: Fast, isolated, focused on business logic
+ */
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+// Pattern 1: Arrange-Act-Assert (AAA)
+describe('calculateDiscount', () => {
+  it('applies 10% discount for orders over $100', () => {
+    // Arrange
+    const order = createOrder({ subtotal: 150 });
+    const discountRules = createDiscountRules();
+
+    // Act
+    const result = calculateDiscount(order, discountRules);
+
+    // Assert
+    expect(result.discount).toBe(15);
+    expect(result.total).toBe(135);
+  });
+});
+
+// Pattern 2: Testing Edge Cases Systematically
+describe('validateEmail', () => {
+  // Happy path
+  it('accepts valid email formats', () => {
+    const validEmails = [
+      'user@example.com',
+      'user.name@example.co.uk',
+      'user+tag@example.org'
+    ];
+
+    validEmails.forEach(email => {
+      expect(validateEmail(email)).toBe(true);
+    });
+  });
+
+  // Edge cases
+  it.each([
+    ['missing @', 'userexample.com'],
+    ['missing domain', 'user@'],
+    ['missing local part', '@example.com'],
+    ['invalid characters', 'user<script>@example.com'],
+    ['empty string', ''],
+    ['whitespace only', '   '],
+  ])('rejects %s: %s', (_description, email) => {
+    expect(validateEmail(email)).toBe(false);
+  });
+
+  // Boundary conditions
+  it('handles maximum length email', () => {
+    const longEmail = 'a'.repeat(64) + '@' + 'b'.repeat(63) + '.com';
+    expect(validateEmail(longEmail)).toBe(true);
+  });
+
+  it('rejects email exceeding maximum length', () => {
+    const tooLongEmail = 'a'.repeat(65) + '@' + 'b'.repeat(64) + '.com';
+    expect(validateEmail(tooLongEmail)).toBe(false);
+  });
+});
+
+// Pattern 3: Testing Error Handling
+describe('fetchUserData', () => {
+  const mockApi = vi.fn();
+
+  beforeEach(() => {
+    mockApi.mockReset();
+  });
+
+  it('throws UserNotFoundError when user does not exist', async () => {
+    mockApi.mockRejectedValue(new Error('404'));
+
+    await expect(fetchUserData('nonexistent-id', mockApi))
+      .rejects
+      .toThrow(UserNotFoundError);
+  });
+
+  it('retries on transient failures', async () => {
+    mockApi
+      .mockRejectedValueOnce(new Error('timeout'))
+      .mockRejectedValueOnce(new Error('timeout'))
+      .mockResolvedValueOnce({ id: '123', name: 'Test' });
+
+    const result = await fetchUserData('123', mockApi);
+
+    expect(mockApi).toHaveBeenCalledTimes(3);
+    expect(result.name).toBe('Test');
+  });
+
+  it('gives up after max retries', async () => {
+    mockApi.mockRejectedValue(new Error('timeout'));
+
+    await expect(fetchUserData('123', mockApi))
+      .rejects
+      .toThrow(MaxRetriesExceededError);
+
+    expect(mockApi).toHaveBeenCalledTimes(3);
+  });
+});
+
+// Pattern 4: Testing Pure Functions with Properties
+describe('sortUsers (property-based)', () => {
+  it('output length equals input length', () => {
+    fc.assert(
+      fc.property(fc.array(fc.record({
+        id: fc.string(),
+        name: fc.string(),
+        age: fc.nat()
+      })), (users) => {
+        const sorted = sortUsers(users, 'name');
+        return sorted.length === users.length;
+      })
+    );
+  });
+
+  it('maintains all original elements', () => {
+    fc.assert(
+      fc.property(fc.array(userArbitrary), (users) => {
+        const sorted = sortUsers(users, 'name');
+        const originalIds = new Set(users.map(u => u.id));
+        const sortedIds = new Set(sorted.map(u => u.id));
+        return setsEqual(originalIds, sortedIds);
+      })
+    );
+  });
+
+  it('result is actually sorted', () => {
+    fc.assert(
+      fc.property(fc.array(userArbitrary), (users) => {
+        const sorted = sortUsers(users, 'name');
+        return sorted.every((user, i) =>
+          i === 0 || user.name >= sorted[i - 1].name
+        );
+      })
+    );
+  });
 });
 ```
 
-### 2. Edge Cases
+### 4. Integration Testing Patterns
+
 ```typescript
-it('handles empty input', () => {
-  expect(() => createUser({ email: '' })).toThrow();
+/**
+ * Integration Tests: Test service boundaries and contracts
+ */
+
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { createTestDatabase, cleanupTestDatabase } from './test-utils';
+
+describe('UserService Integration', () => {
+  let db: TestDatabase;
+  let userService: UserService;
+
+  beforeAll(async () => {
+    db = await createTestDatabase();
+    userService = new UserService(db);
+  });
+
+  afterAll(async () => {
+    await cleanupTestDatabase(db);
+  });
+
+  // Test real database interactions
+  describe('createUser', () => {
+    it('persists user to database', async () => {
+      const userData = {
+        email: 'test@example.com',
+        name: 'Test User'
+      };
+
+      const user = await userService.createUser(userData);
+
+      // Verify in database directly
+      const dbUser = await db.query('SELECT * FROM users WHERE id = $1', [user.id]);
+      expect(dbUser.email).toBe(userData.email);
+      expect(dbUser.name).toBe(userData.name);
+    });
+
+    it('enforces unique email constraint', async () => {
+      const userData = { email: 'duplicate@example.com', name: 'User 1' };
+      await userService.createUser(userData);
+
+      await expect(userService.createUser({
+        email: 'duplicate@example.com',
+        name: 'User 2'
+      })).rejects.toThrow(DuplicateEmailError);
+    });
+  });
+
+  // Test transactions
+  describe('transferCredits', () => {
+    it('atomically transfers credits between users', async () => {
+      const sender = await userService.createUser({ credits: 100 });
+      const receiver = await userService.createUser({ credits: 0 });
+
+      await userService.transferCredits(sender.id, receiver.id, 50);
+
+      const [updatedSender, updatedReceiver] = await Promise.all([
+        userService.getUser(sender.id),
+        userService.getUser(receiver.id)
+      ]);
+
+      expect(updatedSender.credits).toBe(50);
+      expect(updatedReceiver.credits).toBe(50);
+    });
+
+    it('rolls back on failure', async () => {
+      const sender = await userService.createUser({ credits: 100 });
+      const receiver = await userService.createUser({ credits: 0 });
+
+      // Simulate failure mid-transaction
+      vi.spyOn(db, 'commit').mockRejectedValueOnce(new Error('DB error'));
+
+      await expect(
+        userService.transferCredits(sender.id, receiver.id, 50)
+      ).rejects.toThrow();
+
+      // Verify no changes persisted
+      const [s, r] = await Promise.all([
+        userService.getUser(sender.id),
+        userService.getUser(receiver.id)
+      ]);
+
+      expect(s.credits).toBe(100);
+      expect(r.credits).toBe(0);
+    });
+  });
+});
+
+// API Contract Testing
+describe('API Contract Tests', () => {
+  it('GET /users/:id returns correct schema', async () => {
+    const response = await api.get('/users/123');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toMatchSchema({
+      type: 'object',
+      required: ['id', 'email', 'name', 'createdAt'],
+      properties: {
+        id: { type: 'string', format: 'uuid' },
+        email: { type: 'string', format: 'email' },
+        name: { type: 'string', minLength: 1 },
+        createdAt: { type: 'string', format: 'date-time' }
+      }
+    });
+  });
+
+  it('POST /users validates request body', async () => {
+    const response = await api.post('/users', {
+      body: { email: 'invalid-email' } // Missing name, invalid email
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toContainEqual(
+      expect.objectContaining({ field: 'email', message: expect.any(String) })
+    );
+    expect(response.body.errors).toContainEqual(
+      expect.objectContaining({ field: 'name', message: expect.any(String) })
+    );
+  });
 });
 ```
 
-### 3. Error Cases
+### 5. E2E Testing Patterns
+
 ```typescript
-it('handles database failure', async () => {
-  db.fail();
-  await expect(createUser({})).rejects.toThrow(DatabaseError);
+/**
+ * E2E Tests: Test critical user journeys
+ * Use sparingly - slow and expensive
+ */
+
+import { test, expect } from '@playwright/test';
+
+// Critical Path: User Registration & Login
+test.describe('Authentication Flow', () => {
+  test('new user can register and login', async ({ page }) => {
+    const testEmail = `test-${Date.now()}@example.com`;
+
+    // Registration
+    await page.goto('/register');
+    await page.fill('[data-testid="email"]', testEmail);
+    await page.fill('[data-testid="password"]', 'SecurePass123!');
+    await page.fill('[data-testid="confirm-password"]', 'SecurePass123!');
+    await page.click('[data-testid="register-button"]');
+
+    // Verify registration success
+    await expect(page).toHaveURL('/verify-email');
+    await expect(page.locator('[data-testid="success-message"]'))
+      .toContainText('verification email sent');
+
+    // Simulate email verification (in test environment)
+    await verifyEmailInTestMode(testEmail);
+
+    // Login
+    await page.goto('/login');
+    await page.fill('[data-testid="email"]', testEmail);
+    await page.fill('[data-testid="password"]', 'SecurePass123!');
+    await page.click('[data-testid="login-button"]');
+
+    // Verify login success
+    await expect(page).toHaveURL('/dashboard');
+    await expect(page.locator('[data-testid="user-menu"]')).toBeVisible();
+  });
+
+  test('handles invalid credentials', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('[data-testid="email"]', 'wrong@example.com');
+    await page.fill('[data-testid="password"]', 'wrongpassword');
+    await page.click('[data-testid="login-button"]');
+
+    await expect(page.locator('[data-testid="error-message"]'))
+      .toContainText('Invalid email or password');
+    await expect(page).toHaveURL('/login');
+  });
+});
+
+// Critical Path: E-commerce Checkout
+test.describe('Checkout Flow', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login as test user
+    await loginAsTestUser(page);
+  });
+
+  test('complete purchase flow', async ({ page }) => {
+    // Add item to cart
+    await page.goto('/products/test-product');
+    await page.click('[data-testid="add-to-cart"]');
+    await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
+
+    // Go to checkout
+    await page.click('[data-testid="cart-icon"]');
+    await page.click('[data-testid="checkout-button"]');
+
+    // Fill shipping info
+    await page.fill('[data-testid="address"]', '123 Test St');
+    await page.fill('[data-testid="city"]', 'Test City');
+    await page.fill('[data-testid="zip"]', '12345');
+    await page.click('[data-testid="continue-to-payment"]');
+
+    // Payment (use test card)
+    await page.fill('[data-testid="card-number"]', '4242424242424242');
+    await page.fill('[data-testid="expiry"]', '12/25');
+    await page.fill('[data-testid="cvc"]', '123');
+    await page.click('[data-testid="place-order"]');
+
+    // Verify success
+    await expect(page).toHaveURL(/\/orders\/[a-z0-9-]+/);
+    await expect(page.locator('[data-testid="order-status"]'))
+      .toHaveText('Order Confirmed');
+  });
+});
+
+// Visual Regression Testing
+test.describe('Visual Regression', () => {
+  test('dashboard matches snapshot', async ({ page }) => {
+    await loginAsTestUser(page);
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page).toHaveScreenshot('dashboard.png', {
+      maxDiffPixelRatio: 0.01
+    });
+  });
+
+  test('responsive layout on mobile', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/');
+
+    await expect(page).toHaveScreenshot('home-mobile.png');
+  });
 });
 ```
 
-### 4. Performance
+### 6. Performance Testing
+
 ```typescript
-it('responds within 100ms', async () => {
-  const start = Date.now();
-  await fetchUsers();
-  expect(Date.now() - start).toBeLessThan(100);
+/**
+ * Performance Tests: Ensure system meets performance requirements
+ */
+
+import { describe, it, expect } from 'vitest';
+
+// Response Time Testing
+describe('API Performance', () => {
+  it('GET /users responds within 100ms', async () => {
+    const iterations = 100;
+    const times: number[] = [];
+
+    for (let i = 0; i < iterations; i++) {
+      const start = performance.now();
+      await api.get('/users');
+      times.push(performance.now() - start);
+    }
+
+    const p50 = percentile(times, 50);
+    const p95 = percentile(times, 95);
+    const p99 = percentile(times, 99);
+
+    expect(p50).toBeLessThan(50);  // Median under 50ms
+    expect(p95).toBeLessThan(100); // 95th percentile under 100ms
+    expect(p99).toBeLessThan(200); // 99th percentile under 200ms
+  });
+
+  it('handles concurrent requests', async () => {
+    const concurrency = 50;
+    const requests = Array(concurrency).fill(null).map(() =>
+      api.get('/users')
+    );
+
+    const start = performance.now();
+    const responses = await Promise.all(requests);
+    const duration = performance.now() - start;
+
+    // All should succeed
+    expect(responses.every(r => r.status === 200)).toBe(true);
+    // Should complete in reasonable time
+    expect(duration).toBeLessThan(1000);
+  });
+});
+
+// Memory Leak Detection
+describe('Memory Stability', () => {
+  it('does not leak memory over many operations', async () => {
+    const initialMemory = process.memoryUsage().heapUsed;
+
+    // Perform many operations
+    for (let i = 0; i < 10000; i++) {
+      await processData(generateLargePayload());
+    }
+
+    // Force garbage collection if available
+    if (global.gc) global.gc();
+
+    const finalMemory = process.memoryUsage().heapUsed;
+    const growth = finalMemory - initialMemory;
+
+    // Memory should not grow significantly (< 10MB)
+    expect(growth).toBeLessThan(10 * 1024 * 1024);
+  });
+});
+
+// Load Testing Configuration
+const loadTestConfig = {
+  scenarios: {
+    normalLoad: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '2m', target: 100 },  // Ramp up
+        { duration: '5m', target: 100 },  // Steady state
+        { duration: '2m', target: 0 }     // Ramp down
+      ],
+      gracefulRampDown: '30s'
+    },
+
+    stressTest: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '2m', target: 200 },
+        { duration: '5m', target: 200 },
+        { duration: '2m', target: 400 },  // Push beyond normal
+        { duration: '5m', target: 400 },
+        { duration: '2m', target: 0 }
+      ]
+    },
+
+    spikeTest: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '10s', target: 500 }, // Sudden spike
+        { duration: '1m', target: 500 },
+        { duration: '10s', target: 0 }
+      ]
+    }
+  },
+
+  thresholds: {
+    http_req_duration: ['p(95)<200', 'p(99)<500'],
+    http_req_failed: ['rate<0.01'],
+    http_reqs: ['rate>100']
+  }
+};
+```
+
+### 7. Security Testing
+
+```typescript
+/**
+ * Security Tests: Verify protection against common attacks
+ */
+
+describe('Security Tests', () => {
+  // SQL Injection Prevention
+  describe('SQL Injection', () => {
+    const sqlInjectionPayloads = [
+      "'; DROP TABLE users; --",
+      "' OR '1'='1",
+      "'; INSERT INTO users VALUES ('hacker', 'hacked'); --",
+      "1; UPDATE users SET role='admin' WHERE id=1; --"
+    ];
+
+    it.each(sqlInjectionPayloads)(
+      'safely handles SQL injection attempt: %s',
+      async (payload) => {
+        const response = await api.get(`/users?search=${encodeURIComponent(payload)}`);
+
+        // Should not error (indicates parameterized queries)
+        expect(response.status).not.toBe(500);
+
+        // Verify database integrity
+        const users = await db.query('SELECT * FROM users');
+        expect(users).toBeDefined();
+      }
+    );
+  });
+
+  // XSS Prevention
+  describe('XSS Prevention', () => {
+    const xssPayloads = [
+      '<script>alert("xss")</script>',
+      '<img src=x onerror=alert("xss")>',
+      '"><script>alert(document.cookie)</script>',
+      "javascript:alert('xss')"
+    ];
+
+    it.each(xssPayloads)(
+      'escapes XSS payload: %s',
+      async (payload) => {
+        // Create content with XSS payload
+        await api.post('/posts', { body: { content: payload } });
+
+        // Retrieve and verify it's escaped
+        const response = await api.get('/posts');
+        const html = response.body.posts[0].content;
+
+        expect(html).not.toContain('<script>');
+        expect(html).not.toContain('onerror=');
+        expect(html).not.toContain('javascript:');
+      }
+    );
+  });
+
+  // Authentication Security
+  describe('Authentication', () => {
+    it('rate limits login attempts', async () => {
+      const attempts = 10;
+      const responses: Response[] = [];
+
+      for (let i = 0; i < attempts; i++) {
+        responses.push(await api.post('/login', {
+          body: { email: 'test@example.com', password: 'wrong' }
+        }));
+      }
+
+      // Later attempts should be rate limited
+      const rateLimited = responses.filter(r => r.status === 429);
+      expect(rateLimited.length).toBeGreaterThan(0);
+    });
+
+    it('uses secure session cookies', async () => {
+      const response = await api.post('/login', {
+        body: { email: 'test@example.com', password: 'correct' }
+      });
+
+      const sessionCookie = response.headers['set-cookie'];
+      expect(sessionCookie).toContain('HttpOnly');
+      expect(sessionCookie).toContain('Secure');
+      expect(sessionCookie).toContain('SameSite');
+    });
+
+    it('invalidates session on logout', async () => {
+      const loginResponse = await api.post('/login', {
+        body: { email: 'test@example.com', password: 'correct' }
+      });
+      const sessionToken = extractSessionToken(loginResponse);
+
+      await api.post('/logout', { headers: { Cookie: sessionToken } });
+
+      // Old session should be invalid
+      const response = await api.get('/me', {
+        headers: { Cookie: sessionToken }
+      });
+      expect(response.status).toBe(401);
+    });
+  });
+
+  // Authorization Testing
+  describe('Authorization', () => {
+    it('prevents accessing other users data', async () => {
+      const user1Token = await loginAs('user1');
+      const user2Token = await loginAs('user2');
+
+      // User 1 tries to access User 2's data
+      const response = await api.get('/users/user2/private-data', {
+        headers: { Authorization: `Bearer ${user1Token}` }
+      });
+
+      expect(response.status).toBe(403);
+    });
+
+    it('admin routes require admin role', async () => {
+      const userToken = await loginAs('regular-user');
+
+      const response = await api.get('/admin/users', {
+        headers: { Authorization: `Bearer ${userToken}` }
+      });
+
+      expect(response.status).toBe(403);
+    });
+  });
 });
 ```
 
-### 5. Security
+### 8. Accessibility Testing
+
 ```typescript
-it('rejects SQL injection', () => {
-  const input = "'; DROP TABLE users; --";
-  expect(() => query(input)).not.toThrow();
+/**
+ * Accessibility Tests: Ensure usability for all users
+ */
+
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+test.describe('Accessibility', () => {
+  // Automated WCAG Compliance
+  test('home page has no accessibility violations', async ({ page }) => {
+    await page.goto('/');
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+      .analyze();
+
+    expect(results.violations).toEqual([]);
+  });
+
+  // Keyboard Navigation
+  test('all interactive elements are keyboard accessible', async ({ page }) => {
+    await page.goto('/');
+
+    // Tab through all focusable elements
+    const focusableSelectors = 'a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const elements = await page.locator(focusableSelectors).all();
+
+    for (const element of elements) {
+      await page.keyboard.press('Tab');
+      const focused = await page.evaluate(() => document.activeElement?.tagName);
+      expect(focused).toBeDefined();
+    }
+  });
+
+  // Focus Management
+  test('modal traps focus correctly', async ({ page }) => {
+    await page.goto('/');
+    await page.click('[data-testid="open-modal"]');
+
+    // Focus should be on modal
+    const modalFocused = await page.locator('[data-testid="modal"]').evaluate(
+      el => el.contains(document.activeElement)
+    );
+    expect(modalFocused).toBe(true);
+
+    // Tab should stay within modal
+    for (let i = 0; i < 10; i++) {
+      await page.keyboard.press('Tab');
+      const stillInModal = await page.locator('[data-testid="modal"]').evaluate(
+        el => el.contains(document.activeElement)
+      );
+      expect(stillInModal).toBe(true);
+    }
+
+    // Escape closes modal
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-testid="modal"]')).not.toBeVisible();
+  });
+
+  // Screen Reader Compatibility
+  test('images have alt text', async ({ page }) => {
+    await page.goto('/');
+
+    const images = await page.locator('img').all();
+    for (const img of images) {
+      const alt = await img.getAttribute('alt');
+      expect(alt).toBeDefined();
+      expect(alt?.length).toBeGreaterThan(0);
+    }
+  });
+
+  // Color Contrast
+  test('text has sufficient contrast', async ({ page }) => {
+    await page.goto('/');
+
+    const results = await new AxeBuilder({ page })
+      .withRules(['color-contrast'])
+      .analyze();
+
+    expect(results.violations).toEqual([]);
+  });
+
+  // Reduced Motion
+  test('respects prefers-reduced-motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+
+    // Check animations are disabled
+    const animatedElement = page.locator('[data-animated]');
+    const animationDuration = await animatedElement.evaluate(el =>
+      getComputedStyle(el).animationDuration
+    );
+
+    expect(animationDuration).toBe('0s');
+  });
 });
 ```
 
-## Omega Quality
-Test for ALL dimensions:
-- Accuracy
-- Performance
-- Security
-- Accessibility
+## Use Cases
+
+### Testing a New Feature
+
+```typescript
+/**
+ * Complete test suite for a new user profile feature
+ */
+
+// Unit Tests
+describe('ProfileService', () => {
+  it('validates profile data', () => {
+    expect(validateProfile({ name: '' })).toEqual({
+      valid: false,
+      errors: ['Name is required']
+    });
+  });
+
+  it('sanitizes bio field', () => {
+    const result = sanitizeProfile({
+      bio: '<script>alert("xss")</script>Hello'
+    });
+    expect(result.bio).toBe('Hello');
+  });
+});
+
+// Integration Tests
+describe('Profile API', () => {
+  it('updates profile in database', async () => {
+    const response = await api.put('/profile', {
+      body: { name: 'New Name', bio: 'New bio' }
+    });
+
+    expect(response.status).toBe(200);
+
+    const dbProfile = await db.profiles.findById(userId);
+    expect(dbProfile.name).toBe('New Name');
+  });
+});
+
+// E2E Tests
+test('user can update their profile', async ({ page }) => {
+  await loginAsTestUser(page);
+  await page.goto('/settings/profile');
+  await page.fill('[data-testid="name"]', 'Updated Name');
+  await page.click('[data-testid="save"]');
+
+  await expect(page.locator('[data-testid="success"]')).toBeVisible();
+});
+```
+
+### CI/CD Test Configuration
+
+```yaml
+# .github/workflows/test.yml
+name: Test Suite
+
+on: [push, pull_request]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run unit tests
+        run: npm run test:unit -- --coverage
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run integration tests
+        run: npm run test:integration
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Playwright
+        run: npx playwright install --with-deps
+      - name: Run E2E tests
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+```
+
+## Best Practices
+
+### Do's
+
+- **Test all four quality dimensions** (accuracy, performance, security, accessibility)
+- **Follow the test pyramid** - more unit tests, fewer E2E tests
+- **Use descriptive test names** that explain the expected behavior
+- **Test edge cases and error conditions** systematically
+- **Keep tests independent** - no shared state between tests
+- **Use appropriate assertions** that give helpful error messages
+- **Mock external dependencies** in unit tests
+- **Test real integrations** in integration tests
+- **Run tests in CI/CD** on every commit
+- **Maintain test data factories** for consistent test data
+
+### Don'ts
+
+- Don't test implementation details - test behavior
+- Don't write flaky tests - fix or delete them
+- Don't skip tests without documented reason
+- Don't test framework code - trust your dependencies
+- Don't use sleep/delays - use proper async handling
+- Don't hardcode test data - use factories
+- Don't ignore failing tests - fix them immediately
+- Don't over-mock - some integration is valuable
+- Don't write tests after bugs escape - prevent them
+- Don't chase 100% coverage - chase meaningful coverage
+
+## References
+
+- [Testing Library](https://testing-library.com/)
+- [Vitest Documentation](https://vitest.dev/)
+- [Playwright Documentation](https://playwright.dev/)
+- [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)
+- [Web Content Accessibility Guidelines](https://www.w3.org/WAI/standards-guidelines/wcag/)
 
 
 ## Configuration

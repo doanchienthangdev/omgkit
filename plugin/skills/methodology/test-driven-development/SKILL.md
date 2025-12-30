@@ -1,39 +1,794 @@
 ---
 name: test-driven-development
-description: TDD workflow. Use when implementing features with test-first approach.
+description: Test-first development with Red-Green-Refactor cycle, behavior-driven specs, and comprehensive testing strategies
+category: methodology
+triggers:
+  - tdd
+  - test driven
+  - test first
+  - red green refactor
+  - write tests first
+  - testing methodology
 ---
 
-# Test-Driven Development Skill
+# Test-Driven Development
 
-## TDD Cycle
-1. 🔴 **RED** - Write failing test
-2. 🟢 **GREEN** - Make it pass (minimal code)
-3. ♻️ **REFACTOR** - Improve code
+Master **test-first development** with the Red-Green-Refactor cycle. This skill enables confident code changes through comprehensive test coverage, emergent design, and continuous validation.
 
-## Rules
-- No production code without failing test
-- Only enough code to pass test
-- Refactor only when green
-- One assertion per test
+## Purpose
 
-## Example
+Build reliable software through test-first practices:
+
+- Write failing tests before implementation
+- Design interfaces through test usage
+- Achieve comprehensive coverage naturally
+- Enable fearless refactoring
+- Document behavior through specs
+- Catch regressions immediately
+- Improve code design through testability
+
+## Features
+
+### 1. The Red-Green-Refactor Cycle
+
+```markdown
+## TDD Cycle Visualization
+
+    ┌───────────────────────────────────────────────────┐
+    │                                                   │
+    │   🔴 RED                                          │
+    │   Write a failing test                            │
+    │   - Test doesn't compile OR                       │
+    │   - Test fails with assertion error               │
+    │                                                   │
+    │                    │                              │
+    │                    ▼                              │
+    │                                                   │
+    │   🟢 GREEN                                        │
+    │   Make the test pass                              │
+    │   - Write MINIMAL code                            │
+    │   - No more than needed to pass                   │
+    │   - "Fake it till you make it"                    │
+    │                                                   │
+    │                    │                              │
+    │                    ▼                              │
+    │                                                   │
+    │   🔄 REFACTOR                                     │
+    │   Improve the code                                │
+    │   - Remove duplication                            │
+    │   - Improve naming                                │
+    │   - Extract methods/classes                       │
+    │   - Keep tests green!                             │
+    │                                                   │
+    │                    │                              │
+    │                    ▼                              │
+    │                                                   │
+    │              Next Test ──────────────────► 🔴     │
+    │                                                   │
+    └───────────────────────────────────────────────────┘
+
+## Cycle Duration
+- Ideal cycle: 1-5 minutes
+- Maximum cycle: 10 minutes
+- If stuck longer: Undo and try smaller step
+```
+
+### 2. Writing Effective Tests
+
 ```typescript
-// 1. RED - Write test first
-describe('calculateTax', () => {
-  it('calculates 10% tax', () => {
-    expect(calculateTax(100, 0.1)).toBe(10);
+// TDD Example: Building a Password Validator
+
+// ═══════════════════════════════════════════════════════════
+// ITERATION 1: Minimum length requirement
+// ═══════════════════════════════════════════════════════════
+
+// 🔴 RED: Write failing test first
+describe('PasswordValidator', () => {
+  describe('validate', () => {
+    it('returns invalid for passwords shorter than 8 characters', () => {
+      const result = validatePassword('short');
+      expect(result.valid).toBe(false);
+      expect(result.errors).toContain('Password must be at least 8 characters');
+    });
   });
 });
 
-// 2. GREEN - Minimal implementation
-function calculateTax(amount: number, rate: number) {
-  return amount * rate;
+// 🟢 GREEN: Minimal implementation to pass
+interface ValidationResult {
+  valid: boolean;
+  errors: string[];
 }
 
-// 3. REFACTOR if needed
+function validatePassword(password: string): ValidationResult {
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+// 🔄 REFACTOR: Nothing to refactor yet
+
+// ═══════════════════════════════════════════════════════════
+// ITERATION 2: Valid password passes
+// ═══════════════════════════════════════════════════════════
+
+// 🔴 RED: Add test for valid case
+it('returns valid for password with 8+ characters', () => {
+  const result = validatePassword('validpwd');
+  expect(result.valid).toBe(true);
+  expect(result.errors).toHaveLength(0);
+});
+
+// 🟢 GREEN: Already passes! No changes needed.
+
+// ═══════════════════════════════════════════════════════════
+// ITERATION 3: Require uppercase letter
+// ═══════════════════════════════════════════════════════════
+
+// 🔴 RED: Add uppercase requirement
+it('returns invalid without uppercase letter', () => {
+  const result = validatePassword('lowercase123');
+  expect(result.valid).toBe(false);
+  expect(result.errors).toContain('Password must contain uppercase letter');
+});
+
+// 🟢 GREEN: Add uppercase check
+function validatePassword(password: string): ValidationResult {
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters');
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Password must contain uppercase letter');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+// 🔄 REFACTOR: Extract validation rules
+interface ValidationRule {
+  test: (password: string) => boolean;
+  message: string;
+}
+
+const passwordRules: ValidationRule[] = [
+  {
+    test: (p) => p.length >= 8,
+    message: 'Password must be at least 8 characters',
+  },
+  {
+    test: (p) => /[A-Z]/.test(p),
+    message: 'Password must contain uppercase letter',
+  },
+];
+
+function validatePassword(password: string): ValidationResult {
+  const errors = passwordRules
+    .filter((rule) => !rule.test(password))
+    .map((rule) => rule.message);
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// ITERATION 4: More rules become easy to add!
+// ═══════════════════════════════════════════════════════════
+
+// 🔴 RED
+it('returns invalid without number', () => {
+  const result = validatePassword('NoNumbers!');
+  expect(result.valid).toBe(false);
+  expect(result.errors).toContain('Password must contain a number');
+});
+
+// 🟢 GREEN: Just add to rules array
+passwordRules.push({
+  test: (p) => /\d/.test(p),
+  message: 'Password must contain a number',
+});
 ```
 
-## Benefits
-- Design emerges from tests
-- 100% coverage by default
-- Confidence in refactoring
+### 3. Test Patterns and Structures
+
+```typescript
+// ═══════════════════════════════════════════════════════════
+// ARRANGE-ACT-ASSERT Pattern
+// ═══════════════════════════════════════════════════════════
+
+describe('ShoppingCart', () => {
+  describe('addItem', () => {
+    it('increases total when item is added', () => {
+      // ARRANGE: Set up test data and dependencies
+      const cart = new ShoppingCart();
+      const item = { id: '1', name: 'Widget', price: 10.00 };
+
+      // ACT: Execute the behavior being tested
+      cart.addItem(item);
+
+      // ASSERT: Verify the expected outcome
+      expect(cart.total).toBe(10.00);
+      expect(cart.itemCount).toBe(1);
+    });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// GIVEN-WHEN-THEN Pattern (BDD Style)
+// ═══════════════════════════════════════════════════════════
+
+describe('ShoppingCart', () => {
+  describe('when applying discount code', () => {
+    it('reduces total by discount percentage', () => {
+      // GIVEN a cart with items
+      const cart = new ShoppingCart();
+      cart.addItem({ id: '1', name: 'Widget', price: 100.00 });
+
+      // WHEN a 20% discount is applied
+      cart.applyDiscount('SAVE20');
+
+      // THEN the total is reduced by 20%
+      expect(cart.total).toBe(80.00);
+    });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// Test Fixture Pattern
+// ═══════════════════════════════════════════════════════════
+
+describe('OrderService', () => {
+  // Shared fixtures
+  let orderService: OrderService;
+  let mockPaymentGateway: jest.Mocked<PaymentGateway>;
+  let mockInventory: jest.Mocked<InventoryService>;
+
+  // Common test data
+  const validOrder: Order = {
+    id: 'order-123',
+    items: [{ productId: 'prod-1', quantity: 2, price: 25.00 }],
+    total: 50.00,
+  };
+
+  beforeEach(() => {
+    // Fresh mocks for each test
+    mockPaymentGateway = {
+      charge: jest.fn().mockResolvedValue({ success: true }),
+    };
+    mockInventory = {
+      reserve: jest.fn().mockResolvedValue(true),
+      release: jest.fn().mockResolvedValue(true),
+    };
+
+    orderService = new OrderService(mockPaymentGateway, mockInventory);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('submitOrder', () => {
+    it('reserves inventory and charges payment', async () => {
+      await orderService.submitOrder(validOrder);
+
+      expect(mockInventory.reserve).toHaveBeenCalledWith(validOrder.items);
+      expect(mockPaymentGateway.charge).toHaveBeenCalledWith(50.00);
+    });
+
+    it('releases inventory if payment fails', async () => {
+      mockPaymentGateway.charge.mockResolvedValue({ success: false });
+
+      await expect(orderService.submitOrder(validOrder)).rejects.toThrow();
+
+      expect(mockInventory.release).toHaveBeenCalledWith(validOrder.items);
+    });
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// Parameterized Tests
+// ═══════════════════════════════════════════════════════════
+
+describe('EmailValidator', () => {
+  // Valid email test cases
+  it.each([
+    ['simple@example.com', 'simple email'],
+    ['user.name@domain.org', 'email with dots'],
+    ['user+tag@example.com', 'email with plus'],
+    ['user@subdomain.domain.com', 'email with subdomain'],
+  ])('validates %s as valid (%s)', (email, _description) => {
+    expect(isValidEmail(email)).toBe(true);
+  });
+
+  // Invalid email test cases
+  it.each([
+    ['plaintext', 'no @ symbol'],
+    ['missing@domain', 'no TLD'],
+    ['@nodomain.com', 'no local part'],
+    ['spaces in@email.com', 'contains spaces'],
+    ['', 'empty string'],
+  ])('rejects %s as invalid (%s)', (email, _description) => {
+    expect(isValidEmail(email)).toBe(false);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// Builder Pattern for Test Data
+// ═══════════════════════════════════════════════════════════
+
+class UserBuilder {
+  private user: Partial<User> = {
+    id: 'user-123',
+    email: 'test@example.com',
+    name: 'Test User',
+    role: 'user',
+    active: true,
+  };
+
+  withId(id: string): this {
+    this.user.id = id;
+    return this;
+  }
+
+  withEmail(email: string): this {
+    this.user.email = email;
+    return this;
+  }
+
+  withRole(role: UserRole): this {
+    this.user.role = role;
+    return this;
+  }
+
+  inactive(): this {
+    this.user.active = false;
+    return this;
+  }
+
+  admin(): this {
+    this.user.role = 'admin';
+    return this;
+  }
+
+  build(): User {
+    return this.user as User;
+  }
+}
+
+// Usage in tests
+describe('PermissionService', () => {
+  it('grants admin access to admin users', () => {
+    const admin = new UserBuilder().admin().build();
+    const service = new PermissionService();
+
+    expect(service.canAccessAdminPanel(admin)).toBe(true);
+  });
+
+  it('denies admin access to regular users', () => {
+    const user = new UserBuilder().withRole('user').build();
+    const service = new PermissionService();
+
+    expect(service.canAccessAdminPanel(user)).toBe(false);
+  });
+});
+```
+
+### 4. Mocking Strategies
+
+```typescript
+// ═══════════════════════════════════════════════════════════
+// Dependency Injection for Testability
+// ═══════════════════════════════════════════════════════════
+
+// BAD: Hard to test
+class UserService {
+  async getUser(id: string) {
+    const response = await fetch(`/api/users/${id}`); // Can't mock
+    return response.json();
+  }
+}
+
+// GOOD: Dependency injection
+interface HttpClient {
+  get<T>(url: string): Promise<T>;
+}
+
+class UserService {
+  constructor(private http: HttpClient) {}
+
+  async getUser(id: string): Promise<User> {
+    return this.http.get<User>(`/api/users/${id}`);
+  }
+}
+
+// Test with mock
+describe('UserService', () => {
+  it('fetches user by id', async () => {
+    const mockHttp: jest.Mocked<HttpClient> = {
+      get: jest.fn().mockResolvedValue({ id: '1', name: 'John' }),
+    };
+
+    const service = new UserService(mockHttp);
+    const user = await service.getUser('1');
+
+    expect(mockHttp.get).toHaveBeenCalledWith('/api/users/1');
+    expect(user.name).toBe('John');
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// Stub vs Mock vs Spy
+// ═══════════════════════════════════════════════════════════
+
+// STUB: Provides canned responses
+const stubLogger: Logger = {
+  log: () => {},
+  error: () => {},
+  warn: () => {},
+};
+
+// MOCK: Verifies interactions
+const mockLogger = {
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+};
+
+// SPY: Wraps real implementation
+const realLogger = new ConsoleLogger();
+const spyLogger = jest.spyOn(realLogger, 'error');
+
+// ═══════════════════════════════════════════════════════════
+// Time-Based Testing
+// ═══════════════════════════════════════════════════════════
+
+describe('TokenService', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('expires tokens after 1 hour', () => {
+    const service = new TokenService();
+    const token = service.createToken('user-1');
+
+    // Initially valid
+    expect(service.isValid(token)).toBe(true);
+
+    // Advance time by 59 minutes - still valid
+    jest.advanceTimersByTime(59 * 60 * 1000);
+    expect(service.isValid(token)).toBe(true);
+
+    // Advance time by 2 more minutes - now expired
+    jest.advanceTimersByTime(2 * 60 * 1000);
+    expect(service.isValid(token)).toBe(false);
+  });
+});
+
+// ═══════════════════════════════════════════════════════════
+// Testing Async Code
+// ═══════════════════════════════════════════════════════════
+
+describe('NotificationService', () => {
+  it('sends notification and waits for delivery', async () => {
+    const service = new NotificationService();
+
+    // Test async success
+    const result = await service.send('Hello');
+    expect(result.delivered).toBe(true);
+  });
+
+  it('handles async errors', async () => {
+    const service = new NotificationService();
+    service.setOffline(true);
+
+    // Test async error
+    await expect(service.send('Hello')).rejects.toThrow('Network unavailable');
+  });
+
+  it('retries failed deliveries', async () => {
+    const mockTransport = {
+      send: jest
+        .fn()
+        .mockRejectedValueOnce(new Error('Temporary failure'))
+        .mockResolvedValueOnce({ success: true }),
+    };
+
+    const service = new NotificationService(mockTransport);
+    await service.send('Hello');
+
+    expect(mockTransport.send).toHaveBeenCalledTimes(2);
+  });
+});
+```
+
+### 5. Coverage and Quality Metrics
+
+```markdown
+## Code Coverage Guidelines
+
+### Coverage Targets by Type
+
+| Test Type | Target | Rationale |
+|-----------|--------|-----------|
+| Unit Tests | 80%+ | Core logic coverage |
+| Integration | 60%+ | Critical paths |
+| E2E | 100% critical | User journeys |
+
+### What Coverage Tells You
+✅ Code that IS executed by tests
+❌ Does NOT mean code is well-tested
+❌ Does NOT mean edge cases covered
+❌ Does NOT mean behavior is verified
+
+### Meaningful Coverage
+```typescript
+// 100% coverage but NOT well-tested
+function divide(a: number, b: number): number {
+  return a / b;
+}
+
+it('divides two numbers', () => {
+  expect(divide(10, 2)).toBe(5); // 100% coverage!
+});
+
+// Missing tests:
+// - divide(10, 0) - Division by zero
+// - divide(0, 5) - Zero numerator
+// - divide(-10, 2) - Negative numbers
+// - divide(1.5, 0.3) - Floating point
+```
+
+### Coverage Report Analysis
+```bash
+# Generate coverage report
+npm test -- --coverage
+
+# Example output:
+# -------------------|---------|----------|---------|---------|
+# File               | % Stmts | % Branch | % Funcs | % Lines |
+# -------------------|---------|----------|---------|---------|
+# All files          |   85.32 |    72.41 |   91.23 |   84.76 |
+#  src/services      |   92.14 |    85.00 |   95.00 |   91.89 |
+#   UserService.ts   |   95.00 |    90.00 |  100.00 |   94.74 |
+#   OrderService.ts  |   89.47 |    80.00 |   90.00 |   89.19 |
+```
+
+### Branch Coverage Focus
+```typescript
+// Branch coverage example
+function processOrder(order: Order): Result {
+  if (order.total > 1000) {        // Branch 1
+    if (order.customerType === 'vip') {  // Branch 2
+      return applyVipDiscount(order);
+    }
+    return applyBulkDiscount(order);
+  }
+  return processStandard(order);
+}
+
+// Tests needed for 100% branch coverage:
+// 1. order.total <= 1000
+// 2. order.total > 1000 AND customerType === 'vip'
+// 3. order.total > 1000 AND customerType !== 'vip'
+```
+
+### 6. TDD with Different Architectures
+
+```typescript
+// ═══════════════════════════════════════════════════════════
+// TDD with Clean Architecture
+// ═══════════════════════════════════════════════════════════
+
+// 1. Start with USE CASE test
+describe('CreateUserUseCase', () => {
+  it('creates user and sends welcome email', async () => {
+    // Arrange
+    const mockUserRepo: jest.Mocked<UserRepository> = {
+      save: jest.fn().mockResolvedValue({ id: '1', email: 'test@test.com' }),
+      findByEmail: jest.fn().mockResolvedValue(null),
+    };
+    const mockEmailService: jest.Mocked<EmailService> = {
+      send: jest.fn().mockResolvedValue(true),
+    };
+
+    const useCase = new CreateUserUseCase(mockUserRepo, mockEmailService);
+
+    // Act
+    const result = await useCase.execute({
+      email: 'test@test.com',
+      password: 'password123',
+    });
+
+    // Assert
+    expect(result.success).toBe(true);
+    expect(mockUserRepo.save).toHaveBeenCalled();
+    expect(mockEmailService.send).toHaveBeenCalledWith(
+      'test@test.com',
+      expect.stringContaining('Welcome')
+    );
+  });
+});
+
+// 2. Then implement the use case
+class CreateUserUseCase {
+  constructor(
+    private userRepo: UserRepository,
+    private emailService: EmailService
+  ) {}
+
+  async execute(input: CreateUserInput): Promise<CreateUserOutput> {
+    // Check if user exists
+    const existing = await this.userRepo.findByEmail(input.email);
+    if (existing) {
+      return { success: false, error: 'Email already registered' };
+    }
+
+    // Create user
+    const user = await this.userRepo.save({
+      email: input.email,
+      passwordHash: await hash(input.password),
+    });
+
+    // Send welcome email
+    await this.emailService.send(user.email, 'Welcome to our platform!');
+
+    return { success: true, userId: user.id };
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// TDD with API Endpoints
+// ═══════════════════════════════════════════════════════════
+
+describe('POST /api/users', () => {
+  it('creates user and returns 201', async () => {
+    const response = await request(app)
+      .post('/api/users')
+      .send({
+        email: 'new@example.com',
+        password: 'securepass123',
+      })
+      .expect(201);
+
+    expect(response.body).toMatchObject({
+      id: expect.any(String),
+      email: 'new@example.com',
+    });
+  });
+
+  it('returns 400 for invalid email', async () => {
+    const response = await request(app)
+      .post('/api/users')
+      .send({
+        email: 'not-an-email',
+        password: 'securepass123',
+      })
+      .expect(400);
+
+    expect(response.body.error).toContain('email');
+  });
+
+  it('returns 409 for duplicate email', async () => {
+    // Create user first
+    await createUser({ email: 'exists@example.com' });
+
+    // Try to create duplicate
+    const response = await request(app)
+      .post('/api/users')
+      .send({
+        email: 'exists@example.com',
+        password: 'securepass123',
+      })
+      .expect(409);
+
+    expect(response.body.error).toContain('already exists');
+  });
+});
+```
+
+## Use Cases
+
+### Building a Calculator with TDD
+
+```typescript
+// Progressive TDD session building a calculator
+
+// Test 1: Addition
+describe('Calculator', () => {
+  describe('add', () => {
+    it('adds two positive numbers', () => {
+      expect(add(2, 3)).toBe(5);
+    });
+  });
+});
+
+// Implementation 1
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+// Test 2: Negative numbers
+it('adds negative numbers', () => {
+  expect(add(-2, -3)).toBe(-5);
+  expect(add(-2, 3)).toBe(1);
+});
+// Already passes!
+
+// Test 3: Subtraction
+describe('subtract', () => {
+  it('subtracts two numbers', () => {
+    expect(subtract(5, 3)).toBe(2);
+  });
+});
+
+// Implementation 3
+function subtract(a: number, b: number): number {
+  return a - b;
+}
+
+// Refactor: Extract to class
+class Calculator {
+  add(a: number, b: number): number {
+    return a + b;
+  }
+
+  subtract(a: number, b: number): number {
+    return a - b;
+  }
+}
+
+// Continue with multiply, divide, etc.
+```
+
+## Best Practices
+
+### Do's
+
+- Write the test BEFORE the implementation
+- Keep tests focused on ONE behavior
+- Use descriptive test names that document behavior
+- Run tests frequently (every few minutes)
+- Refactor only when tests are green
+- Test behavior, not implementation
+- Keep the Red-Green-Refactor cycle short
+- Use test doubles (mocks) for external dependencies
+- Organize tests to mirror source structure
+- Delete tests that no longer add value
+
+### Don'ts
+
+- Don't write implementation before tests
+- Don't test private methods directly
+- Don't mock what you don't own
+- Don't skip the refactor step
+- Don't write tests for trivial code
+- Don't let tests become too slow
+- Don't test framework/library code
+- Don't ignore flaky tests
+- Don't over-mock (test integration too)
+- Don't forget to run all tests before commit
+
+## References
+
+- [Test Driven Development by Kent Beck](https://www.amazon.com/Test-Driven-Development-Kent-Beck/dp/0321146530)
+- [Growing Object-Oriented Software, Guided by Tests](http://www.growing-object-oriented-software.com/)
+- [The Art of Unit Testing](https://www.manning.com/books/the-art-of-unit-testing-third-edition)
+- [Jest Documentation](https://jestjs.io/docs/getting-started)
+- [Testing Library](https://testing-library.com/)

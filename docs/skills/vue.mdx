@@ -1,6 +1,6 @@
 ---
 title: "vue"
-description: "Vue.js development. Use for Vue 3 projects, Composition API, Pinia."
+description: "Modern Vue 3 development with Composition API, TypeScript, Pinia, Vue Router, and testing patterns"
 icon: "layer-group"
 ---
 
@@ -12,7 +12,7 @@ icon: "layer-group"
 
 ## Overview
 
-Vue.js development. Use for Vue 3 projects, Composition API, Pinia.
+Modern Vue 3 development with Composition API, TypeScript, Pinia, Vue Router, and testing patterns
 
 ## What You Get
 
@@ -24,63 +24,1321 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Vue.js Skill
+# Vue.js
 
-## Composition API
+Modern **Vue 3 development** following industry best practices. This skill covers Composition API, TypeScript integration, Pinia state management, Vue Router, component patterns, testing with Vitest, and production-ready configurations used by top engineering teams.
 
-### Component
+## Purpose
+
+Build reactive, maintainable Vue applications with confidence:
+
+- Master Composition API and `<script setup>` syntax
+- Implement type-safe components with TypeScript
+- Manage state effectively with Pinia stores
+- Handle routing with Vue Router
+- Create reusable composables
+- Write comprehensive tests with Vitest
+- Build performant applications
+
+## Features
+
+### 1. Component Architecture with TypeScript
+
 ```vue
+<!-- src/components/UserCard.vue -->
 <script setup lang="ts">
+import { computed, ref, watch, onMounted } from 'vue';
+import type { User, UserRole } from '@/types';
+
+// Props with TypeScript
+interface Props {
+  user: User;
+  showActions?: boolean;
+  variant?: 'default' | 'compact' | 'detailed';
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  showActions: true,
+  variant: 'default',
+});
+
+// Emits with TypeScript
+interface Emits {
+  (e: 'edit', user: User): void;
+  (e: 'delete', userId: string): void;
+  (e: 'select', user: User, selected: boolean): void;
+}
+
+const emit = defineEmits<Emits>();
+
+// Expose methods to parent
+defineExpose({
+  focus: () => cardRef.value?.focus(),
+});
+
+// Refs
+const cardRef = ref<HTMLDivElement | null>(null);
+const isSelected = ref(false);
+const isLoading = ref(false);
+
+// Computed
+const fullName = computed(() =>
+  `${props.user.firstName} ${props.user.lastName}`
+);
+
+const roleLabel = computed(() => {
+  const labels: Record<UserRole, string> = {
+    admin: 'Administrator',
+    user: 'User',
+    guest: 'Guest',
+  };
+  return labels[props.user.role];
+});
+
+const cardClasses = computed(() => ({
+  'user-card': true,
+  [`user-card--${props.variant}`]: true,
+  'user-card--selected': isSelected.value,
+  'user-card--loading': isLoading.value,
+}));
+
+// Watchers
+watch(() => props.user.id, (newId, oldId) => {
+  if (newId !== oldId) {
+    isSelected.value = false;
+  }
+});
+
+// Methods
+function handleEdit() {
+  emit('edit', props.user);
+}
+
+function handleDelete() {
+  emit('delete', props.user.id);
+}
+
+function toggleSelect() {
+  isSelected.value = !isSelected.value;
+  emit('select', props.user, isSelected.value);
+}
+
+// Lifecycle
+onMounted(() => {
+  console.log('UserCard mounted for:', props.user.id);
+});
+</script>
+
+<template>
+  <div
+    ref="cardRef"
+    :class="cardClasses"
+    tabindex="0"
+    @click="toggleSelect"
+  >
+    <div class="user-card__avatar">
+      <img
+        :src="user.avatarUrl || '/default-avatar.png'"
+        :alt="fullName"
+      />
+    </div>
+
+    <div class="user-card__content">
+      <h3 class="user-card__name">{{ fullName }}</h3>
+      <p class="user-card__email">{{ user.email }}</p>
+      <span class="user-card__role" :class="`role--${user.role}`">
+        {{ roleLabel }}
+      </span>
+    </div>
+
+    <div v-if="showActions" class="user-card__actions">
+      <button @click.stop="handleEdit">Edit</button>
+      <button @click.stop="handleDelete">Delete</button>
+    </div>
+
+    <slot name="footer" :user="user" :selected="isSelected" />
+  </div>
+</template>
+
+<style scoped>
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.user-card--selected {
+  border-color: var(--primary-color);
+  background: var(--primary-bg);
+}
+
+.user-card--compact {
+  padding: 0.5rem;
+}
+
+.user-card--loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+</style>
+```
+
+### 2. Composables (Reusable Logic)
+
+```typescript
+// src/composables/useUser.ts
+import { ref, computed, watch, type Ref } from 'vue';
+import type { User, UpdateUserData } from '@/types';
+import { userService } from '@/services/user.service';
+
+interface UseUserOptions {
+  immediate?: boolean;
+  onError?: (error: Error) => void;
+}
+
+export function useUser(userId: Ref<string | null>, options: UseUserOptions = {}) {
+  const { immediate = true, onError } = options;
+
+  const user = ref<User | null>(null);
+  const loading = ref(false);
+  const error = ref<Error | null>(null);
+
+  const isLoaded = computed(() => !!user.value);
+  const fullName = computed(() =>
+    user.value ? `${user.value.firstName} ${user.value.lastName}` : ''
+  );
+
+  async function fetchUser() {
+    if (!userId.value) {
+      user.value = null;
+      return;
+    }
+
+    loading.value = true;
+    error.value = null;
+
+    try {
+      user.value = await userService.getById(userId.value);
+    } catch (e) {
+      error.value = e as Error;
+      onError?.(e as Error);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function updateUser(data: UpdateUserData) {
+    if (!userId.value || !user.value) return;
+
+    loading.value = true;
+    try {
+      user.value = await userService.update(userId.value, data);
+    } catch (e) {
+      error.value = e as Error;
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  watch(userId, fetchUser, { immediate });
+
+  return {
+    user,
+    loading,
+    error,
+    isLoaded,
+    fullName,
+    fetchUser,
+    updateUser,
+  };
+}
+
+
+// src/composables/usePagination.ts
+import { ref, computed, watch } from 'vue';
+
+interface UsePaginationOptions {
+  initialPage?: number;
+  initialLimit?: number;
+  total?: number;
+}
+
+export function usePagination(options: UsePaginationOptions = {}) {
+  const page = ref(options.initialPage ?? 1);
+  const limit = ref(options.initialLimit ?? 20);
+  const total = ref(options.total ?? 0);
+
+  const totalPages = computed(() =>
+    Math.ceil(total.value / limit.value) || 1
+  );
+
+  const hasNextPage = computed(() => page.value < totalPages.value);
+  const hasPrevPage = computed(() => page.value > 1);
+
+  const offset = computed(() => (page.value - 1) * limit.value);
+
+  function nextPage() {
+    if (hasNextPage.value) page.value++;
+  }
+
+  function prevPage() {
+    if (hasPrevPage.value) page.value--;
+  }
+
+  function goToPage(pageNum: number) {
+    if (pageNum >= 1 && pageNum <= totalPages.value) {
+      page.value = pageNum;
+    }
+  }
+
+  function setTotal(newTotal: number) {
+    total.value = newTotal;
+    if (page.value > totalPages.value) {
+      page.value = totalPages.value || 1;
+    }
+  }
+
+  return {
+    page,
+    limit,
+    total,
+    totalPages,
+    hasNextPage,
+    hasPrevPage,
+    offset,
+    nextPage,
+    prevPage,
+    goToPage,
+    setTotal,
+  };
+}
+
+
+// src/composables/useAsync.ts
+import { ref, shallowRef, type Ref } from 'vue';
+
+interface UseAsyncOptions<T> {
+  immediate?: boolean;
+  initialData?: T;
+  onSuccess?: (data: T) => void;
+  onError?: (error: Error) => void;
+}
+
+export function useAsync<T, P extends unknown[] = []>(
+  asyncFn: (...args: P) => Promise<T>,
+  options: UseAsyncOptions<T> = {}
+) {
+  const { initialData, onSuccess, onError } = options;
+
+  const data = shallowRef<T | undefined>(initialData) as Ref<T | undefined>;
+  const loading = ref(false);
+  const error = ref<Error | null>(null);
+
+  async function execute(...args: P): Promise<T | undefined> {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const result = await asyncFn(...args);
+      data.value = result;
+      onSuccess?.(result);
+      return result;
+    } catch (e) {
+      error.value = e as Error;
+      onError?.(e as Error);
+      return undefined;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  return {
+    data,
+    loading,
+    error,
+    execute,
+  };
+}
+```
+
+### 3. Pinia State Management
+
+```typescript
+// src/stores/user.store.ts
+import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import type { User, LoginCredentials, RegisterData } from '@/types';
+import { authService } from '@/services/auth.service';
+import { useStorage } from '@vueuse/core';
 
-const count = ref(0);
-const doubled = computed(() => count.value * 2);
+export const useUserStore = defineStore('user', () => {
+  // State
+  const user = ref<User | null>(null);
+  const token = useStorage<string | null>('auth_token', null);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
 
-function increment() {
-  count.value++;
+  // Getters
+  const isAuthenticated = computed(() => !!token.value && !!user.value);
+  const isAdmin = computed(() => user.value?.role === 'admin');
+  const fullName = computed(() =>
+    user.value ? `${user.value.firstName} ${user.value.lastName}` : ''
+  );
+
+  // Actions
+  async function login(credentials: LoginCredentials) {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await authService.login(credentials);
+      token.value = response.token;
+      user.value = response.user;
+    } catch (e) {
+      error.value = (e as Error).message;
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function register(data: RegisterData) {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const response = await authService.register(data);
+      token.value = response.token;
+      user.value = response.user;
+    } catch (e) {
+      error.value = (e as Error).message;
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function fetchCurrentUser() {
+    if (!token.value) return;
+
+    loading.value = true;
+    try {
+      user.value = await authService.getCurrentUser();
+    } catch (e) {
+      logout();
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  function logout() {
+    user.value = null;
+    token.value = null;
+  }
+
+  function $reset() {
+    user.value = null;
+    token.value = null;
+    loading.value = false;
+    error.value = null;
+  }
+
+  return {
+    // State
+    user,
+    token,
+    loading,
+    error,
+    // Getters
+    isAuthenticated,
+    isAdmin,
+    fullName,
+    // Actions
+    login,
+    register,
+    fetchCurrentUser,
+    logout,
+    $reset,
+  };
+});
+
+
+// src/stores/notification.store.ts
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+
+interface Notification {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  message: string;
+  duration?: number;
+}
+
+export const useNotificationStore = defineStore('notification', () => {
+  const notifications = ref<Notification[]>([]);
+
+  function add(notification: Omit<Notification, 'id'>) {
+    const id = crypto.randomUUID();
+    const newNotification: Notification = {
+      ...notification,
+      id,
+      duration: notification.duration ?? 5000,
+    };
+
+    notifications.value.push(newNotification);
+
+    if (newNotification.duration > 0) {
+      setTimeout(() => remove(id), newNotification.duration);
+    }
+
+    return id;
+  }
+
+  function remove(id: string) {
+    const index = notifications.value.findIndex(n => n.id === id);
+    if (index !== -1) {
+      notifications.value.splice(index, 1);
+    }
+  }
+
+  function success(message: string) {
+    return add({ type: 'success', message });
+  }
+
+  function error(message: string) {
+    return add({ type: 'error', message });
+  }
+
+  function warning(message: string) {
+    return add({ type: 'warning', message });
+  }
+
+  function info(message: string) {
+    return add({ type: 'info', message });
+  }
+
+  return {
+    notifications,
+    add,
+    remove,
+    success,
+    error,
+    warning,
+    info,
+  };
+});
+```
+
+### 4. Vue Router Configuration
+
+```typescript
+// src/router/index.ts
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
+import { useUserStore } from '@/stores/user.store';
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    component: () => import('@/layouts/DefaultLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'home',
+        component: () => import('@/views/HomeView.vue'),
+      },
+      {
+        path: 'dashboard',
+        name: 'dashboard',
+        component: () => import('@/views/DashboardView.vue'),
+        meta: { requiresAuth: true },
+      },
+      {
+        path: 'users',
+        name: 'users',
+        component: () => import('@/views/UsersView.vue'),
+        meta: { requiresAuth: true, roles: ['admin'] },
+      },
+      {
+        path: 'users/:id',
+        name: 'user-detail',
+        component: () => import('@/views/UserDetailView.vue'),
+        props: true,
+        meta: { requiresAuth: true },
+      },
+    ],
+  },
+  {
+    path: '/auth',
+    component: () => import('@/layouts/AuthLayout.vue'),
+    children: [
+      {
+        path: 'login',
+        name: 'login',
+        component: () => import('@/views/auth/LoginView.vue'),
+        meta: { guestOnly: true },
+      },
+      {
+        path: 'register',
+        name: 'register',
+        component: () => import('@/views/auth/RegisterView.vue'),
+        meta: { guestOnly: true },
+      },
+    ],
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/views/NotFoundView.vue'),
+  },
+];
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition;
+    if (to.hash) return { el: to.hash, behavior: 'smooth' };
+    return { top: 0 };
+  },
+});
+
+// Navigation Guards
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore();
+
+  // Initialize user if token exists but user is not loaded
+  if (userStore.token && !userStore.user) {
+    await userStore.fetchCurrentUser();
+  }
+
+  // Check authentication
+  if (to.meta.requiresAuth && !userStore.isAuthenticated) {
+    return next({ name: 'login', query: { redirect: to.fullPath } });
+  }
+
+  // Check guest-only routes
+  if (to.meta.guestOnly && userStore.isAuthenticated) {
+    return next({ name: 'dashboard' });
+  }
+
+  // Check role-based access
+  const requiredRoles = to.meta.roles as string[] | undefined;
+  if (requiredRoles && userStore.user) {
+    if (!requiredRoles.includes(userStore.user.role)) {
+      return next({ name: 'dashboard' });
+    }
+  }
+
+  next();
+});
+
+export default router;
+```
+
+### 5. Form Handling with Validation
+
+```vue
+<!-- src/views/auth/RegisterView.vue -->
+<script setup lang="ts">
+import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/user.store';
+import { useNotificationStore } from '@/stores/notification.store';
+
+interface FormState {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface FormErrors {
+  email?: string;
+  password?: string;
+  confirmPassword?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+const router = useRouter();
+const userStore = useUserStore();
+const notifications = useNotificationStore();
+
+const form = reactive<FormState>({
+  email: '',
+  password: '',
+  confirmPassword: '',
+  firstName: '',
+  lastName: '',
+});
+
+const errors = reactive<FormErrors>({});
+const submitting = ref(false);
+
+function validateEmail(email: string): string | undefined {
+  if (!email) return 'Email is required';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Invalid email format';
+}
+
+function validatePassword(password: string): string | undefined {
+  if (!password) return 'Password is required';
+  if (password.length < 8) return 'Password must be at least 8 characters';
+  if (!/[A-Z]/.test(password)) return 'Password must contain uppercase letter';
+  if (!/[0-9]/.test(password)) return 'Password must contain a number';
+}
+
+function validateForm(): boolean {
+  errors.email = validateEmail(form.email);
+  errors.password = validatePassword(form.password);
+  errors.confirmPassword = form.password !== form.confirmPassword
+    ? 'Passwords do not match'
+    : undefined;
+  errors.firstName = !form.firstName ? 'First name is required' : undefined;
+  errors.lastName = !form.lastName ? 'Last name is required' : undefined;
+
+  return !Object.values(errors).some(Boolean);
+}
+
+async function handleSubmit() {
+  if (!validateForm()) return;
+
+  submitting.value = true;
+
+  try {
+    await userStore.register({
+      email: form.email,
+      password: form.password,
+      firstName: form.firstName,
+      lastName: form.lastName,
+    });
+
+    notifications.success('Registration successful!');
+    router.push({ name: 'dashboard' });
+  } catch (error) {
+    notifications.error((error as Error).message);
+  } finally {
+    submitting.value = false;
+  }
 }
 </script>
 
 <template>
-  <button @click="increment">{{ count }} ({{ doubled }})</button>
+  <form @submit.prevent="handleSubmit" class="register-form">
+    <h1>Create Account</h1>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input
+          id="firstName"
+          v-model="form.firstName"
+          type="text"
+          :class="{ error: errors.firstName }"
+        />
+        <span v-if="errors.firstName" class="error-message">
+          {{ errors.firstName }}
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input
+          id="lastName"
+          v-model="form.lastName"
+          type="text"
+          :class="{ error: errors.lastName }"
+        />
+        <span v-if="errors.lastName" class="error-message">
+          {{ errors.lastName }}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        v-model="form.email"
+        type="email"
+        :class="{ error: errors.email }"
+      />
+      <span v-if="errors.email" class="error-message">
+        {{ errors.email }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        v-model="form.password"
+        type="password"
+        :class="{ error: errors.password }"
+      />
+      <span v-if="errors.password" class="error-message">
+        {{ errors.password }}
+      </span>
+    </div>
+
+    <div class="form-group">
+      <label for="confirmPassword">Confirm Password</label>
+      <input
+        id="confirmPassword"
+        v-model="form.confirmPassword"
+        type="password"
+        :class="{ error: errors.confirmPassword }"
+      />
+      <span v-if="errors.confirmPassword" class="error-message">
+        {{ errors.confirmPassword }}
+      </span>
+    </div>
+
+    <button type="submit" :disabled="submitting">
+      {{ submitting ? 'Creating...' : 'Create Account' }}
+    </button>
+
+    <p class="login-link">
+      Already have an account?
+      <RouterLink :to="{ name: 'login' }">Sign in</RouterLink>
+    </p>
+  </form>
 </template>
 ```
 
-### Composable
+### 6. Testing with Vitest
+
 ```typescript
-// composables/useUser.ts
-export function useUser(id: Ref<string>) {
-  const user = ref<User | null>(null);
-  const loading = ref(true);
+// src/components/__tests__/UserCard.spec.ts
+import { describe, it, expect, vi } from 'vitest';
+import { mount } from '@vue/test-utils';
+import UserCard from '@/components/UserCard.vue';
+import type { User } from '@/types';
 
-  watch(id, async (newId) => {
-    loading.value = true;
-    user.value = await fetchUser(newId);
-    loading.value = false;
-  }, { immediate: true });
+const mockUser: User = {
+  id: '1',
+  email: 'test@example.com',
+  firstName: 'John',
+  lastName: 'Doe',
+  role: 'user',
+  avatarUrl: null,
+  createdAt: new Date().toISOString(),
+};
 
-  return { user, loading };
-}
-```
+describe('UserCard', () => {
+  it('renders user information correctly', () => {
+    const wrapper = mount(UserCard, {
+      props: { user: mockUser },
+    });
 
-### Pinia Store
-```typescript
-export const useUserStore = defineStore('user', () => {
-  const user = ref<User | null>(null);
+    expect(wrapper.text()).toContain('John Doe');
+    expect(wrapper.text()).toContain('test@example.com');
+  });
 
-  async function login(email: string, password: string) {
-    user.value = await api.login(email, password);
-  }
+  it('emits edit event when edit button is clicked', async () => {
+    const wrapper = mount(UserCard, {
+      props: { user: mockUser },
+    });
 
-  return { user, login };
+    await wrapper.find('button:first-child').trigger('click');
+
+    expect(wrapper.emitted('edit')).toBeTruthy();
+    expect(wrapper.emitted('edit')![0]).toEqual([mockUser]);
+  });
+
+  it('emits delete event with user id', async () => {
+    const wrapper = mount(UserCard, {
+      props: { user: mockUser },
+    });
+
+    const deleteButton = wrapper.findAll('button')[1];
+    await deleteButton.trigger('click');
+
+    expect(wrapper.emitted('delete')).toBeTruthy();
+    expect(wrapper.emitted('delete')![0]).toEqual(['1']);
+  });
+
+  it('hides actions when showActions is false', () => {
+    const wrapper = mount(UserCard, {
+      props: { user: mockUser, showActions: false },
+    });
+
+    expect(wrapper.find('.user-card__actions').exists()).toBe(false);
+  });
+
+  it('toggles selection on click', async () => {
+    const wrapper = mount(UserCard, {
+      props: { user: mockUser },
+    });
+
+    await wrapper.trigger('click');
+
+    expect(wrapper.emitted('select')).toBeTruthy();
+    expect(wrapper.emitted('select')![0]).toEqual([mockUser, true]);
+    expect(wrapper.classes()).toContain('user-card--selected');
+  });
+});
+
+
+// src/stores/__tests__/user.store.spec.ts
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { setActivePinia, createPinia } from 'pinia';
+import { useUserStore } from '@/stores/user.store';
+import { authService } from '@/services/auth.service';
+
+vi.mock('@/services/auth.service', () => ({
+  authService: {
+    login: vi.fn(),
+    register: vi.fn(),
+    getCurrentUser: vi.fn(),
+  },
+}));
+
+describe('User Store', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+    vi.clearAllMocks();
+  });
+
+  it('initial state is correct', () => {
+    const store = useUserStore();
+
+    expect(store.user).toBeNull();
+    expect(store.isAuthenticated).toBe(false);
+  });
+
+  it('login sets user and token', async () => {
+    const mockResponse = {
+      user: { id: '1', email: 'test@example.com', role: 'user' },
+      token: 'test-token',
+    };
+    vi.mocked(authService.login).mockResolvedValue(mockResponse);
+
+    const store = useUserStore();
+    await store.login({ email: 'test@example.com', password: 'password' });
+
+    expect(store.user).toEqual(mockResponse.user);
+    expect(store.token).toBe('test-token');
+    expect(store.isAuthenticated).toBe(true);
+  });
+
+  it('logout clears user and token', async () => {
+    const store = useUserStore();
+    store.user = { id: '1', email: 'test@example.com' } as any;
+    store.token = 'test-token';
+
+    store.logout();
+
+    expect(store.user).toBeNull();
+    expect(store.token).toBeNull();
+    expect(store.isAuthenticated).toBe(false);
+  });
+
+  it('handles login error', async () => {
+    vi.mocked(authService.login).mockRejectedValue(new Error('Invalid credentials'));
+
+    const store = useUserStore();
+
+    await expect(
+      store.login({ email: 'test@example.com', password: 'wrong' })
+    ).rejects.toThrow('Invalid credentials');
+
+    expect(store.error).toBe('Invalid credentials');
+  });
+});
+
+
+// src/composables/__tests__/usePagination.spec.ts
+import { describe, it, expect } from 'vitest';
+import { usePagination } from '@/composables/usePagination';
+
+describe('usePagination', () => {
+  it('initializes with default values', () => {
+    const { page, limit, total } = usePagination();
+
+    expect(page.value).toBe(1);
+    expect(limit.value).toBe(20);
+    expect(total.value).toBe(0);
+  });
+
+  it('calculates total pages correctly', () => {
+    const { totalPages, setTotal } = usePagination({ initialLimit: 10 });
+
+    setTotal(45);
+
+    expect(totalPages.value).toBe(5);
+  });
+
+  it('navigates pages correctly', () => {
+    const { page, nextPage, prevPage, setTotal } = usePagination();
+    setTotal(100);
+
+    nextPage();
+    expect(page.value).toBe(2);
+
+    nextPage();
+    expect(page.value).toBe(3);
+
+    prevPage();
+    expect(page.value).toBe(2);
+  });
+
+  it('prevents navigation beyond bounds', () => {
+    const { page, nextPage, prevPage, setTotal, limit } = usePagination();
+    setTotal(30);
+
+    prevPage();
+    expect(page.value).toBe(1);
+
+    page.value = 2;
+    nextPage();
+    expect(page.value).toBe(2);
+  });
 });
 ```
 
+### 7. API Service Layer
+
+```typescript
+// src/services/api.service.ts
+import axios, { type AxiosInstance, type AxiosRequestConfig } from 'axios';
+import { useUserStore } from '@/stores/user.store';
+
+const api: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor
+api.interceptors.request.use((config) => {
+  const userStore = useUserStore();
+  if (userStore.token) {
+    config.headers.Authorization = `Bearer ${userStore.token}`;
+  }
+  return config;
+});
+
+// Response interceptor
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const userStore = useUserStore();
+      userStore.logout();
+      window.location.href = '/auth/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export { api };
+
+
+// src/services/user.service.ts
+import { api } from './api.service';
+import type { User, CreateUserData, UpdateUserData, PaginatedResponse } from '@/types';
+
+interface UserFilters {
+  search?: string;
+  role?: string;
+  page?: number;
+  limit?: number;
+}
+
+export const userService = {
+  async getAll(filters: UserFilters = {}): Promise<PaginatedResponse<User>> {
+    const { data } = await api.get('/users', { params: filters });
+    return data;
+  },
+
+  async getById(id: string): Promise<User> {
+    const { data } = await api.get(`/users/${id}`);
+    return data;
+  },
+
+  async create(userData: CreateUserData): Promise<User> {
+    const { data } = await api.post('/users', userData);
+    return data;
+  },
+
+  async update(id: string, userData: UpdateUserData): Promise<User> {
+    const { data } = await api.patch(`/users/${id}`, userData);
+    return data;
+  },
+
+  async delete(id: string): Promise<void> {
+    await api.delete(`/users/${id}`);
+  },
+};
+```
+
+## Use Cases
+
+### Data Table with Pagination and Filters
+
+```vue
+<!-- src/views/UsersView.vue -->
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import { usePagination } from '@/composables/usePagination';
+import { useAsync } from '@/composables/useAsync';
+import { userService } from '@/services/user.service';
+import UserCard from '@/components/UserCard.vue';
+import type { User } from '@/types';
+
+const search = ref('');
+const roleFilter = ref('');
+
+const {
+  page,
+  limit,
+  totalPages,
+  hasNextPage,
+  hasPrevPage,
+  nextPage,
+  prevPage,
+  setTotal,
+} = usePagination({ initialLimit: 10 });
+
+const { data: users, loading, execute: fetchUsers } = useAsync(
+  () => userService.getAll({
+    search: search.value,
+    role: roleFilter.value,
+    page: page.value,
+    limit: limit.value,
+  })
+);
+
+watch([search, roleFilter], () => {
+  page.value = 1;
+  fetchUsers();
+});
+
+watch(page, fetchUsers);
+
+watch(users, (response) => {
+  if (response) setTotal(response.total);
+});
+
+fetchUsers();
+
+function handleEdit(user: User) {
+  // Navigate to edit page
+}
+
+function handleDelete(userId: string) {
+  // Confirm and delete
+}
+</script>
+
+<template>
+  <div class="users-view">
+    <header class="users-view__header">
+      <h1>Users</h1>
+      <RouterLink :to="{ name: 'user-create' }" class="btn btn--primary">
+        Add User
+      </RouterLink>
+    </header>
+
+    <div class="users-view__filters">
+      <input
+        v-model="search"
+        type="search"
+        placeholder="Search users..."
+      />
+      <select v-model="roleFilter">
+        <option value="">All Roles</option>
+        <option value="admin">Admin</option>
+        <option value="user">User</option>
+        <option value="guest">Guest</option>
+      </select>
+    </div>
+
+    <div v-if="loading" class="loading">Loading...</div>
+
+    <div v-else-if="users?.data.length" class="users-view__list">
+      <UserCard
+        v-for="user in users.data"
+        :key="user.id"
+        :user="user"
+        @edit="handleEdit"
+        @delete="handleDelete"
+      />
+    </div>
+
+    <div v-else class="empty">No users found</div>
+
+    <div class="pagination">
+      <button :disabled="!hasPrevPage" @click="prevPage">Previous</button>
+      <span>Page {{ page }} of {{ totalPages }}</span>
+      <button :disabled="!hasNextPage" @click="nextPage">Next</button>
+    </div>
+  </div>
+</template>
+```
+
+### Modal Component with Teleport
+
+```vue
+<!-- src/components/Modal.vue -->
+<script setup lang="ts">
+import { ref, watch, onMounted, onUnmounted } from 'vue';
+
+interface Props {
+  modelValue: boolean;
+  title?: string;
+  persistent?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  persistent: false,
+});
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'close'): void;
+}>();
+
+const modalRef = ref<HTMLDivElement | null>(null);
+
+function close() {
+  emit('update:modelValue', false);
+  emit('close');
+}
+
+function handleBackdropClick() {
+  if (!props.persistent) close();
+}
+
+function handleEscape(event: KeyboardEvent) {
+  if (event.key === 'Escape' && props.modelValue && !props.persistent) {
+    close();
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleEscape);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscape);
+});
+
+watch(() => props.modelValue, (isOpen) => {
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+});
+</script>
+
+<template>
+  <Teleport to="body">
+    <Transition name="modal">
+      <div
+        v-if="modelValue"
+        class="modal-backdrop"
+        @click="handleBackdropClick"
+      >
+        <div
+          ref="modalRef"
+          class="modal"
+          role="dialog"
+          aria-modal="true"
+          @click.stop
+        >
+          <header v-if="title || $slots.header" class="modal__header">
+            <slot name="header">
+              <h2>{{ title }}</h2>
+            </slot>
+            <button class="modal__close" @click="close">&times;</button>
+          </header>
+
+          <div class="modal__body">
+            <slot />
+          </div>
+
+          <footer v-if="$slots.footer" class="modal__footer">
+            <slot name="footer" :close="close" />
+          </footer>
+        </div>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
+
+<style scoped>
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+</style>
+```
+
 ## Best Practices
-- Use Composition API
-- Use `<script setup>`
-- Create composables for logic
-- Use Pinia for state
+
+### Do's
+
+- Use Composition API with `<script setup>`
+- Use TypeScript for type safety
+- Create composables for reusable logic
+- Use Pinia for global state management
+- Use Vue Router for navigation
+- Implement proper error boundaries
+- Write unit tests with Vitest
+- Use lazy loading for routes
+- Follow single responsibility principle
+- Use provide/inject for deep prop drilling
+
+### Don'ts
+
+- Don't use Options API in new code
+- Don't mutate props directly
+- Don't use `this` in Composition API
+- Don't overuse global state
+- Don't skip error handling
+- Don't ignore TypeScript errors
+- Don't use `any` type
+- Don't create memory leaks in watchers
+- Don't skip component testing
+- Don't mix template refs with reactive refs
+
+## References
+
+- [Vue 3 Documentation](https://vuejs.org/)
+- [Pinia Documentation](https://pinia.vuejs.org/)
+- [Vue Router Documentation](https://router.vuejs.org/)
+- [Vitest Documentation](https://vitest.dev/)
+- [VueUse Composables](https://vueuse.org/)
 
 
 ## Configuration

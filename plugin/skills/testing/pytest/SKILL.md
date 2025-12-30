@@ -1,58 +1,895 @@
 ---
 name: pytest
-description: Python testing with pytest. Use for unit tests, fixtures, mocking.
+description: Python testing with pytest including fixtures, parametrization, mocking, async testing, and CI integration
+category: testing
+triggers:
+  - pytest
+  - python testing
+  - unit testing python
+  - fixtures
+  - test automation
 ---
 
-# Pytest Skill
+# Pytest
 
-## Basic Tests
-```python
-def test_add():
-    assert add(1, 2) == 3
+Enterprise-grade **Python testing framework** following industry best practices. This skill covers fixtures, parametrization, mocking, async testing, markers, plugins, and CI integration patterns used by top engineering teams.
 
-def test_raises():
-    with pytest.raises(ValueError):
-        validate("")
+## Purpose
+
+Build comprehensive Python test suites:
+
+- Write clear and maintainable unit tests
+- Create reusable fixtures for test setup
+- Implement parametrized tests for edge cases
+- Mock external dependencies effectively
+- Test async code with pytest-asyncio
+- Generate coverage reports
+- Integrate with CI/CD pipelines
+
+## Features
+
+### 1. Configuration Setup
+
+```ini
+# pytest.ini
+[pytest]
+testpaths = tests
+python_files = test_*.py *_test.py
+python_classes = Test*
+python_functions = test_*
+addopts =
+    -v
+    --strict-markers
+    --tb=short
+    -ra
+    --cov=src
+    --cov-report=term-missing
+    --cov-report=html:coverage_html
+    --cov-fail-under=80
+markers =
+    slow: marks tests as slow (deselect with '-m "not slow"')
+    integration: marks tests as integration tests
+    unit: marks tests as unit tests
+    smoke: marks tests as smoke tests
+filterwarnings =
+    error
+    ignore::DeprecationWarning
+asyncio_mode = auto
 ```
 
-## Fixtures
+```toml
+# pyproject.toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --strict-markers --tb=short"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = ["*/tests/*", "*/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]
+fail_under = 80
+show_missing = true
+```
+
+### 2. Fixture Patterns
+
 ```python
+# tests/conftest.py
+from typing import Generator, AsyncGenerator
+from collections.abc import Iterator
+import pytest
+from unittest.mock import MagicMock, AsyncMock
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from httpx import AsyncClient
+
+from src.database import Base
+from src.main import app
+from src.models import User, Organization
+
+
+# Database fixtures
+@pytest.fixture(scope="session")
+def engine():
+    """Create test database engine."""
+    engine = create_engine(
+        "postgresql://test:test@localhost:5432/test_db",
+        echo=False,
+    )
+    Base.metadata.create_all(engine)
+    yield engine
+    Base.metadata.drop_all(engine)
+
+
 @pytest.fixture
-def user():
-    return User(email="test@example.com")
+def db_session(engine) -> Generator[Session, None, None]:
+    """Create database session with automatic rollback."""
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = sessionmaker(bind=connection)()
+
+    yield session
+
+    session.close()
+    transaction.rollback()
+    connection.close()
+
+
+# Factory fixtures
+@pytest.fixture
+def user_factory(db_session: Session):
+    """Factory for creating test users."""
+    def _create_user(
+        email: str = "test@example.com",
+        name: str = "Test User",
+        is_active: bool = True,
+        **kwargs,
+    ) -> User:
+        user = User(
+            email=email,
+            name=name,
+            is_active=is_active,
+            **kwargs,
+        )
+        db_session.add(user)
+        db_session.commit()
+        db_session.refresh(user)
+        return user
+
+    return _create_user
+
 
 @pytest.fixture
-async def db():
-    conn = await create_connection()
-    yield conn
-    await conn.close()
+def test_user(user_factory) -> User:
+    """Create a standard test user."""
+    return user_factory(
+        email="testuser@example.com",
+        name="Test User",
+    )
 
-def test_user_email(user):
-    assert user.email == "test@example.com"
+
+@pytest.fixture
+def admin_user(user_factory) -> User:
+    """Create an admin test user."""
+    return user_factory(
+        email="admin@example.com",
+        name="Admin User",
+        is_admin=True,
+    )
+
+
+# Mock fixtures
+@pytest.fixture
+def mock_email_service() -> MagicMock:
+    """Mock email service."""
+    mock = MagicMock()
+    mock.send_email.return_value = {"message_id": "test-123"}
+    return mock
+
+
+@pytest.fixture
+def mock_payment_gateway() -> MagicMock:
+    """Mock payment gateway."""
+    mock = MagicMock()
+    mock.charge.return_value = {
+        "id": "ch_123",
+        "status": "succeeded",
+        "amount": 1000,
+    }
+    mock.refund.return_value = {
+        "id": "re_123",
+        "status": "succeeded",
+    }
+    return mock
+
+
+# Async fixtures
+@pytest.fixture
+async def async_client() -> AsyncGenerator[AsyncClient, None]:
+    """Create async HTTP client for API testing."""
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        yield client
+
+
+@pytest.fixture
+def mock_async_service() -> AsyncMock:
+    """Mock async service."""
+    mock = AsyncMock()
+    mock.fetch_data.return_value = {"data": "test"}
+    return mock
+
+
+# Environment fixtures
+@pytest.fixture(autouse=True)
+def env_setup(monkeypatch):
+    """Set up test environment variables."""
+    monkeypatch.setenv("ENV", "test")
+    monkeypatch.setenv("DEBUG", "false")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://test:test@localhost/test")
+
+
+# Cleanup fixtures
+@pytest.fixture(autouse=True)
+def cleanup_uploads(tmp_path):
+    """Clean up uploaded files after tests."""
+    yield
+    # Cleanup happens automatically with tmp_path
 ```
 
-## Parametrize
+### 3. Parametrized Tests
+
 ```python
-@pytest.mark.parametrize("input,expected", [
-    (1, 2),
-    (2, 4),
-    (3, 6),
-])
-def test_double(input, expected):
-    assert double(input) == expected
+# tests/test_validators.py
+import pytest
+from src.validators import (
+    validate_email,
+    validate_password,
+    validate_phone,
+    validate_url,
+    ValidationError,
+)
+
+
+class TestEmailValidation:
+    """Test email validation."""
+
+    @pytest.mark.parametrize(
+        "email",
+        [
+            "user@example.com",
+            "user.name@example.com",
+            "user+tag@example.com",
+            "user@subdomain.example.com",
+            "user123@example.co.uk",
+        ],
+    )
+    def test_valid_emails(self, email: str):
+        """Test that valid emails pass validation."""
+        assert validate_email(email) is True
+
+    @pytest.mark.parametrize(
+        "email,error_message",
+        [
+            ("", "Email is required"),
+            ("invalid", "Invalid email format"),
+            ("@example.com", "Invalid email format"),
+            ("user@", "Invalid email format"),
+            ("user@.com", "Invalid email format"),
+            ("user space@example.com", "Invalid email format"),
+        ],
+    )
+    def test_invalid_emails(self, email: str, error_message: str):
+        """Test that invalid emails raise appropriate errors."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_email(email)
+        assert error_message in str(exc_info.value)
+
+
+class TestPasswordValidation:
+    """Test password validation."""
+
+    @pytest.mark.parametrize(
+        "password",
+        [
+            "SecurePass123!",
+            "MyP@ssw0rd",
+            "Complex!Pass99",
+            "Valid#Password1",
+        ],
+    )
+    def test_valid_passwords(self, password: str):
+        """Test that valid passwords pass validation."""
+        assert validate_password(password) is True
+
+    @pytest.mark.parametrize(
+        "password,expected_errors",
+        [
+            ("short", ["at least 8 characters"]),
+            ("nouppercase123!", ["uppercase letter"]),
+            ("NOLOWERCASE123!", ["lowercase letter"]),
+            ("NoNumbers!", ["digit"]),
+            ("NoSpecialChar123", ["special character"]),
+            ("", ["Password is required"]),
+        ],
+        ids=[
+            "too_short",
+            "no_uppercase",
+            "no_lowercase",
+            "no_numbers",
+            "no_special",
+            "empty",
+        ],
+    )
+    def test_invalid_passwords(self, password: str, expected_errors: list[str]):
+        """Test that invalid passwords return appropriate errors."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_password(password)
+
+        error_message = str(exc_info.value)
+        for expected in expected_errors:
+            assert expected in error_message
+
+
+class TestComplexParametrization:
+    """Test complex parametrization patterns."""
+
+    @pytest.mark.parametrize(
+        "input_value,transform,expected",
+        [
+            (10, "double", 20),
+            (10, "triple", 30),
+            (5, "double", 10),
+            (5, "triple", 15),
+        ],
+    )
+    def test_transformations(self, input_value, transform, expected):
+        """Test value transformations."""
+        from src.transforms import apply_transform
+
+        result = apply_transform(input_value, transform)
+        assert result == expected
+
+    @pytest.mark.parametrize("x", [1, 2, 3])
+    @pytest.mark.parametrize("y", [10, 20])
+    def test_cartesian_product(self, x: int, y: int):
+        """Test all combinations of x and y."""
+        from src.math_utils import multiply
+
+        result = multiply(x, y)
+        assert result == x * y
 ```
 
-## Mocking
+### 4. Mocking and Patching
+
 ```python
-def test_api_call(mocker):
-    mocker.patch('module.fetch', return_value={'data': 'test'})
-    result = get_data()
-    assert result == {'data': 'test'}
+# tests/test_services.py
+import pytest
+from unittest.mock import patch, MagicMock, AsyncMock, call
+from datetime import datetime, timedelta
+
+from src.services.user_service import UserService
+from src.services.notification_service import NotificationService
+from src.services.payment_service import PaymentService
+
+
+class TestUserService:
+    """Test UserService with mocking."""
+
+    @pytest.fixture
+    def user_service(self, db_session, mock_email_service):
+        """Create UserService with mocked dependencies."""
+        return UserService(
+            db=db_session,
+            email_service=mock_email_service,
+        )
+
+    def test_create_user_sends_welcome_email(
+        self,
+        user_service: UserService,
+        mock_email_service: MagicMock,
+    ):
+        """Test that creating a user sends welcome email."""
+        user = user_service.create_user(
+            email="new@example.com",
+            name="New User",
+            password="SecurePass123!",
+        )
+
+        mock_email_service.send_email.assert_called_once_with(
+            to="new@example.com",
+            template="welcome",
+            context={"name": "New User"},
+        )
+        assert user.email == "new@example.com"
+
+    @patch("src.services.user_service.datetime")
+    def test_user_last_login_updated(
+        self,
+        mock_datetime: MagicMock,
+        user_service: UserService,
+        test_user,
+    ):
+        """Test that last login is updated on authentication."""
+        fixed_time = datetime(2024, 1, 15, 10, 30, 0)
+        mock_datetime.utcnow.return_value = fixed_time
+
+        user_service.authenticate(test_user.email, "password")
+
+        assert test_user.last_login == fixed_time
+
+    def test_password_reset_flow(
+        self,
+        user_service: UserService,
+        mock_email_service: MagicMock,
+        test_user,
+    ):
+        """Test complete password reset flow."""
+        # Request reset
+        token = user_service.request_password_reset(test_user.email)
+
+        mock_email_service.send_email.assert_called_with(
+            to=test_user.email,
+            template="password_reset",
+            context={"token": token, "name": test_user.name},
+        )
+
+        # Reset password
+        user_service.reset_password(token, "NewSecurePass123!")
+
+        # Verify new password works
+        assert user_service.authenticate(
+            test_user.email,
+            "NewSecurePass123!",
+        )
+
+
+class TestNotificationService:
+    """Test NotificationService with multiple mocks."""
+
+    @pytest.fixture
+    def notification_service(self):
+        """Create NotificationService with mocked providers."""
+        with patch("src.services.notification_service.SMSProvider") as mock_sms, \
+             patch("src.services.notification_service.PushProvider") as mock_push:
+
+            mock_sms_instance = MagicMock()
+            mock_push_instance = MagicMock()
+            mock_sms.return_value = mock_sms_instance
+            mock_push.return_value = mock_push_instance
+
+            service = NotificationService()
+            service._sms = mock_sms_instance
+            service._push = mock_push_instance
+
+            yield service
+
+    def test_send_notification_all_channels(
+        self,
+        notification_service: NotificationService,
+    ):
+        """Test sending notifications to all channels."""
+        notification_service.notify(
+            user_id="user_123",
+            message="Test notification",
+            channels=["sms", "push"],
+        )
+
+        notification_service._sms.send.assert_called_once()
+        notification_service._push.send.assert_called_once()
+
+    def test_notification_retry_on_failure(
+        self,
+        notification_service: NotificationService,
+    ):
+        """Test notification retry logic."""
+        notification_service._sms.send.side_effect = [
+            Exception("Network error"),
+            Exception("Network error"),
+            {"message_id": "success"},
+        ]
+
+        result = notification_service.notify(
+            user_id="user_123",
+            message="Test",
+            channels=["sms"],
+            max_retries=3,
+        )
+
+        assert notification_service._sms.send.call_count == 3
+        assert result["sms"]["status"] == "success"
+
+
+class TestPaymentService:
+    """Test PaymentService with payment gateway mock."""
+
+    @pytest.fixture
+    def payment_service(self, db_session, mock_payment_gateway):
+        """Create PaymentService with mocked gateway."""
+        return PaymentService(
+            db=db_session,
+            gateway=mock_payment_gateway,
+        )
+
+    def test_process_payment_success(
+        self,
+        payment_service: PaymentService,
+        mock_payment_gateway: MagicMock,
+        test_user,
+    ):
+        """Test successful payment processing."""
+        result = payment_service.process_payment(
+            user_id=test_user.id,
+            amount=1000,
+            currency="usd",
+            payment_method_id="pm_123",
+        )
+
+        mock_payment_gateway.charge.assert_called_once_with(
+            amount=1000,
+            currency="usd",
+            payment_method="pm_123",
+            metadata={"user_id": test_user.id},
+        )
+        assert result["status"] == "succeeded"
+
+    def test_process_payment_failure_rolls_back(
+        self,
+        payment_service: PaymentService,
+        mock_payment_gateway: MagicMock,
+        test_user,
+        db_session,
+    ):
+        """Test that failed payment rolls back database changes."""
+        mock_payment_gateway.charge.side_effect = Exception("Card declined")
+
+        with pytest.raises(Exception, match="Card declined"):
+            payment_service.process_payment(
+                user_id=test_user.id,
+                amount=1000,
+                currency="usd",
+                payment_method_id="pm_123",
+            )
+
+        # Verify no payment record was created
+        from src.models import Payment
+        payments = db_session.query(Payment).filter_by(user_id=test_user.id).all()
+        assert len(payments) == 0
 ```
 
-## Run
-```bash
-pytest -v
-pytest --cov=src
-pytest -k "test_user"
+### 5. Async Testing
+
+```python
+# tests/test_async_services.py
+import pytest
+from unittest.mock import AsyncMock, patch
+from httpx import AsyncClient
+
+from src.services.async_service import AsyncDataService
+from src.main import app
+
+
+@pytest.mark.asyncio
+class TestAsyncDataService:
+    """Test async data service."""
+
+    @pytest.fixture
+    def async_service(self) -> AsyncDataService:
+        """Create async data service."""
+        return AsyncDataService()
+
+    async def test_fetch_data_success(
+        self,
+        async_service: AsyncDataService,
+    ):
+        """Test successful data fetching."""
+        with patch.object(
+            async_service,
+            "_http_client",
+            new_callable=AsyncMock,
+        ) as mock_client:
+            mock_client.get.return_value.json.return_value = {
+                "items": [{"id": 1}, {"id": 2}]
+            }
+            mock_client.get.return_value.status_code = 200
+
+            result = await async_service.fetch_data("test-endpoint")
+
+            assert len(result["items"]) == 2
+
+    async def test_fetch_data_with_retry(
+        self,
+        async_service: AsyncDataService,
+    ):
+        """Test data fetching with retry on failure."""
+        with patch.object(
+            async_service,
+            "_http_client",
+            new_callable=AsyncMock,
+        ) as mock_client:
+            # First two calls fail, third succeeds
+            mock_client.get.side_effect = [
+                Exception("Connection error"),
+                Exception("Timeout"),
+                AsyncMock(
+                    json=AsyncMock(return_value={"data": "success"}),
+                    status_code=200,
+                ),
+            ]
+
+            result = await async_service.fetch_data_with_retry(
+                "test-endpoint",
+                max_retries=3,
+            )
+
+            assert result == {"data": "success"}
+            assert mock_client.get.call_count == 3
+
+    async def test_concurrent_fetches(
+        self,
+        async_service: AsyncDataService,
+    ):
+        """Test concurrent data fetching."""
+        with patch.object(
+            async_service,
+            "_http_client",
+            new_callable=AsyncMock,
+        ) as mock_client:
+            mock_client.get.return_value.json.return_value = {"id": 1}
+            mock_client.get.return_value.status_code = 200
+
+            results = await async_service.fetch_multiple(
+                ["endpoint1", "endpoint2", "endpoint3"]
+            )
+
+            assert len(results) == 3
+            assert mock_client.get.call_count == 3
+
+
+@pytest.mark.asyncio
+class TestAPIEndpoints:
+    """Test API endpoints with async client."""
+
+    async def test_get_users(self, async_client: AsyncClient, test_user):
+        """Test GET /users endpoint."""
+        response = await async_client.get("/api/users")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["users"]) >= 1
+
+    async def test_create_user(self, async_client: AsyncClient):
+        """Test POST /users endpoint."""
+        response = await async_client.post(
+            "/api/users",
+            json={
+                "email": "newuser@example.com",
+                "name": "New User",
+                "password": "SecurePass123!",
+            },
+        )
+
+        assert response.status_code == 201
+        data = response.json()
+        assert data["user"]["email"] == "newuser@example.com"
+
+    async def test_authentication_flow(self, async_client: AsyncClient, test_user):
+        """Test complete authentication flow."""
+        # Login
+        login_response = await async_client.post(
+            "/api/auth/login",
+            json={
+                "email": test_user.email,
+                "password": "testpassword",
+            },
+        )
+        assert login_response.status_code == 200
+        token = login_response.json()["access_token"]
+
+        # Access protected endpoint
+        protected_response = await async_client.get(
+            "/api/me",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert protected_response.status_code == 200
+        assert protected_response.json()["email"] == test_user.email
 ```
+
+### 6. Test Markers and Custom Plugins
+
+```python
+# tests/markers.py
+import pytest
+from functools import wraps
+
+
+def slow(func):
+    """Mark test as slow."""
+    return pytest.mark.slow(func)
+
+
+def integration(func):
+    """Mark test as integration test."""
+    return pytest.mark.integration(func)
+
+
+def requires_db(func):
+    """Mark test as requiring database."""
+    return pytest.mark.requires_db(func)
+
+
+# tests/conftest.py - Custom markers configuration
+def pytest_configure(config):
+    """Configure custom markers."""
+    config.addinivalue_line(
+        "markers",
+        "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    )
+    config.addinivalue_line(
+        "markers",
+        "integration: marks tests as integration tests",
+    )
+    config.addinivalue_line(
+        "markers",
+        "requires_db: marks tests as requiring database connection",
+    )
+
+
+def pytest_collection_modifyitems(config, items):
+    """Modify test collection based on markers."""
+    if config.getoption("--skip-slow"):
+        skip_slow = pytest.mark.skip(reason="--skip-slow option provided")
+        for item in items:
+            if "slow" in item.keywords:
+                item.add_marker(skip_slow)
+
+    if not config.getoption("--run-integration"):
+        skip_integration = pytest.mark.skip(
+            reason="need --run-integration option to run"
+        )
+        for item in items:
+            if "integration" in item.keywords:
+                item.add_marker(skip_integration)
+
+
+def pytest_addoption(parser):
+    """Add custom command line options."""
+    parser.addoption(
+        "--skip-slow",
+        action="store_true",
+        default=False,
+        help="Skip slow tests",
+    )
+    parser.addoption(
+        "--run-integration",
+        action="store_true",
+        default=False,
+        help="Run integration tests",
+    )
+
+
+# tests/test_with_markers.py
+import pytest
+
+
+@pytest.mark.slow
+def test_slow_operation():
+    """This test takes a long time."""
+    import time
+    time.sleep(5)
+    assert True
+
+
+@pytest.mark.integration
+def test_external_api():
+    """This test requires external API."""
+    import requests
+    response = requests.get("https://api.example.com/health")
+    assert response.status_code == 200
+
+
+@pytest.mark.requires_db
+def test_database_operation(db_session):
+    """This test requires database."""
+    result = db_session.execute("SELECT 1")
+    assert result.scalar() == 1
+```
+
+## Use Cases
+
+### Test Organization for Large Projects
+
+```
+tests/
+├── conftest.py              # Shared fixtures
+├── unit/                    # Unit tests
+│   ├── conftest.py
+│   ├── test_models.py
+│   ├── test_validators.py
+│   └── test_utils.py
+├── integration/             # Integration tests
+│   ├── conftest.py
+│   ├── test_api.py
+│   ├── test_database.py
+│   └── test_external_services.py
+├── e2e/                     # End-to-end tests
+│   ├── conftest.py
+│   └── test_workflows.py
+└── fixtures/                # Shared test data
+    ├── users.json
+    └── products.json
+```
+
+### CI/CD Integration
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements-dev.txt
+
+      - name: Run unit tests
+        run: pytest tests/unit -v --cov=src --cov-report=xml
+
+      - name: Run integration tests
+        run: pytest tests/integration -v --run-integration
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/test_db
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
+```
+
+## Best Practices
+
+### Do's
+
+- Use descriptive test names that explain the scenario
+- Create reusable fixtures for common setup
+- Use parametrize for testing multiple inputs
+- Mock external dependencies
+- Group related tests in classes
+- Use markers to categorize tests
+- Write tests before or alongside code
+- Keep tests independent and isolated
+- Use factories for test data creation
+- Run tests in parallel with pytest-xdist
+
+### Don'ts
+
+- Don't share state between tests
+- Don't use sleep for timing issues
+- Don't test implementation details
+- Don't write tests that depend on order
+- Don't ignore flaky tests
+- Don't over-mock (test real behavior when possible)
+- Don't use hardcoded paths
+- Don't skip writing tests for edge cases
+- Don't leave commented-out test code
+- Don't test framework functionality
+
+## References
+
+- [Pytest Documentation](https://docs.pytest.org/)
+- [pytest-asyncio](https://pytest-asyncio.readthedocs.io/)
+- [pytest-mock](https://pytest-mock.readthedocs.io/)
+- [pytest-cov](https://pytest-cov.readthedocs.io/)
+- [Testing Best Practices](https://docs.pytest.org/en/latest/explanation/goodpractices.html)

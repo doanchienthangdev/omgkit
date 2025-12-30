@@ -1,6 +1,6 @@
 ---
 title: "spring"
-description: "Spring Boot development. Use for Spring projects, REST APIs, JPA."
+description: "Enterprise Spring Boot development with JPA, security, testing, and microservices patterns"
 icon: "layer-group"
 ---
 
@@ -12,7 +12,7 @@ icon: "layer-group"
 
 ## Overview
 
-Spring Boot development. Use for Spring projects, REST APIs, JPA.
+Enterprise Spring Boot development with JPA, security, testing, and microservices patterns
 
 ## What You Get
 
@@ -24,71 +24,554 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Spring Boot Skill
+# Spring Boot
 
-## Patterns
+Enterprise-grade **Spring Boot development** following industry best practices. This skill covers Spring Data JPA, Spring Security, REST APIs, validation, testing patterns, and microservices configurations used by top engineering teams.
 
-### Controller
+## Purpose
+
+Build scalable Java applications with confidence:
+
+- Design clean architectures with Spring Boot
+- Implement REST APIs with proper validation
+- Use Spring Data JPA for database operations
+- Handle authentication with Spring Security
+- Write comprehensive tests with JUnit and MockMvc
+- Deploy production-ready applications
+- Build microservices with Spring Cloud
+
+## Features
+
+### 1. Entity Design and Relationships
+
 ```java
+// src/main/java/com/example/model/User.java
+package com.example.model;
+
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+@Entity
+@Table(name = "users")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
+public class User {
+    @Id
+    @UuidGenerator
+    private UUID id;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private UserRole role = UserRole.USER;
+
+    @Builder.Default
+    private Boolean isActive = true;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @Builder.Default
+    private Set<Membership> memberships = new HashSet<>();
+
+    public boolean isAdmin() {
+        return this.role == UserRole.ADMIN;
+    }
+}
+
+
+// src/main/java/com/example/model/Organization.java
+@Entity
+@Table(name = "organizations")
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
+public class Organization {
+    @Id
+    @UuidGenerator
+    private UUID id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false, unique = true)
+    private String slug;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
+    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL)
+    @Builder.Default
+    private Set<Membership> memberships = new HashSet<>();
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+}
+```
+
+### 2. DTOs and Validation
+
+```java
+// src/main/java/com/example/dto/user/CreateUserRequest.java
+package com.example.dto.user;
+
+import jakarta.validation.constraints.*;
+import lombok.Data;
+
+@Data
+public class CreateUserRequest {
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 100)
+    private String name;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    private String email;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, max = 128)
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).*$",
+             message = "Password must contain uppercase, lowercase, number and special character")
+    private String password;
+
+    private String role;
+}
+
+
+// src/main/java/com/example/dto/user/UserResponse.java
+@Data
+@Builder
+public class UserResponse {
+    private UUID id;
+    private String email;
+    private String name;
+    private UserRole role;
+    private Boolean isActive;
+    private LocalDateTime createdAt;
+
+    public static UserResponse fromEntity(User user) {
+        return UserResponse.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .name(user.getName())
+            .role(user.getRole())
+            .isActive(user.getIsActive())
+            .createdAt(user.getCreatedAt())
+            .build();
+    }
+}
+
+
+// src/main/java/com/example/dto/common/PaginatedResponse.java
+@Data
+@Builder
+public class PaginatedResponse<T> {
+    private List<T> data;
+    private int page;
+    private int limit;
+    private long total;
+    private int totalPages;
+    private boolean hasMore;
+
+    public static <T, E> PaginatedResponse<T> fromPage(
+        Page<E> page,
+        java.util.function.Function<E, T> mapper
+    ) {
+        return PaginatedResponse.<T>builder()
+            .data(page.getContent().stream().map(mapper).toList())
+            .page(page.getNumber() + 1)
+            .limit(page.getSize())
+            .total(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .hasMore(page.hasNext())
+            .build();
+    }
+}
+```
+
+### 3. Repositories
+
+```java
+// src/main/java/com/example/repository/UserRepository.java
+@Repository
+public interface UserRepository extends JpaRepository<User, UUID> {
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    @Query("""
+        SELECT u FROM User u
+        WHERE u.isActive = true
+        AND (:search IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :search, '%'))
+             OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))
+        AND (:role IS NULL OR u.role = :role)
+        """)
+    Page<User> findAllWithFilters(
+        @Param("search") String search,
+        @Param("role") UserRole role,
+        Pageable pageable
+    );
+}
+```
+
+### 4. Services
+
+```java
+// src/main/java/com/example/service/UserService.java
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class UserService {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public PaginatedResponse<UserResponse> findAll(String search, String role, int page, int limit) {
+        UserRole userRole = role != null ? UserRole.valueOf(role.toUpperCase()) : null;
+        PageRequest pageRequest = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
+
+        Page<User> users = userRepository.findAllWithFilters(search, userRole, pageRequest);
+
+        return PaginatedResponse.fromPage(users, UserResponse::fromEntity);
+    }
+
+    public UserResponse findById(UUID id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("User not found with id: " + id));
+        return UserResponse.fromEntity(user);
+    }
+
+    @Transactional
+    public UserResponse create(CreateUserRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ConflictException("Email already in use");
+        }
+
+        User user = User.builder()
+            .email(request.getEmail().toLowerCase())
+            .name(request.getName())
+            .password(passwordEncoder.encode(request.getPassword()))
+            .role(request.getRole() != null ? UserRole.valueOf(request.getRole().toUpperCase()) : UserRole.USER)
+            .build();
+
+        return UserResponse.fromEntity(userRepository.save(user));
+    }
+
+    @Transactional
+    public UserResponse update(UUID id, UpdateUserRequest request) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new ConflictException("Email already in use");
+            }
+            user.setEmail(request.getEmail().toLowerCase());
+        }
+
+        if (request.getName() != null) user.setName(request.getName());
+        if (request.getIsActive() != null) user.setIsActive(request.getIsActive());
+
+        return UserResponse.fromEntity(userRepository.save(user));
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        if (!userRepository.existsById(id)) {
+            throw new NotFoundException("User not found");
+        }
+        userRepository.deleteById(id);
+    }
+}
+```
+
+### 5. Controllers
+
+```java
+// src/main/java/com/example/controller/UserController.java
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+@Tag(name = "Users", description = "User management endpoints")
 public class UserController {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping
-    public List<User> findAll() {
-        return userService.findAll();
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "List all users")
+    public ResponseEntity<PaginatedResponse<UserResponse>> findAll(
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) String role,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "20") int limit
+    ) {
+        return ResponseEntity.ok(userService.findAll(search, role, page, limit));
+    }
+
+    @GetMapping("/me")
+    @Operation(summary = "Get current user profile")
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(userService.findById(currentUser.getId()));
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> findById(@PathVariable UUID id) {
+        return ResponseEntity.ok(userService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody CreateUserDto dto) {
-        User user = userService.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> create(@Valid @RequestBody CreateUserRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> update(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
+        return ResponseEntity.ok(userService.update(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id) {
+        userService.delete(id);
     }
 }
 ```
 
-### Service
+### 6. Security Configuration
+
 ```java
-@Service
-public class UserService {
-    @Autowired
+// src/main/java/com/example/config/SecurityConfig.java
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
+    private final JwtAuthenticationFilter jwtAuthFilter;
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+```
+
+### 7. Testing
+
+```java
+// src/test/java/com/example/service/UserServiceTest.java
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+    @Mock
     private UserRepository userRepository;
 
-    public List<User> findAll() {
-        return userRepository.findAll();
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @InjectMocks
+    private UserService userService;
+
+    private User testUser;
+
+    @BeforeEach
+    void setUp() {
+        testUser = User.builder()
+            .id(UUID.randomUUID())
+            .email("test@example.com")
+            .name("Test User")
+            .role(UserRole.USER)
+            .isActive(true)
+            .build();
+    }
+
+    @Test
+    void findById_ShouldReturnUser_WhenUserExists() {
+        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+
+        UserResponse result = userService.findById(testUser.getId());
+
+        assertThat(result.getEmail()).isEqualTo(testUser.getEmail());
+    }
+
+    @Test
+    void findById_ShouldThrowNotFoundException_WhenUserNotFound() {
+        UUID id = UUID.randomUUID();
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> userService.findById(id))
+            .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void create_ShouldCreateUser_WhenEmailIsUnique() {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setEmail("new@example.com");
+        request.setName("New User");
+        request.setPassword("Password123!");
+
+        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded");
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+
+        UserResponse result = userService.create(request);
+
+        assertThat(result).isNotNull();
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void create_ShouldThrowConflictException_WhenEmailExists() {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setEmail("existing@example.com");
+
+        when(userRepository.existsByEmail(request.getEmail())).thenReturn(true);
+
+        assertThatThrownBy(() -> userService.create(request))
+            .isInstanceOf(ConflictException.class);
+    }
+}
+
+
+// src/test/java/com/example/controller/UserControllerTest.java
+@WebMvcTest(UserController.class)
+class UserControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private UserService userService;
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void create_ShouldReturn201_WhenValidRequest() throws Exception {
+        CreateUserRequest request = new CreateUserRequest();
+        request.setEmail("test@example.com");
+        request.setName("Test User");
+        request.setPassword("Password123!");
+
+        UserResponse response = UserResponse.builder()
+            .email("test@example.com")
+            .name("Test User")
+            .build();
+
+        when(userService.create(any())).thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.email").value("test@example.com"));
+    }
+
+    @Test
+    @WithMockUser(roles = "USER")
+    void findAll_ShouldReturn403_WhenNotAdmin() throws Exception {
+        mockMvc.perform(get("/api/v1/users"))
+            .andExpect(status().isForbidden());
     }
 }
 ```
 
-### Repository
-```java
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email);
-}
-```
+## Use Cases
 
-### Entity
-```java
-@Entity
-@Table(name = "users")
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+### Caching with Redis
 
-    @Column(unique = true)
-    private String email;
+```java
+@Service
+@RequiredArgsConstructor
+public class CachedUserService {
+    private final UserRepository userRepository;
+
+    @Cacheable(value = "users", key = "#id")
+    public UserResponse findById(UUID id) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+        return UserResponse.fromEntity(user);
+    }
+
+    @CacheEvict(value = "users", key = "#id")
+    public void evictCache(UUID id) {}
 }
 ```
 
 ## Best Practices
+
+### Do's
+
+- Use UUID primary keys for public APIs
+- Use DTOs for request/response separation
+- Use Spring Data JPA specifications for complex queries
+- Use @Transactional appropriately
+- Use proper validation annotations
+- Write unit and integration tests
+- Use Spring Security for authentication
+- Use proper exception handling
 - Use constructor injection
-- Use DTOs for API contracts
-- Use @Transactional for writes
-- Use Spring Security
+- Document APIs with OpenAPI
+
+### Don'ts
+
+- Don't expose entities directly in APIs
+- Don't use field injection
+- Don't ignore N+1 query problems
+- Don't skip validation
+- Don't hardcode configuration
+- Don't ignore security headers
+- Don't skip error handling
+- Don't use raw SQL without parameterization
+- Don't forget to handle exceptions globally
+- Don't skip testing
+
+## References
+
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [Spring Data JPA](https://spring.io/projects/spring-data-jpa)
+- [Spring Security](https://spring.io/projects/spring-security)
+- [JUnit 5 User Guide](https://junit.org/junit5/docs/current/user-guide/)
+- [Baeldung Spring Tutorials](https://www.baeldung.com/spring-boot)
 
 
 ## Configuration

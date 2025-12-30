@@ -1,61 +1,658 @@
 ---
 name: omega-coding
-description: AI-first development patterns. Use for leveraging AI in development.
+description: AI-first development patterns with prompt engineering, specification-driven generation, and leverage multiplication
+category: omega
+triggers:
+  - omega coding
+  - ai-first development
+  - ai assisted coding
+  - prompt driven
+  - leverage multiplication
+  - ai development
 ---
 
-# Omega Coding Skill
+# Omega Coding
 
-## Principles
+Master **AI-first development** patterns that multiply your productivity 10-100x. This skill teaches specification-driven code generation, strategic prompt engineering, and systematic leverage of AI capabilities.
 
-### 1. AI-First Design
-Design for AI assistance:
-- Clear interfaces
-- Self-documenting code
-- Predictable patterns
+## Purpose
 
-### 2. Prompt-Driven Development
+Transform development velocity through AI-human collaboration:
+
+- Design specifications that generate perfect code
+- Leverage AI for 10-100x productivity gains
+- Build iterative refinement workflows
+- Maintain quality through systematic verification
+- Scale individual capabilities exponentially
+- Apply the Omega principles to development
+
+## Features
+
+### 1. The Omega Principles in Code
+
 ```markdown
-1. Write clear requirements
-2. Let AI generate first draft
-3. Review and refine
-4. Iterate with feedback
+## The 7 Omega Principles Applied to Development
+
+### Ω1: Leverage Multiplication
+```
+Traditional:  1 developer = 1 feature/day
+Omega:        1 developer + AI = 10-50 features/day
+
+Leverage calculation:
+- Manual coding: 4 hours/feature
+- AI-assisted: 15 minutes/feature
+- Leverage multiplier: 16x
 ```
 
-### 3. Leverage Multiplication (Ω1)
-```
-Manual:    1 task = 1 hour
-AI-Assisted: 1 task = 5 minutes
-Leverage:  12x improvement
+**Application:**
+- Use AI for repetitive code generation
+- Automate boilerplate creation
+- Generate tests from implementations
+- Create documentation automatically
+
+### Ω2: Transcendent Abstraction
+Instead of solving one problem, solve the class of problems.
+
+```typescript
+// Level 1: Solve one problem
+function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Level 2: Solve the class (Omega approach)
+function createValidator<T>(
+  rules: ValidationRule<T>[]
+): (value: T) => ValidationResult {
+  return (value: T) => {
+    const errors = rules
+      .filter(rule => !rule.validate(value))
+      .map(rule => rule.message);
+    return { valid: errors.length === 0, errors };
+  };
+}
+
+// Now email validation is just one instance:
+const validateEmail = createValidator([
+  { validate: v => typeof v === 'string', message: 'Must be string' },
+  { validate: v => v.includes('@'), message: 'Must contain @' },
+  { validate: v => v.length <= 254, message: 'Too long' },
+]);
 ```
 
-## Patterns
+### Ω3: Agentic Decomposition
+Break work into autonomous, specialist agents.
 
-### Specification First
+```yaml
+# Omega development workflow
+agents:
+  architect:
+    role: Design system structure
+    output: Architecture document
+
+  implementer:
+    role: Write production code
+    input: Architecture + specs
+    output: Implementation
+
+  tester:
+    role: Write and run tests
+    input: Implementation
+    output: Test results + coverage
+
+  reviewer:
+    role: Code review and quality
+    input: Implementation + tests
+    output: Review comments
+
+  documenter:
+    role: Generate documentation
+    input: Implementation
+    output: API docs + guides
+```
+
+### Ω4: Autonomous Operation
+Systems should self-correct and self-improve.
+
+```typescript
+// Self-healing code pattern
+async function withRetryAndFallback<T>(
+  primary: () => Promise<T>,
+  fallback: () => Promise<T>,
+  options: { maxRetries: number; backoff: number }
+): Promise<T> {
+  for (let i = 0; i < options.maxRetries; i++) {
+    try {
+      return await primary();
+    } catch (error) {
+      await delay(options.backoff * Math.pow(2, i));
+    }
+  }
+  return fallback();
+}
+```
+
+### Ω5: Zero-Marginal-Cost Scaling
+Once built, serving N+1 costs nothing extra.
+
+```typescript
+// Build reusable, scalable components
+const ComponentLibrary = {
+  Button: createReusableComponent('Button'),
+  Input: createReusableComponent('Input'),
+  Modal: createReusableComponent('Modal'),
+  // Each component: built once, used infinite times
+};
+```
+
+### Ω6: Recursive Self-Improvement
+Code that improves itself.
+
+```typescript
+// Self-optimizing query builder
+class QueryOptimizer {
+  private performanceHistory: QueryPerformance[] = [];
+
+  async executeQuery(query: string): Promise<Result> {
+    const startTime = Date.now();
+    const result = await this.db.query(query);
+    const duration = Date.now() - startTime;
+
+    // Learn from execution
+    this.performanceHistory.push({ query, duration });
+
+    // Suggest optimizations
+    if (duration > 100) {
+      const suggestions = this.analyzeAndSuggest(query);
+      console.log('Optimization suggestions:', suggestions);
+    }
+
+    return result;
+  }
+}
+```
+
+### Ω7: Emergent Capabilities
+Combined systems exceed sum of parts.
+
+```typescript
+// Compose simple functions into powerful pipelines
+const processDocument = pipe(
+  parseMarkdown,      // Simple parsing
+  extractEntities,    // Simple extraction
+  enrichWithContext,  // Simple enrichment
+  generateSummary,    // Simple summary
+  // Together: powerful document understanding
+);
+```
+```
+
+### 2. Specification-Driven Development
+
 ```markdown
-## Spec: UserService
+## The Perfect Specification Format
 
-### Methods
-- createUser(email, password) → User
-- getUser(id) → User | null
+### Component Specification Template
+```yaml
+component:
+  name: UserAuthService
+  description: Handles user authentication and session management
+  version: 1.0.0
 
-### Constraints
-- Email must be unique
-- Password hashed with bcrypt
+requirements:
+  functional:
+    - FR1: Users can register with email and password
+    - FR2: Users can login with credentials
+    - FR3: Users can logout and invalidate session
+    - FR4: Sessions expire after 24 hours
+    - FR5: Support password reset via email
 
-### Tests
-- Creates user successfully
-- Rejects duplicate email
+  non_functional:
+    - NFR1: Response time < 200ms
+    - NFR2: Support 10,000 concurrent users
+    - NFR3: 99.9% uptime
+    - NFR4: PCI-DSS compliant password handling
+
+interface:
+  methods:
+    - name: register
+      input:
+        email: string (valid email format)
+        password: string (min 8 chars, 1 uppercase, 1 number)
+      output:
+        success: boolean
+        userId?: string
+        error?: { code: string, message: string }
+
+    - name: login
+      input:
+        email: string
+        password: string
+      output:
+        success: boolean
+        token?: string (JWT, expires 24h)
+        error?: { code: string, message: string }
+
+    - name: logout
+      input:
+        token: string
+      output:
+        success: boolean
+
+dependencies:
+  - Database: PostgreSQL (users table)
+  - Cache: Redis (sessions)
+  - Email: SendGrid (password reset)
+
+security:
+  - Passwords hashed with bcrypt (cost factor 12)
+  - JWT signed with RS256
+  - Rate limiting: 5 attempts per minute
+  - Secrets in environment variables
+
+testing:
+  unit:
+    - Test password validation rules
+    - Test token generation
+    - Test session expiry
+  integration:
+    - Test registration flow
+    - Test login/logout flow
+    - Test password reset flow
+  edge_cases:
+    - Duplicate email registration
+    - Invalid credentials
+    - Expired session
+    - Concurrent login attempts
 ```
 
-### Iterative Refinement
-1. Generate initial code
-2. Add tests
-3. Fix edge cases
-4. Optimize
-5. Document
+### Specification-to-Code Workflow
+
+```markdown
+## Step 1: Write Specification
+Create complete spec with all requirements.
+
+## Step 2: Generate Interface
+Prompt: "Generate TypeScript interface from this spec: [spec]"
+
+## Step 3: Generate Implementation
+Prompt: "Implement [component] following this interface and spec: [spec]"
+
+## Step 4: Generate Tests
+Prompt: "Generate comprehensive tests for [component] covering: [test requirements]"
+
+## Step 5: Verify and Iterate
+- Run tests
+- Fix any issues
+- Add edge cases
+- Document
+```
+```
+
+### 3. Prompt Engineering for Code
+
+```markdown
+## Effective Code Prompts
+
+### Template: Component Generation
+```
+Create a [COMPONENT_TYPE] component named [NAME] with the following:
+
+Requirements:
+- [Requirement 1]
+- [Requirement 2]
+- [Requirement 3]
+
+Interface:
+[Define inputs, outputs, methods]
+
+Constraints:
+- Language: TypeScript
+- Style: Functional programming preferred
+- Error handling: Return Result types
+- Testing: Include unit tests
+
+Example usage:
+[Show how it should be called]
+
+Do not:
+- Use any deprecated APIs
+- Include console.log in production code
+- Hardcode configuration values
+```
+
+### Template: Refactoring Request
+```
+Refactor the following code to:
+1. [Improvement 1]
+2. [Improvement 2]
+
+Current code:
+[paste code]
+
+Preserve:
+- Existing functionality
+- API compatibility
+- Type signatures
+
+Output:
+- Refactored code
+- Explanation of changes
+- Any breaking changes (should be none)
+```
+
+### Template: Bug Fix Request
+```
+Fix the bug in this code:
+
+Code:
+[paste code]
+
+Bug description:
+[describe the issue]
+
+Expected behavior:
+[what should happen]
+
+Actual behavior:
+[what actually happens]
+
+Provide:
+1. Root cause analysis
+2. Fixed code
+3. Test to prevent regression
+```
+
+### Template: Test Generation
+```
+Generate comprehensive tests for:
+
+Code:
+[paste code]
+
+Test framework: [Jest/Vitest/pytest]
+
+Cover:
+- Happy path scenarios
+- Edge cases: [list specific]
+- Error conditions: [list specific]
+- Boundary conditions
+
+Include:
+- Descriptive test names
+- Arrange-Act-Assert structure
+- Mocks for external dependencies
+```
+```
+
+### 4. Iterative Refinement Pattern
+
+```typescript
+// The Omega refinement loop
+interface RefinementCycle {
+  generate: () => Code;
+  test: (code: Code) => TestResults;
+  analyze: (results: TestResults) => Issues[];
+  refine: (code: Code, issues: Issues[]) => Code;
+}
+
+async function omegaDevelopment(spec: Specification): Promise<Code> {
+  // Initial generation
+  let code = await generateFromSpec(spec);
+  let iteration = 0;
+  const maxIterations = 5;
+
+  while (iteration < maxIterations) {
+    // Test the code
+    const results = await runTests(code);
+
+    if (results.allPassing && results.coverage >= 80) {
+      console.log(`✓ Code complete after ${iteration + 1} iterations`);
+      return code;
+    }
+
+    // Analyze failures
+    const issues = analyzeResults(results);
+
+    // Refine code
+    code = await refineCode(code, issues);
+    iteration++;
+  }
+
+  throw new Error('Max iterations reached without passing tests');
+}
+
+// Example iteration log:
+/*
+Iteration 1:
+  - Generated: UserService with 5 methods
+  - Tests: 8/12 passing
+  - Issues: Missing null checks, incorrect date handling
+  - Refinement: Added null guards, fixed Date parsing
+
+Iteration 2:
+  - Tests: 11/12 passing
+  - Issues: Edge case for empty input
+  - Refinement: Added empty input validation
+
+Iteration 3:
+  - Tests: 12/12 passing
+  - Coverage: 85%
+  - Complete!
+*/
+```
+
+### 5. Code Quality Patterns
+
+```typescript
+// Omega-quality code characteristics
+
+// 1. Self-documenting with clear types
+interface User {
+  id: UserId;           // Branded type for type safety
+  email: Email;         // Validated email type
+  createdAt: Timestamp; // Unix timestamp
+  status: UserStatus;   // 'active' | 'suspended' | 'deleted'
+}
+
+// 2. Pure functions where possible
+const calculateTotal = (items: LineItem[]): Money =>
+  items.reduce(
+    (sum, item) => sum.add(item.price.multiply(item.quantity)),
+    Money.zero()
+  );
+
+// 3. Explicit error handling
+type Result<T, E = Error> =
+  | { success: true; value: T }
+  | { success: false; error: E };
+
+async function findUser(id: UserId): Promise<Result<User, NotFoundError>> {
+  const user = await db.users.find(id);
+  if (!user) {
+    return { success: false, error: new NotFoundError('User', id) };
+  }
+  return { success: true, value: user };
+}
+
+// 4. Composable building blocks
+const pipeline = pipe(
+  validate,
+  transform,
+  enrich,
+  persist,
+  notify
+);
+
+// 5. Testable by design
+class OrderService {
+  constructor(
+    private readonly repo: OrderRepository,  // Injected
+    private readonly payment: PaymentGateway, // Injected
+    private readonly notifier: Notifier       // Injected
+  ) {}
+
+  // Each dependency can be mocked in tests
+}
+```
+
+### 6. Leverage Multiplication Tactics
+
+```markdown
+## 10x Productivity Tactics
+
+### Tactic 1: Generate, Don't Write
+```
+Instead of: Writing CRUD operations manually
+Do: Generate from schema
+
+Schema → API endpoints → Controllers → Services → Tests
+All generated, all consistent, all in minutes.
+```
+
+### Tactic 2: Transform, Don't Recreate
+```
+Instead of: Building from scratch
+Do: Transform existing code
+
+"Convert this JavaScript to TypeScript with proper types"
+"Add error handling to all async functions"
+"Extract repeated code into reusable utilities"
+```
+
+### Tactic 3: Batch Operations
+```
+Instead of: One file at a time
+Do: Process multiple files
+
+"Add JSDoc comments to all exported functions in src/utils/"
+"Update all React class components to functional components"
+"Add input validation to all API route handlers"
+```
+
+### Tactic 4: Template Once, Generate Many
+```yaml
+# Define template once
+template: api_endpoint
+components:
+  - route_handler
+  - validation_schema
+  - service_method
+  - repository_method
+  - unit_tests
+  - integration_test
+
+# Generate for each resource
+resources:
+  - users
+  - products
+  - orders
+  - payments
+
+# Result: 4 resources × 6 components = 24 files generated
+```
+
+### Tactic 5: Test-First Specification
+```typescript
+// Write the test first as a specification
+describe('ShoppingCart', () => {
+  it('should add items and calculate total', () => {
+    const cart = new ShoppingCart();
+    cart.addItem({ id: '1', name: 'Widget', price: 10, quantity: 2 });
+    cart.addItem({ id: '2', name: 'Gadget', price: 25, quantity: 1 });
+
+    expect(cart.itemCount).toBe(3);
+    expect(cart.total).toBe(45);
+  });
+
+  it('should apply percentage discount', () => {
+    const cart = new ShoppingCart();
+    cart.addItem({ id: '1', name: 'Widget', price: 100, quantity: 1 });
+    cart.applyDiscount({ type: 'percentage', value: 10 });
+
+    expect(cart.total).toBe(90);
+  });
+});
+
+// Then generate implementation from tests
+// "Implement ShoppingCart class to pass these tests"
+```
+```
+
+## Use Cases
+
+### Full Feature Development
+
+```markdown
+## Example: Building Authentication System
+
+### Step 1: Specification
+```yaml
+feature: User Authentication
+scope:
+  - Registration with email/password
+  - Login with JWT tokens
+  - Password reset flow
+  - Session management
+```
+
+### Step 2: Generate Architecture
+Prompt: "Design a scalable authentication system architecture..."
+Output: Component diagram, data flow, technology choices
+
+### Step 3: Generate Data Models
+Prompt: "Generate Prisma schema for auth system..."
+Output: User, Session, PasswordReset models
+
+### Step 4: Generate Services
+Prompt: "Implement AuthService with registration, login, logout..."
+Output: Complete service implementation
+
+### Step 5: Generate API Routes
+Prompt: "Create Express routes for auth endpoints..."
+Output: Route handlers with validation
+
+### Step 6: Generate Tests
+Prompt: "Generate comprehensive tests for AuthService..."
+Output: Unit and integration tests
+
+### Step 7: Generate Documentation
+Prompt: "Create OpenAPI spec for auth endpoints..."
+Output: API documentation
+
+Total time: 2 hours (vs. 2-3 days traditional)
+```
 
 ## Best Practices
-- Clear specifications
-- Incremental generation
-- Verification at each step
-- Learn from AI suggestions
+
+### Do's
+
+- Write clear specifications before generating code
+- Use iterative refinement (generate, test, improve)
+- Leverage AI for repetitive tasks
+- Verify generated code meets requirements
+- Maintain human oversight for critical logic
+- Build reusable templates and patterns
+- Document prompts that work well
+- Combine AI strengths with human judgment
+- Start simple and add complexity
+- Keep specifications updated
+
+### Don'ts
+
+- Don't trust generated code without verification
+- Don't skip testing generated code
+- Don't use AI for security-critical code without expert review
+- Don't generate without clear requirements
+- Don't ignore AI suggestions for improvement
+- Don't lose the specification-code relationship
+- Don't over-rely on AI for creative design
+- Don't skip code review for AI-generated code
+- Don't use outdated AI models for complex tasks
+- Don't forget to understand generated code
+
+## References
+
+- [GitHub Copilot Best Practices](https://github.blog/2023-06-20-how-to-write-better-prompts-for-github-copilot/)
+- [Prompt Engineering Guide](https://www.promptingguide.ai/)
+- [AI-Assisted Software Development](https://arxiv.org/abs/2303.17580)
+- [The Pragmatic Programmer](https://pragprog.com/titles/tpp20/the-pragmatic-programmer-20th-anniversary-edition/)

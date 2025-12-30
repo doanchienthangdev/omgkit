@@ -1,6 +1,6 @@
 ---
 title: "threejs"
-description: "Three.js 3D graphics. Use for 3D scenes, WebGL, animations."
+description: "Three.js 3D graphics with WebGL, React Three Fiber, shaders, physics, and immersive experiences"
 icon: "palette"
 ---
 
@@ -12,7 +12,7 @@ icon: "palette"
 
 ## Overview
 
-Three.js 3D graphics. Use for 3D scenes, WebGL, animations.
+Three.js 3D graphics with WebGL, React Three Fiber, shaders, physics, and immersive experiences
 
 ## What You Get
 
@@ -24,60 +24,1318 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Three.js Skill
+# Three.js 3D Graphics
 
-## Basic Setup
-```javascript
+Enterprise-grade **Three.js 3D graphics** following industry best practices. This skill covers scene setup, React Three Fiber integration, materials and lighting, animations, shaders, physics simulation, and performance optimization used by top engineering teams.
+
+## Purpose
+
+Build immersive 3D web experiences:
+
+- Create interactive 3D scenes with proper camera controls
+- Build declarative 3D with React Three Fiber
+- Implement physically-based rendering (PBR) materials
+- Add realistic lighting and shadows
+- Create smooth animations and transitions
+- Write custom shaders for visual effects
+- Integrate physics simulations
+- Optimize performance for production
+
+## Features
+
+### 1. Core Three.js Setup
+
+```typescript
+// lib/three/SceneManager.ts
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
+interface SceneManagerOptions {
+  container: HTMLElement;
+  width?: number;
+  height?: number;
+  antialias?: boolean;
+  alpha?: boolean;
+  pixelRatio?: number;
+}
 
-renderer.setSize(width, height);
-document.body.appendChild(renderer.domElement);
+export class SceneManager {
+  private scene: THREE.Scene;
+  private camera: THREE.PerspectiveCamera;
+  private renderer: THREE.WebGLRenderer;
+  private controls: OrbitControls;
+  private composer: EffectComposer;
+  private clock: THREE.Clock;
+  private animationFrameId: number | null = null;
+  private updateCallbacks: Set<(delta: number, elapsed: number) => void> = new Set();
+
+  constructor(options: SceneManagerOptions) {
+    const {
+      container,
+      width = container.clientWidth,
+      height = container.clientHeight,
+      antialias = true,
+      alpha = false,
+      pixelRatio = Math.min(window.devicePixelRatio, 2),
+    } = options;
+
+    // Scene
+    this.scene = new THREE.Scene();
+    this.scene.background = alpha ? null : new THREE.Color(0x111111);
+
+    // Camera
+    this.camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+    this.camera.position.set(0, 2, 5);
+
+    // Renderer
+    this.renderer = new THREE.WebGLRenderer({
+      antialias,
+      alpha,
+      powerPreference: 'high-performance',
+    });
+    this.renderer.setSize(width, height);
+    this.renderer.setPixelRatio(pixelRatio);
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
+    container.appendChild(this.renderer.domElement);
+
+    // Controls
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+    this.controls.minDistance = 1;
+    this.controls.maxDistance = 100;
+
+    // Post-processing
+    this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
+
+    // Clock
+    this.clock = new THREE.Clock();
+
+    // Handle resize
+    this.handleResize = this.handleResize.bind(this);
+    window.addEventListener('resize', this.handleResize);
+  }
+
+  private handleResize(): void {
+    const container = this.renderer.domElement.parentElement;
+    if (!container) return;
+
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(width, height);
+    this.composer.setSize(width, height);
+  }
+
+  public addUpdateCallback(callback: (delta: number, elapsed: number) => void): void {
+    this.updateCallbacks.add(callback);
+  }
+
+  public removeUpdateCallback(callback: (delta: number, elapsed: number) => void): void {
+    this.updateCallbacks.delete(callback);
+  }
+
+  public start(): void {
+    if (this.animationFrameId !== null) return;
+
+    const animate = () => {
+      this.animationFrameId = requestAnimationFrame(animate);
+
+      const delta = this.clock.getDelta();
+      const elapsed = this.clock.getElapsedTime();
+
+      // Update controls
+      this.controls.update();
+
+      // Run update callbacks
+      this.updateCallbacks.forEach((callback) => callback(delta, elapsed));
+
+      // Render
+      this.composer.render();
+    };
+
+    animate();
+  }
+
+  public stop(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+  }
+
+  public getScene(): THREE.Scene {
+    return this.scene;
+  }
+
+  public getCamera(): THREE.PerspectiveCamera {
+    return this.camera;
+  }
+
+  public getRenderer(): THREE.WebGLRenderer {
+    return this.renderer;
+  }
+
+  public dispose(): void {
+    this.stop();
+    window.removeEventListener('resize', this.handleResize);
+
+    // Dispose of all objects in scene
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        object.geometry.dispose();
+        if (Array.isArray(object.material)) {
+          object.material.forEach((m) => m.dispose());
+        } else {
+          object.material.dispose();
+        }
+      }
+    });
+
+    this.renderer.dispose();
+    this.controls.dispose();
+  }
+}
+
+// Usage
+const container = document.getElementById('canvas-container')!;
+const sceneManager = new SceneManager({ container, antialias: true });
+
+// Add objects
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+const cube = new THREE.Mesh(geometry, material);
+cube.castShadow = true;
+sceneManager.getScene().add(cube);
+
+// Add lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(5, 10, 5);
+directionalLight.castShadow = true;
+sceneManager.getScene().add(ambientLight, directionalLight);
+
+// Animation
+sceneManager.addUpdateCallback((delta) => {
+  cube.rotation.x += delta;
+  cube.rotation.y += delta * 0.5;
+});
+
+sceneManager.start();
 ```
 
-## React Three Fiber
-```tsx
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+### 2. React Three Fiber Integration
 
-function Scene() {
+```tsx
+// components/Scene.tsx
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import {
+  OrbitControls,
+  Environment,
+  ContactShadows,
+  PerspectiveCamera,
+  useGLTF,
+  Float,
+  Text3D,
+  Center,
+  MeshTransmissionMaterial,
+} from '@react-three/drei';
+import { Suspense, useRef, useState } from 'react';
+import * as THREE from 'three';
+
+// Animated box component
+function AnimatedBox({ position }: { position: [number, number, number] }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
+  const [clicked, setClicked] = useState(false);
+
+  useFrame((state, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.x += delta * 0.5;
+      meshRef.current.rotation.y += delta * 0.3;
+
+      // Smooth scale animation
+      const targetScale = clicked ? 1.5 : hovered ? 1.2 : 1;
+      meshRef.current.scale.lerp(
+        new THREE.Vector3(targetScale, targetScale, targetScale),
+        0.1
+      );
+    }
+  });
+
   return (
-    <Canvas>
-      <ambientLight />
-      <pointLight position={[10, 10, 10]} />
-      <mesh>
-        <boxGeometry />
-        <meshStandardMaterial color="orange" />
+    <mesh
+      ref={meshRef}
+      position={position}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+      onClick={() => setClicked(!clicked)}
+    >
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial
+        color={hovered ? '#ff6b6b' : '#4ecdc4'}
+        metalness={0.5}
+        roughness={0.2}
+      />
+    </mesh>
+  );
+}
+
+// GLTF Model loader
+function Model({ url, scale = 1 }: { url: string; scale?: number }) {
+  const { scene } = useGLTF(url);
+  const modelRef = useRef<THREE.Group>(null);
+
+  // Clone materials for unique instances
+  useEffect(() => {
+    scene.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      }
+    });
+  }, [scene]);
+
+  return (
+    <primitive
+      ref={modelRef}
+      object={scene}
+      scale={scale}
+      dispose={null}
+    />
+  );
+}
+
+// Glass material sphere
+function GlassSphere() {
+  return (
+    <mesh position={[2, 1, 0]}>
+      <sphereGeometry args={[0.8, 64, 64]} />
+      <MeshTransmissionMaterial
+        backside
+        samples={16}
+        thickness={0.5}
+        chromaticAberration={0.5}
+        anisotropy={0.3}
+        distortion={0.2}
+        distortionScale={0.5}
+        temporalDistortion={0.1}
+        iridescence={1}
+        iridescenceIOR={1}
+        iridescenceThicknessRange={[0, 1400]}
+      />
+    </mesh>
+  );
+}
+
+// 3D Text
+function Text3DComponent({ text }: { text: string }) {
+  return (
+    <Center position={[0, 2, 0]}>
+      <Float speed={2} rotationIntensity={0.5} floatIntensity={1}>
+        <Text3D
+          font="/fonts/Inter_Bold.json"
+          size={0.5}
+          height={0.1}
+          curveSegments={12}
+        >
+          {text}
+          <meshStandardMaterial color="#ff6b6b" metalness={0.8} roughness={0.2} />
+        </Text3D>
+      </Float>
+    </Center>
+  );
+}
+
+// Camera rig with smooth following
+function CameraRig({ target }: { target: THREE.Vector3 }) {
+  const { camera } = useThree();
+
+  useFrame(() => {
+    camera.position.lerp(
+      new THREE.Vector3(target.x + 5, target.y + 3, target.z + 5),
+      0.02
+    );
+    camera.lookAt(target);
+  });
+
+  return null;
+}
+
+// Main scene
+export function Scene() {
+  return (
+    <Canvas
+      shadows
+      dpr={[1, 2]}
+      gl={{
+        antialias: true,
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1,
+      }}
+    >
+      <PerspectiveCamera makeDefault position={[5, 3, 5]} fov={50} />
+      <OrbitControls
+        enableDamping
+        dampingFactor={0.05}
+        minDistance={2}
+        maxDistance={20}
+      />
+
+      {/* Lighting */}
+      <ambientLight intensity={0.5} />
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={1.5}
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-camera-far={50}
+        shadow-camera-left={-10}
+        shadow-camera-right={10}
+        shadow-camera-top={10}
+        shadow-camera-bottom={-10}
+      />
+
+      {/* Environment */}
+      <Environment preset="city" />
+
+      {/* Content */}
+      <Suspense fallback={null}>
+        <AnimatedBox position={[-2, 0.5, 0]} />
+        <AnimatedBox position={[0, 0.5, 0]} />
+        <GlassSphere />
+        <Text3DComponent text="Hello 3D" />
+
+        {/* Ground */}
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+          <planeGeometry args={[50, 50]} />
+          <meshStandardMaterial color="#1a1a2e" />
+        </mesh>
+      </Suspense>
+
+      {/* Contact shadows */}
+      <ContactShadows
+        position={[0, -0.49, 0]}
+        opacity={0.5}
+        scale={20}
+        blur={2}
+        far={10}
+      />
+    </Canvas>
+  );
+}
+```
+
+### 3. Custom Shaders
+
+```tsx
+// shaders/GradientMaterial.tsx
+import { shaderMaterial } from '@react-three/drei';
+import { extend, useFrame } from '@react-three/fiber';
+import { useRef } from 'react';
+import * as THREE from 'three';
+
+// Vertex shader
+const vertexShader = `
+  varying vec2 vUv;
+  varying vec3 vPosition;
+  varying vec3 vNormal;
+
+  uniform float uTime;
+  uniform float uAmplitude;
+  uniform float uFrequency;
+
+  void main() {
+    vUv = uv;
+    vPosition = position;
+    vNormal = normal;
+
+    // Wave displacement
+    vec3 pos = position;
+    float displacement = sin(pos.x * uFrequency + uTime) *
+                         sin(pos.z * uFrequency + uTime) *
+                         uAmplitude;
+    pos.y += displacement;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  }
+`;
+
+// Fragment shader
+const fragmentShader = `
+  varying vec2 vUv;
+  varying vec3 vPosition;
+  varying vec3 vNormal;
+
+  uniform float uTime;
+  uniform vec3 uColorA;
+  uniform vec3 uColorB;
+  uniform float uNoiseScale;
+
+  // Simplex noise function
+  vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+  vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+  vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+  vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+  float snoise(vec3 v) {
+    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+
+    vec3 i  = floor(v + dot(v, C.yyy));
+    vec3 x0 = v - i + dot(i, C.xxx);
+
+    vec3 g = step(x0.yzx, x0.xyz);
+    vec3 l = 1.0 - g;
+    vec3 i1 = min(g.xyz, l.zxy);
+    vec3 i2 = max(g.xyz, l.zxy);
+
+    vec3 x1 = x0 - i1 + C.xxx;
+    vec3 x2 = x0 - i2 + C.yyy;
+    vec3 x3 = x0 - D.yyy;
+
+    i = mod289(i);
+    vec4 p = permute(permute(permute(
+              i.z + vec4(0.0, i1.z, i2.z, 1.0))
+            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
+            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+
+    float n_ = 0.142857142857;
+    vec3 ns = n_ * D.wyz - D.xzx;
+
+    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+
+    vec4 x_ = floor(j * ns.z);
+    vec4 y_ = floor(j - 7.0 * x_);
+
+    vec4 x = x_ *ns.x + ns.yyyy;
+    vec4 y = y_ *ns.x + ns.yyyy;
+    vec4 h = 1.0 - abs(x) - abs(y);
+
+    vec4 b0 = vec4(x.xy, y.xy);
+    vec4 b1 = vec4(x.zw, y.zw);
+
+    vec4 s0 = floor(b0)*2.0 + 1.0;
+    vec4 s1 = floor(b1)*2.0 + 1.0;
+    vec4 sh = -step(h, vec4(0.0));
+
+    vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
+    vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
+
+    vec3 p0 = vec3(a0.xy,h.x);
+    vec3 p1 = vec3(a0.zw,h.y);
+    vec3 p2 = vec3(a1.xy,h.z);
+    vec3 p3 = vec3(a1.zw,h.w);
+
+    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+    p0 *= norm.x;
+    p1 *= norm.y;
+    p2 *= norm.z;
+    p3 *= norm.w;
+
+    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+    m = m * m;
+    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+  }
+
+  void main() {
+    // Animated noise
+    float noise = snoise(vec3(vPosition.xz * uNoiseScale, uTime * 0.3));
+    noise = noise * 0.5 + 0.5; // Normalize to 0-1
+
+    // Gradient based on UV and noise
+    float gradient = vUv.y + noise * 0.3;
+
+    // Mix colors
+    vec3 color = mix(uColorA, uColorB, gradient);
+
+    // Add rim lighting
+    vec3 viewDirection = normalize(cameraPosition - vPosition);
+    float rimLight = 1.0 - max(0.0, dot(viewDirection, vNormal));
+    rimLight = pow(rimLight, 3.0);
+    color += rimLight * 0.3;
+
+    gl_FragColor = vec4(color, 1.0);
+  }
+`;
+
+// Create shader material
+const GradientMaterial = shaderMaterial(
+  {
+    uTime: 0,
+    uColorA: new THREE.Color('#ff6b6b'),
+    uColorB: new THREE.Color('#4ecdc4'),
+    uAmplitude: 0.2,
+    uFrequency: 2.0,
+    uNoiseScale: 1.0,
+  },
+  vertexShader,
+  fragmentShader
+);
+
+extend({ GradientMaterial });
+
+// TypeScript declaration
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      gradientMaterial: any;
+    }
+  }
+}
+
+// Component using custom shader
+export function ShaderPlane() {
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
+
+  useFrame(({ clock }) => {
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
+    }
+  });
+
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
+      <planeGeometry args={[10, 10, 64, 64]} />
+      <gradientMaterial
+        ref={materialRef}
+        uColorA="#ff6b6b"
+        uColorB="#4ecdc4"
+        uAmplitude={0.3}
+        uFrequency={3.0}
+      />
+    </mesh>
+  );
+}
+
+// Post-processing shader
+const GlitchShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    uTime: { value: 0 },
+    uIntensity: { value: 0.5 },
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    uniform float uTime;
+    uniform float uIntensity;
+    varying vec2 vUv;
+
+    float random(vec2 st) {
+      return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+    }
+
+    void main() {
+      vec2 uv = vUv;
+
+      // Random glitch offset
+      float glitch = step(0.99, random(vec2(uTime * 0.1, floor(uv.y * 20.0))));
+      uv.x += glitch * uIntensity * (random(vec2(uTime)) - 0.5);
+
+      // RGB split
+      float r = texture2D(tDiffuse, uv + vec2(uIntensity * 0.01, 0.0)).r;
+      float g = texture2D(tDiffuse, uv).g;
+      float b = texture2D(tDiffuse, uv - vec2(uIntensity * 0.01, 0.0)).b;
+
+      gl_FragColor = vec4(r, g, b, 1.0);
+    }
+  `,
+};
+```
+
+### 4. Physics Integration
+
+```tsx
+// components/PhysicsScene.tsx
+import { Canvas } from '@react-three/fiber';
+import { Physics, RigidBody, CuboidCollider, BallCollider } from '@react-three/rapier';
+import { useRef, useState } from 'react';
+import * as THREE from 'three';
+
+// Physics-enabled box
+function PhysicsBox({ position }: { position: [number, number, number] }) {
+  const [color, setColor] = useState('#ff6b6b');
+
+  return (
+    <RigidBody
+      position={position}
+      restitution={0.7}
+      friction={0.5}
+      onCollisionEnter={() => setColor('#4ecdc4')}
+      onCollisionExit={() => setColor('#ff6b6b')}
+    >
+      <mesh castShadow>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color={color} />
       </mesh>
+    </RigidBody>
+  );
+}
+
+// Bouncing ball
+function BouncingBall({ position }: { position: [number, number, number] }) {
+  const rigidBodyRef = useRef(null);
+
+  const handleClick = () => {
+    if (rigidBodyRef.current) {
+      // Apply upward impulse on click
+      rigidBodyRef.current.applyImpulse({ x: 0, y: 10, z: 0 }, true);
+    }
+  };
+
+  return (
+    <RigidBody
+      ref={rigidBodyRef}
+      position={position}
+      restitution={0.9}
+      friction={0.3}
+      colliders="ball"
+    >
+      <mesh castShadow onClick={handleClick}>
+        <sphereGeometry args={[0.5, 32, 32]} />
+        <meshStandardMaterial color="#feca57" metalness={0.3} roughness={0.2} />
+      </mesh>
+    </RigidBody>
+  );
+}
+
+// Ground plane
+function Ground() {
+  return (
+    <RigidBody type="fixed" friction={1}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]} receiveShadow>
+        <planeGeometry args={[50, 50]} />
+        <meshStandardMaterial color="#1a1a2e" />
+      </mesh>
+    </RigidBody>
+  );
+}
+
+// Walls for containment
+function Walls() {
+  return (
+    <>
+      {/* Back wall */}
+      <RigidBody type="fixed">
+        <CuboidCollider args={[25, 10, 0.5]} position={[0, 5, -25]} />
+      </RigidBody>
+      {/* Front wall */}
+      <RigidBody type="fixed">
+        <CuboidCollider args={[25, 10, 0.5]} position={[0, 5, 25]} />
+      </RigidBody>
+      {/* Left wall */}
+      <RigidBody type="fixed">
+        <CuboidCollider args={[0.5, 10, 25]} position={[-25, 5, 0]} />
+      </RigidBody>
+      {/* Right wall */}
+      <RigidBody type="fixed">
+        <CuboidCollider args={[0.5, 10, 25]} position={[25, 5, 0]} />
+      </RigidBody>
+    </>
+  );
+}
+
+// Spawner for dynamic objects
+function ObjectSpawner() {
+  const [objects, setObjects] = useState<Array<{ id: number; type: 'box' | 'ball'; position: [number, number, number] }>>([]);
+
+  const spawnObject = () => {
+    const id = Date.now();
+    const type = Math.random() > 0.5 ? 'box' : 'ball';
+    const position: [number, number, number] = [
+      (Math.random() - 0.5) * 10,
+      10,
+      (Math.random() - 0.5) * 10,
+    ];
+    setObjects((prev) => [...prev, { id, type, position }]);
+  };
+
+  return (
+    <>
+      {objects.map(({ id, type, position }) =>
+        type === 'box' ? (
+          <PhysicsBox key={id} position={position} />
+        ) : (
+          <BouncingBall key={id} position={position} />
+        )
+      )}
+
+      {/* Spawn trigger - invisible clickable plane */}
+      <mesh position={[0, 15, 0]} onClick={spawnObject}>
+        <planeGeometry args={[20, 20]} />
+        <meshBasicMaterial visible={false} />
+      </mesh>
+    </>
+  );
+}
+
+// Main physics scene
+export function PhysicsScene() {
+  return (
+    <Canvas shadows camera={{ position: [15, 15, 15], fov: 50 }}>
+      <ambientLight intensity={0.5} />
+      <directionalLight
+        position={[10, 20, 10]}
+        intensity={1.5}
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+      />
+
+      <Physics gravity={[0, -9.81, 0]} debug={false}>
+        <Ground />
+        <Walls />
+        <ObjectSpawner />
+
+        {/* Initial objects */}
+        <PhysicsBox position={[0, 5, 0]} />
+        <PhysicsBox position={[0.5, 7, 0.5]} />
+        <BouncingBall position={[-2, 5, 0]} />
+        <BouncingBall position={[2, 8, 2]} />
+      </Physics>
+
       <OrbitControls />
     </Canvas>
   );
 }
 ```
 
-## Animation
+### 5. Animation System
+
 ```tsx
-import { useFrame } from '@react-three/fiber';
+// lib/three/AnimationManager.ts
+import * as THREE from 'three';
+import gsap from 'gsap';
 
-function Box() {
-  const ref = useRef<THREE.Mesh>(null);
+interface AnimationConfig {
+  duration?: number;
+  ease?: string;
+  delay?: number;
+  repeat?: number;
+  yoyo?: boolean;
+  onComplete?: () => void;
+}
 
-  useFrame((state, delta) => {
-    if (ref.current) ref.current.rotation.y += delta;
+export class AnimationManager {
+  private mixer: THREE.AnimationMixer | null = null;
+  private actions: Map<string, THREE.AnimationAction> = new Map();
+  private timelines: Map<string, gsap.core.Timeline> = new Map();
+
+  // GLTF animation setup
+  public setupMixer(model: THREE.Object3D, animations: THREE.AnimationClip[]): void {
+    this.mixer = new THREE.AnimationMixer(model);
+
+    animations.forEach((clip) => {
+      const action = this.mixer!.clipAction(clip);
+      this.actions.set(clip.name, action);
+    });
+  }
+
+  public playAnimation(name: string, options: { loop?: boolean; crossFade?: number } = {}): void {
+    const action = this.actions.get(name);
+    if (!action) return;
+
+    const { loop = true, crossFade = 0.3 } = options;
+
+    // Stop other actions with crossfade
+    this.actions.forEach((a, n) => {
+      if (n !== name && a.isRunning()) {
+        a.fadeOut(crossFade);
+      }
+    });
+
+    action.reset();
+    action.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);
+    action.clampWhenFinished = !loop;
+    action.fadeIn(crossFade);
+    action.play();
+  }
+
+  public update(delta: number): void {
+    this.mixer?.update(delta);
+  }
+
+  // GSAP-based object animation
+  public animateTo(
+    object: THREE.Object3D,
+    properties: Partial<{
+      position: { x?: number; y?: number; z?: number };
+      rotation: { x?: number; y?: number; z?: number };
+      scale: { x?: number; y?: number; z?: number };
+    }>,
+    config: AnimationConfig = {}
+  ): gsap.core.Tween {
+    const { duration = 1, ease = 'power2.out', delay = 0, onComplete } = config;
+
+    const targets: any[] = [];
+    const props: any = {};
+
+    if (properties.position) {
+      targets.push(object.position);
+      Object.assign(props, properties.position);
+    }
+    if (properties.rotation) {
+      targets.push(object.rotation);
+      Object.assign(props, properties.rotation);
+    }
+    if (properties.scale) {
+      targets.push(object.scale);
+      Object.assign(props, properties.scale);
+    }
+
+    return gsap.to(targets, {
+      ...props,
+      duration,
+      ease,
+      delay,
+      onComplete,
+    });
+  }
+
+  // Timeline-based complex animations
+  public createTimeline(id: string): gsap.core.Timeline {
+    const timeline = gsap.timeline({ paused: true });
+    this.timelines.set(id, timeline);
+    return timeline;
+  }
+
+  public playTimeline(id: string): void {
+    this.timelines.get(id)?.play();
+  }
+
+  public dispose(): void {
+    this.actions.clear();
+    this.timelines.forEach((tl) => tl.kill());
+    this.timelines.clear();
+  }
+}
+
+// React hook for animations
+function useAnimation(meshRef: React.RefObject<THREE.Mesh>) {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const animateIn = useCallback(() => {
+    if (!meshRef.current || isAnimating) return;
+
+    setIsAnimating(true);
+
+    gsap.timeline()
+      .fromTo(
+        meshRef.current.scale,
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 1, z: 1, duration: 0.5, ease: 'back.out(1.7)' }
+      )
+      .fromTo(
+        meshRef.current.rotation,
+        { y: -Math.PI },
+        { y: 0, duration: 0.5, ease: 'power2.out' },
+        '<'
+      )
+      .call(() => setIsAnimating(false));
+  }, [isAnimating]);
+
+  const animateOut = useCallback(() => {
+    if (!meshRef.current || isAnimating) return;
+
+    setIsAnimating(true);
+
+    gsap.to(meshRef.current.scale, {
+      x: 0,
+      y: 0,
+      z: 0,
+      duration: 0.3,
+      ease: 'back.in(1.7)',
+      onComplete: () => setIsAnimating(false),
+    });
+  }, [isAnimating]);
+
+  return { animateIn, animateOut, isAnimating };
+}
+
+// Animated component example
+function AnimatedObject() {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const { animateIn, animateOut, isAnimating } = useAnimation(meshRef);
+
+  useEffect(() => {
+    animateIn();
+  }, []);
+
+  return (
+    <mesh
+      ref={meshRef}
+      onClick={animateOut}
+      scale={[0, 0, 0]}
+    >
+      <boxGeometry />
+      <meshStandardMaterial color="#ff6b6b" />
+    </mesh>
+  );
+}
+```
+
+### 6. Performance Optimization
+
+```tsx
+// lib/three/PerformanceOptimizer.ts
+import * as THREE from 'three';
+import { useThree, useFrame } from '@react-three/fiber';
+import { useEffect, useMemo, useRef } from 'react';
+
+// Level of Detail (LOD) component
+function LODMesh({ position }: { position: [number, number, number] }) {
+  const lodRef = useRef<THREE.LOD>(null);
+  const { camera } = useThree();
+
+  const geometries = useMemo(() => ({
+    high: new THREE.IcosahedronGeometry(1, 4),    // 320 triangles
+    medium: new THREE.IcosahedronGeometry(1, 2),  // 80 triangles
+    low: new THREE.IcosahedronGeometry(1, 1),     // 20 triangles
+  }), []);
+
+  const material = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: '#4ecdc4' }),
+    []
+  );
+
+  useEffect(() => {
+    if (!lodRef.current) return;
+
+    const meshHigh = new THREE.Mesh(geometries.high, material);
+    const meshMedium = new THREE.Mesh(geometries.medium, material);
+    const meshLow = new THREE.Mesh(geometries.low, material);
+
+    lodRef.current.addLevel(meshHigh, 0);
+    lodRef.current.addLevel(meshMedium, 10);
+    lodRef.current.addLevel(meshLow, 20);
+
+    return () => {
+      geometries.high.dispose();
+      geometries.medium.dispose();
+      geometries.low.dispose();
+      material.dispose();
+    };
+  }, [geometries, material]);
+
+  useFrame(() => {
+    lodRef.current?.update(camera);
   });
 
-  return <mesh ref={ref}>...</mesh>;
+  return <lod ref={lodRef} position={position} />;
+}
+
+// Instanced mesh for many identical objects
+function InstancedBoxes({ count = 1000 }: { count?: number }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  const tempObject = useMemo(() => new THREE.Object3D(), []);
+  const tempColor = useMemo(() => new THREE.Color(), []);
+
+  useEffect(() => {
+    if (!meshRef.current) return;
+
+    // Set up instance matrices and colors
+    for (let i = 0; i < count; i++) {
+      tempObject.position.set(
+        (Math.random() - 0.5) * 50,
+        (Math.random() - 0.5) * 50,
+        (Math.random() - 0.5) * 50
+      );
+      tempObject.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      );
+      tempObject.scale.setScalar(0.5 + Math.random() * 0.5);
+      tempObject.updateMatrix();
+
+      meshRef.current.setMatrixAt(i, tempObject.matrix);
+      meshRef.current.setColorAt(
+        i,
+        tempColor.setHSL(Math.random(), 0.7, 0.5)
+      );
+    }
+
+    meshRef.current.instanceMatrix.needsUpdate = true;
+    if (meshRef.current.instanceColor) {
+      meshRef.current.instanceColor.needsUpdate = true;
+    }
+  }, [count, tempObject, tempColor]);
+
+  // Animate instances
+  useFrame(({ clock }) => {
+    if (!meshRef.current) return;
+
+    const time = clock.getElapsedTime();
+
+    for (let i = 0; i < count; i++) {
+      meshRef.current.getMatrixAt(i, tempObject.matrix);
+      tempObject.matrix.decompose(
+        tempObject.position,
+        tempObject.quaternion,
+        tempObject.scale
+      );
+
+      tempObject.rotation.x = time * 0.5 + i * 0.01;
+      tempObject.rotation.y = time * 0.3 + i * 0.01;
+      tempObject.updateMatrix();
+
+      meshRef.current.setMatrixAt(i, tempObject.matrix);
+    }
+
+    meshRef.current.instanceMatrix.needsUpdate = true;
+  });
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]} castShadow>
+      <boxGeometry args={[1, 1, 1]} />
+      <meshStandardMaterial />
+    </instancedMesh>
+  );
+}
+
+// Frustum culling helper
+function useFrustumCulling(meshRef: React.RefObject<THREE.Mesh>) {
+  const { camera } = useThree();
+  const frustum = useMemo(() => new THREE.Frustum(), []);
+  const projScreenMatrix = useMemo(() => new THREE.Matrix4(), []);
+
+  useFrame(() => {
+    if (!meshRef.current) return;
+
+    projScreenMatrix.multiplyMatrices(
+      camera.projectionMatrix,
+      camera.matrixWorldInverse
+    );
+    frustum.setFromProjectionMatrix(projScreenMatrix);
+
+    // Check if mesh is in frustum
+    const isVisible = frustum.intersectsObject(meshRef.current);
+    meshRef.current.visible = isVisible;
+  });
+}
+
+// Texture optimization
+function useOptimizedTexture(url: string) {
+  const texture = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    const tex = loader.load(url);
+
+    // Optimize texture settings
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.magFilter = THREE.LinearFilter;
+    tex.anisotropy = 4; // Balance quality and performance
+    tex.generateMipmaps = true;
+
+    return tex;
+  }, [url]);
+
+  useEffect(() => {
+    return () => texture.dispose();
+  }, [texture]);
+
+  return texture;
+}
+
+// GPU particle system
+function ParticleSystem({ count = 10000 }: { count?: number }) {
+  const particlesRef = useRef<THREE.Points>(null);
+
+  const [positions, velocities] = useMemo(() => {
+    const positions = new Float32Array(count * 3);
+    const velocities = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      positions[i3] = (Math.random() - 0.5) * 20;
+      positions[i3 + 1] = Math.random() * 20;
+      positions[i3 + 2] = (Math.random() - 0.5) * 20;
+
+      velocities[i3] = (Math.random() - 0.5) * 0.02;
+      velocities[i3 + 1] = -Math.random() * 0.05;
+      velocities[i3 + 2] = (Math.random() - 0.5) * 0.02;
+    }
+
+    return [positions, velocities];
+  }, [count]);
+
+  useFrame(() => {
+    if (!particlesRef.current) return;
+
+    const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+
+      positions[i3] += velocities[i3];
+      positions[i3 + 1] += velocities[i3 + 1];
+      positions[i3 + 2] += velocities[i3 + 2];
+
+      // Reset particle when it falls below ground
+      if (positions[i3 + 1] < 0) {
+        positions[i3 + 1] = 20;
+      }
+    }
+
+    particlesRef.current.geometry.attributes.position.needsUpdate = true;
+  });
+
+  return (
+    <points ref={particlesRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={count}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.05}
+        color="#ffffff"
+        transparent
+        opacity={0.8}
+        sizeAttenuation
+      />
+    </points>
+  );
+}
+```
+
+## Use Cases
+
+### Interactive Product Viewer
+
+```tsx
+// components/ProductViewer.tsx
+import { Canvas } from '@react-three/fiber';
+import { useGLTF, OrbitControls, Environment, Html, useProgress } from '@react-three/drei';
+import { Suspense, useState } from 'react';
+
+function Loader() {
+  const { progress } = useProgress();
+  return (
+    <Html center>
+      <div className="text-white text-xl">
+        Loading... {progress.toFixed(0)}%
+      </div>
+    </Html>
+  );
+}
+
+interface ProductProps {
+  modelUrl: string;
+  hotspots: Array<{
+    id: string;
+    position: [number, number, number];
+    label: string;
+    description: string;
+  }>;
+}
+
+function Product({ modelUrl, hotspots }: ProductProps) {
+  const { scene } = useGLTF(modelUrl);
+  const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
+
+  return (
+    <group>
+      <primitive object={scene} scale={1} />
+
+      {hotspots.map((hotspot) => (
+        <group key={hotspot.id} position={hotspot.position}>
+          <mesh onClick={() => setActiveHotspot(hotspot.id)}>
+            <sphereGeometry args={[0.1, 16, 16]} />
+            <meshBasicMaterial
+              color={activeHotspot === hotspot.id ? '#ff6b6b' : '#4ecdc4'}
+            />
+          </mesh>
+
+          {activeHotspot === hotspot.id && (
+            <Html distanceFactor={5}>
+              <div className="bg-white p-4 rounded-lg shadow-lg min-w-[200px]">
+                <h3 className="font-bold">{hotspot.label}</h3>
+                <p className="text-sm text-gray-600">{hotspot.description}</p>
+              </div>
+            </Html>
+          )}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+export function ProductViewer({ modelUrl, hotspots }: ProductProps) {
+  return (
+    <div className="w-full h-screen">
+      <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+        <Suspense fallback={<Loader />}>
+          <Product modelUrl={modelUrl} hotspots={hotspots} />
+          <Environment preset="studio" />
+        </Suspense>
+
+        <OrbitControls
+          enablePan={false}
+          minDistance={2}
+          maxDistance={10}
+          autoRotate
+          autoRotateSpeed={0.5}
+        />
+      </Canvas>
+    </div>
+  );
 }
 ```
 
 ## Best Practices
-- Use React Three Fiber for React
-- Dispose resources
-- Optimize draw calls
-- Use instances for repeated objects
+
+### Do's
+
+- Use React Three Fiber for React applications
+- Dispose of geometries, materials, and textures when unmounting
+- Use instancing for many identical objects
+- Implement LOD for complex scenes
+- Use texture atlases to reduce draw calls
+- Enable shadow maps only when needed
+- Use object pooling for frequently created/destroyed objects
+- Optimize geometry with BufferGeometry
+- Use compressed textures (KTX2, Basis)
+- Profile performance with Chrome DevTools and Spector.js
+
+### Don'ts
+
+- Don't create new geometries/materials in render loops
+- Don't use too many lights (limit to 3-4 dynamic lights)
+- Don't skip frustum culling for large scenes
+- Don't forget to update instanceMatrix when animating instanced meshes
+- Don't use transparent materials unless necessary
+- Don't load uncompressed high-resolution textures
+- Don't forget to set power-of-two texture dimensions
+- Don't ignore memory leaks from undisposed resources
+- Don't use complex shaders without fallbacks
+- Don't skip mobile optimization and testing
+
+## References
+
+- [Three.js Documentation](https://threejs.org/docs/)
+- [React Three Fiber](https://docs.pmnd.rs/react-three-fiber/)
+- [Drei Helpers](https://github.com/pmndrs/drei)
+- [Three.js Fundamentals](https://threejs.org/manual/)
+- [WebGL Best Practices](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices)
 
 
 ## Configuration

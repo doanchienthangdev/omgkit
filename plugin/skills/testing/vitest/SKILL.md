@@ -1,64 +1,1009 @@
 ---
 name: vitest
-description: Vitest testing. Use for JavaScript/TypeScript unit tests.
+description: Vitest testing for TypeScript/JavaScript with mocking, coverage, snapshot testing, and Vue/React component testing
+category: testing
+triggers:
+  - vitest
+  - javascript testing
+  - typescript testing
+  - unit testing js
+  - vue testing
+  - react testing
 ---
 
-# Vitest Skill
+# Vitest
 
-## Basic Tests
-```typescript
-import { describe, it, expect } from 'vitest';
+Enterprise-grade **JavaScript/TypeScript testing framework** following industry best practices. This skill covers unit testing, mocking, snapshot testing, component testing, coverage reports, and CI integration patterns used by top engineering teams.
 
-describe('add', () => {
-  it('adds two numbers', () => {
-    expect(add(1, 2)).toBe(3);
-  });
+## Purpose
 
-  it('handles negative numbers', () => {
-    expect(add(-1, 1)).toBe(0);
-  });
-});
-```
+Build comprehensive JavaScript/TypeScript test suites:
 
-## Async Tests
-```typescript
-it('fetches user', async () => {
-  const user = await fetchUser('123');
-  expect(user.email).toBe('test@example.com');
-});
-```
+- Write fast and reliable unit tests
+- Mock modules, timers, and network requests
+- Test Vue and React components
+- Implement snapshot testing
+- Generate coverage reports
+- Run tests in parallel and watch mode
+- Integrate with CI/CD pipelines
 
-## Mocking
-```typescript
-import { vi } from 'vitest';
+## Features
 
-vi.mock('./api', () => ({
-  fetchData: vi.fn().mockResolvedValue({ data: 'test' }),
-}));
+### 1. Configuration Setup
 
-it('calls API', async () => {
-  const result = await getData();
-  expect(fetchData).toHaveBeenCalled();
-});
-```
-
-## Setup
 ```typescript
 // vitest.config.ts
+import { defineConfig } from "vitest/config";
+import vue from "@vitejs/plugin-vue";
+import react from "@vitejs/plugin-react";
+import path from "path";
+
 export default defineConfig({
+  plugins: [vue(), react()],
   test: {
     globals: true,
-    environment: 'jsdom',
+    environment: "jsdom",
+    include: ["**/*.{test,spec}.{js,ts,jsx,tsx}"],
+    exclude: ["**/node_modules/**", "**/dist/**", "**/e2e/**"],
+    setupFiles: ["./tests/setup.ts"],
     coverage: {
-      provider: 'v8',
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
+      reportsDirectory: "./coverage",
+      exclude: [
+        "node_modules/",
+        "tests/",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "**/types/**",
+      ],
+      thresholds: {
+        global: {
+          branches: 80,
+          functions: 80,
+          lines: 80,
+          statements: 80,
+        },
+      },
+    },
+    pool: "threads",
+    poolOptions: {
+      threads: {
+        singleThread: false,
+        maxThreads: 4,
+        minThreads: 1,
+      },
+    },
+    testTimeout: 10000,
+    hookTimeout: 10000,
+    reporters: ["default", "json", "junit"],
+    outputFile: {
+      json: "./test-results/results.json",
+      junit: "./test-results/junit.xml",
+    },
+    typecheck: {
+      enabled: true,
+      checker: "tsc",
+    },
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@tests": path.resolve(__dirname, "./tests"),
     },
   },
 });
 ```
 
-## Run
-```bash
-vitest
-vitest --coverage
-vitest --ui
+```typescript
+// tests/setup.ts
+import { beforeAll, afterAll, afterEach, vi } from "vitest";
+import { cleanup } from "@testing-library/vue";
+import "@testing-library/jest-dom/vitest";
+
+// Reset mocks after each test
+afterEach(() => {
+  vi.clearAllMocks();
+  vi.resetAllMocks();
+  cleanup();
+});
+
+// Global setup
+beforeAll(() => {
+  // Mock window.matchMedia
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+
+  // Mock IntersectionObserver
+  const mockIntersectionObserver = vi.fn();
+  mockIntersectionObserver.mockReturnValue({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  });
+  window.IntersectionObserver = mockIntersectionObserver;
+
+  // Mock ResizeObserver
+  window.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
+});
+
+// Global teardown
+afterAll(() => {
+  vi.restoreAllMocks();
+});
 ```
+
+### 2. Unit Testing Patterns
+
+```typescript
+// tests/unit/utils/string.test.ts
+import { describe, it, expect, test } from "vitest";
+import {
+  capitalize,
+  truncate,
+  slugify,
+  camelToKebab,
+  parseTemplate,
+} from "@/utils/string";
+
+describe("String Utilities", () => {
+  describe("capitalize", () => {
+    it("capitalizes the first letter", () => {
+      expect(capitalize("hello")).toBe("Hello");
+    });
+
+    it("handles empty strings", () => {
+      expect(capitalize("")).toBe("");
+    });
+
+    it("handles single character", () => {
+      expect(capitalize("a")).toBe("A");
+    });
+
+    it("preserves rest of string case", () => {
+      expect(capitalize("hELLO")).toBe("HELLO");
+    });
+  });
+
+  describe("truncate", () => {
+    it("truncates long strings", () => {
+      expect(truncate("Hello World", 5)).toBe("Hello...");
+    });
+
+    it("returns original if shorter than limit", () => {
+      expect(truncate("Hi", 10)).toBe("Hi");
+    });
+
+    it("uses custom suffix", () => {
+      expect(truncate("Hello World", 5, "…")).toBe("Hello…");
+    });
+
+    test.each([
+      ["Hello World", 5, "...", "Hello..."],
+      ["Short", 10, "...", "Short"],
+      ["Test", 4, "", "Test"],
+      ["Testing", 4, "…", "Test…"],
+    ])('truncate("%s", %d, "%s") returns "%s"', (str, len, suffix, expected) => {
+      expect(truncate(str, len, suffix)).toBe(expected);
+    });
+  });
+
+  describe("slugify", () => {
+    it("converts to lowercase", () => {
+      expect(slugify("HELLO")).toBe("hello");
+    });
+
+    it("replaces spaces with hyphens", () => {
+      expect(slugify("Hello World")).toBe("hello-world");
+    });
+
+    it("removes special characters", () => {
+      expect(slugify("Hello! World?")).toBe("hello-world");
+    });
+
+    it("handles multiple spaces", () => {
+      expect(slugify("Hello   World")).toBe("hello-world");
+    });
+  });
+
+  describe("parseTemplate", () => {
+    it("replaces placeholders with values", () => {
+      const template = "Hello, {{name}}!";
+      const result = parseTemplate(template, { name: "World" });
+      expect(result).toBe("Hello, World!");
+    });
+
+    it("handles multiple placeholders", () => {
+      const template = "{{greeting}}, {{name}}!";
+      const result = parseTemplate(template, {
+        greeting: "Hi",
+        name: "John",
+      });
+      expect(result).toBe("Hi, John!");
+    });
+
+    it("leaves unmatched placeholders", () => {
+      const template = "Hello, {{name}}!";
+      const result = parseTemplate(template, {});
+      expect(result).toBe("Hello, {{name}}!");
+    });
+  });
+});
+
+// tests/unit/utils/async.test.ts
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { debounce, throttle, retry, timeout } from "@/utils/async";
+
+describe("Async Utilities", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  describe("debounce", () => {
+    it("delays function execution", () => {
+      const fn = vi.fn();
+      const debouncedFn = debounce(fn, 100);
+
+      debouncedFn();
+      expect(fn).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(100);
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it("resets timer on subsequent calls", () => {
+      const fn = vi.fn();
+      const debouncedFn = debounce(fn, 100);
+
+      debouncedFn();
+      vi.advanceTimersByTime(50);
+      debouncedFn();
+      vi.advanceTimersByTime(50);
+
+      expect(fn).not.toHaveBeenCalled();
+
+      vi.advanceTimersByTime(50);
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("throttle", () => {
+    it("limits function calls", () => {
+      const fn = vi.fn();
+      const throttledFn = throttle(fn, 100);
+
+      throttledFn();
+      throttledFn();
+      throttledFn();
+
+      expect(fn).toHaveBeenCalledTimes(1);
+
+      vi.advanceTimersByTime(100);
+      throttledFn();
+
+      expect(fn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("retry", () => {
+    it("retries failed operations", async () => {
+      const fn = vi
+        .fn()
+        .mockRejectedValueOnce(new Error("Fail 1"))
+        .mockRejectedValueOnce(new Error("Fail 2"))
+        .mockResolvedValueOnce("Success");
+
+      const result = await retry(fn, { maxAttempts: 3, delay: 100 });
+
+      expect(result).toBe("Success");
+      expect(fn).toHaveBeenCalledTimes(3);
+    });
+
+    it("throws after max attempts", async () => {
+      const fn = vi.fn().mockRejectedValue(new Error("Always fails"));
+
+      await expect(retry(fn, { maxAttempts: 3, delay: 10 })).rejects.toThrow(
+        "Always fails"
+      );
+
+      expect(fn).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe("timeout", () => {
+    it("resolves if promise completes in time", async () => {
+      const promise = Promise.resolve("Success");
+      const result = await timeout(promise, 1000);
+      expect(result).toBe("Success");
+    });
+
+    it("rejects if promise takes too long", async () => {
+      const slowPromise = new Promise((resolve) =>
+        setTimeout(() => resolve("Late"), 2000)
+      );
+
+      const timeoutPromise = timeout(slowPromise, 1000);
+
+      vi.advanceTimersByTime(1000);
+
+      await expect(timeoutPromise).rejects.toThrow("Operation timed out");
+    });
+  });
+});
+```
+
+### 3. Mocking Patterns
+
+```typescript
+// tests/unit/services/user.test.ts
+import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
+import { UserService } from "@/services/user";
+import { apiClient } from "@/lib/api";
+import { cache } from "@/lib/cache";
+
+// Mock modules
+vi.mock("@/lib/api", () => ({
+  apiClient: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
+
+vi.mock("@/lib/cache", () => ({
+  cache: {
+    get: vi.fn(),
+    set: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
+
+describe("UserService", () => {
+  let userService: UserService;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    userService = new UserService();
+  });
+
+  describe("getUser", () => {
+    it("fetches user from API", async () => {
+      const mockUser = { id: "1", name: "John", email: "john@example.com" };
+      (apiClient.get as Mock).mockResolvedValue({ data: mockUser });
+      (cache.get as Mock).mockReturnValue(null);
+
+      const user = await userService.getUser("1");
+
+      expect(apiClient.get).toHaveBeenCalledWith("/users/1");
+      expect(user).toEqual(mockUser);
+    });
+
+    it("returns cached user if available", async () => {
+      const cachedUser = { id: "1", name: "John", email: "john@example.com" };
+      (cache.get as Mock).mockReturnValue(cachedUser);
+
+      const user = await userService.getUser("1");
+
+      expect(cache.get).toHaveBeenCalledWith("user:1");
+      expect(apiClient.get).not.toHaveBeenCalled();
+      expect(user).toEqual(cachedUser);
+    });
+
+    it("caches fetched user", async () => {
+      const mockUser = { id: "1", name: "John", email: "john@example.com" };
+      (apiClient.get as Mock).mockResolvedValue({ data: mockUser });
+      (cache.get as Mock).mockReturnValue(null);
+
+      await userService.getUser("1");
+
+      expect(cache.set).toHaveBeenCalledWith("user:1", mockUser, {
+        ttl: 3600,
+      });
+    });
+  });
+
+  describe("createUser", () => {
+    it("creates user and invalidates cache", async () => {
+      const newUser = { name: "Jane", email: "jane@example.com" };
+      const createdUser = { id: "2", ...newUser };
+      (apiClient.post as Mock).mockResolvedValue({ data: createdUser });
+
+      const user = await userService.createUser(newUser);
+
+      expect(apiClient.post).toHaveBeenCalledWith("/users", newUser);
+      expect(cache.delete).toHaveBeenCalledWith("users:list");
+      expect(user).toEqual(createdUser);
+    });
+
+    it("throws on validation error", async () => {
+      (apiClient.post as Mock).mockRejectedValue({
+        response: {
+          status: 400,
+          data: { errors: { email: "Invalid email" } },
+        },
+      });
+
+      await expect(
+        userService.createUser({ name: "Test", email: "invalid" })
+      ).rejects.toMatchObject({
+        response: { status: 400 },
+      });
+    });
+  });
+});
+
+// tests/unit/hooks/useApi.test.ts
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { renderHook, waitFor } from "@testing-library/vue";
+import { useApi } from "@/hooks/useApi";
+
+// Mock fetch globally
+const mockFetch = vi.fn();
+global.fetch = mockFetch;
+
+describe("useApi", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
+  it("fetches data successfully", async () => {
+    const mockData = { users: [{ id: 1, name: "John" }] };
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockData,
+    });
+
+    const { result } = renderHook(() => useApi("/api/users"));
+
+    expect(result.current.loading).toBe(true);
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.data).toEqual(mockData);
+    expect(result.current.error).toBeNull();
+  });
+
+  it("handles fetch errors", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+    const { result } = renderHook(() => useApi("/api/users"));
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.error).toBeInstanceOf(Error);
+    expect(result.current.data).toBeNull();
+  });
+
+  it("refetches on manual trigger", async () => {
+    const mockData1 = { count: 1 };
+    const mockData2 = { count: 2 };
+    mockFetch
+      .mockResolvedValueOnce({ ok: true, json: async () => mockData1 })
+      .mockResolvedValueOnce({ ok: true, json: async () => mockData2 });
+
+    const { result } = renderHook(() => useApi("/api/count"));
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(mockData1);
+    });
+
+    result.current.refetch();
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(mockData2);
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+});
+```
+
+### 4. Vue Component Testing
+
+```typescript
+// tests/components/Button.test.ts
+import { describe, it, expect, vi } from "vitest";
+import { mount } from "@vue/test-utils";
+import Button from "@/components/Button.vue";
+
+describe("Button", () => {
+  it("renders with default props", () => {
+    const wrapper = mount(Button, {
+      slots: {
+        default: "Click me",
+      },
+    });
+
+    expect(wrapper.text()).toContain("Click me");
+    expect(wrapper.classes()).toContain("btn-primary");
+  });
+
+  it("applies variant classes", () => {
+    const wrapper = mount(Button, {
+      props: { variant: "secondary" },
+      slots: { default: "Button" },
+    });
+
+    expect(wrapper.classes()).toContain("btn-secondary");
+  });
+
+  it("emits click event", async () => {
+    const wrapper = mount(Button, {
+      slots: { default: "Click" },
+    });
+
+    await wrapper.trigger("click");
+
+    expect(wrapper.emitted("click")).toHaveLength(1);
+  });
+
+  it("is disabled when loading", () => {
+    const wrapper = mount(Button, {
+      props: { loading: true },
+      slots: { default: "Submit" },
+    });
+
+    expect(wrapper.attributes("disabled")).toBeDefined();
+    expect(wrapper.find(".spinner").exists()).toBe(true);
+  });
+
+  it("does not emit click when disabled", async () => {
+    const wrapper = mount(Button, {
+      props: { disabled: true },
+      slots: { default: "Click" },
+    });
+
+    await wrapper.trigger("click");
+
+    expect(wrapper.emitted("click")).toBeUndefined();
+  });
+});
+
+// tests/components/UserProfile.test.ts
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { mount, flushPromises } from "@vue/test-utils";
+import { createPinia, setActivePinia } from "pinia";
+import UserProfile from "@/components/UserProfile.vue";
+import { useUserStore } from "@/stores/user";
+
+describe("UserProfile", () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+  });
+
+  it("displays user information", async () => {
+    const userStore = useUserStore();
+    userStore.user = {
+      id: "1",
+      name: "John Doe",
+      email: "john@example.com",
+      avatar: "https://example.com/avatar.jpg",
+    };
+
+    const wrapper = mount(UserProfile);
+
+    expect(wrapper.find("[data-testid='user-name']").text()).toBe("John Doe");
+    expect(wrapper.find("[data-testid='user-email']").text()).toBe(
+      "john@example.com"
+    );
+    expect(wrapper.find("img").attributes("src")).toBe(
+      "https://example.com/avatar.jpg"
+    );
+  });
+
+  it("shows loading state", () => {
+    const userStore = useUserStore();
+    userStore.loading = true;
+
+    const wrapper = mount(UserProfile);
+
+    expect(wrapper.find("[data-testid='loading']").exists()).toBe(true);
+    expect(wrapper.find("[data-testid='user-name']").exists()).toBe(false);
+  });
+
+  it("handles logout", async () => {
+    const userStore = useUserStore();
+    userStore.user = { id: "1", name: "John", email: "john@example.com" };
+    userStore.logout = vi.fn();
+
+    const wrapper = mount(UserProfile);
+
+    await wrapper.find("[data-testid='logout-btn']").trigger("click");
+
+    expect(userStore.logout).toHaveBeenCalled();
+  });
+});
+
+// tests/components/SearchInput.test.ts
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { mount } from "@vue/test-utils";
+import SearchInput from "@/components/SearchInput.vue";
+
+describe("SearchInput", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("debounces input", async () => {
+    const wrapper = mount(SearchInput, {
+      props: { debounce: 300 },
+    });
+
+    await wrapper.find("input").setValue("test");
+
+    expect(wrapper.emitted("search")).toBeUndefined();
+
+    vi.advanceTimersByTime(300);
+
+    expect(wrapper.emitted("search")).toHaveLength(1);
+    expect(wrapper.emitted("search")![0]).toEqual(["test"]);
+  });
+
+  it("clears input on clear button click", async () => {
+    const wrapper = mount(SearchInput);
+
+    await wrapper.find("input").setValue("test");
+    await wrapper.find("[data-testid='clear-btn']").trigger("click");
+
+    expect((wrapper.find("input").element as HTMLInputElement).value).toBe("");
+    expect(wrapper.emitted("clear")).toHaveLength(1);
+  });
+});
+```
+
+### 5. Snapshot Testing
+
+```typescript
+// tests/snapshots/components.test.ts
+import { describe, it, expect } from "vitest";
+import { mount } from "@vue/test-utils";
+import Card from "@/components/Card.vue";
+import Badge from "@/components/Badge.vue";
+import Alert from "@/components/Alert.vue";
+
+describe("Component Snapshots", () => {
+  describe("Card", () => {
+    it("matches snapshot with default props", () => {
+      const wrapper = mount(Card, {
+        slots: {
+          header: "Card Title",
+          default: "Card content",
+          footer: "Card footer",
+        },
+      });
+
+      expect(wrapper.html()).toMatchSnapshot();
+    });
+
+    it("matches snapshot with custom props", () => {
+      const wrapper = mount(Card, {
+        props: {
+          variant: "outlined",
+          hoverable: true,
+        },
+        slots: {
+          default: "Content",
+        },
+      });
+
+      expect(wrapper.html()).toMatchSnapshot();
+    });
+  });
+
+  describe("Badge", () => {
+    it.each(["default", "primary", "success", "warning", "error"] as const)(
+      "matches snapshot for %s variant",
+      (variant) => {
+        const wrapper = mount(Badge, {
+          props: { variant },
+          slots: { default: "Badge" },
+        });
+
+        expect(wrapper.html()).toMatchSnapshot();
+      }
+    );
+  });
+
+  describe("Alert", () => {
+    it("matches snapshot with icon and close button", () => {
+      const wrapper = mount(Alert, {
+        props: {
+          type: "warning",
+          title: "Warning",
+          closable: true,
+        },
+        slots: {
+          default: "This is a warning message",
+        },
+      });
+
+      expect(wrapper.html()).toMatchSnapshot();
+    });
+  });
+});
+
+// tests/snapshots/data-structures.test.ts
+import { describe, it, expect } from "vitest";
+import { transformUserData, normalizeApiResponse } from "@/utils/transforms";
+
+describe("Data Transform Snapshots", () => {
+  it("transforms user data correctly", () => {
+    const rawUser = {
+      id: "123",
+      first_name: "John",
+      last_name: "Doe",
+      email_address: "john.doe@example.com",
+      created_at: "2024-01-15T10:30:00Z",
+      roles: ["admin", "user"],
+    };
+
+    const transformed = transformUserData(rawUser);
+
+    expect(transformed).toMatchInlineSnapshot(`
+      {
+        "createdAt": 2024-01-15T10:30:00.000Z,
+        "email": "john.doe@example.com",
+        "fullName": "John Doe",
+        "id": "123",
+        "isAdmin": true,
+        "roles": [
+          "admin",
+          "user",
+        ],
+      }
+    `);
+  });
+
+  it("normalizes API response", () => {
+    const apiResponse = {
+      data: [
+        { id: 1, name: "Item 1" },
+        { id: 2, name: "Item 2" },
+      ],
+      meta: {
+        total: 100,
+        page: 1,
+        per_page: 10,
+      },
+    };
+
+    const normalized = normalizeApiResponse(apiResponse);
+
+    expect(normalized).toMatchInlineSnapshot(`
+      {
+        "items": [
+          {
+            "id": 1,
+            "name": "Item 1",
+          },
+          {
+            "id": 2,
+            "name": "Item 2",
+          },
+        ],
+        "pagination": {
+          "currentPage": 1,
+          "perPage": 10,
+          "totalItems": 100,
+          "totalPages": 10,
+        },
+      }
+    `);
+  });
+});
+```
+
+### 6. React Component Testing
+
+```typescript
+// tests/components/react/Counter.test.tsx
+import { describe, it, expect } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import Counter from "@/components/Counter";
+
+describe("Counter", () => {
+  it("renders initial count", () => {
+    render(<Counter initialCount={5} />);
+
+    expect(screen.getByText("Count: 5")).toBeInTheDocument();
+  });
+
+  it("increments count on button click", async () => {
+    render(<Counter initialCount={0} />);
+
+    const incrementBtn = screen.getByRole("button", { name: /increment/i });
+    await fireEvent.click(incrementBtn);
+
+    expect(screen.getByText("Count: 1")).toBeInTheDocument();
+  });
+
+  it("decrements count on button click", async () => {
+    render(<Counter initialCount={5} />);
+
+    const decrementBtn = screen.getByRole("button", { name: /decrement/i });
+    await fireEvent.click(decrementBtn);
+
+    expect(screen.getByText("Count: 4")).toBeInTheDocument();
+  });
+
+  it("respects min value", async () => {
+    render(<Counter initialCount={0} min={0} />);
+
+    const decrementBtn = screen.getByRole("button", { name: /decrement/i });
+    await fireEvent.click(decrementBtn);
+
+    expect(screen.getByText("Count: 0")).toBeInTheDocument();
+    expect(decrementBtn).toBeDisabled();
+  });
+});
+
+// tests/components/react/Form.test.tsx
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import ContactForm from "@/components/ContactForm";
+
+describe("ContactForm", () => {
+  const mockSubmit = vi.fn();
+
+  it("submits form with valid data", async () => {
+    const user = userEvent.setup();
+    render(<ContactForm onSubmit={mockSubmit} />);
+
+    await user.type(screen.getByLabelText(/name/i), "John Doe");
+    await user.type(screen.getByLabelText(/email/i), "john@example.com");
+    await user.type(screen.getByLabelText(/message/i), "Hello!");
+    await user.click(screen.getByRole("button", { name: /submit/i }));
+
+    await waitFor(() => {
+      expect(mockSubmit).toHaveBeenCalledWith({
+        name: "John Doe",
+        email: "john@example.com",
+        message: "Hello!",
+      });
+    });
+  });
+
+  it("displays validation errors", async () => {
+    const user = userEvent.setup();
+    render(<ContactForm onSubmit={mockSubmit} />);
+
+    await user.click(screen.getByRole("button", { name: /submit/i }));
+
+    expect(await screen.findByText(/name is required/i)).toBeInTheDocument();
+    expect(await screen.findByText(/email is required/i)).toBeInTheDocument();
+    expect(mockSubmit).not.toHaveBeenCalled();
+  });
+
+  it("validates email format", async () => {
+    const user = userEvent.setup();
+    render(<ContactForm onSubmit={mockSubmit} />);
+
+    await user.type(screen.getByLabelText(/email/i), "invalid-email");
+    await user.tab();
+
+    expect(await screen.findByText(/invalid email/i)).toBeInTheDocument();
+  });
+});
+```
+
+## Use Cases
+
+### CI/CD Integration
+
+```yaml
+# .github/workflows/test.yml
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type check
+        run: npm run type-check
+
+      - name: Run unit tests
+        run: npm run test:unit -- --coverage
+
+      - name: Run component tests
+        run: npm run test:components
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/lcov.info
+```
+
+### Watch Mode Development
+
+```json
+// package.json
+{
+  "scripts": {
+    "test": "vitest",
+    "test:unit": "vitest run",
+    "test:watch": "vitest watch",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "test:changed": "vitest --changed HEAD~1"
+  }
+}
+```
+
+## Best Practices
+
+### Do's
+
+- Use descriptive test names
+- Test behavior, not implementation
+- Keep tests focused and isolated
+- Use test.each for multiple similar cases
+- Mock external dependencies
+- Write tests alongside code
+- Use appropriate matchers
+- Group related tests with describe
+- Run tests in CI/CD pipeline
+- Maintain high coverage thresholds
+
+### Don'ts
+
+- Don't test framework internals
+- Don't share state between tests
+- Don't use arbitrary timeouts
+- Don't over-mock
+- Don't ignore flaky tests
+- Don't test private methods directly
+- Don't duplicate coverage
+- Don't write tests after the fact only
+- Don't skip snapshot updates without review
+- Don't test third-party libraries
+
+## References
+
+- [Vitest Documentation](https://vitest.dev/)
+- [Vue Test Utils](https://test-utils.vuejs.org/)
+- [Testing Library](https://testing-library.com/)
+- [Vitest UI](https://vitest.dev/guide/ui.html)
+- [Coverage Documentation](https://vitest.dev/guide/coverage.html)

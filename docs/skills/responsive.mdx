@@ -1,6 +1,6 @@
 ---
 title: "responsive"
-description: "Responsive design. Use for mobile-first, adaptive layouts."
+description: "Responsive web design with mobile-first approach, fluid layouts, container queries, and cross-device testing"
 icon: "palette"
 ---
 
@@ -12,7 +12,7 @@ icon: "palette"
 
 ## Overview
 
-Responsive design. Use for mobile-first, adaptive layouts.
+Responsive web design with mobile-first approach, fluid layouts, container queries, and cross-device testing
 
 ## What You Get
 
@@ -24,47 +24,865 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Responsive Design Skill
+# Responsive Design
 
-## Breakpoints
+Enterprise-grade **responsive web design** following industry best practices. This skill covers mobile-first development, fluid layouts, container queries, responsive images, and cross-device optimization patterns used by top engineering teams.
+
+## Purpose
+
+Build seamless cross-device experiences:
+
+- Implement mobile-first design approach
+- Create fluid, flexible layouts
+- Use modern CSS layout techniques
+- Optimize images for all devices
+- Implement container queries
+- Test across devices and viewports
+- Handle touch and mouse interactions
+
+## Features
+
+### 1. Mobile-First Breakpoints
+
 ```css
-/* Mobile first */
-.element { /* Mobile styles */ }
+/* Base styles (mobile-first) */
+:root {
+  /* Breakpoint values */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
 
-@media (min-width: 640px) { /* sm */ }
-@media (min-width: 768px) { /* md */ }
-@media (min-width: 1024px) { /* lg */ }
-@media (min-width: 1280px) { /* xl */ }
-```
+/* Mobile base styles */
+.container {
+  width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-## Patterns
+/* Small devices (640px and up) */
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
 
-### Fluid Typography
-```css
-font-size: clamp(1rem, 2.5vw, 2rem);
-```
+/* Medium devices (768px and up) */
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
 
-### Responsive Grid
-```css
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1rem;
+/* Large devices (1024px and up) */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Extra large devices (1280px and up) */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* 2XL devices (1536px and up) */
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1536px;
+  }
 }
 ```
 
-### Container Queries
+```typescript
+// hooks/useBreakpoint.ts
+import { useState, useEffect } from "react";
+
+const breakpoints = {
+  sm: 640,
+  md: 768,
+  lg: 1024,
+  xl: 1280,
+  "2xl": 1536,
+} as const;
+
+type Breakpoint = keyof typeof breakpoints;
+
+export function useBreakpoint() {
+  const [breakpoint, setBreakpoint] = useState<Breakpoint | null>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const w = window.innerWidth;
+      setWidth(w);
+
+      if (w >= breakpoints["2xl"]) setBreakpoint("2xl");
+      else if (w >= breakpoints.xl) setBreakpoint("xl");
+      else if (w >= breakpoints.lg) setBreakpoint("lg");
+      else if (w >= breakpoints.md) setBreakpoint("md");
+      else if (w >= breakpoints.sm) setBreakpoint("sm");
+      else setBreakpoint(null);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const isAbove = (bp: Breakpoint) => width >= breakpoints[bp];
+  const isBelow = (bp: Breakpoint) => width < breakpoints[bp];
+
+  return { breakpoint, width, isAbove, isBelow };
+}
+
+// hooks/useMediaQuery.ts
+import { useState, useEffect } from "react";
+
+export function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    if (media.matches !== matches) {
+      setMatches(media.matches);
+    }
+
+    const listener = (e: MediaQueryListEvent) => setMatches(e.matches);
+    media.addEventListener("change", listener);
+    return () => media.removeEventListener("change", listener);
+  }, [matches, query]);
+
+  return matches;
+}
+
+// Usage
+function Component() {
+  const isMobile = useMediaQuery("(max-width: 639px)");
+  const isTablet = useMediaQuery("(min-width: 640px) and (max-width: 1023px)");
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
+  const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+  const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
+
+  return (
+    <div>
+      {isMobile && <MobileLayout />}
+      {isTablet && <TabletLayout />}
+      {isDesktop && <DesktopLayout />}
+    </div>
+  );
+}
+```
+
+### 2. Fluid Typography
+
 ```css
-@container (min-width: 400px) {
-  .card { flex-direction: row; }
+/* Fluid typography using clamp() */
+:root {
+  /* Base font sizes */
+  --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --font-size-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --font-size-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --font-size-lg: clamp(1.125rem, 1rem + 0.6vw, 1.25rem);
+  --font-size-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --font-size-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+  --font-size-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);
+  --font-size-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem);
+  --font-size-5xl: clamp(3rem, 2rem + 5vw, 4rem);
+
+  /* Fluid spacing */
+  --space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+  --space-sm: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
+  --space-md: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+  --space-lg: clamp(1.5rem, 1.2rem + 1.5vw, 2.5rem);
+  --space-xl: clamp(2rem, 1.5rem + 2.5vw, 4rem);
+  --space-2xl: clamp(3rem, 2rem + 5vw, 6rem);
+}
+
+/* Typography scale */
+h1 {
+  font-size: var(--font-size-4xl);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+  line-height: 1.3;
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+  line-height: 1.4;
+}
+
+p {
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+/* Responsive text utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+```
+
+### 3. Flexible Grid Layouts
+
+```css
+/* Auto-fit responsive grid */
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: var(--space-md);
+}
+
+/* Auto-fill variant */
+.auto-fill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-md);
+}
+
+/* Sidebar layout */
+.sidebar-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 768px) {
+  .sidebar-layout {
+    grid-template-columns: minmax(200px, 25%) 1fr;
+  }
+}
+
+/* Holy grail layout */
+.holy-grail {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+}
+
+.holy-grail-main {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+  .holy-grail-main {
+    grid-template-columns: minmax(150px, 20%) 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .holy-grail-main {
+    grid-template-columns: minmax(200px, 20%) 1fr minmax(200px, 20%);
+  }
+}
+
+/* Masonry-like layout with CSS Grid */
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-auto-rows: 10px;
+  gap: var(--space-md);
+}
+
+/* Card spans based on content */
+.masonry-item--small {
+  grid-row: span 20;
+}
+
+.masonry-item--medium {
+  grid-row: span 30;
+}
+
+.masonry-item--large {
+  grid-row: span 40;
+}
+```
+
+```tsx
+// Responsive grid component
+interface ResponsiveGridProps {
+  children: React.ReactNode;
+  minWidth?: string;
+  gap?: string;
+  className?: string;
+}
+
+export function ResponsiveGrid({
+  children,
+  minWidth = "300px",
+  gap = "1rem",
+  className = "",
+}: ResponsiveGridProps) {
+  return (
+    <div
+      className={className}
+      style={{
+        display: "grid",
+        gridTemplateColumns: `repeat(auto-fit, minmax(min(${minWidth}, 100%), 1fr))`,
+        gap,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// Usage
+function ProductGrid() {
+  return (
+    <ResponsiveGrid minWidth="280px" gap="1.5rem">
+      {products.map((product) => (
+        <ProductCard key={product.id} product={product} />
+      ))}
+    </ResponsiveGrid>
+  );
+}
+```
+
+### 4. Container Queries
+
+```css
+/* Container query setup */
+.card-container {
+  container-type: inline-size;
+  container-name: card;
+}
+
+/* Base card styles (smallest size) */
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.card-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+.card-content {
+  padding: 1rem 0;
+}
+
+/* Card layout changes based on container width */
+@container card (min-width: 400px) {
+  .card {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .card-image {
+    width: 40%;
+    aspect-ratio: 1;
+  }
+
+  .card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+@container card (min-width: 600px) {
+  .card {
+    padding: 1.5rem;
+  }
+
+  .card-image {
+    width: 35%;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Container query units */
+.responsive-text {
+  font-size: clamp(1rem, 3cqi, 1.5rem);
+  padding: 2cqi;
+}
+
+/* Style queries (experimental) */
+@container style(--theme: dark) {
+  .card {
+    background: #1a1a1a;
+    color: white;
+  }
+}
+```
+
+```tsx
+// React component with container queries
+export function ContainerQueryCard({ title, description, image }: CardProps) {
+  return (
+    <div className="card-container">
+      <article className="card">
+        <img src={image} alt="" className="card-image" />
+        <div className="card-content">
+          <h3 className="card-title">{title}</h3>
+          <p className="card-description">{description}</p>
+        </div>
+      </article>
+    </div>
+  );
+}
+
+// CSS Module with container queries
+// Card.module.css
+/*
+.container {
+  container-type: inline-size;
+}
+
+.card {
+  display: grid;
+  gap: 1rem;
+}
+
+@container (min-width: 30rem) {
+  .card {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+*/
+```
+
+### 5. Responsive Images
+
+```tsx
+// Responsive image component
+interface ResponsiveImageProps {
+  src: string;
+  alt: string;
+  sizes?: string;
+  className?: string;
+  priority?: boolean;
+}
+
+export function ResponsiveImage({
+  src,
+  alt,
+  sizes = "100vw",
+  className,
+  priority = false,
+}: ResponsiveImageProps) {
+  // Generate srcset for different sizes
+  const widths = [320, 640, 768, 1024, 1280, 1536, 1920];
+  const srcSet = widths
+    .map((w) => `${src}?w=${w} ${w}w`)
+    .join(", ");
+
+  return (
+    <img
+      src={src}
+      srcSet={srcSet}
+      sizes={sizes}
+      alt={alt}
+      className={className}
+      loading={priority ? "eager" : "lazy"}
+      decoding={priority ? "sync" : "async"}
+    />
+  );
+}
+
+// Picture element for art direction
+export function ArtDirectedImage({
+  mobileSrc,
+  tabletSrc,
+  desktopSrc,
+  alt,
+}: {
+  mobileSrc: string;
+  tabletSrc: string;
+  desktopSrc: string;
+  alt: string;
+}) {
+  return (
+    <picture>
+      {/* Desktop - landscape image */}
+      <source media="(min-width: 1024px)" srcSet={desktopSrc} />
+      {/* Tablet - square image */}
+      <source media="(min-width: 640px)" srcSet={tabletSrc} />
+      {/* Mobile - portrait image (default) */}
+      <img src={mobileSrc} alt={alt} loading="lazy" />
+    </picture>
+  );
+}
+
+// Background image with responsive behavior
+export function ResponsiveHero({ children }: { children: React.ReactNode }) {
+  return (
+    <section
+      className="
+        relative min-h-[50vh] md:min-h-[60vh] lg:min-h-[70vh]
+        bg-cover bg-center bg-no-repeat
+        bg-[image:var(--mobile-bg)]
+        md:bg-[image:var(--tablet-bg)]
+        lg:bg-[image:var(--desktop-bg)]
+      "
+      style={{
+        "--mobile-bg": "url('/hero-mobile.jpg')",
+        "--tablet-bg": "url('/hero-tablet.jpg')",
+        "--desktop-bg": "url('/hero-desktop.jpg')",
+      } as React.CSSProperties}
+    >
+      <div className="absolute inset-0 bg-black/50" />
+      <div className="relative z-10 flex items-center justify-center h-full">
+        {children}
+      </div>
+    </section>
+  );
+}
+```
+
+### 6. Touch-Friendly Design
+
+```css
+/* Touch target sizes (minimum 44x44px) */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Larger touch targets on mobile */
+@media (pointer: coarse) {
+  .button,
+  .link,
+  .interactive {
+    min-height: 48px;
+    padding: 12px 16px;
+  }
+
+  /* Increase spacing between interactive elements */
+  .button-group {
+    gap: 12px;
+  }
+
+  /* Larger form inputs */
+  input,
+  select,
+  textarea {
+    min-height: 48px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+}
+
+/* Hover only on devices that support it */
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .button:hover {
+    background-color: var(--color-primary-dark);
+  }
+}
+
+/* Active states for touch devices */
+@media (hover: none) {
+  .card:active {
+    transform: scale(0.98);
+  }
+
+  .button:active {
+    background-color: var(--color-primary-dark);
+  }
+}
+
+/* Disable hover effects on touch */
+@media (hover: none) and (pointer: coarse) {
+  .hover-effect {
+    transform: none !important;
+  }
+}
+
+/* Safe area insets for notched devices */
+.safe-area-padding {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.fixed-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+```
+
+```tsx
+// Touch-friendly button component
+export function TouchButton({
+  children,
+  onClick,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      onClick={onClick}
+      className="
+        min-h-[44px] min-w-[44px]
+        px-4 py-2
+        touch-manipulation
+        select-none
+        active:scale-95
+        transition-transform duration-150
+      "
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+// Swipe gesture hook
+import { useState, useRef } from "react";
+
+interface SwipeHandlers {
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+  onSwipeUp?: () => void;
+  onSwipeDown?: () => void;
+}
+
+export function useSwipe(handlers: SwipeHandlers, threshold = 50) {
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStart.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+
+    const deltaX = e.changedTouches[0].clientX - touchStart.current.x;
+    const deltaY = e.changedTouches[0].clientY - touchStart.current.y;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > threshold) handlers.onSwipeRight?.();
+      if (deltaX < -threshold) handlers.onSwipeLeft?.();
+    } else {
+      if (deltaY > threshold) handlers.onSwipeDown?.();
+      if (deltaY < -threshold) handlers.onSwipeUp?.();
+    }
+
+    touchStart.current = null;
+  };
+
+  return { onTouchStart, onTouchEnd };
+}
+```
+
+### 7. Responsive Navigation
+
+```tsx
+// Responsive navigation component
+import { useState } from "react";
+
+export function ResponsiveNav() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <nav className="relative bg-white shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            <Logo />
+          </div>
+
+          {/* Desktop navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-8">
+            <NavLink href="/">Home</NavLink>
+            <NavLink href="/products">Products</NavLink>
+            <NavLink href="/about">About</NavLink>
+            <NavLink href="/contact">Contact</NavLink>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="flex items-center md:hidden">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="
+                inline-flex items-center justify-center
+                p-2 rounded-md
+                text-gray-600 hover:text-gray-900 hover:bg-gray-100
+                focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500
+              "
+              aria-expanded={isOpen}
+              aria-controls="mobile-menu"
+            >
+              <span className="sr-only">
+                {isOpen ? "Close menu" : "Open menu"}
+              </span>
+              {isOpen ? (
+                <XIcon className="h-6 w-6" />
+              ) : (
+                <MenuIcon className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div
+        id="mobile-menu"
+        className={`
+          md:hidden
+          ${isOpen ? "block" : "hidden"}
+        `}
+      >
+        <div className="px-2 pt-2 pb-3 space-y-1 bg-white border-t">
+          <MobileNavLink href="/" onClick={() => setIsOpen(false)}>
+            Home
+          </MobileNavLink>
+          <MobileNavLink href="/products" onClick={() => setIsOpen(false)}>
+            Products
+          </MobileNavLink>
+          <MobileNavLink href="/about" onClick={() => setIsOpen(false)}>
+            About
+          </MobileNavLink>
+          <MobileNavLink href="/contact" onClick={() => setIsOpen(false)}>
+            Contact
+          </MobileNavLink>
+        </div>
+      </div>
+    </nav>
+  );
+}
+
+function MobileNavLink({
+  href,
+  children,
+  onClick,
+}: {
+  href: string;
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <a
+      href={href}
+      onClick={onClick}
+      className="
+        block px-3 py-2 rounded-md
+        text-base font-medium
+        text-gray-700 hover:text-gray-900 hover:bg-gray-50
+        min-h-[44px] flex items-center
+      "
+    >
+      {children}
+    </a>
+  );
+}
+```
+
+## Use Cases
+
+### Responsive Card Layout
+
+```tsx
+export function ResponsiveCardGrid() {
+  return (
+    <div
+      className="
+        grid gap-4 sm:gap-6
+        grid-cols-1
+        sm:grid-cols-2
+        lg:grid-cols-3
+        xl:grid-cols-4
+      "
+    >
+      {cards.map((card) => (
+        <Card key={card.id} className="h-full">
+          <CardImage src={card.image} alt={card.title} />
+          <CardContent>
+            <CardTitle className="line-clamp-2">{card.title}</CardTitle>
+            <CardDescription className="line-clamp-3">
+              {card.description}
+            </CardDescription>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 }
 ```
 
 ## Best Practices
-- Mobile-first approach
-- Use relative units
+
+### Do's
+
+- Start with mobile-first CSS
+- Use relative units (rem, em, %)
 - Test on real devices
-- Consider touch targets (44px min)
+- Use semantic HTML
+- Implement touch-friendly targets
+- Consider reduced motion preferences
+- Use container queries for components
+- Optimize images for different sizes
+- Test across browsers
+- Use CSS logical properties
+
+### Don'ts
+
+- Don't hide content on mobile unnecessarily
+- Don't use fixed widths
+- Don't rely only on hover states
+- Don't use small touch targets
+- Don't ignore landscape orientation
+- Don't skip accessibility testing
+- Don't use device-specific breakpoints
+- Don't forget keyboard navigation
+- Don't ignore safe area insets
+- Don't assume mouse input
+
+## References
+
+- [CSS Media Queries](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries)
+- [Container Queries](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Container_Queries)
+- [Responsive Images](https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images)
+- [Touch Events](https://developer.mozilla.org/en-US/docs/Web/API/Touch_events)
+- [Viewport Concepts](https://developer.mozilla.org/en-US/docs/Web/CSS/Viewport_concepts)
 
 
 ## Configuration

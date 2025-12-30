@@ -1,6 +1,6 @@
 ---
 title: "express"
-description: "Express.js development. Use for Express APIs, middleware, routing."
+description: "Enterprise Express.js development with TypeScript, middleware patterns, and production-ready APIs"
 icon: "layer-group"
 ---
 
@@ -12,7 +12,7 @@ icon: "layer-group"
 
 ## Overview
 
-Express.js development. Use for Express APIs, middleware, routing.
+Enterprise Express.js development with TypeScript, middleware patterns, and production-ready APIs
 
 ## What You Get
 
@@ -24,56 +24,1372 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Express.js Skill
+# Express.js
 
-## Patterns
+Enterprise-grade **Express.js development** following industry best practices. This skill covers TypeScript integration, middleware patterns, authentication, error handling, validation, testing, and production deployment configurations used by top engineering teams.
 
-### Basic Setup
-```javascript
-import express from 'express';
+## Purpose
 
-const app = express();
-app.use(express.json());
-```
+Build scalable Node.js APIs with confidence:
 
-### Routes
-```javascript
-app.get('/users', async (req, res) => {
-  const users = await db.users.findMany();
-  res.json(users);
-});
+- Design clean API architectures with proper routing
+- Implement robust middleware patterns
+- Handle authentication and authorization securely
+- Validate requests with comprehensive schemas
+- Write comprehensive tests for reliability
+- Deploy production-ready applications
+- Optimize performance for high traffic
 
-app.post('/users', async (req, res) => {
-  const user = await db.users.create(req.body);
-  res.status(201).json(user);
-});
-```
+## Features
 
-### Middleware
-```javascript
-function authMiddleware(req, res, next) {
-  const token = req.headers.authorization;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
-  req.user = verifyToken(token);
-  next();
+### 1. TypeScript Project Setup
+
+```typescript
+// src/app.ts
+import express, { Application, Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import { pinoHttp } from 'pino-http';
+import { errorHandler } from './middleware/errorHandler';
+import { notFoundHandler } from './middleware/notFoundHandler';
+import { apiRouter } from './routes';
+import { config } from './config';
+import { logger } from './utils/logger';
+
+export function createApp(): Application {
+  const app = express();
+
+  // Security middleware
+  app.use(helmet());
+  app.use(cors({
+    origin: config.cors.origins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
+
+  // Rate limiting
+  app.use(rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' },
+  }));
+
+  // Request parsing
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(compression());
+
+  // Logging
+  app.use(pinoHttp({
+    logger,
+    customLogLevel: (req, res, err) => {
+      if (res.statusCode >= 500 || err) return 'error';
+      if (res.statusCode >= 400) return 'warn';
+      return 'info';
+    },
+  }));
+
+  // Health check
+  app.get('/health', (req, res) => {
+    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+  });
+
+  // API routes
+  app.use('/api/v1', apiRouter);
+
+  // Error handling
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+
+  return app;
 }
 
-app.use('/api', authMiddleware);
+// src/server.ts
+import { createApp } from './app';
+import { config } from './config';
+import { logger } from './utils/logger';
+import { connectDatabase } from './database';
+
+async function bootstrap() {
+  try {
+    await connectDatabase();
+    logger.info('Database connected');
+
+    const app = createApp();
+    const server = app.listen(config.port, () => {
+      logger.info(`Server running on port ${config.port}`);
+    });
+
+    // Graceful shutdown
+    const shutdown = async (signal: string) => {
+      logger.info(`${signal} received, shutting down gracefully`);
+      server.close(async () => {
+        logger.info('HTTP server closed');
+        process.exit(0);
+      });
+
+      setTimeout(() => {
+        logger.error('Forced shutdown after timeout');
+        process.exit(1);
+      }, 10000);
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+  } catch (error) {
+    logger.error('Failed to start server', error);
+    process.exit(1);
+  }
+}
+
+bootstrap();
 ```
 
-### Error Handler
-```javascript
-app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Internal Server Error' });
+### 2. Middleware Patterns
+
+```typescript
+// src/middleware/auth.ts
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import { config } from '../config';
+import { AppError } from '../errors/AppError';
+import { UserService } from '../services/UserService';
+
+export interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
+}
+
+export function authenticate() {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
+        throw new AppError('No token provided', 401, 'UNAUTHORIZED');
+      }
+
+      const token = authHeader.substring(7);
+      const decoded = jwt.verify(token, config.jwt.secret) as {
+        userId: string;
+        email: string;
+        role: string;
+      };
+
+      // Optionally verify user still exists
+      const user = await UserService.findById(decoded.userId);
+      if (!user) {
+        throw new AppError('User not found', 401, 'UNAUTHORIZED');
+      }
+
+      req.user = {
+        id: decoded.userId,
+        email: decoded.email,
+        role: decoded.role,
+      };
+
+      next();
+    } catch (error) {
+      if (error instanceof jwt.JsonWebTokenError) {
+        next(new AppError('Invalid token', 401, 'INVALID_TOKEN'));
+      } else if (error instanceof jwt.TokenExpiredError) {
+        next(new AppError('Token expired', 401, 'TOKEN_EXPIRED'));
+      } else {
+        next(error);
+      }
+    }
+  };
+}
+
+export function authorize(...roles: string[]) {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return next(new AppError('Authentication required', 401, 'UNAUTHORIZED'));
+    }
+
+    if (!roles.includes(req.user.role)) {
+      return next(new AppError('Insufficient permissions', 403, 'FORBIDDEN'));
+    }
+
+    next();
+  };
+}
+
+// src/middleware/validate.ts
+import { Request, Response, NextFunction } from 'express';
+import { ZodSchema, ZodError } from 'zod';
+import { AppError } from '../errors/AppError';
+
+interface ValidationSchemas {
+  body?: ZodSchema;
+  query?: ZodSchema;
+  params?: ZodSchema;
+}
+
+export function validate(schemas: ValidationSchemas) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (schemas.body) {
+        req.body = await schemas.body.parseAsync(req.body);
+      }
+      if (schemas.query) {
+        req.query = await schemas.query.parseAsync(req.query);
+      }
+      if (schemas.params) {
+        req.params = await schemas.params.parseAsync(req.params);
+      }
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const details = error.errors.map(err => ({
+          path: err.path.join('.'),
+          message: err.message,
+        }));
+        next(new AppError('Validation failed', 400, 'VALIDATION_ERROR', details));
+      } else {
+        next(error);
+      }
+    }
+  };
+}
+
+// src/middleware/requestId.ts
+import { Request, Response, NextFunction } from 'express';
+import { v4 as uuidv4 } from 'uuid';
+
+export interface RequestWithId extends Request {
+  id: string;
+}
+
+export function requestId() {
+  return (req: RequestWithId, res: Response, next: NextFunction) => {
+    req.id = (req.headers['x-request-id'] as string) || uuidv4();
+    res.setHeader('X-Request-ID', req.id);
+    next();
+  };
+}
+
+// src/middleware/cache.ts
+import { Request, Response, NextFunction } from 'express';
+import { redis } from '../database/redis';
+
+interface CacheOptions {
+  ttl?: number;
+  keyGenerator?: (req: Request) => string;
+}
+
+export function cache(options: CacheOptions = {}) {
+  const { ttl = 300, keyGenerator } = options;
+
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (req.method !== 'GET') {
+      return next();
+    }
+
+    const key = keyGenerator?.(req) || `cache:${req.originalUrl}`;
+
+    try {
+      const cached = await redis.get(key);
+      if (cached) {
+        res.setHeader('X-Cache', 'HIT');
+        return res.json(JSON.parse(cached));
+      }
+
+      // Override res.json to cache the response
+      const originalJson = res.json.bind(res);
+      res.json = (body: unknown) => {
+        redis.setex(key, ttl, JSON.stringify(body));
+        res.setHeader('X-Cache', 'MISS');
+        return originalJson(body);
+      };
+
+      next();
+    } catch (error) {
+      // If cache fails, continue without caching
+      next();
+    }
+  };
+}
+```
+
+### 3. Error Handling
+
+```typescript
+// src/errors/AppError.ts
+export class AppError extends Error {
+  public readonly statusCode: number;
+  public readonly code: string;
+  public readonly isOperational: boolean;
+  public readonly details?: unknown;
+
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    code: string = 'INTERNAL_ERROR',
+    details?: unknown,
+    isOperational: boolean = true
+  ) {
+    super(message);
+    this.statusCode = statusCode;
+    this.code = code;
+    this.isOperational = isOperational;
+    this.details = details;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+export class NotFoundError extends AppError {
+  constructor(resource: string, id?: string) {
+    super(
+      id ? `${resource} with id ${id} not found` : `${resource} not found`,
+      404,
+      'NOT_FOUND'
+    );
+  }
+}
+
+export class ValidationError extends AppError {
+  constructor(message: string, details?: unknown) {
+    super(message, 400, 'VALIDATION_ERROR', details);
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message: string = 'Unauthorized') {
+    super(message, 401, 'UNAUTHORIZED');
+  }
+}
+
+export class ForbiddenError extends AppError {
+  constructor(message: string = 'Forbidden') {
+    super(message, 403, 'FORBIDDEN');
+  }
+}
+
+export class ConflictError extends AppError {
+  constructor(message: string) {
+    super(message, 409, 'CONFLICT');
+  }
+}
+
+// src/middleware/errorHandler.ts
+import { Request, Response, NextFunction } from 'express';
+import { AppError } from '../errors/AppError';
+import { logger } from '../utils/logger';
+import { config } from '../config';
+
+export function errorHandler(
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  // Log error
+  logger.error({
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+    body: req.body,
+  });
+
+  // Handle known operational errors
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      error: {
+        code: err.code,
+        message: err.message,
+        details: err.details,
+      },
+    });
+  }
+
+  // Handle Prisma errors
+  if (err.constructor.name === 'PrismaClientKnownRequestError') {
+    const prismaError = err as { code: string; meta?: { target?: string[] } };
+    if (prismaError.code === 'P2002') {
+      const field = prismaError.meta?.target?.[0] || 'field';
+      return res.status(409).json({
+        error: {
+          code: 'CONFLICT',
+          message: `A record with this ${field} already exists`,
+        },
+      });
+    }
+    if (prismaError.code === 'P2025') {
+      return res.status(404).json({
+        error: {
+          code: 'NOT_FOUND',
+          message: 'Record not found',
+        },
+      });
+    }
+  }
+
+  // Handle unknown errors
+  const message = config.isProduction
+    ? 'An unexpected error occurred'
+    : err.message;
+
+  res.status(500).json({
+    error: {
+      code: 'INTERNAL_ERROR',
+      message,
+      ...(config.isDevelopment && { stack: err.stack }),
+    },
+  });
+}
+
+// src/middleware/notFoundHandler.ts
+import { Request, Response } from 'express';
+
+export function notFoundHandler(req: Request, res: Response) {
+  res.status(404).json({
+    error: {
+      code: 'NOT_FOUND',
+      message: `Route ${req.method} ${req.path} not found`,
+    },
+  });
+}
+```
+
+### 4. Router Organization
+
+```typescript
+// src/routes/index.ts
+import { Router } from 'express';
+import { userRouter } from './users';
+import { authRouter } from './auth';
+import { projectRouter } from './projects';
+import { organizationRouter } from './organizations';
+
+export const apiRouter = Router();
+
+apiRouter.use('/auth', authRouter);
+apiRouter.use('/users', userRouter);
+apiRouter.use('/organizations', organizationRouter);
+apiRouter.use('/projects', projectRouter);
+
+// src/routes/users.ts
+import { Router } from 'express';
+import { UserController } from '../controllers/UserController';
+import { authenticate, authorize } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { userSchemas } from '../schemas/userSchemas';
+
+export const userRouter = Router();
+const controller = new UserController();
+
+userRouter.get(
+  '/',
+  authenticate(),
+  authorize('admin'),
+  validate({ query: userSchemas.list }),
+  controller.list
+);
+
+userRouter.get(
+  '/me',
+  authenticate(),
+  controller.getCurrentUser
+);
+
+userRouter.patch(
+  '/me',
+  authenticate(),
+  validate({ body: userSchemas.updateProfile }),
+  controller.updateProfile
+);
+
+userRouter.get(
+  '/:id',
+  authenticate(),
+  validate({ params: userSchemas.params }),
+  controller.getById
+);
+
+userRouter.post(
+  '/',
+  authenticate(),
+  authorize('admin'),
+  validate({ body: userSchemas.create }),
+  controller.create
+);
+
+userRouter.patch(
+  '/:id',
+  authenticate(),
+  authorize('admin'),
+  validate({ params: userSchemas.params, body: userSchemas.update }),
+  controller.update
+);
+
+userRouter.delete(
+  '/:id',
+  authenticate(),
+  authorize('admin'),
+  validate({ params: userSchemas.params }),
+  controller.delete
+);
+
+// src/routes/projects.ts
+import { Router } from 'express';
+import { ProjectController } from '../controllers/ProjectController';
+import { authenticate } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { projectSchemas } from '../schemas/projectSchemas';
+import { cache } from '../middleware/cache';
+
+export const projectRouter = Router();
+const controller = new ProjectController();
+
+projectRouter.use(authenticate());
+
+projectRouter.get(
+  '/',
+  validate({ query: projectSchemas.list }),
+  cache({ ttl: 60 }),
+  controller.list
+);
+
+projectRouter.get(
+  '/:id',
+  validate({ params: projectSchemas.params }),
+  cache({ ttl: 300 }),
+  controller.getById
+);
+
+projectRouter.post(
+  '/',
+  validate({ body: projectSchemas.create }),
+  controller.create
+);
+
+projectRouter.patch(
+  '/:id',
+  validate({ params: projectSchemas.params, body: projectSchemas.update }),
+  controller.update
+);
+
+projectRouter.delete(
+  '/:id',
+  validate({ params: projectSchemas.params }),
+  controller.delete
+);
+
+// Nested routes for project tasks
+projectRouter.get(
+  '/:id/tasks',
+  validate({ params: projectSchemas.params, query: projectSchemas.taskList }),
+  controller.getTasks
+);
+
+projectRouter.post(
+  '/:id/tasks',
+  validate({ params: projectSchemas.params, body: projectSchemas.createTask }),
+  controller.createTask
+);
+```
+
+### 5. Controllers and Services
+
+```typescript
+// src/controllers/UserController.ts
+import { Response, NextFunction } from 'express';
+import { AuthRequest } from '../middleware/auth';
+import { UserService } from '../services/UserService';
+import { NotFoundError } from '../errors/AppError';
+
+export class UserController {
+  private userService = new UserService();
+
+  list = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const { page = 1, limit = 20, search, role } = req.query as {
+        page?: number;
+        limit?: number;
+        search?: string;
+        role?: string;
+      };
+
+      const result = await this.userService.findAll({
+        page: Number(page),
+        limit: Math.min(Number(limit), 100),
+        search,
+        role,
+      });
+
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getCurrentUser = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.userService.findById(req.user!.id);
+      if (!user) {
+        throw new NotFoundError('User');
+      }
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getById = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.userService.findById(req.params.id);
+      if (!user) {
+        throw new NotFoundError('User', req.params.id);
+      }
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  create = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.userService.create(req.body);
+      res.status(201).json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.userService.update(req.user!.id, req.body);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  update = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      const user = await this.userService.update(req.params.id, req.body);
+      res.json(user);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  delete = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      await this.userService.delete(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+// src/services/UserService.ts
+import { Prisma } from '@prisma/client';
+import { prisma } from '../database/prisma';
+import { ConflictError, NotFoundError } from '../errors/AppError';
+import { hashPassword, verifyPassword } from '../utils/password';
+
+interface FindAllOptions {
+  page: number;
+  limit: number;
+  search?: string;
+  role?: string;
+}
+
+interface CreateUserData {
+  email: string;
+  password: string;
+  name: string;
+  role?: string;
+}
+
+interface UpdateUserData {
+  email?: string;
+  name?: string;
+  role?: string;
+  password?: string;
+}
+
+export class UserService {
+  async findAll(options: FindAllOptions) {
+    const { page, limit, search, role } = options;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = {
+      deletedAt: null,
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      }),
+      ...(role && { role }),
+    };
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        hasMore: skip + users.length < total,
+      },
+    };
+  }
+
+  async findById(id: string) {
+    return prisma.user.findFirst({
+      where: { id, deletedAt: null },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+        organizations: {
+          select: {
+            organization: {
+              select: { id: true, name: true, slug: true },
+            },
+            role: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findByEmail(email: string) {
+    return prisma.user.findFirst({
+      where: { email, deletedAt: null },
+    });
+  }
+
+  async create(data: CreateUserData) {
+    const existing = await this.findByEmail(data.email);
+    if (existing) {
+      throw new ConflictError('Email already in use');
+    }
+
+    const hashedPassword = await hashPassword(data.password);
+
+    return prisma.user.create({
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  async update(id: string, data: UpdateUserData) {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundError('User', id);
+    }
+
+    if (data.email && data.email !== user.email) {
+      const existing = await this.findByEmail(data.email);
+      if (existing) {
+        throw new ConflictError('Email already in use');
+      }
+    }
+
+    const updateData: Prisma.UserUpdateInput = { ...data };
+    if (data.password) {
+      updateData.password = await hashPassword(data.password);
+    }
+
+    return prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  async delete(id: string) {
+    const user = await this.findById(id);
+    if (!user) {
+      throw new NotFoundError('User', id);
+    }
+
+    // Soft delete
+    await prisma.user.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async verifyCredentials(email: string, password: string) {
+    const user = await prisma.user.findFirst({
+      where: { email, deletedAt: null },
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    const isValid = await verifyPassword(password, user.password);
+    if (!isValid) {
+      return null;
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    };
+  }
+}
+```
+
+### 6. Validation Schemas
+
+```typescript
+// src/schemas/userSchemas.ts
+import { z } from 'zod';
+
+export const userSchemas = {
+  params: z.object({
+    id: z.string().uuid('Invalid user ID'),
+  }),
+
+  list: z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+    search: z.string().optional(),
+    role: z.enum(['admin', 'user', 'guest']).optional(),
+  }),
+
+  create: z.object({
+    email: z.string().email('Invalid email address'),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+      .regex(/[0-9]/, 'Password must contain a number'),
+    name: z.string().min(2).max(100),
+    role: z.enum(['admin', 'user', 'guest']).default('user'),
+  }),
+
+  update: z.object({
+    email: z.string().email('Invalid email address').optional(),
+    name: z.string().min(2).max(100).optional(),
+    role: z.enum(['admin', 'user', 'guest']).optional(),
+    password: z
+      .string()
+      .min(8, 'Password must be at least 8 characters')
+      .regex(/[A-Z]/, 'Password must contain an uppercase letter')
+      .regex(/[0-9]/, 'Password must contain a number')
+      .optional(),
+  }).refine(data => Object.keys(data).length > 0, {
+    message: 'At least one field must be provided',
+  }),
+
+  updateProfile: z.object({
+    name: z.string().min(2).max(100).optional(),
+    avatar: z.string().url().optional(),
+  }),
+};
+
+// src/schemas/projectSchemas.ts
+import { z } from 'zod';
+
+export const projectSchemas = {
+  params: z.object({
+    id: z.string().uuid('Invalid project ID'),
+  }),
+
+  list: z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+    status: z.enum(['draft', 'active', 'completed', 'archived']).optional(),
+    search: z.string().optional(),
+    sortBy: z.enum(['createdAt', 'name', 'updatedAt']).default('createdAt'),
+    sortOrder: z.enum(['asc', 'desc']).default('desc'),
+  }),
+
+  create: z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().max(5000).optional(),
+    organizationId: z.string().uuid(),
+  }),
+
+  update: z.object({
+    name: z.string().min(1).max(255).optional(),
+    description: z.string().max(5000).optional(),
+    status: z.enum(['draft', 'active', 'completed', 'archived']).optional(),
+  }),
+
+  taskList: z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce.number().int().positive().max(100).default(20),
+    status: z.enum(['todo', 'in_progress', 'done']).optional(),
+  }),
+
+  createTask: z.object({
+    title: z.string().min(1).max(255),
+    description: z.string().max(5000).optional(),
+    priority: z.enum(['low', 'medium', 'high']).default('medium'),
+    assigneeId: z.string().uuid().optional(),
+    dueDate: z.coerce.date().optional(),
+  }),
+};
+```
+
+### 7. Testing Patterns
+
+```typescript
+// tests/setup.ts
+import { PrismaClient } from '@prisma/client';
+import { mockDeep, DeepMockProxy } from 'jest-mock-extended';
+
+export const prismaMock = mockDeep<PrismaClient>();
+
+jest.mock('../src/database/prisma', () => ({
+  prisma: prismaMock,
+}));
+
+beforeEach(() => {
+  jest.clearAllMocks();
 });
+
+// tests/integration/users.test.ts
+import request from 'supertest';
+import { createApp } from '../../src/app';
+import { prisma } from '../../src/database/prisma';
+import { generateToken } from '../../src/utils/jwt';
+
+const app = createApp();
+
+describe('Users API', () => {
+  let adminToken: string;
+  let userToken: string;
+
+  beforeAll(async () => {
+    // Create test users
+    const admin = await prisma.user.create({
+      data: {
+        email: 'admin@test.com',
+        password: await hashPassword('Admin123!'),
+        name: 'Admin User',
+        role: 'admin',
+      },
+    });
+
+    const user = await prisma.user.create({
+      data: {
+        email: 'user@test.com',
+        password: await hashPassword('User123!'),
+        name: 'Regular User',
+        role: 'user',
+      },
+    });
+
+    adminToken = generateToken(admin);
+    userToken = generateToken(user);
+  });
+
+  afterAll(async () => {
+    await prisma.user.deleteMany();
+  });
+
+  describe('GET /api/v1/users', () => {
+    it('should return paginated users for admin', async () => {
+      const response = await request(app)
+        .get('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('pagination');
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should return 403 for non-admin users', async () => {
+      await request(app)
+        .get('/api/v1/users')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(403);
+    });
+
+    it('should return 401 without token', async () => {
+      await request(app)
+        .get('/api/v1/users')
+        .expect(401);
+    });
+
+    it('should filter users by search term', async () => {
+      const response = await request(app)
+        .get('/api/v1/users?search=admin')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(response.body.data.every((u: any) =>
+        u.name.toLowerCase().includes('admin') ||
+        u.email.toLowerCase().includes('admin')
+      )).toBe(true);
+    });
+  });
+
+  describe('GET /api/v1/users/me', () => {
+    it('should return current user profile', async () => {
+      const response = await request(app)
+        .get('/api/v1/users/me')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(200);
+
+      expect(response.body.email).toBe('user@test.com');
+      expect(response.body).not.toHaveProperty('password');
+    });
+  });
+
+  describe('POST /api/v1/users', () => {
+    it('should create a new user', async () => {
+      const newUser = {
+        email: 'new@test.com',
+        password: 'NewUser123!',
+        name: 'New User',
+        role: 'user',
+      };
+
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(newUser)
+        .expect(201);
+
+      expect(response.body.email).toBe(newUser.email);
+      expect(response.body).toHaveProperty('id');
+      expect(response.body).not.toHaveProperty('password');
+    });
+
+    it('should return 400 for invalid email', async () => {
+      const response = await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          email: 'invalid-email',
+          password: 'Valid123!',
+          name: 'Test User',
+        })
+        .expect(400);
+
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('should return 409 for duplicate email', async () => {
+      await request(app)
+        .post('/api/v1/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          email: 'user@test.com',
+          password: 'Duplicate123!',
+          name: 'Duplicate User',
+        })
+        .expect(409);
+    });
+  });
+});
+
+// tests/unit/UserService.test.ts
+import { UserService } from '../../src/services/UserService';
+import { prismaMock } from '../setup';
+
+describe('UserService', () => {
+  const service = new UserService();
+
+  describe('findAll', () => {
+    it('should return paginated users', async () => {
+      const mockUsers = [
+        { id: '1', email: 'user1@test.com', name: 'User 1', role: 'user', createdAt: new Date() },
+        { id: '2', email: 'user2@test.com', name: 'User 2', role: 'user', createdAt: new Date() },
+      ];
+
+      prismaMock.user.findMany.mockResolvedValue(mockUsers);
+      prismaMock.user.count.mockResolvedValue(2);
+
+      const result = await service.findAll({ page: 1, limit: 10 });
+
+      expect(result.data).toHaveLength(2);
+      expect(result.pagination.total).toBe(2);
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 0,
+          take: 10,
+        })
+      );
+    });
+
+    it('should apply search filter', async () => {
+      prismaMock.user.findMany.mockResolvedValue([]);
+      prismaMock.user.count.mockResolvedValue(0);
+
+      await service.findAll({ page: 1, limit: 10, search: 'john' });
+
+      expect(prismaMock.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              { name: { contains: 'john', mode: 'insensitive' } },
+            ]),
+          }),
+        })
+      );
+    });
+  });
+
+  describe('create', () => {
+    it('should create a new user with hashed password', async () => {
+      const userData = {
+        email: 'new@test.com',
+        password: 'Password123!',
+        name: 'New User',
+      };
+
+      prismaMock.user.findFirst.mockResolvedValue(null);
+      prismaMock.user.create.mockResolvedValue({
+        id: 'new-id',
+        ...userData,
+        password: 'hashed',
+        role: 'user',
+        createdAt: new Date(),
+      });
+
+      const result = await service.create(userData);
+
+      expect(result.email).toBe(userData.email);
+      expect(prismaMock.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            email: userData.email,
+            password: expect.not.stringContaining(userData.password),
+          }),
+        })
+      );
+    });
+  });
+});
+```
+
+## Use Cases
+
+### REST API for E-commerce Platform
+
+```typescript
+// src/routes/products.ts
+import { Router } from 'express';
+import { ProductController } from '../controllers/ProductController';
+import { authenticate, authorize } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { cache } from '../middleware/cache';
+import { upload } from '../middleware/upload';
+import { z } from 'zod';
+
+const router = Router();
+const controller = new ProductController();
+
+const productSchemas = {
+  list: z.object({
+    category: z.string().optional(),
+    minPrice: z.coerce.number().positive().optional(),
+    maxPrice: z.coerce.number().positive().optional(),
+    search: z.string().optional(),
+    sortBy: z.enum(['price', 'name', 'createdAt', 'popularity']).default('createdAt'),
+    sortOrder: z.enum(['asc', 'desc']).default('desc'),
+    page: z.coerce.number().positive().default(1),
+    limit: z.coerce.number().positive().max(50).default(20),
+  }),
+  create: z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().max(5000),
+    price: z.number().positive(),
+    categoryId: z.string().uuid(),
+    inventory: z.number().int().nonnegative().default(0),
+    sku: z.string().optional(),
+  }),
+};
+
+// Public routes
+router.get(
+  '/',
+  validate({ query: productSchemas.list }),
+  cache({ ttl: 60 }),
+  controller.list
+);
+
+router.get(
+  '/:id',
+  cache({ ttl: 300 }),
+  controller.getById
+);
+
+// Admin routes
+router.post(
+  '/',
+  authenticate(),
+  authorize('admin'),
+  upload.array('images', 5),
+  validate({ body: productSchemas.create }),
+  controller.create
+);
+
+router.patch(
+  '/:id',
+  authenticate(),
+  authorize('admin'),
+  controller.update
+);
+
+export { router as productRouter };
+```
+
+### WebSocket Integration for Real-time Updates
+
+```typescript
+// src/websocket/index.ts
+import { Server as SocketIOServer } from 'socket.io';
+import { Server } from 'http';
+import { verifyToken } from '../utils/jwt';
+import { logger } from '../utils/logger';
+
+export function setupWebSocket(server: Server) {
+  const io = new SocketIOServer(server, {
+    cors: {
+      origin: process.env.CORS_ORIGINS?.split(',') || '*',
+      credentials: true,
+    },
+  });
+
+  // Authentication middleware
+  io.use(async (socket, next) => {
+    try {
+      const token = socket.handshake.auth.token;
+      if (!token) {
+        return next(new Error('Authentication required'));
+      }
+
+      const user = await verifyToken(token);
+      socket.data.user = user;
+      next();
+    } catch (error) {
+      next(new Error('Invalid token'));
+    }
+  });
+
+  io.on('connection', (socket) => {
+    const user = socket.data.user;
+    logger.info(`User connected: ${user.id}`);
+
+    // Join user's personal room
+    socket.join(`user:${user.id}`);
+
+    // Join organization rooms
+    socket.on('join:organization', async (orgId: string) => {
+      // Verify user belongs to organization
+      const membership = await checkMembership(user.id, orgId);
+      if (membership) {
+        socket.join(`org:${orgId}`);
+        socket.emit('joined:organization', { orgId });
+      }
+    });
+
+    // Handle real-time notifications
+    socket.on('disconnect', () => {
+      logger.info(`User disconnected: ${user.id}`);
+    });
+  });
+
+  return io;
+}
+
+// Emit events from services
+export function emitToUser(io: SocketIOServer, userId: string, event: string, data: unknown) {
+  io.to(`user:${userId}`).emit(event, data);
+}
+
+export function emitToOrganization(io: SocketIOServer, orgId: string, event: string, data: unknown) {
+  io.to(`org:${orgId}`).emit(event, data);
+}
 ```
 
 ## Best Practices
-- Use async/await with try/catch
-- Use middleware for cross-cutting concerns
-- Validate input
-- Use proper status codes
+
+### Do's
+
+- Use TypeScript for type safety
+- Implement proper error handling with custom error classes
+- Use validation middleware for all inputs
+- Use dependency injection for testability
+- Implement proper logging with correlation IDs
+- Use environment variables for configuration
+- Implement graceful shutdown handling
+- Use compression and rate limiting
+- Write integration and unit tests
+- Use async/await consistently
+
+### Don'ts
+
+- Don't use callbacks when async/await is available
+- Don't catch errors without proper handling
+- Don't expose stack traces in production
+- Don't store secrets in code
+- Don't skip input validation
+- Don't use synchronous file operations
+- Don't ignore error handling in middleware
+- Don't use `any` type unnecessarily
+- Don't forget to handle promise rejections
+- Don't skip security headers
+
+## References
+
+- [Express.js Documentation](https://expressjs.com/)
+- [Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [Zod Documentation](https://zod.dev/)
+- [TypeScript Express Tutorial](https://developer.okta.com/blog/2018/11/15/node-express-typescript)
 
 
 ## Configuration

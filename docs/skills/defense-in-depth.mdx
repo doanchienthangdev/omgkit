@@ -1,6 +1,6 @@
 ---
 title: "defense-in-depth"
-description: "Security defense in depth. Use when designing secure systems."
+description: "Layered security architecture with multiple protective barriers for comprehensive system protection"
 icon: "diagram-project"
 ---
 
@@ -12,7 +12,7 @@ icon: "diagram-project"
 
 ## Overview
 
-Security defense in depth. Use when designing secure systems.
+Layered security architecture with multiple protective barriers for comprehensive system protection
 
 ## What You Get
 
@@ -24,52 +24,841 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Defense in Depth Skill
+# Defense in Depth
 
-## Layers
+Implement **layered security architecture** with multiple protective barriers. This skill provides frameworks for building systems where each layer provides independent protection, ensuring no single point of failure compromises security.
 
-### 1. Perimeter
-- Firewall
-- Rate limiting
-- WAF
+## Purpose
 
-### 2. Network
-- VPC
-- Security groups
-- TLS everywhere
+Build resilient security through layered protection:
 
-### 3. Application
-- Input validation
-- Output encoding
-- CSRF protection
+- Design multiple independent security barriers
+- Ensure each layer catches what others miss
+- Prevent single points of security failure
+- Slow down attackers at every step
+- Provide time to detect and respond to breaches
+- Limit blast radius when breaches occur
+- Maintain security even when some controls fail
 
-### 4. Data
-- Encryption at rest
-- Encryption in transit
-- Access control
+## Features
 
-### 5. Monitoring
-- Logging
-- Alerting
-- Audit trails
+### 1. The Defense in Depth Model
 
-## Principle
-> If one layer fails, others protect.
+```markdown
+## Security Layers Architecture
 
-## Implementation
-```typescript
-// Layer 1: Rate limiting
-app.use(rateLimit({ max: 100 }));
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      DEFENSE IN DEPTH MODEL                              │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐ │
+│  │ LAYER 1: PERIMETER                                                 │ │
+│  │ ════════════════════                                               │ │
+│  │ WAF │ DDoS Protection │ Rate Limiting │ IP Filtering              │ │
+│  │                                                                    │ │
+│  │  ┌─────────────────────────────────────────────────────────────┐  │ │
+│  │  │ LAYER 2: NETWORK                                             │  │ │
+│  │  │ ═════════════════                                            │  │ │
+│  │  │ VPC │ Security Groups │ Network Policies │ TLS Everywhere   │  │ │
+│  │  │                                                              │  │ │
+│  │  │  ┌───────────────────────────────────────────────────────┐  │  │ │
+│  │  │  │ LAYER 3: APPLICATION                                   │  │  │ │
+│  │  │  │ ═════════════════════                                  │  │  │ │
+│  │  │  │ Input Validation │ Output Encoding │ CSRF │ CSP      │  │  │ │
+│  │  │  │                                                        │  │  │ │
+│  │  │  │  ┌─────────────────────────────────────────────────┐  │  │  │ │
+│  │  │  │  │ LAYER 4: DATA                                    │  │  │  │ │
+│  │  │  │  │ ═══════════════                                  │  │  │  │ │
+│  │  │  │  │ Encryption at Rest │ Encryption in Transit      │  │  │  │ │
+│  │  │  │  │ Access Control │ Data Classification            │  │  │  │ │
+│  │  │  │  │                                                  │  │  │  │ │
+│  │  │  │  │  ┌───────────────────────────────────────────┐  │  │  │  │ │
+│  │  │  │  │  │ LAYER 5: IDENTITY                          │  │  │  │  │ │
+│  │  │  │  │  │ ═══════════════════                        │  │  │  │  │ │
+│  │  │  │  │  │ MFA │ Least Privilege │ Session Mgmt     │  │  │  │  │ │
+│  │  │  │  │  └───────────────────────────────────────────┘  │  │  │  │ │
+│  │  │  │  └─────────────────────────────────────────────────┘  │  │  │ │
+│  │  │  └───────────────────────────────────────────────────────┘  │  │ │
+│  │  └─────────────────────────────────────────────────────────────┘  │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
+│                                                                         │
+│  ┌───────────────────────────────────────────────────────────────────┐ │
+│  │ CROSS-CUTTING: MONITORING & DETECTION                             │ │
+│  │ Logging │ Alerting │ Anomaly Detection │ Incident Response       │ │
+│  └───────────────────────────────────────────────────────────────────┘ │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 
-// Layer 2: Input validation
-const validated = schema.parse(input);
-
-// Layer 3: Parameterized query
-db.query('SELECT * FROM users WHERE id = $1', [id]);
-
-// Layer 4: Output encoding
-res.json(sanitize(data));
+PRINCIPLE: If one layer fails, others still protect the asset.
 ```
+
+### 2. Layer 1: Perimeter Security
+
+```typescript
+/**
+ * Perimeter Security: First line of defense
+ * Block attacks before they reach your application
+ */
+
+// WAF (Web Application Firewall) Configuration
+const wafConfig = {
+  rules: [
+    // SQL Injection patterns
+    {
+      name: 'sql-injection',
+      action: 'block',
+      patterns: [
+        /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER)\b)/i,
+        /(\b(OR|AND)\s+\d+\s*=\s*\d+)/i,
+        /(--|\#|\/\*)/
+      ]
+    },
+    // XSS patterns
+    {
+      name: 'xss-attack',
+      action: 'block',
+      patterns: [
+        /<script\b[^>]*>/i,
+        /javascript:/i,
+        /on\w+\s*=/i
+      ]
+    },
+    // Path traversal
+    {
+      name: 'path-traversal',
+      action: 'block',
+      patterns: [
+        /\.\.\//,
+        /\.\.\\/
+      ]
+    }
+  ]
+};
+
+// Rate Limiting Configuration
+interface RateLimitConfig {
+  global: {
+    requestsPerSecond: number;
+    burstSize: number;
+  };
+  perEndpoint: Map<string, EndpointLimit>;
+  perUser: {
+    requestsPerMinute: number;
+    requestsPerHour: number;
+  };
+}
+
+const rateLimiting: RateLimitConfig = {
+  global: {
+    requestsPerSecond: 10000,
+    burstSize: 15000
+  },
+  perEndpoint: new Map([
+    ['/api/login', { requestsPerMinute: 5, lockoutDuration: 900 }],
+    ['/api/register', { requestsPerMinute: 2, lockoutDuration: 3600 }],
+    ['/api/password-reset', { requestsPerMinute: 3, lockoutDuration: 3600 }]
+  ]),
+  perUser: {
+    requestsPerMinute: 60,
+    requestsPerHour: 1000
+  }
+};
+
+// DDoS Protection
+class DDoSProtection {
+  private connectionTracker: Map<string, ConnectionInfo> = new Map();
+
+  async handleRequest(request: Request): Promise<Response | null> {
+    const clientIp = request.headers.get('cf-connecting-ip')!;
+
+    // Check if IP is in blocklist
+    if (await this.isBlocked(clientIp)) {
+      return new Response('Blocked', { status: 403 });
+    }
+
+    // Track connection patterns
+    const info = this.trackConnection(clientIp);
+
+    // Detect anomalies
+    if (this.isAnomalous(info)) {
+      await this.triggerProtection(clientIp);
+      return new Response('Rate Limited', { status: 429 });
+    }
+
+    return null; // Allow through
+  }
+
+  private isAnomalous(info: ConnectionInfo): boolean {
+    return (
+      info.requestsPerSecond > 100 ||
+      info.uniquePathsPerMinute > 500 ||
+      info.payloadSize > 10_000_000
+    );
+  }
+}
+```
+
+### 3. Layer 2: Network Security
+
+```typescript
+/**
+ * Network Security: Isolate and protect internal communication
+ */
+
+// VPC and Security Group Configuration (AWS example)
+const networkConfig = {
+  vpc: {
+    cidr: '10.0.0.0/16',
+    subnets: {
+      public: ['10.0.1.0/24', '10.0.2.0/24'],   // Load balancers
+      private: ['10.0.10.0/24', '10.0.11.0/24'], // Application
+      data: ['10.0.20.0/24', '10.0.21.0/24']     // Databases
+    }
+  },
+
+  securityGroups: {
+    loadBalancer: {
+      inbound: [
+        { port: 443, source: '0.0.0.0/0' },
+        { port: 80, source: '0.0.0.0/0' }  // Redirect to HTTPS
+      ],
+      outbound: [
+        { port: 8080, destination: 'application-sg' }
+      ]
+    },
+
+    application: {
+      inbound: [
+        { port: 8080, source: 'load-balancer-sg' }
+      ],
+      outbound: [
+        { port: 5432, destination: 'database-sg' },
+        { port: 6379, destination: 'cache-sg' },
+        { port: 443, destination: '0.0.0.0/0' }  // External APIs
+      ]
+    },
+
+    database: {
+      inbound: [
+        { port: 5432, source: 'application-sg' }
+      ],
+      outbound: [] // No outbound access
+    }
+  }
+};
+
+// Mutual TLS (mTLS) for Service-to-Service
+class MTLSClient {
+  private certificate: Certificate;
+  private privateKey: PrivateKey;
+  private caCertificate: Certificate;
+
+  async makeRequest(url: string, options: RequestInit): Promise<Response> {
+    const agent = new https.Agent({
+      cert: this.certificate,
+      key: this.privateKey,
+      ca: this.caCertificate,
+      rejectUnauthorized: true
+    });
+
+    return fetch(url, {
+      ...options,
+      // @ts-ignore
+      agent
+    });
+  }
+}
+
+// Network Policy (Kubernetes)
+const networkPolicy = {
+  apiVersion: 'networking.k8s.io/v1',
+  kind: 'NetworkPolicy',
+  metadata: {
+    name: 'api-server-policy',
+    namespace: 'production'
+  },
+  spec: {
+    podSelector: {
+      matchLabels: { app: 'api-server' }
+    },
+    policyTypes: ['Ingress', 'Egress'],
+    ingress: [
+      {
+        from: [
+          { podSelector: { matchLabels: { app: 'ingress-controller' } } }
+        ],
+        ports: [{ port: 8080, protocol: 'TCP' }]
+      }
+    ],
+    egress: [
+      {
+        to: [
+          { podSelector: { matchLabels: { app: 'database' } } }
+        ],
+        ports: [{ port: 5432, protocol: 'TCP' }]
+      },
+      {
+        to: [
+          { namespaceSelector: { matchLabels: { name: 'kube-system' } } }
+        ],
+        ports: [{ port: 53, protocol: 'UDP' }] // DNS
+      }
+    ]
+  }
+};
+```
+
+### 4. Layer 3: Application Security
+
+```typescript
+/**
+ * Application Security: Secure code and request handling
+ */
+
+import { z } from 'zod';
+import DOMPurify from 'dompurify';
+import csrf from 'csrf';
+
+// Input Validation - Never trust user input
+const userInputSchema = z.object({
+  email: z.string().email().max(254),
+  name: z.string().min(1).max(100).regex(/^[\p{L}\s'-]+$/u),
+  age: z.number().int().min(0).max(150).optional(),
+  bio: z.string().max(1000).optional()
+});
+
+function validateInput<T>(schema: z.ZodSchema<T>, data: unknown): T {
+  try {
+    return schema.parse(data);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      throw new ValidationError(error.errors);
+    }
+    throw error;
+  }
+}
+
+// Output Encoding - Prevent XSS
+function sanitizeForHTML(input: string): string {
+  return DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br'],
+    ALLOWED_ATTR: ['href', 'title'],
+    ALLOW_DATA_ATTR: false
+  });
+}
+
+function escapeForSQL(input: string): string {
+  // Always use parameterized queries instead!
+  throw new Error('Use parameterized queries, not escaping');
+}
+
+// CSRF Protection
+class CSRFProtection {
+  private tokens = new csrf();
+
+  generateToken(sessionId: string): string {
+    const secret = this.getSecretForSession(sessionId);
+    return this.tokens.create(secret);
+  }
+
+  verifyToken(sessionId: string, token: string): boolean {
+    const secret = this.getSecretForSession(sessionId);
+    return this.tokens.verify(secret, token);
+  }
+}
+
+// Content Security Policy
+const contentSecurityPolicy = {
+  'default-src': ["'self'"],
+  'script-src': ["'self'", "'strict-dynamic'"],
+  'style-src': ["'self'", "'unsafe-inline'"], // Consider using nonces
+  'img-src': ["'self'", 'data:', 'https:'],
+  'font-src': ["'self'"],
+  'connect-src': ["'self'", 'https://api.example.com'],
+  'frame-ancestors': ["'none'"],
+  'base-uri': ["'self'"],
+  'form-action': ["'self'"]
+};
+
+// Security Headers Middleware
+function securityHeaders(req: Request, res: Response, next: NextFunction) {
+  // Prevent clickjacking
+  res.setHeader('X-Frame-Options', 'DENY');
+
+  // Prevent MIME sniffing
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
+  // Enable XSS filter (legacy browsers)
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+
+  // Force HTTPS
+  res.setHeader(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains; preload'
+  );
+
+  // CSP
+  const cspValue = Object.entries(contentSecurityPolicy)
+    .map(([key, values]) => `${key} ${values.join(' ')}`)
+    .join('; ');
+  res.setHeader('Content-Security-Policy', cspValue);
+
+  next();
+}
+```
+
+### 5. Layer 4: Data Security
+
+```typescript
+/**
+ * Data Security: Protect data at rest and in transit
+ */
+
+import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
+
+// Encryption at Rest
+class FieldLevelEncryption {
+  private algorithm = 'aes-256-gcm';
+  private keyLength = 32;
+  private ivLength = 16;
+  private tagLength = 16;
+
+  async encrypt(
+    plaintext: string,
+    encryptionKey: Buffer
+  ): Promise<EncryptedData> {
+    const iv = randomBytes(this.ivLength);
+    const cipher = createCipheriv(this.algorithm, encryptionKey, iv);
+
+    let encrypted = cipher.update(plaintext, 'utf8', 'base64');
+    encrypted += cipher.final('base64');
+
+    const tag = cipher.getAuthTag();
+
+    return {
+      ciphertext: encrypted,
+      iv: iv.toString('base64'),
+      tag: tag.toString('base64'),
+      algorithm: this.algorithm
+    };
+  }
+
+  async decrypt(
+    data: EncryptedData,
+    encryptionKey: Buffer
+  ): Promise<string> {
+    const decipher = createDecipheriv(
+      data.algorithm,
+      encryptionKey,
+      Buffer.from(data.iv, 'base64')
+    );
+
+    decipher.setAuthTag(Buffer.from(data.tag, 'base64'));
+
+    let decrypted = decipher.update(data.ciphertext, 'base64', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    return decrypted;
+  }
+}
+
+// Data Classification and Handling
+type DataClassification = 'public' | 'internal' | 'confidential' | 'restricted';
+
+interface DataHandlingPolicy {
+  classification: DataClassification;
+  encryption: {
+    atRest: boolean;
+    inTransit: boolean;
+  };
+  accessControl: {
+    roles: string[];
+    mfa: boolean;
+  };
+  retention: {
+    maxDays: number;
+    archiveAfterDays?: number;
+  };
+  logging: {
+    accessLogging: boolean;
+    auditLogging: boolean;
+  };
+}
+
+const dataHandlingPolicies: Record<DataClassification, DataHandlingPolicy> = {
+  public: {
+    classification: 'public',
+    encryption: { atRest: false, inTransit: true },
+    accessControl: { roles: ['*'], mfa: false },
+    retention: { maxDays: 365 * 10 },
+    logging: { accessLogging: false, auditLogging: false }
+  },
+  internal: {
+    classification: 'internal',
+    encryption: { atRest: false, inTransit: true },
+    accessControl: { roles: ['employee'], mfa: false },
+    retention: { maxDays: 365 * 5 },
+    logging: { accessLogging: true, auditLogging: false }
+  },
+  confidential: {
+    classification: 'confidential',
+    encryption: { atRest: true, inTransit: true },
+    accessControl: { roles: ['authorized'], mfa: true },
+    retention: { maxDays: 365 * 3, archiveAfterDays: 365 },
+    logging: { accessLogging: true, auditLogging: true }
+  },
+  restricted: {
+    classification: 'restricted',
+    encryption: { atRest: true, inTransit: true },
+    accessControl: { roles: ['privileged'], mfa: true },
+    retention: { maxDays: 365, archiveAfterDays: 90 },
+    logging: { accessLogging: true, auditLogging: true }
+  }
+};
+
+// Database Access Control
+class SecureDataAccess {
+  async query<T>(
+    sql: string,
+    params: unknown[],
+    context: SecurityContext
+  ): Promise<T[]> {
+    // 1. Always use parameterized queries
+    // 2. Apply row-level security
+    const securedSql = this.applyRowLevelSecurity(sql, context);
+
+    // 3. Audit the access
+    await this.auditLog({
+      action: 'data_access',
+      query: sql,
+      user: context.userId,
+      timestamp: new Date(),
+      classification: this.getDataClassification(sql)
+    });
+
+    // 4. Execute with minimal privileges
+    return this.executeWithRole(securedSql, params, context.dbRole);
+  }
+}
+```
+
+### 6. Layer 5: Identity Security
+
+```typescript
+/**
+ * Identity Security: Authentication and Authorization
+ */
+
+// Multi-Factor Authentication
+interface MFAConfig {
+  required: boolean;
+  methods: MFAMethod[];
+  sessionDuration: number; // seconds
+  reauthenticationTriggers: string[];
+}
+
+type MFAMethod = 'totp' | 'webauthn' | 'sms' | 'email';
+
+class MFAService {
+  async verifyMFA(
+    userId: string,
+    method: MFAMethod,
+    code: string
+  ): Promise<boolean> {
+    switch (method) {
+      case 'totp':
+        return this.verifyTOTP(userId, code);
+      case 'webauthn':
+        return this.verifyWebAuthn(userId, code);
+      case 'sms':
+      case 'email':
+        return this.verifyOTP(userId, method, code);
+      default:
+        throw new Error(`Unsupported MFA method: ${method}`);
+    }
+  }
+
+  private async verifyTOTP(userId: string, code: string): Promise<boolean> {
+    const secret = await this.getTOTPSecret(userId);
+    const expected = this.generateTOTP(secret);
+
+    // Check current and adjacent time windows
+    const windows = [-1, 0, 1];
+    return windows.some(offset =>
+      this.generateTOTP(secret, offset) === code
+    );
+  }
+}
+
+// Principle of Least Privilege
+interface Permission {
+  resource: string;
+  actions: string[];
+  conditions?: PermissionCondition[];
+}
+
+interface Role {
+  name: string;
+  permissions: Permission[];
+  inherits?: string[];
+}
+
+const roleDefinitions: Role[] = [
+  {
+    name: 'viewer',
+    permissions: [
+      { resource: 'documents', actions: ['read'] },
+      { resource: 'comments', actions: ['read', 'create'] }
+    ]
+  },
+  {
+    name: 'editor',
+    inherits: ['viewer'],
+    permissions: [
+      { resource: 'documents', actions: ['read', 'write', 'delete'] },
+      {
+        resource: 'documents',
+        actions: ['publish'],
+        conditions: [{ type: 'ownership', field: 'authorId' }]
+      }
+    ]
+  },
+  {
+    name: 'admin',
+    inherits: ['editor'],
+    permissions: [
+      { resource: 'users', actions: ['read', 'write', 'delete'] },
+      { resource: 'settings', actions: ['read', 'write'] }
+    ]
+  }
+];
+
+// Session Security
+class SecureSessionManager {
+  private readonly SESSION_DURATION = 3600; // 1 hour
+  private readonly REFRESH_THRESHOLD = 300; // 5 minutes
+
+  async createSession(userId: string, metadata: SessionMetadata): Promise<Session> {
+    const sessionId = this.generateSecureId();
+    const session: Session = {
+      id: sessionId,
+      userId,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + this.SESSION_DURATION * 1000),
+      metadata: {
+        ...metadata,
+        userAgent: metadata.userAgent,
+        ipAddress: metadata.ipAddress,
+        mfaVerified: false
+      }
+    };
+
+    await this.store.set(sessionId, session);
+    return session;
+  }
+
+  async validateSession(sessionId: string, request: Request): Promise<Session | null> {
+    const session = await this.store.get(sessionId);
+
+    if (!session) return null;
+
+    // Check expiration
+    if (new Date() > session.expiresAt) {
+      await this.invalidateSession(sessionId);
+      return null;
+    }
+
+    // Validate session binding (prevent session hijacking)
+    if (!this.validateSessionBinding(session, request)) {
+      await this.invalidateSession(sessionId);
+      await this.alertSecurityTeam('session_hijacking_attempt', session);
+      return null;
+    }
+
+    // Refresh if close to expiry
+    if (this.shouldRefresh(session)) {
+      await this.refreshSession(session);
+    }
+
+    return session;
+  }
+
+  private validateSessionBinding(session: Session, request: Request): boolean {
+    // Check IP address consistency (with some tolerance for mobile)
+    const currentIp = request.headers.get('x-forwarded-for');
+    if (session.metadata.ipAddress !== currentIp) {
+      // Log but allow if user agent matches (mobile networks change IPs)
+      if (session.metadata.userAgent !== request.headers.get('user-agent')) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+```
+
+### 7. Cross-Cutting: Monitoring and Detection
+
+```typescript
+/**
+ * Security Monitoring: Detect and respond to threats
+ */
+
+interface SecurityEvent {
+  timestamp: Date;
+  eventType: SecurityEventType;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  source: string;
+  target: string;
+  details: Record<string, unknown>;
+  userId?: string;
+  ipAddress?: string;
+}
+
+type SecurityEventType =
+  | 'authentication_failure'
+  | 'authorization_failure'
+  | 'rate_limit_exceeded'
+  | 'suspicious_pattern'
+  | 'data_access_anomaly'
+  | 'configuration_change'
+  | 'privilege_escalation'
+  | 'sql_injection_attempt'
+  | 'xss_attempt';
+
+class SecurityMonitoring {
+  private readonly alertThresholds = {
+    authentication_failure: { count: 5, windowMinutes: 5 },
+    rate_limit_exceeded: { count: 10, windowMinutes: 1 },
+    sql_injection_attempt: { count: 1, windowMinutes: 1 }
+  };
+
+  async logSecurityEvent(event: SecurityEvent): Promise<void> {
+    // 1. Store the event
+    await this.eventStore.insert(event);
+
+    // 2. Check for alerting conditions
+    await this.checkAlertConditions(event);
+
+    // 3. Update metrics
+    this.metrics.increment(`security_events_${event.eventType}`, {
+      severity: event.severity
+    });
+  }
+
+  private async checkAlertConditions(event: SecurityEvent): Promise<void> {
+    const threshold = this.alertThresholds[event.eventType];
+    if (!threshold) return;
+
+    const recentCount = await this.countRecentEvents(
+      event.eventType,
+      event.source,
+      threshold.windowMinutes
+    );
+
+    if (recentCount >= threshold.count) {
+      await this.triggerAlert({
+        type: 'threshold_exceeded',
+        event,
+        count: recentCount,
+        threshold: threshold.count
+      });
+    }
+  }
+
+  async detectAnomalies(): Promise<Anomaly[]> {
+    const anomalies: Anomaly[] = [];
+
+    // Check for unusual access patterns
+    const accessPatterns = await this.analyzeAccessPatterns();
+    anomalies.push(...accessPatterns.filter(p => p.isAnomalous));
+
+    // Check for privilege escalation attempts
+    const privilegeEvents = await this.analyzePrivilegeEvents();
+    anomalies.push(...privilegeEvents.filter(e => e.isAnomalous));
+
+    // Check for data exfiltration patterns
+    const dataAccess = await this.analyzeDataAccessPatterns();
+    anomalies.push(...dataAccess.filter(d => d.isAnomalous));
+
+    return anomalies;
+  }
+}
+```
+
+## Use Cases
+
+### Complete API Security Stack
+
+```typescript
+// Combining all layers in an Express application
+import express from 'express';
+
+const app = express();
+
+// Layer 1: Rate limiting (Perimeter)
+app.use(rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false
+}));
+
+// Layer 2: Security headers (Network/Application)
+app.use(helmet());
+app.use(cors({ origin: allowedOrigins, credentials: true }));
+
+// Layer 3: Request validation (Application)
+app.use(express.json({ limit: '100kb' }));
+
+// Layer 4: Authentication (Identity)
+app.use(authMiddleware);
+
+// Layer 5: Authorization per route (Identity)
+app.get('/api/users/:id',
+  authorize(['admin', 'self']),
+  async (req, res) => {
+    // Layer 6: Data access with security context
+    const user = await secureDataAccess.getUser(req.params.id, req.securityContext);
+    res.json(user);
+  }
+);
+
+// Cross-cutting: Error handling with security logging
+app.use(securityErrorHandler);
+```
+
+## Best Practices
+
+### Do's
+
+- **Implement all layers** - each provides unique protection
+- **Fail securely** - deny access when in doubt
+- **Log security events** for detection and forensics
+- **Rotate credentials** regularly
+- **Validate all inputs** at every layer
+- **Encrypt sensitive data** at rest and in transit
+- **Use least privilege** for all access
+- **Test security controls** regularly
+- **Keep dependencies updated** for security patches
+
+### Don'ts
+
+- Don't rely on a single security layer
+- Don't trust user input at any layer
+- Don't expose detailed error messages
+- Don't store secrets in code
+- Don't skip security in development
+- Don't ignore security alerts
+- Don't assume internal traffic is safe
+- Don't disable security for "convenience"
+
+## References
+
+- [OWASP Security Cheat Sheets](https://cheatsheetseries.owasp.org/)
+- [NIST Cybersecurity Framework](https://www.nist.gov/cyberframework)
+- [AWS Well-Architected Security Pillar](https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/)
+- [Zero Trust Architecture](https://www.nist.gov/publications/zero-trust-architecture)
 
 
 ## Configuration

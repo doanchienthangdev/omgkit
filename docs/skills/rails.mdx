@@ -1,6 +1,6 @@
 ---
 title: "rails"
-description: "Ruby on Rails development. Use for Rails projects, MVC, ActiveRecord."
+description: "Enterprise Ruby on Rails development with Active Record, API mode, testing, and production patterns"
 icon: "layer-group"
 ---
 
@@ -12,7 +12,7 @@ icon: "layer-group"
 
 ## Overview
 
-Ruby on Rails development. Use for Rails projects, MVC, ActiveRecord.
+Enterprise Ruby on Rails development with Active Record, API mode, testing, and production patterns
 
 ## What You Get
 
@@ -24,57 +24,613 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Ruby on Rails Skill
+# Ruby on Rails
 
-## Patterns
+Enterprise-grade **Ruby on Rails development** following industry best practices. This skill covers Active Record, API mode, service objects, authentication, testing with RSpec, background jobs, and production deployment configurations used by top engineering teams.
 
-### Model
+## Purpose
+
+Build scalable Ruby applications with confidence:
+
+- Design clean model architectures with Active Record
+- Implement REST APIs with Rails API mode
+- Use service objects and concerns for clean code
+- Handle authentication with JWT or Devise
+- Write comprehensive tests with RSpec
+- Deploy production-ready applications
+- Leverage background jobs with Sidekiq
+
+## Features
+
+### 1. Model Design and Associations
+
 ```ruby
+# app/models/user.rb
 class User < ApplicationRecord
-  validates :email, presence: true, uniqueness: true
-  has_many :posts
+  has_secure_password
 
-  scope :active, -> { where(active: true) }
-end
-```
+  # Associations
+  has_many :memberships, dependent: :destroy
+  has_many :organizations, through: :memberships
+  has_many :owned_organizations, class_name: 'Organization', foreign_key: :owner_id
+  has_many :projects, foreign_key: :created_by
 
-### Controller
-```ruby
-class UsersController < ApplicationController
-  def index
-    @users = User.all
-    render json: @users
+  # Validations
+  validates :email, presence: true, uniqueness: { case_sensitive: false },
+                    format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :name, presence: true, length: { minimum: 2, maximum: 100 }
+  validates :password, length: { minimum: 8 }, if: -> { new_record? || password.present? }
+  validates :role, inclusion: { in: %w[admin user guest] }
+
+  # Callbacks
+  before_save :downcase_email
+
+  # Scopes
+  scope :active, -> { where(is_active: true) }
+  scope :admins, -> { where(role: 'admin') }
+  scope :search, ->(query) {
+    return all if query.blank?
+    where('name ILIKE :q OR email ILIKE :q', q: "%#{query}%")
+  }
+
+  # Enums
+  enum :role, { guest: 'guest', user: 'user', admin: 'admin' }, default: :user
+
+  # Instance methods
+  def admin?
+    role == 'admin'
   end
 
-  def create
-    @user = User.new(user_params)
-    if @user.save
-      render json: @user, status: :created
-    else
-      render json: @user.errors, status: :unprocessable_entity
-    end
+  def member_of?(organization)
+    organizations.exists?(organization.id)
   end
 
   private
 
-  def user_params
-    params.require(:user).permit(:email, :password)
+  def downcase_email
+    self.email = email.downcase
+  end
+end
+
+
+# app/models/organization.rb
+class Organization < ApplicationRecord
+  belongs_to :owner, class_name: 'User'
+  has_many :memberships, dependent: :destroy
+  has_many :members, through: :memberships, source: :user
+  has_many :projects, dependent: :destroy
+
+  validates :name, presence: true, length: { maximum: 255 }
+  validates :slug, presence: true, uniqueness: true,
+                   format: { with: /\A[a-z0-9-]+\z/ }
+
+  scope :for_user, ->(user) { joins(:memberships).where(memberships: { user_id: user.id }) }
+
+  before_validation :generate_slug, on: :create
+
+  private
+
+  def generate_slug
+    self.slug ||= name&.parameterize
+  end
+end
+
+
+# app/models/project.rb
+class Project < ApplicationRecord
+  belongs_to :organization
+  belongs_to :creator, class_name: 'User', foreign_key: :created_by
+  has_many :tasks, dependent: :destroy
+
+  validates :name, presence: true, length: { maximum: 255 }
+  validates :name, uniqueness: { scope: :organization_id }
+
+  enum :status, { draft: 'draft', active: 'active', completed: 'completed', archived: 'archived' }
+
+  scope :active, -> { where(status: :active) }
+
+  include Discard::Model
+  default_scope -> { kept }
+end
+```
+
+### 2. Serializers
+
+```ruby
+# app/serializers/user_serializer.rb
+class UserSerializer
+  include JSONAPI::Serializer
+
+  attributes :id, :email, :name, :role, :is_active, :created_at, :updated_at
+
+  attribute :organization_count do |user|
+    user.organizations.count
+  end
+
+  has_many :organizations, serializer: OrganizationSerializer, if: Proc.new { |_record, params|
+    params && params[:include_organizations]
+  }
+end
+
+
+# app/serializers/organization_serializer.rb
+class OrganizationSerializer
+  include JSONAPI::Serializer
+
+  attributes :id, :name, :slug, :created_at
+
+  attribute :member_count do |organization|
+    organization.members.count
+  end
+
+  belongs_to :owner, serializer: UserSerializer
+end
+
+
+# app/serializers/pagination_serializer.rb
+class PaginationSerializer
+  def initialize(collection, serializer_class, options = {})
+    @collection = collection
+    @serializer_class = serializer_class
+    @options = options
+  end
+
+  def as_json
+    {
+      data: serialized_data,
+      pagination: {
+        current_page: @collection.current_page,
+        per_page: @collection.limit_value,
+        total: @collection.total_count,
+        total_pages: @collection.total_pages,
+        has_more: @collection.current_page < @collection.total_pages
+      }
+    }
+  end
+
+  private
+
+  def serialized_data
+    @serializer_class.new(@collection, @options).serializable_hash[:data]
   end
 end
 ```
 
-### Routes
+### 3. Controllers
+
 ```ruby
-Rails.application.routes.draw do
-  resources :users, only: [:index, :create, :show]
+# app/controllers/application_controller.rb
+class ApplicationController < ActionController::API
+  include ActionController::HttpAuthentication::Token::ControllerMethods
+
+  before_action :authenticate_user!
+
+  rescue_from ActiveRecord::RecordNotFound, with: :not_found
+  rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_entity
+
+  private
+
+  def authenticate_user!
+    authenticate_or_request_with_http_token do |token, _options|
+      @current_user = JsonWebToken.decode(token)
+    end
+  end
+
+  def current_user
+    @current_user
+  end
+
+  def authorize_admin!
+    render_forbidden unless current_user.admin?
+  end
+
+  def not_found(exception)
+    render json: { error: { code: 'NOT_FOUND', message: exception.message } }, status: :not_found
+  end
+
+  def unprocessable_entity(exception)
+    render json: { error: { code: 'VALIDATION_ERROR', details: exception.record.errors } }, status: :unprocessable_entity
+  end
+
+  def render_forbidden
+    render json: { error: { code: 'FORBIDDEN', message: 'Access denied' } }, status: :forbidden
+  end
+end
+
+
+# app/controllers/api/v1/users_controller.rb
+module Api
+  module V1
+    class UsersController < ApplicationController
+      before_action :authorize_admin!, except: [:me, :update_me]
+      before_action :set_user, only: [:show, :update, :destroy]
+
+      def index
+        users = User.active.search(params[:search])
+        users = users.where(role: params[:role]) if params[:role].present?
+        users = users.page(params[:page]).per(params[:per_page] || 20)
+
+        render json: PaginationSerializer.new(users, UserSerializer).as_json
+      end
+
+      def show
+        render json: UserSerializer.new(@user, include_organizations: true).serializable_hash
+      end
+
+      def create
+        user = User.new(user_params)
+        user.save!
+        render json: UserSerializer.new(user).serializable_hash, status: :created
+      end
+
+      def update
+        @user.update!(user_params)
+        render json: UserSerializer.new(@user).serializable_hash
+      end
+
+      def destroy
+        @user.destroy
+        head :no_content
+      end
+
+      def me
+        render json: UserSerializer.new(current_user, include_organizations: true).serializable_hash
+      end
+
+      private
+
+      def set_user
+        @user = User.find(params[:id])
+      end
+
+      def user_params
+        params.require(:user).permit(:name, :email, :password, :role, :is_active)
+      end
+    end
+  end
+end
+
+
+# app/controllers/api/v1/auth_controller.rb
+module Api
+  module V1
+    class AuthController < ApplicationController
+      skip_before_action :authenticate_user!, only: [:register, :login]
+
+      def register
+        user = User.new(register_params)
+        user.save!
+
+        token = JsonWebToken.encode(user_id: user.id)
+        render json: { user: UserSerializer.new(user).serializable_hash, token: token }, status: :created
+      end
+
+      def login
+        user = User.find_by(email: params[:email]&.downcase)
+
+        if user&.authenticate(params[:password]) && user.is_active?
+          token = JsonWebToken.encode(user_id: user.id)
+          render json: { user: UserSerializer.new(user).serializable_hash, token: token }
+        else
+          render json: { error: { code: 'UNAUTHORIZED', message: 'Invalid credentials' } }, status: :unauthorized
+        end
+      end
+
+      private
+
+      def register_params
+        params.require(:user).permit(:name, :email, :password)
+      end
+    end
+  end
+end
+```
+
+### 4. Service Objects
+
+```ruby
+# app/services/application_service.rb
+class ApplicationService
+  def self.call(...)
+    new(...).call
+  end
+end
+
+
+# app/services/users/create_user_service.rb
+module Users
+  class CreateUserService < ApplicationService
+    def initialize(params)
+      @params = params
+    end
+
+    def call
+      user = User.new(@params)
+      user.save!
+
+      SendWelcomeEmailJob.perform_later(user.id)
+
+      Result.success(user: user)
+    rescue ActiveRecord::RecordInvalid => e
+      Result.failure(errors: e.record.errors)
+    end
+  end
+end
+
+
+# app/services/organizations/create_organization_service.rb
+module Organizations
+  class CreateOrganizationService < ApplicationService
+    def initialize(owner:, params:)
+      @owner = owner
+      @params = params
+    end
+
+    def call
+      ActiveRecord::Base.transaction do
+        organization = Organization.create!(@params.merge(owner: @owner))
+        Membership.create!(user: @owner, organization: organization, role: :owner)
+
+        Result.success(organization: organization)
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      Result.failure(errors: e.record.errors)
+    end
+  end
+end
+
+
+# app/services/result.rb
+class Result
+  attr_reader :data, :errors
+
+  def initialize(success:, data: {}, errors: nil)
+    @success = success
+    @data = data
+    @errors = errors
+  end
+
+  def success?
+    @success
+  end
+
+  def failure?
+    !@success
+  end
+
+  def self.success(data = {})
+    new(success: true, data: data)
+  end
+
+  def self.failure(errors:)
+    new(success: false, errors: errors)
+  end
+end
+```
+
+### 5. JWT Authentication
+
+```ruby
+# lib/json_web_token.rb
+class JsonWebToken
+  SECRET_KEY = Rails.application.credentials.secret_key_base
+
+  def self.encode(payload, exp = 24.hours.from_now)
+    payload[:exp] = exp.to_i
+    JWT.encode(payload, SECRET_KEY)
+  end
+
+  def self.decode(token)
+    decoded = JWT.decode(token, SECRET_KEY)[0]
+    User.find(decoded['user_id'])
+  rescue JWT::DecodeError, ActiveRecord::RecordNotFound
+    nil
+  end
+end
+```
+
+### 6. Background Jobs
+
+```ruby
+# app/jobs/application_job.rb
+class ApplicationJob < ActiveJob::Base
+  queue_as :default
+
+  retry_on StandardError, wait: :exponentially_longer, attempts: 3
+  discard_on ActiveJob::DeserializationError
+end
+
+
+# app/jobs/send_welcome_email_job.rb
+class SendWelcomeEmailJob < ApplicationJob
+  queue_as :mailers
+
+  def perform(user_id)
+    user = User.find(user_id)
+    UserMailer.welcome_email(user).deliver_now
+  end
+end
+```
+
+### 7. Testing with RSpec
+
+```ruby
+# spec/models/user_spec.rb
+require 'rails_helper'
+
+RSpec.describe User, type: :model do
+  describe 'validations' do
+    subject { build(:user) }
+
+    it { should validate_presence_of(:email) }
+    it { should validate_uniqueness_of(:email).case_insensitive }
+    it { should validate_presence_of(:name) }
+  end
+
+  describe 'associations' do
+    it { should have_many(:memberships).dependent(:destroy) }
+    it { should have_many(:organizations).through(:memberships) }
+  end
+
+  describe 'scopes' do
+    describe '.active' do
+      it 'returns only active users' do
+        active_user = create(:user, is_active: true)
+        inactive_user = create(:user, is_active: false)
+
+        expect(User.active).to include(active_user)
+        expect(User.active).not_to include(inactive_user)
+      end
+    end
+
+    describe '.search' do
+      it 'searches by name and email' do
+        user = create(:user, name: 'John Doe', email: 'john@example.com')
+
+        expect(User.search('john')).to include(user)
+        expect(User.search('jane')).not_to include(user)
+      end
+    end
+  end
+
+  describe '#admin?' do
+    it 'returns true for admin users' do
+      admin = build(:user, role: :admin)
+      expect(admin.admin?).to be true
+    end
+  end
+end
+
+
+# spec/requests/api/v1/users_spec.rb
+require 'rails_helper'
+
+RSpec.describe 'Api::V1::Users', type: :request do
+  let(:admin) { create(:user, role: :admin) }
+  let(:auth_headers) { { 'Authorization' => "Bearer #{JsonWebToken.encode(user_id: admin.id)}" } }
+
+  describe 'GET /api/v1/users' do
+    before { create_list(:user, 5) }
+
+    it 'returns paginated users for admin' do
+      get '/api/v1/users', headers: auth_headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response['data']).to be_an(Array)
+      expect(json_response['pagination']).to include('current_page', 'total')
+    end
+
+    it 'returns 403 for non-admin' do
+      user = create(:user)
+      headers = { 'Authorization' => "Bearer #{JsonWebToken.encode(user_id: user.id)}" }
+
+      get '/api/v1/users', headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe 'POST /api/v1/users' do
+    let(:valid_params) { { user: { name: 'New User', email: 'new@example.com', password: 'SecurePass123!' } } }
+
+    it 'creates a new user' do
+      expect {
+        post '/api/v1/users', params: valid_params, headers: auth_headers
+      }.to change(User, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+    end
+  end
+
+  def json_response
+    JSON.parse(response.body)
+  end
+end
+
+
+# spec/factories/users.rb
+FactoryBot.define do
+  factory :user do
+    sequence(:email) { |n| "user#{n}@example.com" }
+    name { Faker::Name.name }
+    password { 'Password123!' }
+    role { :user }
+    is_active { true }
+
+    trait :admin do
+      role { :admin }
+    end
+  end
+end
+```
+
+## Use Cases
+
+### API Rate Limiting
+
+```ruby
+# config/initializers/rack_attack.rb
+class Rack::Attack
+  throttle('requests by ip', limit: 100, period: 1.minute) do |request|
+    request.ip
+  end
+
+  throttle('login attempts', limit: 5, period: 1.minute) do |request|
+    if request.path == '/api/v1/auth/login' && request.post?
+      request.ip
+    end
+  end
+end
+```
+
+### Caching with Redis
+
+```ruby
+# app/controllers/api/v1/organizations_controller.rb
+def show
+  @organization = Rails.cache.fetch("organization:#{params[:id]}", expires_in: 5.minutes) do
+    Organization.includes(:owner, :members).find(params[:id])
+  end
+
+  render json: OrganizationSerializer.new(@organization).serializable_hash
 end
 ```
 
 ## Best Practices
-- Use strong params
-- Use scopes for queries
-- Use concerns for shared code
-- Use background jobs for async
+
+### Do's
+
+- Use UUID primary keys for public APIs
+- Use service objects for business logic
+- Use serializers for consistent responses
+- Use concerns for shared behavior
+- Use scopes for reusable queries
+- Use background jobs for heavy operations
+- Use strong parameters
+- Write comprehensive tests with RSpec
+- Use database indexes for performance
+- Use soft deletes for important data
+
+### Don'ts
+
+- Don't put business logic in controllers
+- Don't use N+1 queries
+- Don't skip validations
+- Don't ignore security headers
+- Don't expose internal errors
+- Don't use callbacks for business logic
+- Don't skip authentication
+- Don't ignore test coverage
+- Don't use sync operations for heavy tasks
+- Don't forget rate limiting
+
+## References
+
+- [Rails Guides](https://guides.rubyonrails.org/)
+- [RSpec Documentation](https://rspec.info/)
+- [Rails API Best Practices](https://github.com/rubocop/rubocop-rails)
+- [JSON:API Serializer](https://github.com/jsonapi-serializer/jsonapi-serializer)
+- [Sidekiq Documentation](https://github.com/mperham/sidekiq)
 
 
 ## Configuration

@@ -1,6 +1,6 @@
 ---
 title: "systematic-debugging"
-description: "Systematic debugging process. Use when investigating bugs."
+description: "Structured debugging with reproduction, isolation, hypothesis testing, and root cause resolution"
 icon: "diagram-project"
 ---
 
@@ -12,7 +12,7 @@ icon: "diagram-project"
 
 ## Overview
 
-Systematic debugging process. Use when investigating bugs.
+Structured debugging with reproduction, isolation, hypothesis testing, and root cause resolution
 
 ## What You Get
 
@@ -24,51 +24,581 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 
-# Systematic Debugging Skill
+# Systematic Debugging
 
-## Process
+Master **structured debugging** through methodical investigation, hypothesis testing, and root cause resolution. This skill provides a 95% effective debugging framework used by top engineering teams.
 
-### 1. Reproduce
-- Can you reproduce consistently?
-- What are the exact steps?
-- What environment?
+## Purpose
 
-### 2. Isolate
-- What's the smallest case?
-- Which component fails?
-- When did it start?
+Debug efficiently and prevent recurrence:
 
-### 3. Hypothesize
-Form 3 hypotheses:
-1. [Most likely cause]
-2. [Second possibility]
-3. [Unlikely but possible]
+- Reproduce issues reliably
+- Isolate the problem scope
+- Generate and test hypotheses systematically
+- Find root causes, not just symptoms
+- Fix with confidence
+- Prevent regression through tests
+- Document for future reference
 
-### 4. Test
-- Test each hypothesis
+## Features
+
+### 1. The 5-Phase Debugging Process
+
+```markdown
+## Systematic Debugging Framework
+
+┌────────────────────────────────────────────────────────────────┐
+│ PHASE 1: REPRODUCE                                              │
+│ ═══════════════════                                            │
+│ Goal: Consistently trigger the bug                              │
+│                                                                 │
+│ Questions:                                                      │
+│ • What are the exact steps to reproduce?                        │
+│ • What environment? (OS, browser, version)                      │
+│ • Is it 100% reproducible or intermittent?                      │
+│ • When did it start happening?                                  │
+│ • What changed recently?                                        │
+│                                                                 │
+│ Output: Reliable reproduction steps                             │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────────┐
+│ PHASE 2: ISOLATE                                                │
+│ ═══════════════════                                            │
+│ Goal: Narrow down the problem area                              │
+│                                                                 │
+│ Techniques:                                                     │
+│ • Binary search: Disable half the code                          │
+│ • Minimal repro: Simplest case that fails                       │
+│ • Environment isolation: Local vs staging vs prod               │
+│ • Component isolation: Which module/service?                    │
+│ • Time isolation: When did it start?                            │
+│                                                                 │
+│ Output: Specific file(s)/line(s) of interest                    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────────┐
+│ PHASE 3: HYPOTHESIZE                                            │
+│ ═══════════════════                                            │
+│ Goal: Form theories about the cause                             │
+│                                                                 │
+│ Generate at least 3 hypotheses:                                 │
+│ H1: [Most likely cause] - Evidence: ___                         │
+│ H2: [Second possibility] - Evidence: ___                        │
+│ H3: [Less likely but possible] - Evidence: ___                  │
+│                                                                 │
+│ Prioritize by:                                                  │
+│ • Evidence strength (what points to this?)                      │
+│ • Test cost (how easy to verify?)                               │
+│ • Likelihood (gut feeling + data)                               │
+│                                                                 │
+│ Output: Ranked list of hypotheses                               │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────────┐
+│ PHASE 4: TEST                                                   │
+│ ═══════════════════                                            │
+│ Goal: Verify or eliminate hypotheses                            │
+│                                                                 │
+│ For each hypothesis:                                            │
+│ 1. Design a test that would PROVE it                            │
+│ 2. Design a test that would DISPROVE it                         │
+│ 3. Run tests, record results                                    │
+│ 4. Move to next hypothesis or dig deeper                        │
+│                                                                 │
+│ Tools: Logging, debugger, profiler, tests                       │
+│                                                                 │
+│ Output: Confirmed root cause                                    │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌────────────────────────────────────────────────────────────────┐
+│ PHASE 5: FIX & VERIFY                                           │
+│ ═══════════════════                                            │
+│ Goal: Fix correctly and prevent recurrence                      │
+│                                                                 │
+│ Steps:                                                          │
+│ 1. Write failing test that reproduces the bug                   │
+│ 2. Implement minimal fix                                        │
+│ 3. Verify test passes                                           │
+│ 4. Check for related issues                                     │
+│ 5. Document the fix                                             │
+│                                                                 │
+│ Output: Fixed code + regression test + documentation            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 2. Reproduction Techniques
+
+```markdown
+## Reproduction Strategies
+
+### Creating Minimal Reproduction
+
+```typescript
+// Original complex scenario
+async function complexUserFlow() {
+  const user = await login('admin@test.com', 'password');
+  await navigateToSettings();
+  await clickTheme('dark');
+  await clickSave();
+  await navigateToProfile();
+  await uploadAvatar(largeImage);
+  await clickSave(); // Bug occurs here
+}
+
+// Minimal reproduction - strip away unrelated steps
+async function minimalRepro() {
+  // Does uploading any image fail?
+  await uploadAvatar(largeImage); // Yes, bug here!
+
+  // What about small images?
+  await uploadAvatar(smallImage); // Works fine
+
+  // Root cause: Large file handling bug
+}
+```
+
+### Environment Reproduction
+
+```yaml
+# reproduction.yml - Document environment exactly
+environment:
+  os: macOS 14.1
+  node: 20.10.0
+  browser: Chrome 120
+  database: PostgreSQL 15.4
+
+reproduction_steps:
+  1. Clone repo at commit abc123
+  2. Run: npm install
+  3. Run: docker-compose up -d
+  4. Run: npm run seed
+  5. Run: npm run dev
+  6. Navigate to /users
+  7. Click "Export" button
+  8. Observe: Error "Maximum call stack size exceeded"
+
+frequency: 100% reproducible
+first_observed: 2024-01-15
+last_known_good: commit def456 (2024-01-14)
+```
+
+### Intermittent Bug Reproduction
+
+```typescript
+// For race conditions and intermittent bugs
+async function stressTest() {
+  const results = [];
+
+  // Run many times to catch intermittent failures
+  for (let i = 0; i < 100; i++) {
+    try {
+      await performAction();
+      results.push({ iteration: i, status: 'success' });
+    } catch (error) {
+      results.push({ iteration: i, status: 'failure', error });
+    }
+  }
+
+  // Analyze failure rate
+  const failures = results.filter((r) => r.status === 'failure');
+  console.log(`Failure rate: ${failures.length}%`);
+  console.log('Failure details:', failures);
+}
+```
+
+### 3. Isolation Techniques
+
+```markdown
+## Binary Search Debugging
+
+### Git Bisect for Regression Finding
+```bash
+# Start bisect session
+git bisect start
+
+# Mark current (broken) as bad
+git bisect bad HEAD
+
+# Mark last known good commit
+git bisect good v2.0.0
+
+# Git checks out middle commit
+# Test and mark as good or bad
+git bisect good  # or: git bisect bad
+
+# Repeat until culprit found
+# Git will report: "abc123 is the first bad commit"
+
+# Automate with a test script
+git bisect run npm test
+
+# Clean up
+git bisect reset
+```
+
+### Code Section Isolation
+```typescript
+// Technique: Comment out half the code at a time
+
+async function problematicFunction() {
+  // BLOCK A
+  await stepA1();
+  await stepA2();
+  await stepA3();
+
+  // BLOCK B
+  await stepB1();
+  await stepB2();
+  await stepB3();
+
+  // Test: Comment out BLOCK B
+  // Still fails? Bug is in BLOCK A
+  // Works now? Bug is in BLOCK B
+  // Repeat binary search within the failing block
+}
+```
+
+### Component Isolation
+```typescript
+// Test components in isolation
+
+// Instead of testing full flow:
+const result = await fullApiFlow(request);
+
+// Test each component separately:
+const validated = await validateRequest(request);
+console.log('Validation:', validated); // Check here
+
+const processed = await processData(validated);
+console.log('Processing:', processed); // Check here
+
+const stored = await saveToDatabase(processed);
+console.log('Storage:', stored); // Check here
+
+const response = await formatResponse(stored);
+console.log('Response:', response); // Check here
+```
+
+### 4. Hypothesis Generation
+
+```markdown
+## Hypothesis Categories
+
+### Data Issues
+- Invalid input data
+- Missing required fields
+- Type mismatches
+- Encoding problems (UTF-8, etc.)
+- Stale/cached data
+- Data corruption
+
+### Configuration Issues
+- Wrong environment variables
+- Missing config values
+- Incorrect settings
+- Feature flags
+- Permission misconfig
+
+### Timing Issues
+- Race conditions
+- Timeout too short/long
+- Order of operations
+- Async/await bugs
+- Deadlocks
+- Event loop blocking
+
+### Resource Issues
+- Memory exhaustion
+- Disk space
+- Connection pool exhausted
+- File handles
+- Network limits
+- CPU throttling
+
+### External Dependencies
+- API changes
+- Service downtime
+- Network issues
+- DNS problems
+- Certificate expiry
+- Rate limiting
+
+### Code Logic
+- Off-by-one errors
+- Null pointer
+- Wrong operator
+- Missing edge case
+- Incorrect algorithm
+- State management bug
+```
+
+### Hypothesis Template
+```markdown
+## Hypothesis: Race Condition in User Update
+
+### Evidence For
+- Bug is intermittent (50% reproduction rate)
+- Multiple async operations on same resource
+- Logs show overlapping requests
+
+### Evidence Against
+- Works in single-user testing
+- No obvious shared state
+
+### Test Plan
+1. Add mutex/lock around update
+2. If fixes: Confirms race condition
+3. If not: Eliminate hypothesis
+
+### Test Cost: Low (30 min)
+### Likelihood: High (70%)
+### Priority: Test First
+```
+
+### 5. Debugging Tools Usage
+
+```typescript
+// Strategic Logging
+function debugWithLogging(data: unknown) {
+  // Use structured logging with context
+  console.log('[DEBUG][UserService][updateProfile]', {
+    timestamp: new Date().toISOString(),
+    userId: data.userId,
+    action: 'start',
+    data: sanitize(data), // Remove sensitive info
+  });
+
+  try {
+    const result = performUpdate(data);
+
+    console.log('[DEBUG][UserService][updateProfile]', {
+      timestamp: new Date().toISOString(),
+      userId: data.userId,
+      action: 'success',
+      result: summarize(result),
+    });
+
+    return result;
+  } catch (error) {
+    console.log('[DEBUG][UserService][updateProfile]', {
+      timestamp: new Date().toISOString(),
+      userId: data.userId,
+      action: 'error',
+      error: error.message,
+      stack: error.stack,
+    });
+    throw error;
+  }
+}
+
+// Conditional Breakpoints (Chrome DevTools)
+// Right-click on line number > Add conditional breakpoint
+// Condition: user.id === 'problematic-user-id'
+
+// Performance Profiling
+async function profileOperation() {
+  console.time('fullOperation');
+
+  console.time('step1');
+  await step1();
+  console.timeEnd('step1');
+
+  console.time('step2');
+  await step2();
+  console.timeEnd('step2');
+
+  console.time('step3');
+  await step3();
+  console.timeEnd('step3');
+
+  console.timeEnd('fullOperation');
+}
+
+// Memory Leak Detection
+function checkForLeaks() {
+  const initialMemory = process.memoryUsage().heapUsed;
+
+  for (let i = 0; i < 10000; i++) {
+    performOperation();
+  }
+
+  // Force garbage collection (run with --expose-gc)
+  global.gc?.();
+
+  const finalMemory = process.memoryUsage().heapUsed;
+  const leaked = finalMemory - initialMemory;
+
+  console.log(`Memory difference: ${(leaked / 1024 / 1024).toFixed(2)} MB`);
+}
+```
+
+### 6. Fix Verification
+
+```typescript
+// Write the failing test FIRST
+describe('User Profile Update', () => {
+  it('should handle large avatar uploads', async () => {
+    // This test should FAIL before the fix
+    const largeImage = generateLargeImage(10_000_000); // 10MB
+
+    const result = await uploadAvatar(userId, largeImage);
+
+    expect(result.success).toBe(true);
+    expect(result.url).toBeDefined();
+  });
+
+  it('should show error for files exceeding limit', async () => {
+    const tooLargeImage = generateLargeImage(50_000_000); // 50MB
+
+    await expect(uploadAvatar(userId, tooLargeImage)).rejects.toThrow(
+      'File size exceeds 20MB limit'
+    );
+  });
+});
+
+// After implementing fix, tests should pass
+```
+
+## Use Cases
+
+### Debugging Session Log
+
+```markdown
+## Debug Session: API Timeout Error
+
+### Problem Report
+- Error: "Request timeout after 30000ms"
+- Endpoint: POST /api/reports/generate
+- Frequency: 60% of requests
+- First reported: 2024-01-15
+
+---
+
+### Phase 1: Reproduce
+**Steps to reproduce:**
+1. Login as admin
+2. Navigate to Reports
+3. Select "Full Export" with date range > 1 year
+4. Click Generate
+
+**Result:** Timeout error after 30s
+
+**Reproducibility:** 100% with > 1 year data
+
+---
+
+### Phase 2: Isolate
+
+**Binary search results:**
+- With 1 month data: Works (2s)
+- With 6 months data: Works (15s)
+- With 1 year data: Timeout (>30s)
+
+**Component isolation:**
+- API handler: Fast
+- Database query: SLOW (found bottleneck!)
+- Report generation: Not reached
+
+**Identified:** Database query taking too long
+
+---
+
+### Phase 3: Hypothesize
+
+| # | Hypothesis | Evidence | Test Cost | Priority |
+|---|------------|----------|-----------|----------|
+| H1 | Missing index on date column | No index on created_at | Low | 1st |
+| H2 | N+1 query in report | Code shows loop queries | Low | 2nd |
+| H3 | Data volume issue | Works with less data | Med | 3rd |
+
+---
+
+### Phase 4: Test
+
+**H1 Test: Check for missing index**
+```sql
+EXPLAIN ANALYZE SELECT * FROM transactions
+WHERE created_at BETWEEN '2023-01-01' AND '2024-01-01';
+
+-- Result: Seq Scan on transactions (cost=0.00..25432.00)
+-- Sequential scan = No index being used!
+```
+**Result:** CONFIRMED - Missing index
+
+**Solution identified:** Add index on created_at
+
+---
+
+### Phase 5: Fix & Verify
+
+**Fix:**
+```sql
+CREATE INDEX idx_transactions_created_at ON transactions(created_at);
+```
+
+**Verification:**
+```sql
+EXPLAIN ANALYZE SELECT * FROM transactions
+WHERE created_at BETWEEN '2023-01-01' AND '2024-01-01';
+
+-- Result: Index Scan using idx_transactions_created_at (cost=0.29..8.53)
+```
+
+**Test results:**
+- 1 year report: 3s (was >30s) ✅
+- 2 year report: 6s ✅
+- Full history: 12s ✅
+
+**Regression test added:** ✅
+
+---
+
+### Summary
+- **Root cause:** Missing database index on transactions.created_at
+- **Fix:** Added index
+- **Time to fix:** 2 hours
+- **Prevention:** Add query performance tests to CI
+```
+
+## Best Practices
+
+### Do's
+
+- Always reproduce before debugging
+- Write down hypotheses before testing
+- Test one hypothesis at a time
 - Use binary search for large codebases
 - Add logging strategically
+- Write a failing test before fixing
+- Document the debugging session
+- Check for related issues
+- Add regression tests
+- Share learnings with team
 
-### 5. Fix
-- Minimal fix first
-- Add regression test
-- Verify fix works
+### Don'ts
 
-## Tools
-```bash
-git bisect start
-git bisect bad HEAD
-git bisect good v1.0.0
-```
+- Don't debug by random code changes
+- Don't skip the reproduction step
+- Don't test multiple hypotheses at once
+- Don't ignore intermittent bugs
+- Don't fix symptoms instead of root cause
+- Don't forget to remove debug code
+- Don't skip the verification step
+- Don't assume cause without evidence
+- Don't keep debugging if stuck (escalate)
+- Don't forget to document the fix
 
-## Output
-```markdown
-## Debug Report
-- Problem: [Description]
-- Root Cause: [Actual cause]
-- Fix: [What changed]
-- Prevention: [How to prevent]
-```
+## References
+
+- [Debugging: The 9 Indispensable Rules](https://www.amazon.com/Debugging-Indispensable-Software-Hardware-Problems/dp/0814474578)
+- [Why Programs Fail](https://www.whyprogramsfail.com/)
+- [Chrome DevTools Documentation](https://developer.chrome.com/docs/devtools/)
+- [Git Bisect](https://git-scm.com/docs/git-bisect)
 
 
 ## Configuration
