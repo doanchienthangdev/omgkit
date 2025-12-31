@@ -1,0 +1,254 @@
+# Features Schema for Autonomous Projects
+# This defines the structure of .omgkit/generated/features.yaml
+
+version: 1
+
+schema:
+  # Metadata
+  project_name:
+    type: string
+    required: true
+    description: Project name for reference
+
+  generated_at:
+    type: datetime
+    required: true
+    description: When feature list was generated
+
+  source:
+    type: string
+    required: true
+    description: PRD file this was generated from
+
+  # Feature priorities
+  priorities:
+    p0:
+      type: array
+      items: feature
+      description: Must-have features for MVP
+
+    p1:
+      type: array
+      items: feature
+      description: Should-have features
+
+    p2:
+      type: array
+      items: feature
+      description: Nice-to-have features
+
+    out_of_scope:
+      type: array
+      items: string
+      description: Explicitly excluded features
+
+  # Feature definition
+  feature:
+    id:
+      type: string
+      required: true
+      pattern: "^[a-z][a-z0-9_]*$"
+      description: Unique feature identifier
+
+    name:
+      type: string
+      required: true
+      description: Human-readable feature name
+
+    description:
+      type: string
+      required: true
+      description: What this feature does
+
+    priority:
+      type: string
+      enum: [p0, p1, p2]
+      required: true
+      description: Feature priority
+
+    category:
+      type: string
+      enum: [auth, data, ui, api, integration, infrastructure, other]
+      description: Feature category
+
+    phase:
+      type: string
+      description: Which phase this feature belongs to
+
+    dependencies:
+      type: array
+      items: string
+      description: IDs of features this depends on
+
+    # Implementation details
+    implementation:
+      approach:
+        type: string
+        description: How to implement this feature
+
+      files:
+        type: array
+        items: string
+        description: Files to create/modify
+
+      models:
+        type: array
+        items: string
+        description: Data models needed
+
+      apis:
+        type: array
+        items: string
+        description: API endpoints needed
+
+      components:
+        type: array
+        items: string
+        description: UI components needed
+
+    # Testing requirements
+    testing:
+      unit_tests:
+        type: array
+        items: string
+        description: Unit tests to write
+
+      integration_tests:
+        type: array
+        items: string
+        description: Integration tests to write
+
+      acceptance_criteria:
+        type: array
+        items: string
+        description: Acceptance criteria from PRD
+
+    # Progress tracking
+    status:
+      type: string
+      enum: [pending, in_progress, completed, skipped, blocked]
+      default: pending
+      description: Current feature status
+
+    progress:
+      steps_total:
+        type: integer
+        description: Total implementation steps
+
+      steps_completed:
+        type: integer
+        default: 0
+        description: Completed steps
+
+      tests_total:
+        type: integer
+        description: Total tests to write
+
+      tests_passed:
+        type: integer
+        default: 0
+        description: Passing tests
+
+    # Autonomy settings
+    autonomy:
+      level:
+        type: integer
+        enum: [0, 1, 2, 3, 4]
+        default: 1
+        description: Override autonomy level for this feature
+
+      reason:
+        type: string
+        description: Why this level was set
+
+    # Timing
+    started_at:
+      type: datetime
+      description: When work started
+
+    completed_at:
+      type: datetime
+      description: When feature was completed
+
+    estimated_complexity:
+      type: string
+      enum: [trivial, low, medium, high, very_high]
+      description: Complexity estimate
+
+# Example feature structure
+example:
+  id: user_authentication
+  name: User Authentication
+  description: Allow users to register, login, and manage sessions
+  priority: p0
+  category: auth
+  phase: backend
+  dependencies: []
+
+  implementation:
+    approach: JWT-based auth with refresh tokens
+    files:
+      - src/services/auth.service.ts
+      - src/controllers/auth.controller.ts
+      - src/middleware/auth.middleware.ts
+      - src/utils/jwt.ts
+    models:
+      - User
+      - RefreshToken
+    apis:
+      - POST /auth/register
+      - POST /auth/login
+      - POST /auth/refresh
+      - POST /auth/logout
+    components:
+      - LoginForm
+      - RegisterForm
+
+  testing:
+    unit_tests:
+      - auth.service.test.ts
+      - jwt.test.ts
+    integration_tests:
+      - auth.routes.test.ts
+    acceptance_criteria:
+      - Users can register with email and password
+      - Users can login and receive JWT token
+      - Invalid credentials return appropriate error
+      - Tokens expire after configured time
+
+  status: pending
+  progress:
+    steps_total: 7
+    steps_completed: 0
+    tests_total: 12
+    tests_passed: 0
+
+  autonomy:
+    level: 2
+    reason: Auth is security-critical
+
+  estimated_complexity: medium
+
+# Feature extraction rules
+extraction_rules:
+  from_prd:
+    - section: "Core Features"
+      priority: p0
+    - section: "Additional Features"
+      priority: p1
+    - section: "Future Considerations"
+      priority: p2
+
+  auto_categorize:
+    auth:
+      keywords: [login, register, authentication, password, session, jwt, oauth]
+    data:
+      keywords: [database, model, schema, crud, query]
+    ui:
+      keywords: [page, component, form, button, modal, layout]
+    api:
+      keywords: [endpoint, route, rest, graphql, webhook]
+    integration:
+      keywords: [stripe, email, sms, third-party, external]
+    infrastructure:
+      keywords: [deploy, ci, docker, kubernetes, monitoring]

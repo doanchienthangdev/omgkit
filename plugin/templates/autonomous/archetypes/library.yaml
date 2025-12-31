@@ -1,0 +1,64 @@
+name: "Library/SDK"
+id: library
+description: "Reusable code package for other developers"
+estimated_duration: "1-2 weeks"
+icon: "box"
+
+defaults:
+  language: typescript
+  build: tsup
+  docs: typedoc
+
+phases:
+  - id: discovery
+    name: "Discovery"
+    order: 1
+    checkpoint: true
+    outputs:
+      - ".omgkit/generated/prd.md"
+      - ".omgkit/generated/api-design.md"
+
+  - id: planning
+    name: "API Design"
+    order: 2
+    checkpoint: true
+    outputs:
+      - ".omgkit/generated/public-api.md"
+
+  - id: foundation
+    name: "Project Setup"
+    order: 3
+    auto: true
+
+  - id: core
+    name: "Implementation"
+    order: 4
+    dynamic: true
+    per_feature:
+      workflows: [feature, test]
+
+  - id: documentation
+    name: "Documentation"
+    order: 5
+    checkpoint: true
+    workflows: [technical-docs]
+
+  - id: packaging
+    name: "Packaging"
+    order: 6
+    checkpoint: true
+
+quality_gates:
+  after_feature:
+    - command: "npm test"
+      required: true
+  before_publish:
+    - all_tests_pass: true
+    - coverage_threshold: 90
+
+autonomy:
+  default_level: 0
+  rules:
+    - patterns: ["**/index.ts", "**/exports.ts"]
+      level: 2
+      reason: "Public API changes"

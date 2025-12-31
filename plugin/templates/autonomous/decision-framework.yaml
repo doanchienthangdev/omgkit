@@ -1,0 +1,337 @@
+# Decision Framework for Autonomous Development
+# Defines how decisions are classified and handled
+
+version: 1
+
+# Autonomy levels
+autonomy_levels:
+  - level: 0
+    name: "Auto-execute"
+    description: "Execute automatically without any notification"
+    action: "execute_silently"
+    examples:
+      - Code formatting
+      - Import organization
+      - Whitespace cleanup
+      - Simple variable renames
+
+  - level: 1
+    name: "Execute with Notification"
+    description: "Execute and inform user what was done"
+    action: "execute_notify"
+    examples:
+      - Adding a dependency
+      - Creating a new file
+      - Adding a test case
+      - Applying standard patterns
+
+  - level: 2
+    name: "Preview and Quick Approve"
+    description: "Show what will be done and wait for quick approval"
+    action: "preview_approve"
+    timeout: 300  # 5 minutes before auto-proceed with suggested
+    examples:
+      - Database index changes
+      - API endpoint modifications
+      - Configuration changes
+      - Non-trivial refactoring
+
+  - level: 3
+    name: "Full Review Required"
+    description: "Comprehensive review before any action"
+    action: "full_review"
+    timeout: null  # Must be explicitly approved
+    examples:
+      - Authentication implementation
+      - Payment integration
+      - Security-sensitive changes
+      - Data model modifications
+
+  - level: 4
+    name: "Human Must Perform"
+    description: "Claude provides guidance but human executes"
+    action: "human_only"
+    examples:
+      - API credentials entry
+      - Production deployments
+      - Account creation
+      - Payment gateway setup
+
+# Decision classification rules
+classification_rules:
+  # File-based rules
+  file_patterns:
+    - pattern: "**/migrations/**"
+      level: 3
+      reason: "Database migrations can cause data loss"
+
+    - pattern: "**/auth/**"
+      level: 3
+      reason: "Authentication is security-critical"
+
+    - pattern: "**/*.env*"
+      level: 4
+      reason: "Environment files contain secrets"
+
+    - pattern: "**/config/production.*"
+      level: 4
+      reason: "Production config requires careful review"
+
+    - pattern: "**/tests/**"
+      level: 0
+      reason: "Tests are safe to modify"
+
+    - pattern: "**/*.test.*"
+      level: 0
+      reason: "Test files are safe to modify"
+
+    - pattern: "**/__mocks__/**"
+      level: 0
+      reason: "Mock files are safe to modify"
+
+    - pattern: "**/types/**"
+      level: 1
+      reason: "Type definitions are low risk"
+
+    - pattern: "**/utils/**"
+      level: 1
+      reason: "Utility functions are typically safe"
+
+  # Content-based rules
+  content_patterns:
+    - pattern: "password|secret|token|key|credential"
+      level: 3
+      reason: "Contains sensitive keywords"
+
+    - pattern: "delete|drop|truncate|remove"
+      level: 2
+      reason: "Destructive operations"
+
+    - pattern: "stripe|paypal|payment|billing"
+      level: 3
+      reason: "Payment-related code"
+
+    - pattern: "exec|eval|spawn|child_process"
+      level: 3
+      reason: "Code execution risk"
+
+  # Operation-based rules
+  operations:
+    - operation: "create_file"
+      level: 1
+      reason: "New files are easily reversible"
+
+    - operation: "delete_file"
+      level: 2
+      reason: "File deletion should be confirmed"
+
+    - operation: "modify_schema"
+      level: 3
+      reason: "Schema changes affect data"
+
+    - operation: "add_dependency"
+      level: 1
+      reason: "Dependencies affect project"
+
+    - operation: "remove_dependency"
+      level: 2
+      reason: "May break existing code"
+
+    - operation: "change_config"
+      level: 2
+      reason: "Configuration affects behavior"
+
+    - operation: "deploy"
+      level: 4
+      reason: "Deployments require human oversight"
+
+# Decision templates
+decision_templates:
+  - id: technology_choice
+    description: "Choosing between technology options"
+    level: 2
+    template: |
+      ## Decision: {title}
+
+      ### Context
+      {context}
+
+      ### Options
+      {options}
+
+      ### Recommendation
+      {recommendation}
+
+      ### Trade-offs
+      {trade_offs}
+
+  - id: architecture_decision
+    description: "Architectural choices"
+    level: 3
+    template: |
+      ## Architecture Decision: {title}
+
+      ### Context
+      {context}
+
+      ### Decision
+      {decision}
+
+      ### Consequences
+      {consequences}
+
+      ### Alternatives Considered
+      {alternatives}
+
+  - id: implementation_approach
+    description: "How to implement a feature"
+    level: 2
+    template: |
+      ## Implementation: {feature}
+
+      ### Approach
+      {approach}
+
+      ### Files to Create/Modify
+      {files}
+
+      ### Tests
+      {tests}
+
+  - id: breaking_change
+    description: "Changes that break compatibility"
+    level: 3
+    template: |
+      ## Breaking Change: {title}
+
+      ### What's Changing
+      {change}
+
+      ### Impact
+      {impact}
+
+      ### Migration Path
+      {migration}
+
+      ### Rollback Plan
+      {rollback}
+
+# Decision workflow
+decision_workflow:
+  capture:
+    - Identify decision point
+    - Classify by level
+    - Gather context
+    - Generate options
+
+  evaluate:
+    - Apply classification rules
+    - Consider context modifiers
+    - Determine final level
+
+  present:
+    - Level 0-1: Log only
+    - Level 2: Show preview with recommendation
+    - Level 3: Full decision template
+    - Level 4: Guidance only
+
+  record:
+    - Save to .omgkit/memory/decisions/
+    - Update state with decision
+    - Log in journal
+
+# Context modifiers
+context_modifiers:
+  # Increase level
+  increase_level:
+    - condition: "first_time_in_area"
+      modifier: +1
+      reason: "First time working in this area"
+
+    - condition: "multiple_files_affected"
+      modifier: +1
+      reason: "Changes affect multiple files"
+
+    - condition: "production_environment"
+      modifier: +1
+      reason: "Production context"
+
+  # Decrease level
+  decrease_level:
+    - condition: "pattern_established"
+      modifier: -1
+      reason: "Following established pattern"
+
+    - condition: "test_coverage_high"
+      modifier: -1
+      reason: "Well-tested code"
+
+    - condition: "rollback_easy"
+      modifier: -1
+      reason: "Easy to rollback"
+
+# Approval handling
+approval_handling:
+  level_2:
+    prompt: "Approve this change? [Y/n/details]"
+    default: "yes"
+    timeout_action: "proceed_with_recommendation"
+
+  level_3:
+    prompt: "Review required. Approve? [yes/no/modify]"
+    default: "no"
+    timeout_action: "wait"
+
+  level_4:
+    prompt: "Human action required. Confirm when complete."
+    default: null
+    timeout_action: "wait"
+
+# Decision record schema
+record_schema:
+  id:
+    type: string
+    required: true
+    description: Unique decision ID
+
+  title:
+    type: string
+    required: true
+    description: Brief decision title
+
+  level:
+    type: integer
+    required: true
+    description: Autonomy level
+
+  context:
+    type: string
+    required: true
+    description: Why this decision arose
+
+  options:
+    type: array
+    items: string
+    description: Available options
+
+  decision:
+    type: string
+    required: true
+    description: What was decided
+
+  rationale:
+    type: string
+    required: true
+    description: Why this was decided
+
+  consequences:
+    type: string
+    description: Expected outcomes
+
+  timestamp:
+    type: datetime
+    required: true
+
+  approved_by:
+    type: string
+    description: Who approved (user/auto)

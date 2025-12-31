@@ -1,0 +1,383 @@
+# State Schema for Autonomous Projects
+# This defines the structure of .omgkit/state.yaml
+
+version: 1
+
+schema:
+  # Project metadata
+  project:
+    name:
+      type: string
+      required: true
+      description: Project name from discovery
+
+    type:
+      type: string
+      required: true
+      enum: [saas, api, cli, library, fullstack, mobile]
+      description: Type of project being built
+
+    archetype:
+      type: string
+      required: true
+      description: Archetype ID (saas-mvp, api-service, etc.)
+
+    created_at:
+      type: datetime
+      required: true
+      description: When project was initialized
+
+    description:
+      type: string
+      required: false
+      description: Brief project description
+
+  # Current execution state
+  phase:
+    type: string
+    required: true
+    description: Current phase ID from archetype
+
+  status:
+    type: string
+    required: true
+    enum: [ready, in_progress, checkpoint, blocked, completed, revision_needed]
+    default: ready
+    description: Current execution status
+
+  # Checkpoint information
+  checkpoint:
+    pending:
+      type: boolean
+      default: false
+      description: Whether checkpoint needs approval
+
+    type:
+      type: string
+      enum: [phase, quality_gate, decision, manual]
+      description: What triggered the checkpoint
+
+    phase:
+      type: string
+      description: Phase that completed (for phase checkpoints)
+
+    description:
+      type: string
+      description: Human-readable checkpoint description
+
+    artifacts:
+      type: array
+      items: string
+      description: Files to review at this checkpoint
+
+    rejected:
+      type: boolean
+      default: false
+      description: Whether checkpoint was rejected
+
+    rejection:
+      reason:
+        type: string
+      category:
+        type: string
+        enum: [scope_change, quality_issue, design_issue, missing_item, other]
+      timestamp:
+        type: datetime
+
+    approved_at:
+      type: datetime
+      description: When checkpoint was approved
+
+  # Progress tracking
+  progress:
+    phases_completed:
+      type: array
+      items: string
+      description: List of completed phase IDs
+
+    current_feature:
+      type: string
+      description: Current feature being implemented
+
+    current_step:
+      type: string
+      description: Current step within feature
+
+    features_completed:
+      type: array
+      items: string
+      description: List of completed feature IDs
+
+    steps_completed:
+      type: array
+      items: string
+      description: Steps completed in current feature
+
+    skipped_steps:
+      type: array
+      items:
+        step:
+          type: string
+        reason:
+          type: string
+        timestamp:
+          type: datetime
+      description: Steps that were skipped
+
+  # Resume support
+  resume_point:
+    phase:
+      type: string
+      description: Phase to resume from
+
+    feature:
+      type: string
+      description: Feature to resume from
+
+    step:
+      type: string
+      description: Step to resume from
+
+    attempt:
+      type: integer
+      default: 1
+      description: Number of attempts at current step
+
+    resumed_at:
+      type: datetime
+      description: When execution was resumed
+
+  # Error context for recovery
+  error_context:
+    message:
+      type: string
+      description: Error message
+
+    type:
+      type: string
+      enum: [test_failure, build_failure, external_failure, validation_error, other]
+      description: Type of error
+
+    file:
+      type: string
+      description: File where error occurred
+
+    line:
+      type: integer
+      description: Line number of error
+
+    stack:
+      type: string
+      description: Stack trace if available
+
+    timestamp:
+      type: datetime
+      description: When error occurred
+
+  # Pending decisions requiring approval
+  pending_decisions:
+    type: array
+    items:
+      id:
+        type: string
+        required: true
+        description: Unique decision identifier
+
+      level:
+        type: integer
+        enum: [2, 3, 4]
+        required: true
+        description: Autonomy level
+
+      description:
+        type: string
+        required: true
+        description: What needs to be decided
+
+      options:
+        type: array
+        items: string
+        description: Available options
+
+      suggested:
+        type: string
+        description: Recommended option
+
+      context:
+        type: object
+        description: Additional context for decision
+
+      created_at:
+        type: datetime
+        description: When decision was created
+
+  # Decision history
+  decisions_log:
+    type: array
+    items:
+      id:
+        type: string
+      decision:
+        type: string
+        enum: [approved, rejected, modified]
+      value:
+        type: string
+        description: The decision value if modified
+      timestamp:
+        type: datetime
+      notes:
+        type: string
+
+  # Approval history
+  approval_history:
+    type: array
+    items:
+      type:
+        type: string
+        enum: [checkpoint, decision]
+      phase:
+        type: string
+      id:
+        type: string
+      timestamp:
+        type: datetime
+
+  # Rejection history
+  rejection_history:
+    type: array
+    items:
+      phase:
+        type: string
+      reason:
+        type: string
+      category:
+        type: string
+      timestamp:
+        type: datetime
+      resolved:
+        type: boolean
+      resolution:
+        type: string
+
+  # Quality gate results
+  quality_gates:
+    type: array
+    items:
+      name:
+        type: string
+        description: Gate name (e.g., "npm test")
+
+      status:
+        type: string
+        enum: [passed, failed, skipped]
+
+      output:
+        type: string
+        description: Command output
+
+      duration:
+        type: string
+        description: How long it took
+
+      timestamp:
+        type: datetime
+
+  # Session statistics
+  stats:
+    started_at:
+      type: datetime
+      description: When current session started
+
+    last_activity:
+      type: datetime
+      description: Last activity timestamp
+
+    files_created:
+      type: integer
+      default: 0
+
+    files_modified:
+      type: integer
+      default: 0
+
+    tests_run:
+      type: integer
+      default: 0
+
+    tests_passed:
+      type: integer
+      default: 0
+
+# State transitions
+transitions:
+  ready:
+    - to: in_progress
+      on: start_execution
+    - to: checkpoint
+      on: manual_checkpoint
+
+  in_progress:
+    - to: checkpoint
+      on: phase_complete
+    - to: checkpoint
+      on: quality_gate_trigger
+    - to: checkpoint
+      on: decision_required
+    - to: checkpoint
+      on: manual_checkpoint
+    - to: blocked
+      on: error
+    - to: completed
+      on: all_phases_complete
+
+  checkpoint:
+    - to: in_progress
+      on: approve
+    - to: revision_needed
+      on: reject
+    - to: ready
+      on: approve_final_phase
+
+  blocked:
+    - to: in_progress
+      on: resume
+    - to: in_progress
+      on: skip
+
+  revision_needed:
+    - to: in_progress
+      on: revision_complete
+    - to: checkpoint
+      on: re_review
+
+  completed:
+    - to: in_progress
+      on: reopen
+
+# Default state for new projects
+default_state:
+  version: 1
+  project:
+    name: ""
+    type: ""
+    archetype: ""
+    created_at: ""
+  phase: "discovery"
+  status: "ready"
+  checkpoint:
+    pending: false
+  progress:
+    phases_completed: []
+    features_completed: []
+    steps_completed: []
+    skipped_steps: []
+  pending_decisions: []
+  decisions_log: []
+  approval_history: []
+  rejection_history: []
+  quality_gates: []
+  stats:
+    files_created: 0
+    files_modified: 0
+    tests_run: 0
+    tests_passed: 0

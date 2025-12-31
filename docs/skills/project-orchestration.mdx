@@ -1,0 +1,375 @@
+---
+title: "Project Orchestration"
+description: "Orchestrate autonomous project development through state-driven execution"
+icon: "robot"
+---
+
+<Info>
+  **Category:** Autonomous
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Orchestrate autonomous project development through state-driven execution
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Project Orchestration Skill
+
+Orchestrate autonomous project development through state-driven execution.
+
+## Overview
+
+The Project Orchestration skill provides the core functionality for managing
+autonomous project development. It handles state transitions, phase execution,
+checkpoint management, and quality enforcement.
+
+## Capabilities
+
+### State Management
+
+```yaml
+# Read current state
+state = load_state(".omgkit/state.yaml")
+
+# Update state
+update_state({
+  phase: "backend",
+  status: "in_progress",
+  progress: {
+    current_feature: "user_auth"
+  }
+})
+
+# Transition state
+transition_state("in_progress", "checkpoint")
+```
+
+### Phase Execution
+
+Execute phases according to archetype definition:
+
+1. **Discovery Phase** - Requirements gathering via interview
+2. **Planning Phase** - Generate specifications and schema
+3. **Foundation Phase** - Project scaffolding and setup
+4. **Core Phases** - Feature implementation (dynamic)
+5. **Hardening Phase** - Security and performance
+6. **Deployment Phase** - Production release
+
+### Checkpoint Management
+
+```yaml
+# Create checkpoint
+create_checkpoint({
+  type: "phase",
+  phase: "planning",
+  artifacts: ["schema.sql", "api-spec.md"]
+})
+
+# Check for pending checkpoint
+if has_pending_checkpoint():
+  wait_for_approval()
+
+# Approve checkpoint
+approve_checkpoint()
+
+# Reject with feedback
+reject_checkpoint("Need soft delete columns")
+```
+
+### Decision Framework
+
+Classify and handle decisions by autonomy level:
+
+| Level | Action | Example |
+|-------|--------|---------|
+| 0 | Auto-execute | Code formatting |
+| 1 | Execute + notify | Add dependency |
+| 2 | Preview + quick approve | Database index |
+| 3 | Full review | Auth approach |
+| 4 | Human does it | API credentials |
+
+### Quality Gates
+
+Run quality checks between phases and features:
+
+```yaml
+quality_gates:
+  after_feature:
+    - npm test
+    - npm run lint
+
+  before_checkpoint:
+    - npm run build
+    - coverage >= 80%
+
+  before_deploy:
+    - security_scan
+    - performance_test
+```
+
+## Usage
+
+### Initialize Project
+
+```bash
+# Start discovery interview
+/auto:init my-saas-app
+
+# Generates:
+# - .omgkit/state.yaml
+# - .omgkit/generated/prd.md
+# - .omgkit/generated/discovery-answers.yaml
+```
+
+### Start Execution
+
+```bash
+# Begin autonomous execution
+/auto:start
+
+# Execution flow:
+# 1. Load state and archetype
+# 2. Execute current phase
+# 3. Run quality gates
+# 4. Update progress
+# 5. Create checkpoint if needed
+```
+
+### Monitor Progress
+
+```bash
+# Check status
+/auto:status
+
+# Preview next action
+/auto:next
+
+# Run verification
+/auto:verify
+```
+
+### Handle Checkpoints
+
+```bash
+# At checkpoint, review artifacts then:
+/auto:approve          # Continue
+/auto:reject "reason"  # Request changes
+```
+
+### Resume After Interruption
+
+```bash
+# Resume from saved state
+/auto:resume
+
+# Retry failed step
+/auto:resume --retry
+
+# Skip problematic step
+/auto:resume --skip
+```
+
+## State Machine
+
+```
+┌─────────┐    start    ┌─────────────┐
+│  ready  │────────────►│ in_progress │
+└─────────┘             └──────┬──────┘
+     ▲                         │
+     │ approve                 │ phase_complete
+     │                         │ decision_required
+     │                         │ quality_fail
+┌─────────────┐                │
+│ checkpoint  │◄───────────────┘
+└─────────────┘
+     │
+     │ reject
+     ▼
+┌─────────────────┐
+│ revision_needed │
+└─────────────────┘
+
+┌─────────────┐    error    ┌─────────┐
+│ in_progress │────────────►│ blocked │
+└─────────────┘             └─────────┘
+                                 │
+                                 │ resume/skip
+                                 ▼
+                            ┌─────────────┐
+                            │ in_progress │
+                            └─────────────┘
+
+┌─────────────┐  all_complete  ┌───────────┐
+│ in_progress │───────────────►│ completed │
+└─────────────┘                └───────────┘
+```
+
+## Memory Integration
+
+### Context Files
+
+Maintain current context in `.omgkit/memory/context/`:
+
+- `project-brief.md` - Project overview
+- `current-feature.md` - Active feature details
+- `tech-stack.md` - Technology decisions
+
+### Decision Log
+
+Record all decisions in `.omgkit/memory/decisions/`:
+
+```markdown
+# Decision: Authentication Approach
+
+**Date:** 2024-01-15
+**Status:** Approved
+
+## Context
+Need to implement user authentication.
+
+## Options Considered
+1. Session-based auth
+2. JWT with refresh tokens
+3. OAuth only
+
+## Decision
+JWT with refresh tokens
+
+## Rationale
+- Stateless for scalability
+- Works with mobile apps
+- Standard approach
+```
+
+### Journal
+
+Track daily progress in `.omgkit/memory/journal/`:
+
+```markdown
+# 2024-01-15 Development Journal
+
+## Summary
+Completed planning phase, started backend implementation.
+
+## Completed
+- Database schema design
+- API specification
+- User model implementation
+
+## Challenges
+- Decided on password hashing approach
+- Resolved dependency conflict
+
+## Tomorrow
+- Complete auth service
+- Add unit tests
+```
+
+## Error Recovery
+
+### Test Failure Recovery
+
+1. Analyze failure message
+2. Identify failing test
+3. Check related code
+4. Attempt auto-fix if confidence > 70%
+5. Retry tests
+6. Block if still failing after 2 attempts
+
+### Build Failure Recovery
+
+1. Parse build error
+2. Check for common issues
+3. Fix imports, types, syntax
+4. Retry build
+5. Block if unfixable
+
+### External Failure Recovery
+
+1. Identify external service
+2. Retry with exponential backoff
+3. Max 3 retries
+4. Block and report if persistent
+
+## Configuration
+
+### Archetype Selection
+
+Based on project type, select appropriate archetype:
+
+| Project Type | Archetype | Phases |
+|-------------|-----------|--------|
+| SaaS | saas-mvp | 7 phases |
+| API | api-service | 6 phases |
+| CLI | cli-tool | 5 phases |
+| Library | library | 6 phases |
+| Full-stack | fullstack-app | 8 phases |
+
+### Autonomy Overrides
+
+Configure autonomy levels in state:
+
+```yaml
+autonomy:
+  default_level: 1
+  overrides:
+    - pattern: "**/migrations/**"
+      level: 3
+    - pattern: "**/auth/**"
+      level: 3
+    - pattern: "**/tests/**"
+      level: 0
+```
+
+## Best Practices
+
+1. **Always save state** after significant actions
+2. **Run quality gates** before checkpoints
+3. **Record decisions** for future reference
+4. **Update memory** as context changes
+5. **Handle errors gracefully** with recovery options
+6. **Respect autonomy levels** for sensitive operations
+7. **Provide clear progress** updates to user
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  project-orchestration:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Autonomous" icon="robot" href="/skills/overview#autonomous">
+    More autonomous skills
+  </Card>
+</CardGroup>

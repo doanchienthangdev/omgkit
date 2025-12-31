@@ -185,13 +185,13 @@ describe('Documentation Alignment', () => {
       expect(orphan, `Orphan categories in generate-docs.js: ${orphan.join(', ')}`).toHaveLength(0);
     });
 
-    it('should have exactly 14 skill categories', () => {
-      expect(pluginCategories.length).toBe(14);
+    it('should have exactly 15 skill categories', () => {
+      expect(pluginCategories.length).toBe(15);
     });
 
     it('should have all required skill categories', () => {
       const required = [
-        'ai-engineering', 'backend', 'databases', 'devops', 'frameworks',
+        'ai-engineering', 'autonomous', 'backend', 'databases', 'devops', 'frameworks',
         'frontend', 'integrations', 'languages', 'methodology', 'mobile',
         'omega', 'security', 'testing', 'tools'
       ];
@@ -210,6 +210,7 @@ describe('Documentation Alignment', () => {
       // Map plugin category names to display names
       const categoryMap = {
         'ai-engineering': 'AI Engineering',
+        'autonomous': 'Autonomous',
         'backend': 'Backend',
         'databases': 'Databases',
         'devops': 'DevOps',
@@ -270,9 +271,9 @@ describe('Documentation Alignment', () => {
       expect(pluginCounts['ai-engineering']).toBe(12);
     });
 
-    it('total skills should be 88', () => {
+    it('total skills should be 89', () => {
       const total = Object.values(pluginCounts).reduce((sum, count) => sum + count, 0);
-      expect(total).toBe(88);
+      expect(total).toBe(89);
     });
   });
 
@@ -313,12 +314,12 @@ describe('Documentation Alignment', () => {
       }
     });
 
-    it('mint.json should have all 14 skill category groups', () => {
+    it('mint.json should have all 15 skill category groups', () => {
       const content = readFileSync(mintPath, 'utf8');
       const mint = JSON.parse(content);
 
       const expectedGroups = [
-        'AI Engineering', 'Languages', 'Frameworks', 'Backend', 'Databases',
+        'AI Engineering', 'Autonomous', 'Languages', 'Frameworks', 'Backend', 'Databases',
         'Frontend', 'Mobile', 'DevOps', 'Security', 'Testing', 'Tools',
         'Integrations', 'Methodology', 'Omega Skills'
       ];
@@ -352,7 +353,7 @@ describe('Documentation Alignment', () => {
       expect(existsSync(join(skillsDocsDir, 'overview.mdx'))).toBe(true);
     });
 
-    it('all 88 skill docs should exist', () => {
+    it('all 89 skill docs should exist', () => {
       const pluginCounts = countPluginSkills();
       const expectedTotal = Object.values(pluginCounts).reduce((sum, count) => sum + count, 0);
 

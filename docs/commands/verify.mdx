@@ -1,0 +1,428 @@
+---
+title: "/auto:verify"
+description: "Run verification checks on autonomous project"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Auto
+
+  **Syntax:** `/auto:verify "[--full | --quick | --phase <phase>]"`
+</Info>
+
+## Overview
+
+Run verification checks on autonomous project
+
+## Quick Start
+
+```bash
+/auto:verify "[--full
+```
+
+
+# Verify Autonomous Project
+
+Run comprehensive verification checks on the autonomous project state and artifacts.
+
+## Verification Modes
+
+### Quick Verification
+Fast checks for basic integrity:
+```bash
+/auto:verify --quick
+```
+
+### Full Verification
+Complete verification of all aspects:
+```bash
+/auto:verify --full
+/auto:verify
+```
+
+### Phase Verification
+Verify specific phase artifacts:
+```bash
+/auto:verify --phase planning
+```
+
+## Verification Categories
+
+### 1. State Integrity
+
+Check `.omgkit/state.yaml`:
+- [ ] File exists and is valid YAML
+- [ ] Required fields present (project, phase, status)
+- [ ] Phase matches archetype phases
+- [ ] Progress data is consistent
+- [ ] No orphaned references
+
+### 2. Artifact Verification
+
+For each phase's expected outputs:
+- [ ] File exists
+- [ ] File is not empty
+- [ ] File format is valid (YAML, SQL, MD)
+- [ ] Content matches expected structure
+
+### 3. Code Quality
+
+If code has been generated:
+- [ ] TypeScript compiles without errors
+- [ ] ESLint passes
+- [ ] All tests pass
+- [ ] Coverage meets threshold
+
+### 4. Consistency Checks
+
+- [ ] PRD features match implementation plan
+- [ ] Schema matches models
+- [ ] API spec matches routes
+- [ ] Tests cover documented features
+
+### 5. Memory Integrity
+
+- [ ] Context files are current
+- [ ] Decisions are recorded
+- [ ] Journal entries exist for activities
+
+## Verification Process
+
+### 1. Load Configuration
+
+```yaml
+archetype: "saas-mvp"
+current_phase: "backend"
+quality_gates:
+  - command: "npm test"
+    required: true
+  - coverage_threshold: 80
+```
+
+### 2. Run Checks
+
+Execute each verification category:
+```
+[1/5] State Integrity...
+[2/5] Artifact Verification...
+[3/5] Code Quality...
+[4/5] Consistency Checks...
+[5/5] Memory Integrity...
+```
+
+### 3. Collect Results
+
+```yaml
+verification_results:
+  timestamp: "2024-01-15T10:30:00Z"
+  mode: "full"
+
+  categories:
+    state_integrity:
+      passed: true
+      checks: 5
+      failures: 0
+
+    artifacts:
+      passed: true
+      checks: 8
+      failures: 0
+
+    code_quality:
+      passed: false
+      checks: 4
+      failures: 1
+      details:
+        - check: "coverage"
+          expected: 80
+          actual: 76
+
+    consistency:
+      passed: true
+      checks: 3
+      failures: 0
+
+    memory:
+      passed: true
+      checks: 3
+      failures: 0
+```
+
+## Output
+
+### All Passing
+```
+## Verification Complete ✓
+
+**Mode:** Full
+**Duration:** 12.3s
+
+### Results
+
+| Category | Status | Checks |
+|----------|--------|--------|
+| State Integrity | ✅ Pass | 5/5 |
+| Artifacts | ✅ Pass | 8/8 |
+| Code Quality | ✅ Pass | 4/4 |
+| Consistency | ✅ Pass | 3/3 |
+| Memory | ✅ Pass | 3/3 |
+
+**Total:** 23/23 checks passing
+
+### Quality Metrics
+- Test Coverage: 84% (threshold: 80%)
+- TypeScript: No errors
+- ESLint: No warnings
+
+### Project Health: Excellent 🟢
+
+---
+
+**Commands:**
+- `/auto:start` - Continue execution
+- `/auto:status` - View full status
+```
+
+### With Failures
+```
+## Verification Complete ⚠️
+
+**Mode:** Full
+**Duration:** 15.7s
+
+### Results
+
+| Category | Status | Checks |
+|----------|--------|--------|
+| State Integrity | ✅ Pass | 5/5 |
+| Artifacts | ✅ Pass | 8/8 |
+| Code Quality | ⚠️ Fail | 3/4 |
+| Consistency | ✅ Pass | 3/3 |
+| Memory | ✅ Pass | 3/3 |
+
+**Total:** 22/23 checks passing
+
+### Failures
+
+#### Code Quality: Coverage Below Threshold
+
+**Expected:** 80%
+**Actual:** 76%
+
+**Uncovered Files:**
+- `src/services/payment.service.ts` (62%)
+- `src/utils/validation.ts` (71%)
+
+**Suggested Fix:**
+Add tests for payment service and validation utilities.
+
+### Project Health: Needs Attention 🟡
+
+---
+
+**Actions Required:**
+1. Increase test coverage to 80%
+2. Run `/auto:verify` again after fixes
+
+**Commands:**
+- `/auto:verify --quick` - Quick re-check
+- `npm test -- --coverage` - Run tests with coverage
+```
+
+### Critical Failures
+```
+## Verification Failed ❌
+
+**Mode:** Full
+**Duration:** 8.2s
+
+### Critical Issues Found
+
+#### 1. State Corruption
+
+**Issue:** Phase "backend" not found in archetype
+**File:** `.omgkit/state.yaml`
+
+```yaml
+# Current (invalid)
+phase: "backend"
+
+# Expected (one of)
+phases: ["discovery", "planning", "foundation", "core", ...]
+```
+
+**Fix:** Update phase to valid archetype phase
+
+#### 2. Missing Required Artifact
+
+**Issue:** Schema file not found
+**Expected:** `.omgkit/generated/schema.sql`
+**Phase:** Planning (required output)
+
+**Fix:** Run planning phase or create schema manually
+
+### Project Health: Critical 🔴
+
+---
+
+**Recovery Options:**
+
+1. **Auto-repair** (if possible)
+   ```bash
+   /auto:verify --repair
+   ```
+
+2. **Manual fix**
+   - Fix state.yaml phase value
+   - Create missing schema.sql
+
+3. **Reset to checkpoint**
+   ```bash
+   /auto:resume --from planning
+   ```
+
+**Commands:**
+- `/auto:status --verbose` - Detailed state info
+- `/auto:resume --from discovery` - Restart from known good state
+```
+
+## Quick Verification Output
+
+```
+## Quick Verification ✓
+
+**Duration:** 2.1s
+
+### Essential Checks
+- ✅ State file valid
+- ✅ Current phase valid
+- ✅ No blocking errors
+- ✅ Tests passing
+
+**Status:** Ready to continue
+
+---
+
+Run `/auto:verify --full` for comprehensive check.
+```
+
+## Phase Verification Output
+
+```
+## Phase Verification: Planning ✓
+
+**Duration:** 4.3s
+
+### Expected Outputs
+- ✅ `.omgkit/generated/prd.md` (12.4 KB)
+- ✅ `.omgkit/generated/schema.sql` (3.2 KB)
+- ✅ `.omgkit/generated/api-spec.md` (8.7 KB)
+
+### Validation
+- ✅ PRD has all required sections
+- ✅ Schema is valid SQL
+- ✅ API spec follows OpenAPI format
+
+### Quality Gates
+- ✅ Schema validation passed
+- ✅ API spec validation passed
+
+**Phase Status:** Complete and verified
+
+---
+
+**Commands:**
+- `/auto:approve` - Approve this phase
+- `/auto:verify --phase foundation` - Verify next phase
+```
+
+## Repair Mode
+
+Attempt automatic repairs for recoverable issues:
+
+```bash
+/auto:verify --repair
+```
+
+```
+## Verification with Repair
+
+### Issues Found: 2
+### Auto-repairable: 1
+
+#### Repaired ✓
+
+1. **State Progress Inconsistency**
+   - Issue: steps_completed count mismatch
+   - Fix: Recalculated from actual completed steps
+   - Result: Updated state.yaml
+
+#### Manual Repair Needed
+
+2. **Missing Test File**
+   - Issue: `user.service.test.ts` referenced but not found
+   - Cannot auto-repair: Test content unknown
+   - Action: Create test file or remove reference
+
+---
+
+**Verification After Repair:** 22/23 passing
+```
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Bash** - Enables bash capabilities
+- **Glob** - Enables glob capabilities
+- **Grep** - Enables grep capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/auto:verify "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/auto:verify "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Auto Commands" icon="terminal" href="/commands/overview#auto">
+    More auto commands
+  </Card>
+</CardGroup>

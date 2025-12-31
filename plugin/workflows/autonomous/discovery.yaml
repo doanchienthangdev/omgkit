@@ -1,0 +1,232 @@
+# Discovery Workflow
+# First phase of autonomous project development
+
+name: Discovery
+id: discovery
+description: Gather comprehensive requirements through guided interview
+category: autonomous
+version: "1.0.0"
+
+# Workflow metadata
+metadata:
+  phase: discovery
+  order: 1
+  checkpoint: true
+  estimated_duration: "30-60 minutes"
+
+# Input requirements
+inputs:
+  project_idea:
+    type: string
+    required: true
+    description: Initial project idea or description
+
+  project_name:
+    type: string
+    required: false
+    description: Optional project name
+
+# Output artifacts
+outputs:
+  - path: ".omgkit/generated/prd.md"
+    description: Product Requirements Document
+    required: true
+
+  - path: ".omgkit/generated/technical-spec.md"
+    description: Technical Specification
+    required: true
+
+  - path: ".omgkit/generated/discovery-answers.yaml"
+    description: Raw discovery answers
+    required: true
+
+  - path: ".omgkit/state.yaml"
+    description: Initial project state
+    required: true
+
+# Workflow steps
+steps:
+  - id: welcome
+    name: Welcome & Context
+    description: Introduce the discovery process
+    action: |
+      Display welcome message explaining:
+      - What discovery phase involves
+      - How long it typically takes
+      - What will be generated
+
+  - id: vision_interview
+    name: Vision & Strategy Interview
+    description: Understand the project vision
+    questions_source: "plugin/templates/autonomous/discovery-questions.yaml"
+    section: vision
+    actions:
+      - Ask questions from vision section
+      - Capture answers
+      - Summarize understanding
+      - Confirm before proceeding
+
+  - id: users_interview
+    name: Users & Personas Interview
+    description: Understand target users
+    questions_source: "plugin/templates/autonomous/discovery-questions.yaml"
+    section: users
+    actions:
+      - Ask questions from users section
+      - Capture answers
+      - Create user personas
+      - Confirm understanding
+
+  - id: features_interview
+    name: Features & Scope Interview
+    description: Define features and boundaries
+    questions_source: "plugin/templates/autonomous/discovery-questions.yaml"
+    section: features
+    actions:
+      - Ask questions from features section
+      - Categorize by priority (P0, P1, P2)
+      - Define out of scope
+      - Confirm feature list
+
+  - id: technical_interview
+    name: Technical Context Interview
+    description: Understand technical requirements
+    questions_source: "plugin/templates/autonomous/discovery-questions.yaml"
+    section: technical
+    adaptive:
+      skip_if:
+        - condition: "project_type == 'cli'"
+          skip: [frontend_questions, database_scaling]
+        - condition: "project_type == 'library'"
+          skip: [frontend_questions, backend_questions]
+    actions:
+      - Ask questions from technical section
+      - Capture preferences
+      - Note constraints
+      - Confirm stack decisions
+
+  - id: risks_interview
+    name: Risk Assessment Interview
+    description: Identify risks and mitigation
+    questions_source: "plugin/templates/autonomous/discovery-questions.yaml"
+    section: risks
+    actions:
+      - Ask questions from risks section
+      - Capture concerns
+      - Define MVP boundaries
+      - Confirm launch criteria
+
+  - id: generate_prd
+    name: Generate PRD
+    description: Create Product Requirements Document
+    template: "plugin/templates/autonomous/prd-template.md"
+    output: ".omgkit/generated/prd.md"
+    actions:
+      - Compile all answers
+      - Fill PRD template
+      - Include all features with acceptance criteria
+      - Add user personas
+      - Document assumptions
+
+  - id: generate_technical_spec
+    name: Generate Technical Spec
+    description: Create Technical Specification
+    output: ".omgkit/generated/technical-spec.md"
+    actions:
+      - Document technology stack
+      - Define high-level architecture
+      - Outline data model
+      - List API endpoints
+      - Note security considerations
+
+  - id: recommend_archetype
+    name: Recommend Archetype
+    description: Select appropriate project archetype
+    archetypes:
+      saas: saas-mvp
+      api: api-service
+      cli: cli-tool
+      library: library
+      fullstack: fullstack-app
+    actions:
+      - Analyze project type
+      - Match to archetype
+      - Explain recommendation
+      - Allow override
+
+  - id: save_state
+    name: Initialize State
+    description: Create initial project state
+    output: ".omgkit/state.yaml"
+    actions:
+      - Create state file
+      - Set phase to discovery
+      - Mark discovery complete
+      - Set checkpoint pending
+
+  - id: save_answers
+    name: Save Discovery Answers
+    description: Preserve raw answers for reference
+    output: ".omgkit/generated/discovery-answers.yaml"
+    actions:
+      - Save all answers with timestamps
+      - Include follow-up responses
+      - Preserve original wording
+
+  - id: initialize_memory
+    name: Initialize Memory
+    description: Set up memory structure
+    actions:
+      - Create .omgkit/memory/context/
+      - Create .omgkit/memory/decisions/
+      - Create .omgkit/memory/journal/
+      - Write project-brief.md
+
+  - id: checkpoint
+    name: Discovery Checkpoint
+    description: Pause for PRD review
+    checkpoint: true
+    actions:
+      - Display discovery summary
+      - List generated artifacts
+      - Request PRD review
+      - Wait for approval
+
+# Adaptive logic
+adaptive_rules:
+  - condition: "project_type == 'api'"
+    action: skip_frontend_questions
+
+  - condition: "project_type == 'cli'"
+    action: skip_frontend_database_scaling
+
+  - condition: "business_model == 'open_source'"
+    action: skip_payment_questions
+
+  - condition: "timeline == 'asap'"
+    action: focus_mvp_essential
+
+  - condition: "user_scale == 'massive'"
+    action: add_scalability_deepdive
+
+# Quality checks
+quality_checks:
+  - name: prd_completeness
+    check: All required sections filled
+    required: true
+
+  - name: features_prioritized
+    check: All features have priority
+    required: true
+
+  - name: acceptance_criteria
+    check: P0 features have acceptance criteria
+    required: true
+
+# Success criteria
+success_criteria:
+  - PRD contains all required sections
+  - At least 3 P0 features defined
+  - Technical stack specified
+  - User persona documented
+  - MVP scope clearly defined

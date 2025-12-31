@@ -1,0 +1,67 @@
+name: "CLI Tool"
+id: cli-tool
+description: "Command-line utility for developers or operations"
+estimated_duration: "3-7 days"
+icon: "terminal"
+
+defaults:
+  language: typescript
+  runtime: nodejs
+  package_manager: npm
+
+phases:
+  - id: discovery
+    name: "Discovery"
+    order: 1
+    checkpoint: true
+    outputs:
+      - ".omgkit/generated/prd.md"
+      - ".omgkit/generated/command-spec.md"
+
+  - id: planning
+    name: "Command Design"
+    order: 2
+    checkpoint: true
+    outputs:
+      - ".omgkit/generated/cli-structure.md"
+
+  - id: foundation
+    name: "Project Setup"
+    order: 3
+    features:
+      - id: project_setup
+        name: "Project Scaffolding"
+        auto: true
+      - id: cli_framework
+        name: "CLI Framework Setup"
+        auto: true
+
+  - id: core
+    name: "Command Implementation"
+    order: 4
+    dynamic: true
+    per_feature:
+      workflows: [feature, test]
+
+  - id: packaging
+    name: "Packaging"
+    order: 5
+    checkpoint: true
+    steps:
+      - id: npm_package
+        name: "NPM Package Setup"
+      - id: documentation
+        name: "README and Docs"
+
+quality_gates:
+  after_feature:
+    - command: "npm test"
+      required: true
+  before_publish:
+    - all_tests_pass: true
+
+autonomy:
+  default_level: 0
+  rules:
+    - patterns: ["package.json"]
+      level: 2

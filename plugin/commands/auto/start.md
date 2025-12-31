@@ -1,0 +1,212 @@
+---
+description: Start autonomous execution from current state
+allowed-tools: Task, Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+argument-hint: "[--from-phase <phase>]"
+---
+
+# Autonomous Execution Start
+
+Begin autonomous project development from current state.
+
+## Prerequisites
+
+Before starting, verify:
+1. `.omgkit/state.yaml` exists (created by `/auto:init`)
+2. `.omgkit/generated/prd.md` exists (discovery completed)
+3. No pending checkpoints require approval
+
+## Execution Flow
+
+### 1. Load State
+
+```yaml
+# Read from .omgkit/state.yaml
+project:
+  name: "Project Name"
+  type: "saas"
+  archetype: "saas-mvp"
+phase: "planning"  # Current phase
+status: "ready"    # ready | in_progress | checkpoint | blocked | completed
+```
+
+### 2. Load Archetype
+
+Based on `project.archetype`, load the corresponding archetype definition:
+- `plugin/templates/autonomous/archetypes/{archetype}.yaml`
+
+### 3. Determine Next Actions
+
+From the archetype phases, find the current phase and its:
+- **workflows**: Execute these workflows in order
+- **features**: Execute per-feature workflows
+- **steps**: Execute manual steps
+- **checkpoint**: If true, pause for user approval
+
+### 4. Execute Phase
+
+For each item in the current phase:
+
+#### If workflow:
+```
+Run workflow: {workflow-name}
+```
+
+#### If feature (dynamic phase):
+```
+For each feature in .omgkit/generated/features.yaml:
+  1. Run per_feature workflows (feature, test, code-review)
+  2. Run quality_gates.after_feature checks
+  3. Update feature status in state
+```
+
+#### If step:
+```
+Execute step actions
+Update step completion in state
+```
+
+### 5. Quality Gates
+
+After completing phase actions, run quality gates:
+
+```yaml
+quality_gates:
+  after_feature:
+    - command: "npm test"
+      required: true
+  before_checkpoint:
+    - command: "npm run build"
+      required: true
+```
+
+If any required gate fails:
+1. Log the failure
+2. Set status to "blocked"
+3. Report to user with fix suggestions
+
+### 6. Update State
+
+After each significant action:
+```yaml
+# Update .omgkit/state.yaml
+progress:
+  current_feature: "feature_id"
+  current_step: 3
+  steps_completed: ["step1", "step2"]
+```
+
+### 7. Handle Checkpoints
+
+When reaching a checkpoint:
+1. Set `status: "checkpoint"`
+2. Set `checkpoint.pending: true`
+3. Generate checkpoint summary
+4. Pause and notify user
+
+```
+## Checkpoint: {phase_name}
+
+### Completed
+- [x] Step 1
+- [x] Step 2
+
+### Generated Artifacts
+- path/to/artifact1
+- path/to/artifact2
+
+### Quality Gate Results
+- npm test: PASSED
+- npm run build: PASSED
+
+**ACTION REQUIRED**: Run `/auto:approve` to continue or `/auto:reject` with feedback.
+```
+
+## Autonomy Levels
+
+Respect autonomy levels from archetype:
+
+```yaml
+autonomy:
+  default_level: 1
+  rules:
+    - patterns: ["**/migrations/**"]
+      level: 3  # Requires explicit approval
+    - patterns: ["**/auth/**"]
+      level: 3
+```
+
+**Level 0**: Auto-execute, no confirmation
+**Level 1**: Execute with notification
+**Level 2**: Preview before executing, quick approval
+**Level 3**: Full review required
+**Level 4**: Human must do it
+
+For levels 2-4:
+1. Show what will be done
+2. Wait for `/auto:approve` or `/auto:reject`
+
+## Memory Updates
+
+After significant work:
+1. Update `.omgkit/memory/journal/{date}.md`
+2. Record decisions in `.omgkit/memory/decisions/`
+3. Update context files as needed
+
+## Error Handling
+
+On error:
+1. Log error details to `.omgkit/logs/`
+2. Set `status: "blocked"`
+3. Store error context for resume
+4. Notify user with:
+   - What failed
+   - Why it might have failed
+   - Suggested fixes
+   - How to resume after fixing
+
+## Resume Support
+
+State is saved after every action for reliable resume:
+```yaml
+resume_point:
+  phase: "backend"
+  feature: "user_authentication"
+  step: "implement_login"
+  attempt: 2
+```
+
+## Output
+
+Display progress as work proceeds:
+
+```
+## Autonomous Execution Started
+
+**Project:** [Name]
+**Phase:** [Current Phase]
+**Mode:** [Archetype]
+
+### Progress
+
+[■■■■■□□□□□] 50% - Implementing user_authentication
+
+#### Current Task
+Implementing login endpoint...
+
+#### Recent Actions
+- ✓ Created User model
+- ✓ Added password hashing
+- → Implementing login route
+
+#### Next Up
+- Password reset
+- Session management
+```
+
+## Commands During Execution
+
+User can run these during execution:
+- `/auto:status` - Show detailed status
+- `/auto:pause` - Pause after current task
+- `/auto:checkpoint` - Force a checkpoint
+- `/auto:reject [reason]` - Stop and provide feedback

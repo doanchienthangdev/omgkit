@@ -44,9 +44,10 @@ function getWorkflowFiles(dir, files = []) {
 function getWorkflowCategories() {
   if (!existsSync(WORKFLOWS_DIR)) return [];
 
+  // Exclude 'autonomous' as it contains YAML template workflows, not MD command workflows
   return readdirSync(WORKFLOWS_DIR).filter(item => {
     const fullPath = join(WORKFLOWS_DIR, item);
-    return statSync(fullPath).isDirectory();
+    return statSync(fullPath).isDirectory() && item !== 'autonomous';
   });
 }
 

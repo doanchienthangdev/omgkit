@@ -1,0 +1,332 @@
+---
+title: "/auto:approve"
+description: "Approve checkpoint or pending decision to continue"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Auto
+
+  **Syntax:** `/auto:approve "[checkpoint | decision <id>] [--all]"`
+</Info>
+
+## Overview
+
+Approve checkpoint or pending decision to continue
+
+## Quick Start
+
+```bash
+/auto:approve "[checkpoint
+```
+
+
+# Approve Checkpoint or Decision
+
+Approve a pending checkpoint or autonomy decision to continue execution.
+
+## Usage
+
+### Approve Current Checkpoint
+```bash
+/auto:approve
+/auto:approve checkpoint
+```
+
+### Approve Specific Decision
+```bash
+/auto:approve decision db_index_strategy
+```
+
+### Approve All Pending
+```bash
+/auto:approve --all
+```
+
+## Approval Process
+
+### 1. Check Pending Items
+
+Load from `.omgkit/state.yaml`:
+```yaml
+checkpoint:
+  pending: true
+  type: "phase"
+  phase: "planning"
+  description: "Planning phase complete. Review artifacts."
+  artifacts:
+    - ".omgkit/generated/schema.sql"
+    - ".omgkit/generated/api-spec.md"
+
+pending_decisions:
+  - id: "db_index_strategy"
+    level: 2
+    description: "Add composite index on users(email, status)"
+    options:
+      - "approve"
+      - "modify"
+      - "reject"
+  - id: "auth_token_expiry"
+    level: 2
+    description: "Set JWT expiry to 24 hours"
+```
+
+### 2. Validate Approval
+
+For checkpoint:
+- Check artifacts exist
+- Verify quality gates passed
+- Confirm user has reviewed
+
+For decision:
+- Check decision exists
+- Validate decision is pending
+- Record approval with timestamp
+
+### 3. Update State
+
+```yaml
+# After checkpoint approval
+checkpoint:
+  pending: false
+  approved_at: "2024-01-15T10:30:00Z"
+  approved_by: "user"
+
+status: "ready"  # Changed from "checkpoint"
+
+# After decision approval
+decisions_log:
+  - id: "db_index_strategy"
+    decision: "approved"
+    timestamp: "2024-01-15T10:30:00Z"
+
+pending_decisions: []  # Removed approved item
+```
+
+### 4. Record in Memory
+
+Create decision record at `.omgkit/memory/decisions/`:
+```markdown
+# Decision: Database Index Strategy
+
+**Date:** 2024-01-15
+**Phase:** Planning
+**Status:** Approved
+
+## Context
+During schema design, identified need for efficient user lookup by email and status.
+
+## Decision
+Add composite index on users(email, status) table.
+
+## Rationale
+- Improves login query performance
+- Supports filtering by account status
+- Minimal storage overhead
+
+## Consequences
+- Slightly slower inserts
+- Index maintenance on updates
+```
+
+### 5. Continue Execution
+
+After approval:
+1. Log the approval
+2. Update state to "ready"
+3. Prompt to continue
+
+## Output
+
+### Checkpoint Approval
+```
+## Checkpoint Approved ✓
+
+**Phase:** Planning
+**Approved:** 2024-01-15 10:30:00
+
+### Artifacts Reviewed
+- ✓ `.omgkit/generated/schema.sql`
+- ✓ `.omgkit/generated/api-spec.md`
+
+### Decision Recorded
+Saved to: `.omgkit/memory/decisions/2024-01-15-planning-approval.md`
+
+### Ready to Continue
+
+Next phase: **Foundation**
+- Project scaffolding
+- Database setup
+- UI foundation
+
+---
+
+**Commands:**
+- `/auto:start` - Continue execution
+- `/auto:next --preview` - Preview next action
+```
+
+### Decision Approval
+```
+## Decision Approved ✓
+
+**Decision:** db_index_strategy
+**Description:** Add composite index on users(email, status)
+
+### Applied
+The following will be added during implementation:
+```sql
+CREATE INDEX idx_users_email_status ON users(email, status);
+```
+
+### Recorded
+Decision logged at: `.omgkit/memory/decisions/2024-01-15-db_index_strategy.md`
+
+### Remaining Decisions
+- auth_token_expiry: Set JWT expiry to 24 hours
+
+---
+
+**Commands:**
+- `/auto:approve decision auth_token_expiry` - Approve next
+- `/auto:approve --all` - Approve all remaining
+- `/auto:start` - Continue (pending decisions will prompt)
+```
+
+### Approve All
+```
+## All Items Approved ✓
+
+### Checkpoint
+- ✓ Planning phase
+
+### Decisions (2)
+- ✓ db_index_strategy: Add composite index
+- ✓ auth_token_expiry: 24 hour JWT expiry
+
+### Summary
+- Checkpoints approved: 1
+- Decisions approved: 2
+- All items recorded in memory
+
+### Ready to Continue
+
+---
+
+**Commands:**
+- `/auto:start` - Continue execution
+```
+
+## Nothing to Approve
+
+```
+## No Pending Approvals
+
+Current status: **In Progress**
+
+There are no checkpoints or decisions waiting for approval.
+
+### Current State
+- Phase: Backend
+- Feature: user_authentication
+- Progress: 3/7 steps complete
+
+---
+
+**Commands:**
+- `/auto:status` - View full status
+- `/auto:next` - Preview next action
+```
+
+## Conditional Approval
+
+For complex decisions, you can approve with conditions:
+
+```bash
+/auto:approve decision db_index_strategy --with-note "Also add index on created_at"
+```
+
+Output:
+```
+## Decision Approved with Note ✓
+
+**Decision:** db_index_strategy
+**Note Added:** "Also add index on created_at"
+
+This note will be considered during implementation.
+```
+
+## Approval History
+
+Track all approvals for audit:
+
+```yaml
+# .omgkit/state.yaml
+approval_history:
+  - type: "checkpoint"
+    phase: "discovery"
+    timestamp: "2024-01-15T09:00:00Z"
+  - type: "checkpoint"
+    phase: "planning"
+    timestamp: "2024-01-15T10:30:00Z"
+  - type: "decision"
+    id: "db_index_strategy"
+    timestamp: "2024-01-15T10:31:00Z"
+```
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Edit** - Enables edit capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/auto:approve "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/auto:approve "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Auto Commands" icon="terminal" href="/commands/overview#auto">
+    More auto commands
+  </Card>
+</CardGroup>

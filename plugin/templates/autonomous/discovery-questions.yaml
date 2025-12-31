@@ -1,0 +1,795 @@
+version: 1
+name: "Project Discovery"
+description: "Big-tech level requirements gathering through structured brainstorming"
+
+# Discovery is conducted in 5 stages, each with specific questions
+# Questions are adaptive - some are skipped based on previous answers
+
+stages:
+  #############################################################################
+  # STAGE 1: VISION & STRATEGIC CONTEXT
+  #############################################################################
+  - id: vision
+    name: "Vision & Strategic Context"
+    description: "Understanding the why behind the project"
+    icon: "lightbulb"
+
+    questions:
+      - id: problem_statement
+        question: "What problem are you solving? Describe the pain point in detail."
+        type: open
+        required: true
+        priority: critical
+        guidance: |
+          A good problem statement includes:
+          - Who has this problem
+          - What they're trying to do
+          - Why it's difficult today
+          - The impact of not solving it
+        follow_ups:
+          - "Who experiences this pain most acutely?"
+          - "How are they solving it today (workarounds)?"
+          - "What's the cost of not solving this problem?"
+
+      - id: solution_vision
+        question: "In one sentence, what is your solution?"
+        type: open
+        required: true
+        priority: critical
+        validation: "Should be concise and directly address the problem"
+
+      - id: project_type
+        question: "What type of project is this?"
+        type: single_choice
+        required: true
+        priority: critical
+        options:
+          - id: saas
+            label: "SaaS Platform"
+            description: "Multi-tenant web application with subscriptions"
+            archetype: saas-mvp
+          - id: api
+            label: "API Service"
+            description: "Backend service consumed by other applications"
+            archetype: api-service
+          - id: cli
+            label: "CLI Tool"
+            description: "Command-line utility for developers/ops"
+            archetype: cli-tool
+          - id: library
+            label: "Library/SDK"
+            description: "Reusable code package for other developers"
+            archetype: library
+          - id: fullstack
+            label: "Full-Stack App"
+            description: "Web application with frontend and backend"
+            archetype: fullstack-app
+          - id: mobile
+            label: "Mobile App"
+            description: "iOS/Android application"
+            archetype: mobile-app
+          - id: other
+            label: "Other"
+            description: "Describe your project type"
+            requires_input: true
+
+      - id: business_model
+        question: "How will this make money (or provide value)?"
+        type: single_choice
+        required: true
+        priority: high
+        options:
+          - id: subscription
+            label: "Subscription (SaaS)"
+            description: "Monthly/yearly recurring revenue"
+            enables: [payments, billing]
+          - id: usage
+            label: "Usage-Based"
+            description: "Pay per API call, storage, compute, etc."
+            enables: [payments, metering]
+          - id: one_time
+            label: "One-Time Purchase"
+            description: "Single payment for license"
+            enables: [payments]
+          - id: freemium
+            label: "Freemium"
+            description: "Free tier with paid upgrades"
+            enables: [payments, tiers]
+          - id: open_source
+            label: "Open Source"
+            description: "Free, monetize through support/hosting"
+            disables: [payments]
+          - id: internal
+            label: "Internal Tool"
+            description: "No direct revenue, productivity gains"
+            disables: [payments]
+          - id: other
+            label: "Other"
+            requires_input: true
+
+      - id: differentiator
+        question: "What makes your solution different from existing alternatives?"
+        type: open
+        required: true
+        priority: high
+        guidance: "Consider: speed, cost, ease of use, features, target audience"
+
+      - id: timeline
+        question: "What are your time constraints?"
+        type: single_choice
+        required: true
+        priority: high
+        options:
+          - id: asap
+            label: "ASAP (Days)"
+            description: "Need MVP in 3-7 days"
+            scope_limit: minimal
+          - id: weeks
+            label: "2-4 Weeks"
+            description: "Standard MVP timeline"
+            scope_limit: mvp
+          - id: months
+            label: "1-3 Months"
+            description: "Full feature set needed"
+            scope_limit: full
+          - id: quarter
+            label: "3-6 Months"
+            description: "Enterprise-grade required"
+            scope_limit: enterprise
+          - id: flexible
+            label: "No Hard Deadline"
+            description: "Quality over speed"
+            scope_limit: none
+
+      - id: hard_deadline
+        question: "Is there a specific date you need to hit?"
+        type: open
+        required: false
+        priority: medium
+        condition: "timeline != flexible"
+        guidance: "Examples: demo date, launch event, funding milestone"
+
+      - id: budget_constraints
+        question: "Any budget constraints for infrastructure/services?"
+        type: single_choice
+        required: false
+        priority: medium
+        options:
+          - id: free
+            label: "Free/Minimal"
+            description: "Use free tiers only"
+          - id: low
+            label: "Low ($0-50/month)"
+            description: "Small hobby budget"
+          - id: medium
+            label: "Medium ($50-500/month)"
+            description: "Startup budget"
+          - id: high
+            label: "High ($500+/month)"
+            description: "Enterprise budget"
+          - id: unlimited
+            label: "Not a constraint"
+            description: "Budget is flexible"
+
+  #############################################################################
+  # STAGE 2: USERS & PERSONAS
+  #############################################################################
+  - id: users
+    name: "Users & Personas"
+    description: "Understanding who will use the product"
+    icon: "users"
+
+    questions:
+      - id: primary_user_role
+        question: "Who is your primary user? What is their role?"
+        type: open
+        required: true
+        priority: critical
+        guidance: "Examples: developer, marketer, small business owner, etc."
+
+      - id: primary_user_technical
+        question: "How technical is your primary user?"
+        type: single_choice
+        required: true
+        priority: high
+        options:
+          - id: non_technical
+            label: "Non-technical"
+            description: "No coding knowledge, needs simple UI"
+          - id: semi_technical
+            label: "Semi-technical"
+            description: "Comfortable with tools, no coding"
+          - id: technical
+            label: "Technical"
+            description: "Can read code, use APIs"
+          - id: developer
+            label: "Developer"
+            description: "Writes code professionally"
+          - id: devops
+            label: "DevOps/Platform"
+            description: "Infrastructure and automation focus"
+
+      - id: primary_user_goals
+        question: "What does your primary user want to achieve?"
+        type: open
+        required: true
+        priority: critical
+        guidance: "What job are they trying to get done?"
+
+      - id: primary_user_frustrations
+        question: "What frustrates them about current solutions?"
+        type: open
+        required: true
+        priority: high
+
+      - id: secondary_users
+        question: "Are there other types of users?"
+        type: multi_choice
+        required: false
+        priority: medium
+        options:
+          - id: admin
+            label: "Admin/Super User"
+            description: "Manages other users, elevated permissions"
+          - id: developer
+            label: "Developer/Integrator"
+            description: "Uses API/SDK to build on top"
+          - id: end_customer
+            label: "End Customer"
+            description: "Uses product built by primary user"
+          - id: support
+            label: "Support Staff"
+            description: "Handles customer issues"
+          - id: finance
+            label: "Finance/Billing"
+            description: "Manages payments and invoices"
+          - id: none
+            label: "No other users"
+            description: "Single user type only"
+
+      - id: user_scale
+        question: "Expected number of users?"
+        type: single_choice
+        required: true
+        priority: high
+        options:
+          - id: solo
+            label: "Just Me/Team"
+            description: "1-10 users"
+            scale: solo
+          - id: small
+            label: "Small"
+            description: "10-100 users"
+            scale: small
+          - id: medium
+            label: "Medium"
+            description: "100-10,000 users"
+            scale: medium
+          - id: large
+            label: "Large"
+            description: "10,000-1M users"
+            scale: large
+          - id: massive
+            label: "Massive"
+            description: "1M+ users"
+            scale: massive
+
+      - id: concurrent_users
+        question: "Peak concurrent users expected?"
+        type: open
+        required: false
+        priority: medium
+        condition: "user_scale in [medium, large, massive]"
+
+      - id: user_geography
+        question: "Where are your users located?"
+        type: multi_choice
+        required: false
+        priority: low
+        options:
+          - id: local
+            label: "Single Region"
+            description: "One country/region"
+          - id: multi_region
+            label: "Multiple Regions"
+            description: "Several countries"
+          - id: global
+            label: "Global"
+            description: "Worldwide users"
+
+  #############################################################################
+  # STAGE 3: FEATURES & SCOPE
+  #############################################################################
+  - id: features
+    name: "Features & Scope"
+    description: "Defining what will be built"
+    icon: "list-check"
+
+    questions:
+      - id: core_features
+        question: "List the core features that are absolutely essential for v1.0"
+        type: feature_list
+        required: true
+        priority: critical
+        guidance: |
+          For each feature, think about:
+          - What user need does it address?
+          - Is it truly essential for v1?
+          - What's the minimum viable version?
+        structure:
+          - name: "Feature name"
+          - description: "What it does"
+          - priority: "P0 (Critical) / P1 (Important) / P2 (Nice to have)"
+          - user_story: "As a [user], I want to [action] so that [benefit]"
+
+      - id: feature_categories
+        question: "Which feature categories apply to your project?"
+        type: multi_choice
+        required: true
+        priority: high
+        options:
+          - id: auth
+            label: "Authentication"
+            description: "Login, signup, password reset, OAuth"
+            features: [login, signup, password_reset, oauth]
+          - id: user_management
+            label: "User Management"
+            description: "Profiles, roles, permissions, teams"
+            features: [profiles, roles, permissions]
+          - id: payments
+            label: "Payments & Billing"
+            description: "Subscriptions, invoices, refunds"
+            features: [checkout, subscriptions, invoices]
+            condition: "business_model != open_source && business_model != internal"
+          - id: notifications
+            label: "Notifications"
+            description: "Email, push, in-app notifications"
+            features: [email, push, in_app]
+          - id: admin
+            label: "Admin Dashboard"
+            description: "User management, analytics, settings"
+            features: [admin_users, admin_analytics]
+          - id: api
+            label: "Public API"
+            description: "REST/GraphQL API for integrations"
+            features: [rest_api, api_docs]
+          - id: reporting
+            label: "Reporting & Analytics"
+            description: "Dashboards, exports, insights"
+            features: [dashboards, exports]
+          - id: search
+            label: "Search"
+            description: "Full-text search, filters, facets"
+            features: [search, filters]
+          - id: files
+            label: "File Management"
+            description: "Upload, storage, processing"
+            features: [upload, storage]
+          - id: realtime
+            label: "Real-time Features"
+            description: "WebSockets, live updates, presence"
+            features: [websockets, live_updates]
+          - id: collaboration
+            label: "Collaboration"
+            description: "Multi-user editing, comments, sharing"
+            features: [sharing, comments]
+          - id: i18n
+            label: "Internationalization"
+            description: "Multiple languages support"
+            features: [translations]
+
+      - id: nice_to_have
+        question: "What features would be nice to have but aren't essential for v1?"
+        type: feature_list
+        required: false
+        priority: medium
+
+      - id: out_of_scope
+        question: "What is explicitly OUT of scope for v1?"
+        type: open
+        required: true
+        priority: high
+        guidance: |
+          This is as important as what's in scope. List:
+          - Features requested but deferred
+          - Obvious features that won't be included
+          - Strategic exclusions
+
+      - id: performance_requirements
+        question: "What are your performance requirements?"
+        type: single_choice
+        required: false
+        priority: medium
+        options:
+          - id: relaxed
+            label: "Relaxed"
+            description: "Response time under 2 seconds is fine"
+          - id: standard
+            label: "Standard"
+            description: "Response time under 500ms"
+          - id: fast
+            label: "Fast"
+            description: "Response time under 100ms"
+          - id: realtime
+            label: "Real-time"
+            description: "Sub-50ms for interactive features"
+
+      - id: availability_requirements
+        question: "What availability level do you need?"
+        type: single_choice
+        required: false
+        priority: medium
+        options:
+          - id: basic
+            label: "Basic (99%)"
+            description: "Up to 3.6 days downtime/year"
+          - id: standard
+            label: "Standard (99.9%)"
+            description: "Up to 8.7 hours downtime/year"
+          - id: high
+            label: "High (99.99%)"
+            description: "Up to 52 minutes downtime/year"
+
+      - id: security_requirements
+        question: "What security/compliance requirements apply?"
+        type: multi_choice
+        required: false
+        priority: high
+        options:
+          - id: basic
+            label: "Basic Security"
+            description: "Standard authentication, HTTPS"
+          - id: soc2
+            label: "SOC 2"
+            description: "Service organization controls"
+          - id: gdpr
+            label: "GDPR"
+            description: "EU data protection"
+          - id: hipaa
+            label: "HIPAA"
+            description: "Healthcare data protection"
+          - id: pci
+            label: "PCI-DSS"
+            description: "Payment card data security"
+
+      - id: accessibility_requirements
+        question: "What accessibility level do you need?"
+        type: single_choice
+        required: false
+        priority: medium
+        options:
+          - id: none
+            label: "None Specified"
+            description: "No specific requirements"
+          - id: wcag_a
+            label: "WCAG A"
+            description: "Minimum accessibility"
+          - id: wcag_aa
+            label: "WCAG AA"
+            description: "Standard accessibility (recommended)"
+          - id: wcag_aaa
+            label: "WCAG AAA"
+            description: "Highest accessibility"
+
+      - id: success_metrics
+        question: "How will you measure success?"
+        type: metrics_list
+        required: true
+        priority: high
+        guidance: "Define specific, measurable targets"
+        structure:
+          - metric: "What to measure"
+          - target: "Target value"
+          - timeline: "When to achieve"
+        examples:
+          - metric: "Monthly Active Users"
+            target: "1,000"
+            timeline: "3 months post-launch"
+          - metric: "Conversion Rate"
+            target: "5%"
+            timeline: "6 months post-launch"
+
+  #############################################################################
+  # STAGE 4: TECHNICAL CONTEXT
+  #############################################################################
+  - id: technical
+    name: "Technical Context"
+    description: "Establishing technical requirements and constraints"
+    icon: "code"
+
+    questions:
+      - id: frontend_preference
+        question: "Do you have a frontend framework preference?"
+        type: single_choice
+        required: false
+        priority: medium
+        condition: "project_type != api && project_type != cli && project_type != library"
+        options:
+          - id: nextjs
+            label: "Next.js"
+            description: "React framework with SSR, recommended for most projects"
+            recommended: true
+          - id: react
+            label: "React (Vite)"
+            description: "React SPA with Vite bundler"
+          - id: vue
+            label: "Vue.js"
+            description: "Progressive JavaScript framework"
+          - id: svelte
+            label: "SvelteKit"
+            description: "Svelte framework with SSR"
+          - id: none
+            label: "No Preference"
+            description: "Let me recommend based on requirements"
+          - id: other
+            label: "Other"
+            requires_input: true
+
+      - id: backend_preference
+        question: "Do you have a backend language/framework preference?"
+        type: single_choice
+        required: false
+        priority: medium
+        condition: "project_type != cli"
+        options:
+          - id: nodejs
+            label: "Node.js (Express/Fastify)"
+            description: "JavaScript/TypeScript backend"
+          - id: nextjs_api
+            label: "Next.js API Routes"
+            description: "Serverless functions in Next.js"
+          - id: python
+            label: "Python (FastAPI)"
+            description: "Fast, modern Python API"
+          - id: go
+            label: "Go"
+            description: "High-performance compiled language"
+          - id: none
+            label: "No Preference"
+            description: "Let me recommend based on requirements"
+          - id: other
+            label: "Other"
+            requires_input: true
+
+      - id: database_preference
+        question: "Do you have a database preference?"
+        type: single_choice
+        required: false
+        priority: medium
+        options:
+          - id: postgresql
+            label: "PostgreSQL"
+            description: "Robust relational database, recommended"
+            recommended: true
+          - id: mysql
+            label: "MySQL"
+            description: "Popular relational database"
+          - id: mongodb
+            label: "MongoDB"
+            description: "Document database"
+          - id: sqlite
+            label: "SQLite"
+            description: "Embedded database, good for small projects"
+          - id: supabase
+            label: "Supabase"
+            description: "Postgres with realtime and auth built-in"
+          - id: none
+            label: "No Preference"
+            description: "Let me recommend based on requirements"
+
+      - id: auth_preference
+        question: "Do you have an authentication preference?"
+        type: single_choice
+        required: false
+        priority: medium
+        condition: "auth in feature_categories"
+        options:
+          - id: custom
+            label: "Custom Implementation"
+            description: "Build auth from scratch"
+          - id: nextauth
+            label: "NextAuth.js"
+            description: "Authentication for Next.js"
+          - id: clerk
+            label: "Clerk"
+            description: "Drop-in auth with UI components"
+          - id: auth0
+            label: "Auth0"
+            description: "Enterprise auth platform"
+          - id: supabase
+            label: "Supabase Auth"
+            description: "Auth included with Supabase"
+          - id: none
+            label: "No Preference"
+
+      - id: hosting_preference
+        question: "Where do you want to host this?"
+        type: single_choice
+        required: false
+        priority: medium
+        options:
+          - id: vercel
+            label: "Vercel"
+            description: "Best for Next.js, easy deployment"
+            recommended_for: [nextjs]
+          - id: railway
+            label: "Railway"
+            description: "Simple full-stack hosting"
+          - id: fly
+            label: "Fly.io"
+            description: "Edge deployment, good for global apps"
+          - id: aws
+            label: "AWS"
+            description: "Full cloud infrastructure"
+          - id: gcp
+            label: "Google Cloud"
+            description: "Google's cloud platform"
+          - id: self_hosted
+            label: "Self-Hosted"
+            description: "Your own servers"
+          - id: none
+            label: "No Preference"
+
+      - id: payment_provider
+        question: "Which payment provider do you prefer?"
+        type: single_choice
+        required: false
+        priority: medium
+        condition: "payments in feature_categories"
+        options:
+          - id: stripe
+            label: "Stripe"
+            description: "Most popular, excellent DX"
+            recommended: true
+          - id: paddle
+            label: "Paddle"
+            description: "Merchant of record (handles taxes)"
+          - id: lemonsqueezy
+            label: "LemonSqueezy"
+            description: "Simple, indie-friendly"
+          - id: none
+            label: "No Preference"
+
+      - id: existing_systems
+        question: "Are there existing systems you need to integrate with?"
+        type: integration_list
+        required: false
+        priority: medium
+        structure:
+          - system: "System name"
+          - type: "API / Database / File / Manual"
+          - direction: "Read / Write / Both"
+          - critical: "Yes / No"
+          - docs_url: "Documentation URL if available"
+
+      - id: data_residency
+        question: "Any data residency requirements?"
+        type: single_choice
+        required: false
+        priority: medium
+        condition: "user_geography != local"
+        options:
+          - id: none
+            label: "No Requirements"
+            description: "Data can be stored anywhere"
+          - id: us
+            label: "US Only"
+            description: "Data must stay in US"
+          - id: eu
+            label: "EU Only"
+            description: "Data must stay in EU (GDPR)"
+          - id: specific
+            label: "Specific Countries"
+            requires_input: true
+
+      - id: offline_capability
+        question: "Does the app need to work offline?"
+        type: single_choice
+        required: false
+        priority: low
+        options:
+          - id: no
+            label: "No"
+            description: "Always requires internet"
+          - id: partial
+            label: "Partial"
+            description: "Some features work offline"
+          - id: full
+            label: "Full"
+            description: "Fully functional offline with sync"
+
+  #############################################################################
+  # STAGE 5: RISK ASSESSMENT & VALIDATION
+  #############################################################################
+  - id: risks
+    name: "Risk Assessment & Validation"
+    description: "Identifying risks and planning validation"
+    icon: "shield"
+
+    questions:
+      - id: biggest_technical_risk
+        question: "What's your biggest technical risk?"
+        type: open
+        required: true
+        priority: high
+        guidance: |
+          Common technical risks:
+          - Performance at scale
+          - Third-party API reliability
+          - Complex integrations
+          - New technology learning curve
+
+      - id: biggest_market_risk
+        question: "What's your biggest market/business risk?"
+        type: open
+        required: true
+        priority: high
+        guidance: |
+          Common market risks:
+          - Users don't want this
+          - Can't differentiate from competitors
+          - Pricing is wrong
+          - Can't reach target users
+
+      - id: assumptions
+        question: "What are you assuming to be true?"
+        type: open
+        required: true
+        priority: high
+        guidance: |
+          List assumptions that, if wrong, would change the project:
+          - User behavior assumptions
+          - Technical feasibility
+          - Market conditions
+          - Resource availability
+
+      - id: validation_approach
+        question: "How will you validate before building too much?"
+        type: multi_choice
+        required: false
+        priority: medium
+        options:
+          - id: user_interviews
+            label: "User Interviews"
+            description: "Talk to potential users"
+          - id: landing_page
+            label: "Landing Page"
+            description: "Gauge interest with a coming soon page"
+          - id: prototype
+            label: "Prototype/Mockup"
+            description: "Visual prototype before coding"
+          - id: mvp
+            label: "Working MVP"
+            description: "Minimal version to test with real users"
+          - id: beta
+            label: "Beta Program"
+            description: "Early access for select users"
+          - id: none
+            label: "Ship and Learn"
+            description: "Build and iterate based on usage"
+
+      - id: mvp_definition
+        question: "What's the absolute minimum to validate the idea?"
+        type: open
+        required: true
+        priority: critical
+        guidance: |
+          A good MVP:
+          - Solves the core problem for one persona
+          - Can be built in 2-4 weeks
+          - Provides clear signal of success/failure
+          - Is something you're willing to show users
+
+      - id: launch_criteria
+        question: "What must be true before you consider this 'launched'?"
+        type: open
+        required: false
+        priority: medium
+        guidance: "What's the minimum bar for a public launch?"
+
+# Output configuration
+output:
+  format: prd
+  template: prd-template.md
+  save_answers: true
+  generate_spec: true

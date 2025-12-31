@@ -923,6 +923,7 @@ function formatCategoryName(cat) {
  */
 const SKILL_CATEGORIES = {
   'ai-engineering': { icon: 'microchip', description: 'AI/ML engineering patterns and best practices' },
+  autonomous: { icon: 'robot', description: 'Autonomous project development orchestration' },
   backend: { icon: 'server', description: 'Backend architecture and API patterns' },
   databases: { icon: 'database', description: 'Database design and optimization' },
   devops: { icon: 'cloud', description: 'Infrastructure, containers, and CI/CD' },
@@ -1049,7 +1050,7 @@ OMGKIT detects and activates this skill when it finds:
     skillsByCategory[skill.category].push(skill);
   }
 
-  const categoryOrder = ['ai-engineering', 'languages', 'frameworks', 'backend', 'databases', 'frontend', 'mobile', 'devops', 'security', 'testing', 'tools', 'integrations', 'methodology', 'omega'];
+  const categoryOrder = ['ai-engineering', 'autonomous', 'languages', 'frameworks', 'backend', 'databases', 'frontend', 'mobile', 'devops', 'security', 'testing', 'tools', 'integrations', 'methodology', 'omega'];
 
   const overviewDoc = `---
 title: "Skills Overview"

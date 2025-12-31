@@ -1,0 +1,417 @@
+name: "SaaS MVP"
+id: saas-mvp
+description: "Multi-tenant SaaS application with authentication, core features, and optional payments"
+estimated_duration: "2-4 weeks"
+icon: "cloud"
+
+# Default technology recommendations
+defaults:
+  frontend: nextjs
+  backend: nextjs_api
+  database: postgresql
+  auth: nextauth
+  hosting: vercel
+  payments: stripe
+  styling: tailwindcss
+  components: shadcn
+
+# Phases of development
+phases:
+  #############################################################################
+  # PHASE 1: DISCOVERY
+  #############################################################################
+  - id: discovery
+    name: "Discovery & Requirements"
+    description: "Gather and document all requirements"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      Discovery is complete. Please review the generated PRD and technical specification.
+
+      Approve to proceed with planning, or provide feedback to refine requirements.
+
+    steps:
+      - id: requirements_gathering
+        name: "Requirements Gathering"
+        agent: planner
+        command: "/auto:init"
+        description: "Conduct structured discovery interview"
+
+      - id: prd_generation
+        name: "PRD Generation"
+        agent: planner
+        description: "Generate PRD from discovery answers"
+
+      - id: tech_spec
+        name: "Technical Specification"
+        agent: architect
+        description: "Create technical specification based on PRD"
+
+    outputs:
+      - ".omgkit/generated/prd.md"
+      - ".omgkit/generated/technical-spec.md"
+      - ".omgkit/state.yaml"
+
+  #############################################################################
+  # PHASE 2: PLANNING
+  #############################################################################
+  - id: planning
+    name: "Architecture & Design"
+    description: "Design the system architecture and data models"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Architecture and design phase is complete. Review:
+      - Database schema
+      - API design
+      - System architecture
+
+      Approve to begin implementation.
+
+    steps:
+      - id: database_design
+        name: "Database Schema Design"
+        agent: database-admin
+        workflow: schema-design
+        description: "Design the database schema"
+
+      - id: api_design
+        name: "API Design"
+        agent: api-designer
+        workflow: api-design
+        description: "Design the REST/GraphQL API"
+
+      - id: architecture
+        name: "System Architecture"
+        agent: architect
+        description: "Define system architecture and component structure"
+
+      - id: sprint_planning
+        name: "Sprint Planning"
+        agent: sprint-master
+        description: "Break down work into sprints"
+
+    outputs:
+      - ".omgkit/generated/schema.sql"
+      - ".omgkit/generated/openapi.yaml"
+      - ".omgkit/generated/architecture.md"
+      - ".omgkit/generated/sprint-plan.md"
+
+  #############################################################################
+  # PHASE 3: FOUNDATION
+  #############################################################################
+  - id: foundation
+    name: "Project Foundation"
+    description: "Set up project structure and core infrastructure"
+    order: 3
+
+    features:
+      - id: project_setup
+        name: "Project Scaffolding"
+        auto: true
+        checkpoint: false
+        steps:
+          - agent: fullstack-developer
+            action: "Initialize project with chosen stack"
+          - agent: fullstack-developer
+            action: "Set up development environment"
+          - agent: fullstack-developer
+            action: "Configure linting, formatting, TypeScript"
+          - agent: tester
+            action: "Set up testing framework"
+
+      - id: database_setup
+        name: "Database Setup"
+        auto: true
+        checkpoint: false
+        steps:
+          - agent: database-admin
+            action: "Set up database connection"
+          - agent: database-admin
+            action: "Create initial migrations"
+          - agent: database-admin
+            action: "Set up ORM/query builder"
+
+      - id: authentication
+        name: "Authentication System"
+        checkpoint: true
+        checkpoint_message: "Authentication system complete. Review before proceeding."
+        workflows:
+          - authentication
+          - test
+          - code-review
+        steps:
+          - agent: fullstack-developer
+            action: "Implement authentication"
+          - agent: tester
+            action: "Write auth tests"
+          - agent: security-auditor
+            action: "Review auth security"
+
+  #############################################################################
+  # PHASE 4: CORE FEATURES
+  #############################################################################
+  - id: core
+    name: "Core Features"
+    description: "Implement main application features"
+    order: 4
+    dynamic: true  # Features come from PRD
+
+    per_feature:
+      workflows:
+        - feature
+        - test
+        - code-review
+
+      checkpoint_conditions:
+        - pattern: "**/payment*/**"
+          message: "Payment feature complete. Security review required."
+        - pattern: "**/auth*/**"
+          message: "Auth-related feature complete. Security review required."
+        - flag: security-critical
+          message: "Security-critical feature. Review required."
+        - flag: user-data
+          message: "Feature handles user data. Privacy review required."
+
+      quality_gates:
+        - command: "npm run test"
+          required: true
+        - command: "npm run lint"
+          required: true
+        - command: "npm run typecheck"
+          required: true
+
+  #############################################################################
+  # PHASE 5: PAYMENTS (OPTIONAL)
+  #############################################################################
+  - id: payments
+    name: "Payment Integration"
+    description: "Integrate payment processing"
+    order: 5
+    condition: "has_payments"
+    checkpoint: true
+    checkpoint_message: |
+      Payment integration complete. This is a critical feature.
+
+      Please review:
+      - Stripe integration
+      - Subscription handling
+      - Webhook processing
+      - Security measures
+
+    features:
+      - id: stripe_setup
+        name: "Stripe Setup"
+        steps:
+          - agent: fullstack-developer
+            action: "Install and configure Stripe SDK"
+          - agent: fullstack-developer
+            action: "Set up webhook endpoint"
+
+      - id: checkout
+        name: "Checkout Flow"
+        steps:
+          - agent: fullstack-developer
+            action: "Implement checkout session creation"
+          - agent: fullstack-developer
+            action: "Handle successful payments"
+
+      - id: subscriptions
+        name: "Subscription Management"
+        condition: "business_model == subscription"
+        steps:
+          - agent: fullstack-developer
+            action: "Implement subscription creation"
+          - agent: fullstack-developer
+            action: "Handle subscription changes"
+          - agent: fullstack-developer
+            action: "Implement cancellation flow"
+
+      - id: billing_portal
+        name: "Customer Portal"
+        steps:
+          - agent: fullstack-developer
+            action: "Set up Stripe customer portal"
+
+    workflows:
+      - payment-integration
+      - test
+      - security-audit
+
+  #############################################################################
+  # PHASE 6: HARDENING
+  #############################################################################
+  - id: hardening
+    name: "Security & Performance"
+    description: "Harden the application for production"
+    order: 6
+    checkpoint: true
+    checkpoint_message: |
+      Hardening complete. Review security and performance reports before deployment.
+
+    steps:
+      - id: security_audit
+        name: "Security Audit"
+        agent: security-auditor
+        workflow: security-audit
+
+      - id: performance_optimization
+        name: "Performance Optimization"
+        agent: fullstack-developer
+        workflow: performance-optimization
+
+      - id: error_handling
+        name: "Error Handling & Logging"
+        agent: fullstack-developer
+        description: "Implement comprehensive error handling"
+
+      - id: monitoring_setup
+        name: "Monitoring Setup"
+        agent: fullstack-developer
+        description: "Set up monitoring and alerting"
+
+  #############################################################################
+  # PHASE 7: DEPLOYMENT
+  #############################################################################
+  - id: deployment
+    name: "Deployment"
+    description: "Deploy to production"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      Ready for deployment!
+
+      Pre-deployment checklist:
+      - All tests passing
+      - Security audit complete
+      - Performance optimized
+      - Monitoring configured
+
+      Approve to deploy to production.
+
+    steps:
+      - id: environment_setup
+        name: "Environment Setup"
+        agent: cicd-manager
+        description: "Configure production environment"
+
+      - id: ci_cd_setup
+        name: "CI/CD Pipeline"
+        agent: cicd-manager
+        description: "Set up deployment pipeline"
+
+      - id: staging_deploy
+        name: "Staging Deployment"
+        agent: cicd-manager
+        description: "Deploy to staging environment"
+
+      - id: production_deploy
+        name: "Production Deployment"
+        agent: cicd-manager
+        checkpoint: true
+        description: "Deploy to production"
+
+# Quality gates that run automatically
+quality_gates:
+  after_code_change:
+    - command: "npm run typecheck"
+      name: "Type Check"
+      required: true
+    - command: "npm run lint"
+      name: "Linting"
+      required: false  # Warn but don't block
+
+  after_feature:
+    - command: "npm run test"
+      name: "Unit Tests"
+      required: true
+    - command: "npm run test:coverage"
+      name: "Coverage Check"
+      threshold: 80
+      required: false
+
+  before_checkpoint:
+    - command: "npm run build"
+      name: "Build"
+      required: true
+    - command: "npm run test"
+      name: "All Tests"
+      required: true
+    - command: "npm run security:scan"
+      name: "Security Scan"
+      required: true
+
+  before_deploy:
+    - all_tests_pass: true
+    - coverage_threshold: 80
+    - no_critical_vulnerabilities: true
+    - changelog_updated: true
+
+# Autonomy configuration
+autonomy:
+  default_level: 1  # Notify by default
+
+  rules:
+    # Full auto (Level 0)
+    - patterns:
+        - "*.md"
+        - "*.json"
+        - ".eslintrc*"
+        - ".prettierrc*"
+      level: 0
+      reason: "Configuration and documentation"
+
+    # Notify (Level 1)
+    - patterns:
+        - "**/*.test.*"
+        - "**/*.spec.*"
+      level: 1
+      reason: "Test files"
+
+    # Confirm (Level 2)
+    - actions:
+        - "npm install"
+        - "pnpm add"
+      level: 2
+      reason: "New dependencies"
+
+    - patterns:
+        - "**/api/**"
+        - "**/routes/**"
+      level: 2
+      reason: "API changes"
+
+    # Checkpoint (Level 3)
+    - patterns:
+        - "**/migrations/**"
+        - "**/schema.*"
+      level: 3
+      reason: "Database changes"
+
+    - patterns:
+        - "**/auth/**"
+        - "**/login/**"
+        - "**/signup/**"
+      level: 3
+      reason: "Authentication code"
+
+    - patterns:
+        - "**/payment*/**"
+        - "**/billing/**"
+        - "**/subscription*/**"
+      level: 3
+      reason: "Payment code"
+
+    # Block (Level 4)
+    - actions:
+        - "delete"
+        - "rm -rf"
+        - "drop table"
+      level: 4
+      reason: "Destructive operations"
+
+    - patterns:
+        - ".env*"
+        - "**/secrets/**"
+      level: 4
+      reason: "Secrets and credentials"

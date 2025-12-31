@@ -1,0 +1,278 @@
+---
+description: Preview and execute the next autonomous action
+allowed-tools: Task, Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+argument-hint: "[--preview | --execute | --skip]"
+---
+
+# Next Autonomous Action
+
+Preview or execute the next action in the autonomous workflow.
+
+## Modes
+
+### Preview Mode (Default)
+Show what the next action will be without executing:
+```bash
+/auto:next
+/auto:next --preview
+```
+
+### Execute Mode
+Execute the next single action:
+```bash
+/auto:next --execute
+```
+
+### Skip Mode
+Skip the next action and move forward:
+```bash
+/auto:next --skip
+```
+
+## Action Determination
+
+### 1. Load Current State
+
+```yaml
+phase: "backend"
+status: "in_progress"
+progress:
+  current_feature: "user_authentication"
+  current_step: "implement_password_hashing"
+  steps_completed: ["create_user_model", "add_validation"]
+```
+
+### 2. Determine Next Action
+
+From archetype and feature list:
+1. If current step incomplete → Complete current step
+2. If current step complete → Next step in feature
+3. If feature complete → Next feature in phase
+4. If phase complete → Check quality gates
+5. If gates pass → Next phase (or checkpoint)
+
+### 3. Calculate Action Details
+
+```yaml
+next_action:
+  type: "implement"  # implement | test | review | checkpoint | quality_gate
+  target: "password hashing utility"
+  phase: "backend"
+  feature: "user_authentication"
+  step: "implement_password_hashing"
+
+  details:
+    files_to_create:
+      - "src/utils/password.ts"
+    files_to_modify:
+      - "src/services/user.service.ts"
+    tests_to_run:
+      - "password.test.ts"
+
+  autonomy_level: 1
+  estimated_complexity: "low"
+```
+
+## Preview Output
+
+```
+## Next Action Preview
+
+### Action: Implement Password Hashing
+
+**Type:** Implementation
+**Phase:** Backend > User Authentication
+**Step:** 3 of 7
+**Autonomy Level:** 1 (Execute with notification)
+
+### What Will Be Done
+
+1. **Create** `src/utils/password.ts`
+   - hashPassword(plain: string): Promise<string>
+   - verifyPassword(plain: string, hash: string): Promise<boolean>
+   - Using bcrypt with cost factor 12
+
+2. **Modify** `src/services/user.service.ts`
+   - Import password utilities
+   - Hash password in create() method
+   - Add password verification in login()
+
+3. **Create Tests** `src/utils/password.test.ts`
+   - Test password hashing
+   - Test password verification
+   - Test invalid inputs
+
+### Dependencies
+- bcrypt: Already installed ✓
+- @types/bcrypt: Already installed ✓
+
+### After This Step
+- Next: Implement login endpoint
+- Remaining in feature: 4 steps
+- Quality gate: npm test (required)
+
+---
+
+**Commands:**
+- `/auto:next --execute` - Execute this action
+- `/auto:next --skip` - Skip this action
+- `/auto:start` - Continue autonomous execution
+```
+
+## Execute Output
+
+```
+## Executing: Implement Password Hashing
+
+### Progress
+
+[1/3] Creating src/utils/password.ts...
+      ✓ Created with hashPassword and verifyPassword functions
+
+[2/3] Modifying src/services/user.service.ts...
+      ✓ Added password hashing in create()
+      ✓ Added password verification in login()
+
+[3/3] Creating tests...
+      ✓ Created src/utils/password.test.ts
+
+### Running Quality Gate
+
+```
+npm test -- password.test.ts
+
+  Password Utilities
+    ✓ should hash password (45ms)
+    ✓ should verify correct password (42ms)
+    ✓ should reject incorrect password (41ms)
+    ✓ should handle empty input (2ms)
+
+  4 passing (130ms)
+```
+
+### Action Complete ✓
+
+**Files Created:** 2
+**Files Modified:** 1
+**Tests Passing:** 4/4
+
+### Next Action
+Implement login endpoint
+
+**Commands:**
+- `/auto:next` - Preview next action
+- `/auto:next --execute` - Execute next action
+- `/auto:start` - Continue autonomous execution
+```
+
+## Skip Output
+
+```
+## Skipping: Implement Password Hashing
+
+**Reason:** User requested skip
+
+### Impact
+- Step marked as SKIPPED
+- May cause issues in dependent steps
+- Manual completion required later
+
+### State Updated
+```yaml
+progress:
+  skipped_steps:
+    - step: "implement_password_hashing"
+      reason: "user_skip"
+      timestamp: "2024-01-15T10:30:00Z"
+```
+
+### Warning
+The following steps may be affected:
+- implement_login_endpoint (depends on password verification)
+- implement_password_reset (depends on password hashing)
+
+### Next Action
+Implement login endpoint
+
+---
+
+**Note:** Skipped steps are tracked and must be completed before deployment.
+```
+
+## Special Cases
+
+### At Checkpoint
+```
+## Next Action: Checkpoint
+
+**Phase Complete:** Planning
+
+Before continuing, review is required:
+
+### Generated Artifacts
+- `.omgkit/generated/schema.sql`
+- `.omgkit/generated/api-spec.md`
+
+### Quality Gates Passed
+- ✓ Schema validation
+- ✓ API spec validation
+
+---
+
+**Commands:**
+- `/auto:approve` - Approve and continue
+- `/auto:reject "feedback"` - Request changes
+```
+
+### At Phase Boundary
+```
+## Next Action: Start New Phase
+
+**Completed:** Planning Phase
+**Starting:** Foundation Phase
+
+### Phase Overview: Foundation
+1. Project scaffolding (auto)
+2. Database setup (auto)
+3. UI foundation (auto)
+
+**Estimated:** 3 automated steps
+
+---
+
+**Commands:**
+- `/auto:next --execute` - Start foundation phase
+- `/auto:checkpoint` - Pause for review first
+```
+
+### No More Actions
+```
+## Project Complete! 🎉
+
+All phases have been completed.
+
+### Summary
+- **Phases Completed:** 8/8
+- **Features Implemented:** 12
+- **Tests Passing:** 47/47
+- **Coverage:** 84%
+
+### Final Quality Gates
+- ✓ All tests pass
+- ✓ Build succeeds
+- ✓ Coverage > 80%
+- ✓ No security issues
+
+### Generated Project
+[Project structure and key files]
+
+### Next Steps
+1. Review the complete implementation
+2. Deploy to staging environment
+3. Conduct user testing
+
+---
+
+**Commands:**
+- `/auto:status --verbose` - Full project report
+```

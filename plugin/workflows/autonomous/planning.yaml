@@ -1,0 +1,244 @@
+# Planning Workflow
+# Design phase of autonomous project development
+
+name: Planning
+id: planning
+description: Design system architecture, schema, and API from PRD
+category: autonomous
+version: "1.0.0"
+
+# Workflow metadata
+metadata:
+  phase: planning
+  order: 2
+  checkpoint: true
+  depends_on: [discovery]
+  estimated_duration: "15-30 minutes"
+
+# Input requirements
+inputs:
+  prd:
+    type: file
+    path: ".omgkit/generated/prd.md"
+    required: true
+    description: Product Requirements Document
+
+  technical_spec:
+    type: file
+    path: ".omgkit/generated/technical-spec.md"
+    required: true
+    description: Technical Specification
+
+# Output artifacts
+outputs:
+  - path: ".omgkit/generated/schema.sql"
+    description: Database schema
+    required: true
+    condition: "has_database"
+
+  - path: ".omgkit/generated/api-spec.md"
+    description: API specification
+    required: true
+    condition: "has_api"
+
+  - path: ".omgkit/generated/features.yaml"
+    description: Feature breakdown with implementation details
+    required: true
+
+  - path: ".omgkit/generated/wireframes.md"
+    description: UI wireframes
+    required: false
+    condition: "has_frontend"
+
+# Workflow steps
+steps:
+  - id: analyze_prd
+    name: Analyze PRD
+    description: Extract requirements from PRD
+    actions:
+      - Read PRD thoroughly
+      - Extract all features
+      - Identify data entities
+      - Map user flows
+      - Note integration points
+
+  - id: design_data_model
+    name: Design Data Model
+    description: Create database schema
+    condition: "has_database"
+    actions:
+      - Identify entities from features
+      - Define relationships
+      - Add timestamps and soft delete
+      - Create indexes
+      - Write schema.sql
+    output: ".omgkit/generated/schema.sql"
+    autonomy_level: 2
+    review_prompt: |
+      Review the database schema:
+      - Are all entities represented?
+      - Are relationships correct?
+      - Are indexes appropriate?
+
+  - id: design_api
+    name: Design API
+    description: Create API specification
+    condition: "has_api"
+    actions:
+      - Define endpoints for each feature
+      - Specify request/response formats
+      - Add authentication requirements
+      - Document error responses
+      - Write api-spec.md
+    output: ".omgkit/generated/api-spec.md"
+    autonomy_level: 2
+    review_prompt: |
+      Review the API specification:
+      - Are all CRUD operations covered?
+      - Is authentication handled?
+      - Are error codes defined?
+
+  - id: design_ui
+    name: Design UI Structure
+    description: Create wireframes and component list
+    condition: "has_frontend"
+    actions:
+      - Map user flows to pages
+      - Define component hierarchy
+      - Create ASCII wireframes
+      - List required components
+      - Write wireframes.md
+    output: ".omgkit/generated/wireframes.md"
+    autonomy_level: 1
+
+  - id: break_down_features
+    name: Break Down Features
+    description: Create detailed feature breakdown
+    actions:
+      - For each P0 feature:
+        - Define implementation steps
+        - List files to create/modify
+        - Specify tests needed
+        - Estimate complexity
+      - For each P1 feature:
+        - Define high-level approach
+        - List dependencies
+      - Write features.yaml
+    output: ".omgkit/generated/features.yaml"
+    schema: "plugin/templates/autonomous/features-schema.yaml"
+
+  - id: define_implementation_order
+    name: Define Implementation Order
+    description: Sequence features based on dependencies
+    actions:
+      - Build dependency graph
+      - Topological sort features
+      - Group by phase
+      - Identify parallel opportunities
+
+  - id: estimate_complexity
+    name: Estimate Complexity
+    description: Assess implementation complexity
+    actions:
+      - Rate each feature (trivial to very_high)
+      - Identify risk areas
+      - Flag potential blockers
+      - Note areas needing research
+
+  - id: update_state
+    name: Update State
+    description: Mark planning phase complete
+    actions:
+      - Update state.yaml
+      - Set phase to foundation
+      - Record planning decisions
+      - Set checkpoint pending
+
+  - id: checkpoint
+    name: Planning Checkpoint
+    description: Pause for design review
+    checkpoint: true
+    artifacts_to_review:
+      - ".omgkit/generated/schema.sql"
+      - ".omgkit/generated/api-spec.md"
+      - ".omgkit/generated/features.yaml"
+    actions:
+      - Display planning summary
+      - Show schema and API highlights
+      - Show feature breakdown
+      - Request approval to proceed
+
+# Templates used
+templates:
+  schema:
+    source: "plugin/templates/autonomous/schema-template.sql"
+    variables:
+      - entities
+      - relationships
+      - indexes
+
+  api_spec:
+    source: "plugin/templates/autonomous/api-spec-template.md"
+    variables:
+      - endpoints
+      - auth_type
+      - error_codes
+
+  features:
+    source: "plugin/templates/autonomous/features-schema.yaml"
+    variables:
+      - features
+      - priorities
+      - dependencies
+
+# Quality checks
+quality_checks:
+  - name: schema_valid
+    check: SQL syntax is valid
+    required: true
+    condition: "has_database"
+
+  - name: api_complete
+    check: All P0 features have endpoints
+    required: true
+    condition: "has_api"
+
+  - name: features_sequenced
+    check: No circular dependencies
+    required: true
+
+  - name: complexity_assessed
+    check: All features have complexity rating
+    required: true
+
+# Decision points
+decisions:
+  - id: database_indexing
+    description: Index strategy for primary queries
+    autonomy_level: 2
+    options:
+      - name: Minimal indexes
+        description: Only primary keys and foreign keys
+      - name: Query-optimized
+        description: Indexes based on expected query patterns
+      - name: Full coverage
+        description: Index all frequently queried columns
+
+  - id: api_versioning
+    description: API versioning strategy
+    autonomy_level: 2
+    options:
+      - name: URL path
+        description: /api/v1/resource
+      - name: Header
+        description: API-Version header
+      - name: No versioning
+        description: Single version initially
+
+# Success criteria
+success_criteria:
+  - Database schema covers all entities
+  - API endpoints cover all features
+  - Features have implementation details
+  - Dependencies are mapped
+  - Complexity is estimated

@@ -1,0 +1,275 @@
+# Execution Workflow
+# Implementation phase of autonomous project development
+
+name: Execution
+id: execution
+description: Implement features according to plan with quality gates
+category: autonomous
+version: "1.0.0"
+
+# Workflow metadata
+metadata:
+  phase: dynamic  # Runs during foundation, backend, frontend, etc.
+  order: 3+
+  checkpoint: false  # Per-feature checkpoints based on autonomy
+  estimated_duration: "varies by feature"
+
+# Input requirements
+inputs:
+  features:
+    type: file
+    path: ".omgkit/generated/features.yaml"
+    required: true
+    description: Feature breakdown with implementation details
+
+  schema:
+    type: file
+    path: ".omgkit/generated/schema.sql"
+    required: false
+    description: Database schema
+
+  api_spec:
+    type: file
+    path: ".omgkit/generated/api-spec.md"
+    required: false
+    description: API specification
+
+  state:
+    type: file
+    path: ".omgkit/state.yaml"
+    required: true
+    description: Current project state
+
+# Output artifacts
+outputs:
+  - path: "src/**/*"
+    description: Implementation files
+    required: true
+
+  - path: "tests/**/*"
+    description: Test files
+    required: true
+
+# Feature execution loop
+feature_loop:
+  source: ".omgkit/generated/features.yaml"
+  filter: "status == 'pending' && phase == current_phase"
+  order_by: "implementation_order"
+
+  for_each_feature:
+    - id: start_feature
+      name: Start Feature
+      actions:
+        - Update state: current_feature = feature.id
+        - Update feature status: in_progress
+        - Log: "Starting feature: {feature.name}"
+
+    - id: check_dependencies
+      name: Check Dependencies
+      actions:
+        - Verify all dependencies completed
+        - If blocked, skip to next or report
+
+    - id: load_context
+      name: Load Context
+      actions:
+        - Read feature details
+        - Load relevant schema/API sections
+        - Check existing code patterns
+        - Update memory context
+
+    - id: implement_step
+      name: Implement Steps
+      loop: feature.implementation.steps
+      for_each_step:
+        - id: preview_step
+          name: Preview Step
+          condition: "autonomy_level >= 2"
+          actions:
+            - Show what will be done
+            - Wait for approval if level >= 3
+
+        - id: execute_step
+          name: Execute Step
+          actions:
+            - Create/modify files as needed
+            - Follow existing patterns
+            - Add inline comments where helpful
+
+        - id: run_step_tests
+          name: Run Step Tests
+          condition: "step.tests.length > 0"
+          actions:
+            - Run relevant tests
+            - If failing, attempt fix
+            - Report if still failing
+
+        - id: update_progress
+          name: Update Progress
+          actions:
+            - Mark step complete in state
+            - Update feature progress
+            - Log completion
+
+    - id: write_tests
+      name: Write Tests
+      actions:
+        - Create unit tests for new code
+        - Create integration tests if needed
+        - Ensure coverage target met
+
+    - id: run_feature_tests
+      name: Run Feature Tests
+      quality_gate: true
+      actions:
+        - Run all tests for feature
+        - Check coverage
+        - Report results
+
+    - id: code_review
+      name: Code Review
+      condition: "feature.autonomy.level >= 2"
+      workflow: code-review
+      actions:
+        - Review generated code
+        - Check for issues
+        - Suggest improvements
+        - Apply fixes if approved
+
+    - id: complete_feature
+      name: Complete Feature
+      actions:
+        - Update feature status: completed
+        - Record completion time
+        - Update memory context
+        - Log: "Completed feature: {feature.name}"
+
+# Quality gates
+quality_gates:
+  after_step:
+    - name: lint_check
+      command: "npm run lint -- --fix"
+      required: false
+      auto_fix: true
+
+  after_feature:
+    - name: test_suite
+      command: "npm test -- --passWithNoTests"
+      required: true
+
+    - name: type_check
+      command: "npm run type-check"
+      required: true
+      condition: "typescript"
+
+    - name: coverage
+      command: "npm test -- --coverage"
+      required: false
+      threshold:
+        lines: 80
+        functions: 80
+        branches: 70
+
+  before_phase_complete:
+    - name: full_build
+      command: "npm run build"
+      required: true
+
+    - name: e2e_tests
+      command: "npm run test:e2e"
+      required: false
+      condition: "has_e2e"
+
+# Error handling
+error_handling:
+  on_test_failure:
+    - Analyze failure message
+    - Identify root cause
+    - If auto_fix_confidence > 0.7:
+        - Generate fix
+        - Apply fix
+        - Re-run tests
+    - If still failing after 2 attempts:
+        - Set feature status: blocked
+        - Log error context
+        - Report with suggestions
+
+  on_build_failure:
+    - Parse build error
+    - Check for common issues:
+        - Missing imports
+        - Type errors
+        - Syntax errors
+    - Apply fix if identifiable
+    - Retry build
+    - Block if unfixable
+
+  on_lint_failure:
+    - Run auto-fix: npm run lint --fix
+    - Re-check lint
+    - Ignore non-critical warnings
+    - Block on critical errors
+
+# Autonomy handling
+autonomy:
+  level_0:  # Auto-execute
+    - Formatting
+    - Import organization
+    - Simple refactoring
+
+  level_1:  # Execute with notification
+    - Adding dependencies
+    - Creating new files
+    - Standard patterns
+
+  level_2:  # Preview + approve
+    - Database changes
+    - API modifications
+    - Complex logic
+
+  level_3:  # Full review
+    - Authentication code
+    - Payment integration
+    - Security-sensitive
+
+  level_4:  # Human only
+    - API credentials
+    - Production config
+    - External accounts
+
+# Memory updates
+memory:
+  update_on_feature_start:
+    - ".omgkit/memory/context/current-feature.md"
+
+  update_on_feature_complete:
+    - ".omgkit/memory/journal/{date}.md"
+
+  record_decisions:
+    - ".omgkit/memory/decisions/{decision_id}.md"
+
+# Progress reporting
+reporting:
+  show_progress_bar: true
+  update_frequency: "after_each_step"
+
+  format: |
+    ## Feature: {feature.name}
+
+    Progress: [{progress_bar}] {percentage}%
+
+    Current Step: {current_step}
+
+    Recent:
+    {recent_actions}
+
+    Next:
+    {next_steps}
+
+# Success criteria
+success_criteria:
+  - All P0 features implemented
+  - All tests passing
+  - Coverage meets threshold
+  - Build succeeds
+  - No critical lint errors

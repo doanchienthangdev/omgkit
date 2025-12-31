@@ -1,0 +1,78 @@
+name: "API Service"
+id: api-service
+description: "Backend API service consumed by other applications"
+estimated_duration: "1-2 weeks"
+icon: "server"
+
+defaults:
+  backend: fastapi
+  database: postgresql
+  hosting: railway
+  auth: jwt
+
+phases:
+  - id: discovery
+    name: "Discovery"
+    order: 1
+    checkpoint: true
+    outputs:
+      - ".omgkit/generated/prd.md"
+      - ".omgkit/generated/api-spec.md"
+
+  - id: planning
+    name: "API Design"
+    order: 2
+    checkpoint: true
+    workflows:
+      - api-design
+      - schema-design
+    outputs:
+      - ".omgkit/generated/openapi.yaml"
+      - ".omgkit/generated/schema.sql"
+
+  - id: foundation
+    name: "Project Setup"
+    order: 3
+    features:
+      - id: project_setup
+        name: "Project Scaffolding"
+        auto: true
+      - id: database_setup
+        name: "Database Setup"
+        auto: true
+
+  - id: core
+    name: "API Implementation"
+    order: 4
+    dynamic: true
+    per_feature:
+      workflows: [feature, test, code-review]
+
+  - id: hardening
+    name: "Hardening"
+    order: 5
+    checkpoint: true
+    workflows:
+      - security-audit
+      - performance-optimization
+
+  - id: deployment
+    name: "Deployment"
+    order: 6
+    checkpoint: true
+
+quality_gates:
+  after_feature:
+    - command: "pytest"
+      required: true
+  before_deploy:
+    - all_tests_pass: true
+    - coverage_threshold: 80
+
+autonomy:
+  default_level: 1
+  rules:
+    - patterns: ["**/migrations/**"]
+      level: 3
+    - patterns: ["**/auth/**"]
+      level: 3

@@ -1,0 +1,278 @@
+---
+description: Reject checkpoint or decision with feedback
+allowed-tools: Read, Write, Edit, AskUserQuestion
+argument-hint: "<reason> [--checkpoint | --decision <id>]"
+---
+
+# Reject Checkpoint or Decision
+
+Reject a pending checkpoint or decision and provide feedback for revision.
+
+## Usage
+
+### Reject with Reason
+```bash
+/auto:reject "The schema needs a soft delete column for users"
+```
+
+### Reject Specific Checkpoint
+```bash
+/auto:reject --checkpoint "API endpoints don't match PRD requirements"
+```
+
+### Reject Specific Decision
+```bash
+/auto:reject --decision db_index_strategy "Use separate indexes instead"
+```
+
+## Rejection Process
+
+### 1. Capture Feedback
+
+Parse the rejection reason and categorize:
+- **Scope change**: Requirements changed
+- **Quality issue**: Doesn't meet standards
+- **Design issue**: Approach needs revision
+- **Missing item**: Something was forgotten
+- **Other**: Custom feedback
+
+### 2. Update State
+
+```yaml
+# .omgkit/state.yaml
+checkpoint:
+  pending: true
+  rejected: true
+  rejection:
+    reason: "The schema needs a soft delete column for users"
+    category: "missing_item"
+    timestamp: "2024-01-15T10:30:00Z"
+
+status: "revision_needed"
+```
+
+### 3. Analyze Impact
+
+Determine what needs to change:
+```yaml
+impact_analysis:
+  files_to_revise:
+    - ".omgkit/generated/schema.sql"
+    - "prisma/schema.prisma"
+  decisions_affected:
+    - "user_model_design"
+  estimated_rework: "minor"  # minor | moderate | major
+```
+
+### 4. Generate Revision Plan
+
+Based on feedback, create revision tasks:
+```yaml
+revision_tasks:
+  - id: "add_soft_delete"
+    description: "Add deleted_at column to users table"
+    files:
+      - "schema.sql"
+      - "schema.prisma"
+  - id: "update_queries"
+    description: "Add soft delete filter to user queries"
+    files:
+      - "user.service.ts"
+```
+
+### 5. Record in Memory
+
+Save rejection for learning:
+```markdown
+# Rejection: Planning Phase
+
+**Date:** 2024-01-15
+**Phase:** Planning
+**Reason:** The schema needs a soft delete column for users
+
+## Original Approach
+Schema designed without soft delete capability.
+
+## Feedback
+User requires soft delete for data recovery and audit purposes.
+
+## Revision Plan
+1. Add deleted_at column to users table
+2. Update queries to filter deleted records
+3. Add restore functionality
+
+## Lessons
+- Always consider data retention requirements early
+- Include soft delete in standard entity patterns
+```
+
+## Output
+
+### Checkpoint Rejection
+```
+## Checkpoint Rejected
+
+**Phase:** Planning
+**Reason:** The schema needs a soft delete column for users
+
+### Impact Analysis
+
+**Severity:** Minor
+**Files Affected:** 2
+
+1. `.omgkit/generated/schema.sql`
+   - Add: `deleted_at TIMESTAMP NULL`
+
+2. `prisma/schema.prisma` (when created)
+   - Add: `deletedAt DateTime?`
+
+### Revision Plan
+
+I'll make the following changes:
+
+1. **Update Schema**
+   - Add `deleted_at` column to users table
+   - Add index on `deleted_at` for query performance
+
+2. **Update Queries** (during implementation)
+   - Filter `WHERE deleted_at IS NULL` by default
+   - Add methods for soft delete and restore
+
+### Proceeding with Revision
+
+Would you like me to:
+A. Revise the schema now and show you the updated version
+B. Note this for implementation phase
+C. Discuss the soft delete approach further
+
+---
+
+**Commands:**
+- `/auto:resume` - After approving revision
+- `/auto:status` - Check current state
+```
+
+### Decision Rejection
+```
+## Decision Rejected
+
+**Decision:** db_index_strategy
+**Original:** Add composite index on users(email, status)
+**Rejection:** Use separate indexes instead
+
+### Alternative Approach
+
+Based on your feedback, will use:
+```sql
+-- Instead of composite index
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_status ON users(status);
+```
+
+### Trade-offs
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| Composite | Faster combined queries | Less flexible |
+| Separate | More query patterns | More storage |
+
+### Updated Decision
+
+Recorded your preference for separate indexes.
+
+---
+
+**Commands:**
+- `/auto:approve decision db_index_strategy` - If revised version is acceptable
+- `/auto:start` - Continue with new approach
+```
+
+## Rejection with Questions
+
+If feedback is unclear, ask clarifying questions:
+
+```
+## Clarification Needed
+
+**Your Feedback:** "The schema needs work"
+
+I'd like to understand better:
+
+1. **Which tables need changes?**
+   A. Users table
+   B. All tables
+   C. Specific tables: [specify]
+
+2. **What type of changes?**
+   A. Add columns
+   B. Change relationships
+   C. Performance optimization
+   D. Other: [specify]
+
+3. **Any specific requirements?**
+   [Open response]
+
+---
+
+Please provide more details so I can make the right revisions.
+```
+
+## Major Rejection
+
+For significant rejections that require major rework:
+
+```
+## Major Revision Required
+
+**Feedback:** "We need to switch from SQL to MongoDB"
+
+### Impact Assessment
+
+**Severity:** Major
+**Rework Required:** Significant
+
+### Affected Artifacts
+- ❌ `.omgkit/generated/schema.sql` - Will be replaced
+- ⚠️ `.omgkit/generated/prd.md` - Needs update
+- ⚠️ `.omgkit/generated/technical-spec.md` - Needs update
+
+### Recommended Action
+
+This is a fundamental architecture change. I recommend:
+
+1. **Return to Discovery** - Update technical requirements
+2. **Update PRD** - Reflect database change
+3. **New Technical Spec** - Design for MongoDB
+4. **Restart Planning** - New schema design
+
+### Alternative
+
+If you want to minimize rework:
+- Keep current phase artifacts
+- Add MongoDB migration as future task
+- Continue with SQL for MVP
+
+---
+
+**Which approach would you prefer?**
+
+A. Full revision (return to discovery)
+B. Partial revision (update planning only)
+C. Note for future (continue current path)
+D. Discuss further
+```
+
+## Rejection History
+
+Track rejections for pattern analysis:
+
+```yaml
+# .omgkit/state.yaml
+rejection_history:
+  - phase: "planning"
+    reason: "Missing soft delete"
+    category: "missing_item"
+    timestamp: "2024-01-15T10:30:00Z"
+    resolved: true
+    resolution: "Added deleted_at column"
+```

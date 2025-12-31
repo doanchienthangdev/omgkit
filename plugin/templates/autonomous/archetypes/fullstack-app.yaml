@@ -1,0 +1,97 @@
+name: "Full-Stack Application"
+id: fullstack-app
+description: "Web application with frontend and backend"
+estimated_duration: "2-4 weeks"
+icon: "layers"
+
+defaults:
+  frontend: nextjs
+  backend: nextjs_api
+  database: postgresql
+  styling: tailwindcss
+  components: shadcn
+
+phases:
+  - id: discovery
+    name: "Discovery"
+    order: 1
+    checkpoint: true
+    outputs:
+      - ".omgkit/generated/prd.md"
+      - ".omgkit/generated/technical-spec.md"
+
+  - id: planning
+    name: "Design"
+    order: 2
+    checkpoint: true
+    workflows:
+      - schema-design
+      - api-design
+    outputs:
+      - ".omgkit/generated/schema.sql"
+      - ".omgkit/generated/wireframes.md"
+
+  - id: foundation
+    name: "Project Setup"
+    order: 3
+    features:
+      - id: project_setup
+        auto: true
+      - id: database_setup
+        auto: true
+      - id: ui_foundation
+        auto: true
+
+  - id: backend
+    name: "Backend Features"
+    order: 4
+    dynamic: true
+    per_feature:
+      workflows: [feature, test, code-review]
+
+  - id: frontend
+    name: "Frontend Features"
+    order: 5
+    dynamic: true
+    per_feature:
+      workflows: [feature, test]
+
+  - id: integration
+    name: "Integration"
+    order: 6
+    checkpoint: true
+    workflows: [test]
+
+  - id: hardening
+    name: "Hardening"
+    order: 7
+    checkpoint: true
+    workflows:
+      - security-audit
+      - performance-optimization
+
+  - id: deployment
+    name: "Deployment"
+    order: 8
+    checkpoint: true
+
+quality_gates:
+  after_feature:
+    - command: "npm test"
+      required: true
+  before_checkpoint:
+    - command: "npm run build"
+      required: true
+  before_deploy:
+    - all_tests_pass: true
+    - coverage_threshold: 80
+
+autonomy:
+  default_level: 1
+  rules:
+    - patterns: ["**/migrations/**"]
+      level: 3
+    - patterns: ["**/auth/**"]
+      level: 3
+    - patterns: ["**/api/**"]
+      level: 2

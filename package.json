@@ -1,6 +1,6 @@
 {
   "name": "omgkit",
-  "version": "2.10.1",
+  "version": "2.11.0",
   "description": "Omega-Level Development Kit - AI Team System for Claude Code. 23 agents, 58 commands, 88 skills, sprint management.",
   "keywords": [
     "claude-code",
@@ -53,6 +53,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.0.16",
+    "js-yaml": "^4.1.1",
     "vitest": "^4.0.16"
   }
 }

@@ -1,0 +1,298 @@
+# Memory System for Autonomous Development
+# Defines how context is preserved across sessions
+
+version: 1
+
+# Memory structure
+structure:
+  base_path: ".omgkit/memory"
+
+  directories:
+    context:
+      path: "context/"
+      description: "Current project context files"
+      retention: "persistent"
+
+    decisions:
+      path: "decisions/"
+      description: "Decision records and ADRs"
+      retention: "persistent"
+
+    journal:
+      path: "journal/"
+      description: "Daily development logs"
+      retention: "30_days"
+
+    patterns:
+      path: "patterns/"
+      description: "Learned patterns and preferences"
+      retention: "persistent"
+
+    cache:
+      path: "cache/"
+      description: "Temporary cached data"
+      retention: "session"
+
+# Context files
+context_files:
+  - id: project_brief
+    filename: "project-brief.md"
+    description: "High-level project overview"
+    update_frequency: "on_discovery_complete"
+    template: |
+      # {project_name}
+
+      ## Overview
+      {description}
+
+      ## Type
+      {project_type}
+
+      ## Key Features
+      {features_summary}
+
+      ## Tech Stack
+      {tech_stack}
+
+      ## Status
+      Current Phase: {current_phase}
+      Last Updated: {timestamp}
+
+  - id: current_feature
+    filename: "current-feature.md"
+    description: "Details of feature being implemented"
+    update_frequency: "on_feature_start"
+    template: |
+      # Current Feature: {feature_name}
+
+      ## Description
+      {description}
+
+      ## Acceptance Criteria
+      {acceptance_criteria}
+
+      ## Implementation Plan
+      {implementation_steps}
+
+      ## Progress
+      Steps Completed: {completed}/{total}
+
+      ## Notes
+      {notes}
+
+  - id: tech_decisions
+    filename: "tech-decisions.md"
+    description: "Summary of technical decisions"
+    update_frequency: "on_decision"
+    template: |
+      # Technical Decisions
+
+      ## Stack
+      - Frontend: {frontend}
+      - Backend: {backend}
+      - Database: {database}
+      - Hosting: {hosting}
+
+      ## Key Decisions
+      {decisions_list}
+
+      ## Patterns Used
+      {patterns_list}
+
+  - id: error_context
+    filename: "error-context.md"
+    description: "Context for error recovery"
+    update_frequency: "on_error"
+    template: |
+      # Error Context
+
+      ## Last Error
+      {error_message}
+
+      ## Location
+      File: {file}
+      Line: {line}
+
+      ## Attempted Fixes
+      {fixes_attempted}
+
+      ## Resolution Status
+      {status}
+
+# Decision record template
+decision_template:
+  filename_pattern: "{date}-{id}.md"
+  template: |
+    # Decision: {title}
+
+    **Date:** {date}
+    **Status:** {status}
+    **Phase:** {phase}
+
+    ## Context
+    {context}
+
+    ## Decision
+    {decision}
+
+    ## Options Considered
+    {options}
+
+    ## Rationale
+    {rationale}
+
+    ## Consequences
+    {consequences}
+
+    ## Related
+    - Features: {related_features}
+    - Files: {related_files}
+
+# Journal entry template
+journal_template:
+  filename_pattern: "{date}.md"
+  template: |
+    # Development Journal - {date}
+
+    ## Session Summary
+    Started: {start_time}
+    Ended: {end_time}
+
+    ## Work Completed
+    {completed_items}
+
+    ## In Progress
+    {in_progress_items}
+
+    ## Decisions Made
+    {decisions}
+
+    ## Challenges
+    {challenges}
+
+    ## Notes
+    {notes}
+
+    ## Tomorrow
+    {next_steps}
+
+# Pattern recognition
+patterns:
+  capture:
+    - trigger: "similar_code_structure"
+      action: "record_pattern"
+      template: |
+        ## Pattern: {name}
+
+        ### Context
+        When to use: {when}
+
+        ### Structure
+        ```{language}
+        {code_structure}
+        ```
+
+        ### Examples
+        {examples}
+
+  apply:
+    - trigger: "similar_task"
+      action: "suggest_pattern"
+      threshold: 0.8  # Similarity threshold
+
+# Memory operations
+operations:
+  read:
+    - Load relevant context files
+    - Check for recent decisions
+    - Load patterns for current task
+    - Check error context if resuming
+
+  write:
+    - Update context files atomically
+    - Create decision records
+    - Append to journal
+    - Update patterns if learned
+
+  cleanup:
+    - Archive old journal entries
+    - Compress old decisions
+    - Clear session cache
+    - Maintain size limits
+
+# Memory limits
+limits:
+  max_context_files: 10
+  max_context_file_size: "50KB"
+  max_decisions_kept: 100
+  max_journal_entries: 30
+  max_patterns: 50
+  total_memory_size: "10MB"
+
+# Session handling
+session:
+  start:
+    - Load project-brief.md
+    - Load current-feature.md if exists
+    - Load recent decisions
+    - Load relevant patterns
+    - Check for error context
+
+  during:
+    - Update current-feature.md on progress
+    - Record decisions as they happen
+    - Append to journal periodically
+    - Cache intermediate state
+
+  end:
+    - Save final state
+    - Complete journal entry
+    - Clean session cache
+    - Archive if needed
+
+# Context prioritization
+prioritization:
+  always_load:
+    - project-brief.md
+    - tech-decisions.md
+
+  load_if_relevant:
+    - current-feature.md
+    - error-context.md
+
+  load_on_demand:
+    - Decision records
+    - Patterns
+
+# Retrieval settings
+retrieval:
+  search:
+    - Index context files
+    - Search by keywords
+    - Filter by date range
+    - Sort by relevance
+
+  relevance_factors:
+    - Recency: 0.3
+    - Keyword match: 0.4
+    - Phase match: 0.2
+    - Category match: 0.1
+
+# Export/import
+export:
+  format: "zip"
+  includes:
+    - All context files
+    - All decisions
+    - Recent journal entries
+    - Active patterns
+  excludes:
+    - Cache
+    - Temporary files
+
+import:
+  validation:
+    - Check structure
+    - Validate schemas
+    - Check for conflicts
+  merge_strategy: "newer_wins"
