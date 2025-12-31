@@ -102,7 +102,7 @@ After installation, use these commands in Claude Code:
 | `architect` | System design, leverage multiplication |
 | `sprint-master` | Sprint management, team orchestration |
 
-## ⚡ Commands (54)
+## ⚡ Commands (58)
 
 ### Development
 ```bash

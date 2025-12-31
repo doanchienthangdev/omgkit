@@ -1,182 +1,315 @@
 ---
 title: "Commands Overview"
-description: "54 slash commands for every development task"
+description: "58 slash commands for every development task"
 icon: "terminal"
 ---
 
-OMGKIT provides 54 slash commands covering the entire development lifecycle.
+OMGKIT provides **58 slash commands** organized into 8 categories, covering the entire development lifecycle from planning to deployment.
 
-## Quick Reference
-
-
-### Context
-
-| Command | Description |
-|---------|-------------|
-| [`/checkpoint`](/commands/checkpoint) | Save or restore session state |
-| [`/index`](/commands/index) | Generate project index |
-| [`/load`](/commands/load) | Load project context |
-| [`/mode`](/commands/mode) | Switch behavioral mode |
-| [`/spawn-collect`](/commands/spawn-collect) | Collect results from parallel tasks |
-| [`/spawn`](/commands/spawn) | Launch parallel background task |
-
-
-### Design
-
-| Command | Description |
-|---------|-------------|
-| [`/cro`](/commands/cro) | CRO-focused content/design |
-| [`/enhance`](/commands/enhance) | Enhance existing content/design |
-| [`/fast`](/commands/fast) | Quick UI implementation |
-| [`/good`](/commands/good) | High-quality UI with polish |
-| [`/screenshot`](/commands/screenshot) | Implement UI from screenshot |
-
-
-### Dev
-
-| Command | Description |
-|---------|-------------|
-| [`/feature`](/commands/feature) | Full feature development with planning, testing, a... |
-| [`/fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues |
-| [`/fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation |
-| [`/fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation |
-| [`/fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues |
-| [`/fix-test`](/commands/fix-test) | Fix failing tests |
-| [`/fix`](/commands/fix) | Debug and fix bugs |
-| [`/review`](/commands/review) | Code review with security and quality focus |
-| [`/tdd`](/commands/tdd) | Test-driven development workflow |
-| [`/test`](/commands/test) | Generate and run tests |
-
-
-### Git
-
-| Command | Description |
-|---------|-------------|
-| [`/cm`](/commands/cm) | Quick conventional commit |
-| [`/commit`](/commands/commit) | Smart commit with conventional message |
-| [`/cp`](/commands/cp) | Commit and push |
-| [`/deploy`](/commands/deploy) | Deploy to environment |
-| [`/pr`](/commands/pr) | Create pull request |
-| [`/ship`](/commands/ship) | Commit and create PR |
-
-
-### Omega
-
-| Command | Description |
-|---------|-------------|
-| [`/1000x`](/commands/1000x) | Find 1000x moonshot path |
-| [`/100x`](/commands/100x) | Find 100x paradigm shift |
-| [`/10x`](/commands/10x) | Find 10x improvement path |
-| [`/dimensions`](/commands/dimensions) | Display 10 Omega Dimensions |
-| [`/principles`](/commands/principles) | Display 7 Omega Principles |
-
-
-### Planning
-
-| Command | Description |
-|---------|-------------|
-| [`/ask`](/commands/ask) | Quick question with codebase context |
-| [`/brainstorm`](/commands/brainstorm) | Interactive brainstorming session |
-| [`/doc`](/commands/doc) | Generate documentation |
-| [`/execute-plan`](/commands/execute-plan) | Execute existing plan with subagents |
-| [`/plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks |
-| [`/plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy |
-| [`/plan`](/commands/plan) | Create implementation plan |
-| [`/research`](/commands/research) | Research technology or topic |
-
-
-### Quality
-
-| Command | Description |
-|---------|-------------|
-| [`/api-gen`](/commands/api-gen) | Generate API code from spec |
-| [`/lint`](/commands/lint) | Run linting |
-| [`/optimize`](/commands/optimize) | Performance optimization |
-| [`/refactor`](/commands/refactor) | Improve code structure |
-| [`/security-scan`](/commands/security-scan) | Scan for security vulnerabilities |
-
-
-### Sprint
-
-| Command | Description |
-|---------|-------------|
-| [`/backlog-add`](/commands/backlog-add) | Add task to backlog |
-| [`/backlog-prioritize`](/commands/backlog-prioritize) | AI-powered backlog prioritization |
-| [`/backlog-show`](/commands/backlog-show) | Display backlog |
-| [`/init`](/commands/init) | Initialize OMGKIT in project |
-| [`/sprint-current`](/commands/sprint-current) | Show sprint progress |
-| [`/sprint-end`](/commands/sprint-end) | End sprint with retrospective |
-| [`/sprint-new`](/commands/sprint-new) | Create new sprint |
-| [`/sprint-start`](/commands/sprint-start) | Start current sprint |
-| [`/team-ask`](/commands/team-ask) | Ask the AI team a question |
-| [`/team-run`](/commands/team-run) | Run AI team on sprint tasks |
-| [`/team-status`](/commands/team-status) | Show AI team activity |
-| [`/vision-set`](/commands/vision-set) | Set product vision interactively |
-| [`/vision-show`](/commands/vision-show) | Display current vision |
-
+<Info>
+  **Quick Stats:** 58 Commands | 8 Categories | Full Development Coverage
+</Info>
 
 ## Command Categories
 
-<CardGroup cols={2}>
-  <Card title="Context" icon="layer-group">
-    6 commands for context tasks
+<CardGroup cols={4}>
+  <Card title="Context" icon="layer-group" href="#context">
+    6 commands
   </Card>
-  <Card title="Design" icon="palette">
-    5 commands for design tasks
+  <Card title="Design" icon="palette" href="#design">
+    5 commands
   </Card>
-  <Card title="Dev" icon="code">
-    10 commands for dev tasks
+  <Card title="Dev" icon="code" href="#dev">
+    10 commands
   </Card>
-  <Card title="Git" icon="code-branch">
-    6 commands for git tasks
+  <Card title="Git" icon="code-branch" href="#git">
+    6 commands
   </Card>
-  <Card title="Omega" icon="wand-magic-sparkles">
-    5 commands for omega tasks
+  <Card title="Omega" icon="wand-magic-sparkles" href="#omega">
+    5 commands
   </Card>
-  <Card title="Planning" icon="map">
-    8 commands for planning tasks
+  <Card title="Planning" icon="map" href="#planning">
+    8 commands
   </Card>
-  <Card title="Quality" icon="shield-check">
-    5 commands for quality tasks
+  <Card title="Quality" icon="shield-check" href="#quality">
+    5 commands
   </Card>
-  <Card title="Sprint" icon="calendar">
-    13 commands for sprint tasks
+  <Card title="Sprint" icon="calendar" href="#sprint">
+    13 commands
   </Card>
 </CardGroup>
+
+---
+
+## Context
+
+Context commands manage session state, project indexing, and parallel task execution.
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| [`/context:checkpoint`](/commands/checkpoint) | Save or restore session state for later resumption | - |
+| [`/context:index`](/commands/index) | Generate comprehensive project index for codebase awareness | scout |
+| [`/context:load`](/commands/load) | Load project context from OMEGA.md and config files | - |
+| [`/context:mode`](/commands/mode) | Switch behavioral mode (omega, tutor, implementation, etc.) | - |
+| [`/context:spawn`](/commands/spawn) | Launch parallel background task with specified agent | Any agent |
+| [`/context:spawn-collect`](/commands/spawn-collect) | Collect and aggregate results from parallel spawned tasks | - |
+
+<Tip>
+  Use `/context:index` at the start of a session for better codebase awareness.
+</Tip>
+
+---
+
+## Design
+
+Design commands enable rapid UI implementation from screenshots, mockups, or descriptions.
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| [`/design:cro`](/commands/cro) | CRO-focused design with conversion optimization principles | ui-ux-designer |
+| [`/design:enhance`](/commands/enhance) | Enhance existing content or design with improvements | ui-ux-designer |
+| [`/design:fast`](/commands/fast) | Quick UI implementation with minimal iteration | ui-ux-designer |
+| [`/design:good`](/commands/good) | High-quality UI with polish, animations, and accessibility | ui-ux-designer |
+| [`/design:screenshot`](/commands/screenshot) | Implement UI from screenshot with pixel-perfect accuracy | ui-ux-designer |
+
+<Tip>
+  Use `/design:screenshot` with a screenshot URL or path to recreate any UI.
+</Tip>
+
+---
+
+## Dev
+
+Development commands handle feature implementation, bug fixing, testing, and code review.
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| [`/dev:feature`](/commands/feature) | Full feature development with planning, testing, and review | planner, fullstack-developer, tester, code-reviewer, git-manager |
+| [`/dev:fix`](/commands/fix) | Debug and fix bugs with systematic investigation | debugger |
+| [`/dev:fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues and failing workflows | cicd-manager |
+| [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | debugger |
+| [`/dev:fix-hard`](/commands/fix-hard) | Complex bug fix with deep root cause analysis | debugger, oracle |
+| [`/dev:fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues based on error analysis | debugger |
+| [`/dev:fix-test`](/commands/fix-test) | Fix failing tests with test-specific debugging | tester |
+| [`/dev:review`](/commands/review) | Code review with security, quality, and performance focus | code-reviewer |
+| [`/dev:tdd`](/commands/tdd) | Test-driven development workflow (test first, then implement) | tester, fullstack-developer |
+| [`/dev:test`](/commands/test) | Generate and run tests with coverage analysis | tester |
+
+<Tip>
+  Use `/dev:feature` for complete feature development with the full agent workflow.
+</Tip>
+
+---
+
+## Git
+
+Git commands streamline version control operations from commits to deployments.
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| [`/git:cm`](/commands/cm) | Quick conventional commit with auto-generated message | git-manager |
+| [`/git:commit`](/commands/commit) | Smart commit with conventional message and scope detection | git-manager |
+| [`/git:cp`](/commands/cp) | Commit and push in one command | git-manager |
+| [`/git:deploy`](/commands/deploy) | Deploy to specified environment (staging, production) | git-manager, cicd-manager |
+| [`/git:pr`](/commands/pr) | Create pull request with auto-generated description | git-manager |
+| [`/git:ship`](/commands/ship) | Commit and create PR in one workflow | git-manager |
+
+<Tip>
+  Use `/git:ship` to commit your changes and create a PR in one step.
+</Tip>
+
+---
+
+## Omega
+
+Omega commands activate breakthrough thinking for 10x-1000x improvements.
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| [`/omega:10x`](/commands/10x) | Find 10x improvement path using Omega principles | oracle |
+| [`/omega:100x`](/commands/100x) | Find 100x paradigm shift opportunities | oracle |
+| [`/omega:1000x`](/commands/1000x) | Find 1000x moonshot transformations | oracle |
+| [`/omega:dimensions`](/commands/dimensions) | Display the 10 Omega Dimensions framework | - |
+| [`/omega:principles`](/commands/principles) | Display the 7 Omega Principles | - |
+
+<Note>
+  Omega commands use the Oracle agent with 7 specialized thinking modes for breakthrough insights.
+</Note>
+
+---
+
+## Planning
+
+Planning commands enable strategic thinking, research, and implementation planning.
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| [`/planning:ask`](/commands/ask) | Quick question with full codebase context | scout, researcher |
+| [`/planning:brainstorm`](/commands/brainstorm) | Interactive brainstorming session for ideation | brainstormer |
+| [`/planning:doc`](/commands/doc) | Generate documentation for code or features | docs-manager |
+| [`/planning:execute-plan`](/commands/execute-plan) | Execute existing plan with coordinated subagents | sprint-master, fullstack-developer |
+| [`/planning:plan`](/commands/plan) | Create implementation plan with task breakdown | planner |
+| [`/planning:plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 minute granular tasks | planner |
+| [`/planning:plan-parallel`](/commands/plan-parallel) | Plan optimized for parallel agent execution | planner, architect |
+| [`/planning:research`](/commands/research) | Research technology, library, or best practices | researcher |
+
+<Tip>
+  Use `/planning:plan-detailed` before `/planning:execute-plan` for best results.
+</Tip>
+
+---
+
+## Quality
+
+Quality commands ensure code security, performance, and maintainability.
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| [`/quality:api-gen`](/commands/api-gen) | Generate API code from OpenAPI/Swagger specification | api-designer |
+| [`/quality:lint`](/commands/lint) | Run linting and auto-fix issues | - |
+| [`/quality:optimize`](/commands/optimize) | Performance optimization with profiling | fullstack-developer |
+| [`/quality:refactor`](/commands/refactor) | Improve code structure while preserving behavior | fullstack-developer, code-reviewer |
+| [`/quality:security-scan`](/commands/security-scan) | Scan for security vulnerabilities (OWASP Top 10) | security-auditor, vulnerability-scanner |
+
+<Warning>
+  Always run `/quality:security-scan` before deploying to production.
+</Warning>
+
+---
+
+## Sprint
+
+Sprint commands enable full agile project management with AI team orchestration.
+
+| Command | Description | Agents Used |
+|---------|-------------|-------------|
+| [`/sprint:backlog-add`](/commands/backlog-add) | Add task to product backlog | project-manager |
+| [`/sprint:backlog-prioritize`](/commands/backlog-prioritize) | AI-powered backlog prioritization with MoSCoW | project-manager, oracle |
+| [`/sprint:backlog-show`](/commands/backlog-show) | Display current backlog with priorities | - |
+| [`/sprint:init`](/commands/init) | Initialize OMGKIT in current project | - |
+| [`/sprint:sprint-current`](/commands/sprint-current) | Show current sprint progress and metrics | project-manager |
+| [`/sprint:sprint-end`](/commands/sprint-end) | End sprint with retrospective and velocity | project-manager, journal-writer |
+| [`/sprint:sprint-new`](/commands/sprint-new) | Create new sprint with AI-proposed tasks | project-manager |
+| [`/sprint:sprint-start`](/commands/sprint-start) | Start current sprint and assign tasks | sprint-master |
+| [`/sprint:team-ask`](/commands/team-ask) | Ask the AI team a question | Any agent |
+| [`/sprint:team-run`](/commands/team-run) | Run AI team on sprint tasks autonomously | sprint-master, all agents |
+| [`/sprint:team-status`](/commands/team-status) | Show AI team activity and progress | - |
+| [`/sprint:vision-set`](/commands/vision-set) | Set product vision interactively | project-manager |
+| [`/sprint:vision-show`](/commands/vision-show) | Display current product vision | - |
+
+<Tip>
+  Start with `/sprint:vision-set`, then `/sprint:new --propose`, then `/sprint:team-run` for autonomous development.
+</Tip>
+
+---
 
 ## Usage Patterns
 
 ### Basic Usage
 
 ```bash
-/command argument
-/command "argument with spaces"
-/command --flag value
+# Simple command
+/dev:fix "login button not working"
+
+# Command with detailed description
+/dev:feature "add user authentication with OAuth2 support"
+
+# Command with flags
+/sprint:team-run --mode full-auto
 ```
 
 ### Common Workflows
 
-```bash
-# Feature development
-/feature "add user authentication"
+<AccordionGroup>
+  <Accordion title="Feature Development">
+    ```bash
+    # Option 1: Full automated workflow
+    /dev:feature "add shopping cart functionality"
 
-# Quick bug fix
-/fix "login not working"
+    # Option 2: Step-by-step
+    /planning:plan "shopping cart"
+    /planning:execute-plan
+    /dev:test
+    /dev:review
+    /git:ship
+    ```
+  </Accordion>
 
-# Full planning
-/plan "checkout flow" && /execute-plan
+  <Accordion title="Bug Fixing">
+    ```bash
+    # Quick fix
+    /dev:fix-fast "typo in header"
 
-# Git workflow
-/commit && /pr
-```
+    # Complex bug
+    /dev:fix-hard "race condition in checkout"
+
+    # From logs
+    /dev:fix-logs
+    ```
+  </Accordion>
+
+  <Accordion title="Sprint Management">
+    ```bash
+    # Initialize project
+    /sprint:init
+
+    # Set vision and create sprint
+    /sprint:vision-set
+    /sprint:sprint-new --propose
+
+    # Run AI team
+    /sprint:team-run --mode semi-auto
+    ```
+  </Accordion>
+
+  <Accordion title="Omega Thinking">
+    ```bash
+    # Find improvements
+    /omega:10x "reduce API response time"
+    /omega:100x "user onboarding experience"
+
+    # Apply principles
+    /omega:principles
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Agent Integration
+
+Commands automatically invoke the right agents for each task:
+
+| Agent | Used By Commands |
+|-------|-----------------|
+| **planner** | `/dev:feature`, `/planning:plan*` |
+| **fullstack-developer** | `/dev:feature`, `/dev:tdd`, `/quality:refactor` |
+| **debugger** | `/dev:fix*` |
+| **tester** | `/dev:test`, `/dev:tdd`, `/dev:fix-test` |
+| **code-reviewer** | `/dev:review`, `/dev:feature` |
+| **git-manager** | `/git:*` |
+| **oracle** | `/omega:*`, `/dev:fix-hard` |
+| **sprint-master** | `/sprint:team-run` |
+| **scout** | `/context:index`, `/planning:ask` |
+| **researcher** | `/planning:research` |
+| **ui-ux-designer** | `/design:*` |
+| **security-auditor** | `/quality:security-scan` |
+
+---
 
 ## Next Steps
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/agents/overview">
-    Agents that power commands
+    Learn about the 23 specialized agents
   </Card>
   <Card title="Modes" icon="sliders" href="/modes/overview">
-    Behavioral modes
+    Configure behavioral modes
+  </Card>
+  <Card title="Skills" icon="graduation-cap" href="/skills/overview">
+    Explore 88 domain skills
+  </Card>
+  <Card title="Sprint Management" icon="calendar" href="/concepts/sprint-management">
+    Master sprint workflows
   </Card>
 </CardGroup>
