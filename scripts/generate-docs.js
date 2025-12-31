@@ -906,18 +906,36 @@ Switch modes with \`/context:mode <mode-name>\` or use the shorthand \`/mode:<mo
 }
 
 /**
+ * Format category name for display (e.g., 'ai-engineering' -> 'AI Engineering')
+ */
+function formatCategoryName(cat) {
+  const specialCases = {
+    'ai-engineering': 'AI Engineering',
+    'devops': 'DevOps',
+    'ui-ux': 'UI/UX'
+  };
+  if (specialCases[cat]) return specialCases[cat];
+  return cat.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+/**
  * Skill category metadata
  */
 const SKILL_CATEGORIES = {
-  languages: { icon: 'code', description: 'Programming language expertise' },
-  frameworks: { icon: 'layer-group', description: 'Framework-specific patterns and best practices' },
+  'ai-engineering': { icon: 'microchip', description: 'AI/ML engineering patterns and best practices' },
+  backend: { icon: 'server', description: 'Backend architecture and API patterns' },
   databases: { icon: 'database', description: 'Database design and optimization' },
+  devops: { icon: 'cloud', description: 'Infrastructure, containers, and CI/CD' },
+  frameworks: { icon: 'layer-group', description: 'Framework-specific patterns and best practices' },
   frontend: { icon: 'palette', description: 'Frontend tooling, styling, and UI patterns' },
-  devops: { icon: 'server', description: 'Infrastructure, containers, and CI/CD' },
+  integrations: { icon: 'plug', description: 'Third-party service integrations' },
+  languages: { icon: 'code', description: 'Programming language expertise' },
+  methodology: { icon: 'diagram-project', description: 'Development methodologies and workflows' },
+  mobile: { icon: 'mobile', description: 'Mobile app development patterns' },
+  omega: { icon: 'wand-magic-sparkles', description: 'Omega-level development practices' },
   security: { icon: 'shield-halved', description: 'Security best practices and authentication' },
   testing: { icon: 'flask-vial', description: 'Testing frameworks and strategies' },
-  methodology: { icon: 'diagram-project', description: 'Development methodologies and workflows' },
-  omega: { icon: 'wand-magic-sparkles', description: 'Omega-level development practices' }
+  tools: { icon: 'toolbox', description: 'Development tools and utilities' }
 };
 
 /**
@@ -1031,7 +1049,7 @@ OMGKIT detects and activates this skill when it finds:
     skillsByCategory[skill.category].push(skill);
   }
 
-  const categoryOrder = ['languages', 'frameworks', 'databases', 'frontend', 'devops', 'security', 'testing', 'methodology', 'omega'];
+  const categoryOrder = ['ai-engineering', 'languages', 'frameworks', 'backend', 'databases', 'frontend', 'mobile', 'devops', 'security', 'testing', 'tools', 'integrations', 'methodology', 'omega'];
 
   const overviewDoc = `---
 title: "Skills Overview"
@@ -1064,7 +1082,7 @@ Skills provide **deep domain expertise** that agents use when working with speci
 ${categoryOrder.map(cat => {
   const skills = skillsByCategory[cat] || [];
   const catMeta = SKILL_CATEGORIES[cat] || { icon: 'brain', description: '' };
-  return `  <Card title="${cat.charAt(0).toUpperCase() + cat.slice(1)}" icon="${catMeta.icon}" href="#${cat}">
+  return `  <Card title="${formatCategoryName(cat)}" icon="${catMeta.icon}" href="#${cat}">
     **${skills.length} skills** - ${catMeta.description}
   </Card>`;
 }).join('\n')}
@@ -1102,7 +1120,7 @@ ${categoryOrder.map(cat => {
   if (skills.length === 0) return '';
   const catMeta = SKILL_CATEGORIES[cat] || { icon: 'brain', description: '' };
   return `
-## ${cat.charAt(0).toUpperCase() + cat.slice(1)}
+## ${formatCategoryName(cat)}
 
 ${catMeta.description}
 
