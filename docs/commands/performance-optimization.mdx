@@ -1,79 +1,80 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:performance-optimization"
+description: "Application performance optimization workflow"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:performance-optimization <optimization target>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Application performance optimization workflow
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:performance-optimization "optimization
 ```
 
 
-# Refactor Workflow
+# Performance Optimization Workflow
 
-Refactor: **\<refactor scope\>**
+Optimize: **\<optimization target\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
-
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
-
-### Step 2: Test Coverage
-**Agent:** @tester
-
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
-
-### Step 3: Refactoring
+### Step 1: Profiling
 **Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
+- Profile application
+- Identify bottlenecks
+- Measure baselines
+- Document hotspots
+
+### Step 2: Analysis
+**Agent:** @architect
+
+- Analyze root causes
+- Evaluate solutions
+- Assess trade-offs
+- Prioritize fixes
+
+### Step 3: Optimization
+**Agent:** @fullstack-developer
+**Command:** `/quality:optimize`
+
+- Implement optimizations
+- Add caching
+- Optimize queries
+- Reduce bundle size
 
 ### Step 4: Validation
 **Agent:** @tester
-**Command:** `/dev:test`
 
-- Run all tests
+- Benchmark improvements
+- Load testing
+- Compare to baseline
 - Verify no regressions
-- Check performance impact
 
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
+### Step 5: Documentation
+**Agent:** @docs-manager
 
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Document changes
+- Update runbooks
+- Share learnings
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Profiling complete
+- [ ] Analysis done
+- [ ] Optimizations applied
+- [ ] Improvements validated
+- [ ] Documented
 
-Execute each step sequentially. Show progress after each step.
+Execute each step. Measure everything.
 
 
 
@@ -95,7 +96,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:performance-optimization "your input here"
 ```
 
 ### With Context
@@ -105,7 +106,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:performance-optimization "detailed description"
 ```
 
 ## Tips

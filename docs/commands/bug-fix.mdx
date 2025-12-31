@@ -1,76 +1,78 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:bug-fix"
+description: "Systematic debugging and bug resolution workflow"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:bug-fix <bug description>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Systematic debugging and bug resolution workflow
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:bug-fix "bug
 ```
 
 
-# Refactor Workflow
+# Bug Fix Workflow
 
-Refactor: **\<refactor scope\>**
+Fix bug: **\<bug description\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Bug Analysis
+**Agent:** @debugger
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Reproduce the bug
+- Identify symptoms
+- Gather error logs
+- Document reproduction steps
 
-### Step 2: Test Coverage
-**Agent:** @tester
+### Step 2: Root Cause Investigation
+**Agent:** @debugger
+**Command:** `/dev:fix-hard "\<bug description\>"`
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
+- Trace code execution
+- Identify root cause
+- Document findings
+- Propose fix approach
 
-### Step 3: Refactoring
+### Step 3: Fix Implementation
 **Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
+- Implement the fix
+- Handle edge cases
+- Add defensive code
+- Update documentation
 
-### Step 4: Validation
+### Step 4: Regression Testing
 **Agent:** @tester
 **Command:** `/dev:test`
 
-- Run all tests
-- Verify no regressions
-- Check performance impact
+- Write test for the bug
+- Ensure fix doesn't break existing tests
+- Add edge case tests
+- Verify fix works
 
-### Step 5: Review & Commit
+### Step 5: Code Review & Commit
 **Agent:** @code-reviewer, @git-manager
 
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Review the fix
+- Verify completeness
+- Commit with reference to bug
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
+- [ ] Step 1: Bug analyzed and reproduced
+- [ ] Step 2: Root cause identified
+- [ ] Step 3: Fix implemented
+- [ ] Step 4: Tests passing
 - [ ] Step 5: Reviewed and committed
 
 Execute each step sequentially. Show progress after each step.
@@ -95,7 +97,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:bug-fix "your input here"
 ```
 
 ### With Context
@@ -105,7 +107,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:bug-fix "detailed description"
 ```
 
 ## Tips

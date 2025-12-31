@@ -1,79 +1,73 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:marketing"
+description: "Create marketing content and materials"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:marketing <marketing goal>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Create marketing content and materials
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:marketing "marketing
 ```
 
 
-# Refactor Workflow
+# Marketing Content Workflow
 
-Refactor: **\<refactor scope\>**
+Create: **\<marketing goal\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Research
+**Agent:** @researcher
+**Command:** `/planning:research`
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Target audience analysis
+- Competitor research
+- Market positioning
+- Key messages
 
-### Step 2: Test Coverage
-**Agent:** @tester
+### Step 2: Ideation
+**Agent:** @brainstormer
+**Command:** `/planning:brainstorm`
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
+- Message angles
+- Headline options
+- Value propositions
+- Call-to-actions
 
-### Step 3: Refactoring
-**Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
+### Step 3: Content Creation
+**Agent:** @copywriter
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
+- Write headlines
+- Create body copy
+- Features/benefits
+- CTAs
 
-### Step 4: Validation
-**Agent:** @tester
-**Command:** `/dev:test`
+### Step 4: Review
+**Agent:** @copywriter
 
-- Run all tests
-- Verify no regressions
-- Check performance impact
-
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
-
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Tone consistency
+- Clarity
+- Persuasiveness
+- Grammar
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Research complete
+- [ ] Ideas generated
+- [ ] Content written
+- [ ] Review complete
 
-Execute each step sequentially. Show progress after each step.
+Execute for compelling content.
 
 
 
@@ -95,7 +89,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:marketing "your input here"
 ```
 
 ### With Context
@@ -105,7 +99,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:marketing "detailed description"
 ```
 
 ## Tips

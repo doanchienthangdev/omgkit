@@ -1,79 +1,81 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:security-audit"
+description: "Comprehensive security audit workflow"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:security-audit <scope of audit>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Comprehensive security audit workflow
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:security-audit "scope
 ```
 
 
-# Refactor Workflow
+# Security Audit Workflow
 
-Refactor: **\<refactor scope\>**
+Audit: **\<scope of audit\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Scope Definition
+**Agent:** @security-auditor
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Define audit scope
+- Identify assets
+- Map attack surface
+- Set objectives
 
-### Step 2: Test Coverage
-**Agent:** @tester
+### Step 2: Vulnerability Scanning
+**Agent:** @vulnerability-scanner
+**Command:** `/quality:security-scan`
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
+- Run automated scans
+- Check dependencies
+- Analyze code
+- Identify issues
 
-### Step 3: Refactoring
-**Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
+### Step 3: Manual Review
+**Agent:** @security-auditor
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
+- OWASP Top 10 review
+- Authentication analysis
+- Authorization checks
+- Data handling review
 
-### Step 4: Validation
-**Agent:** @tester
-**Command:** `/dev:test`
+### Step 4: Risk Assessment
+**Agent:** @security-auditor
 
-- Run all tests
-- Verify no regressions
-- Check performance impact
+- Categorize vulnerabilities
+- Assess impact
+- Prioritize by risk
+- Create remediation plan
 
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
+### Step 5: Reporting
+**Agent:** @docs-manager
 
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Create audit report
+- Document findings
+- Provide recommendations
+- Track remediation
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Scope defined
+- [ ] Scans complete
+- [ ] Manual review done
+- [ ] Risks assessed
+- [ ] Report generated
 
-Execute each step sequentially. Show progress after each step.
+Execute thoroughly. Security is critical.
 
 
 
@@ -95,7 +97,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:security-audit "your input here"
 ```
 
 ### With Context
@@ -105,7 +107,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:security-audit "detailed description"
 ```
 
 ## Tips

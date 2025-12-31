@@ -1,77 +1,69 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:prompt-engineering"
+description: "Systematic prompt optimization workflow"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:prompt-engineering <prompt optimization goal>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Systematic prompt optimization workflow
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:prompt-engineering "prompt
 ```
 
 
-# Refactor Workflow
+# Prompt Engineering Workflow
 
-Refactor: **\<refactor scope\>**
+Optimize prompts for: **\<prompt optimization goal\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Baseline Analysis
+**Agent:** @researcher
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Analyze current prompts
+- Identify issues
+- Document failure cases
+- Establish baseline metrics
 
-### Step 2: Test Coverage
+### Step 2: Prompt Design
+**Agent:** @oracle
+
+- Apply prompt engineering techniques
+- Create prompt variants
+- Add few-shot examples
+- Implement chain-of-thought
+
+### Step 3: A/B Testing
 **Agent:** @tester
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
+- Test prompt variants
+- Measure quality metrics
+- Statistical comparison
+- Identify winners
 
-### Step 3: Refactoring
+### Step 4: Optimization
 **Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
-
-### Step 4: Validation
-**Agent:** @tester
-**Command:** `/dev:test`
-
-- Run all tests
-- Verify no regressions
-- Check performance impact
-
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
-
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Refine winning prompts
+- Optimize token usage
+- Add guardrails
+- Document final prompts
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Baseline established
+- [ ] Prompts designed
+- [ ] A/B testing complete
+- [ ] Optimization done
 
 Execute each step sequentially. Show progress after each step.
 
@@ -95,7 +87,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:prompt-engineering "your input here"
 ```
 
 ### With Context
@@ -105,7 +97,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:prompt-engineering "detailed description"
 ```
 
 ## Tips

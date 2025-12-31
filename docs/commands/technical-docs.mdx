@@ -1,79 +1,72 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:technical-docs"
+description: "Create comprehensive technical documentation"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:technical-docs <documentation scope>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Create comprehensive technical documentation
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:technical-docs "documentation
 ```
 
 
-# Refactor Workflow
+# Technical Documentation Workflow
 
-Refactor: **\<refactor scope\>**
+Document: **\<documentation scope\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
+### Step 1: Content Planning
+**Agent:** @docs-manager
+
+- Define documentation scope
+- Identify audience
+- Plan structure
+- Create outline
+
+### Step 2: Content Writing
+**Agent:** @docs-manager
+**Command:** `/planning:doc`
+
+- Write technical content
+- Add code examples
+- Create diagrams
+- Document APIs
+
+### Step 3: Review
 **Agent:** @code-reviewer
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Technical accuracy
+- Clarity and completeness
+- Code example verification
+- Consistency check
 
-### Step 2: Test Coverage
-**Agent:** @tester
+### Step 4: Publishing
+**Agent:** @docs-manager
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
-
-### Step 3: Refactoring
-**Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
-
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
-
-### Step 4: Validation
-**Agent:** @tester
-**Command:** `/dev:test`
-
-- Run all tests
-- Verify no regressions
-- Check performance impact
-
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
-
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Format for publishing
+- Add navigation
+- Generate API docs
+- Deploy documentation
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Content planned
+- [ ] Documentation written
+- [ ] Review complete
+- [ ] Published
 
-Execute each step sequentially. Show progress after each step.
+Execute thoroughly. Good docs = happy developers.
 
 
 
@@ -95,7 +88,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:technical-docs "your input here"
 ```
 
 ### With Context
@@ -105,7 +98,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:technical-docs "detailed description"
 ```
 
 ## Tips

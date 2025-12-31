@@ -1,45 +1,93 @@
 ---
-title: "/dev:feature"
-description: "Full feature development with planning, testing, and review"
-icon: "code"
+title: "/workflow:feature"
+description: "Complete feature development from planning to deployment"
+icon: "terminal"
 ---
 
 <Info>
-  **Category:** Dev
+  **Category:** Workflow
 
-  **Syntax:** `/dev:feature <feature description>`
+  **Syntax:** `/workflow:feature <feature description>`
 </Info>
 
 ## Overview
 
-Full feature development with planning, testing, and review
+Complete feature development from planning to deployment
 
 ## Quick Start
 
 ```bash
-/dev:feature "feature
+/workflow:feature "feature
 ```
 
 
-# 🍳 Feature: \<feature description\>
+# Feature Development Workflow
 
 Build feature: **\<feature description\>**
 
-## Workflow
-1. **Plan** (planner) - Create implementation plan
-2. **Implement** (fullstack-developer) - Write code
-3. **Test** (tester) - Write and run tests
-4. **Review** (code-reviewer) - Code review
-5. **Commit** (git-manager) - Create commit
+## Workflow Steps
 
-## Progress
-- [ ] Planning complete
-- [ ] Implementation complete
-- [ ] Tests passing
-- [ ] Review approved
-- [ ] Committed
+### Step 1: Planning
+**Agent:** @planner
+**Command:** `/planning:plan "\<feature description\>"`
 
-Show progress after each step.
+- Analyze feature requirements
+- Break down into implementable tasks
+- Create detailed implementation plan
+- Define acceptance criteria
+- Identify dependencies and risks
+
+### Step 2: Implementation
+**Agent:** @fullstack-developer
+**Command:** `/dev:feature "\<feature description\>"`
+
+- Follow the implementation plan
+- Write code incrementally
+- Add inline documentation
+- Follow coding standards
+
+### Step 3: Testing
+**Agent:** @tester
+**Command:** `/dev:test`
+
+- Write unit tests for new code
+- Write integration tests
+- Achieve coverage target (>80%)
+- Run all tests and fix failures
+
+### Step 4: Code Review
+**Agent:** @code-reviewer
+**Command:** `/dev:review`
+
+- Review code quality
+- Check for security issues
+- Verify best practices
+- Suggest improvements
+
+### Step 5: Commit & PR
+**Agent:** @git-manager
+**Command:** `/git:pr`
+
+- Create feature branch
+- Stage and commit changes
+- Write meaningful commit message
+- Create pull request
+
+## Progress Tracking
+- [ ] Step 1: Planning complete
+- [ ] Step 2: Implementation complete
+- [ ] Step 3: Tests passing (>80% coverage)
+- [ ] Step 4: Code review approved
+- [ ] Step 5: PR created
+
+## Quality Gates
+- [ ] Implementation plan approved
+- [ ] All code follows project standards
+- [ ] Test coverage exceeds 80%
+- [ ] No security vulnerabilities
+- [ ] Code review passed
+
+Execute each step sequentially. Show progress after each step.
 
 
 
@@ -50,6 +98,7 @@ This command uses the following tools:
 - **Task** - Enables task capabilities
 - **Read** - Enables read capabilities
 - **Write** - Enables write capabilities
+- **Edit** - Enables edit capabilities
 - **Bash** - Enables bash capabilities
 - **Grep** - Enables grep capabilities
 - **Glob** - Enables glob capabilities
@@ -60,7 +109,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/dev:feature "your input here"
+/workflow:feature "your input here"
 ```
 
 ### With Context
@@ -70,7 +119,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/dev:feature "detailed description"
+/workflow:feature "detailed description"
 ```
 
 ## Tips
@@ -96,7 +145,7 @@ For best results, be specific in your descriptions and include relevant file pat
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 58 commands
   </Card>
-  <Card title="Dev Commands" icon="code" href="/commands/overview#dev">
-    More dev commands
+  <Card title="Workflow Commands" icon="terminal" href="/commands/overview#workflow">
+    More workflow commands
   </Card>
 </CardGroup>

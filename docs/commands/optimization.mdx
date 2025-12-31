@@ -1,79 +1,80 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:optimization"
+description: "Database performance optimization workflow"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:optimization <optimization target>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Database performance optimization workflow
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:optimization "optimization
 ```
 
 
-# Refactor Workflow
+# Database Optimization Workflow
 
-Refactor: **\<refactor scope\>**
+Optimize: **\<optimization target\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Performance Analysis
+**Agent:** @database-admin
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Identify slow queries
+- Analyze execution plans
+- Review index usage
+- Measure baselines
 
-### Step 2: Test Coverage
+### Step 2: Query Optimization
+**Agent:** @database-admin
+
+- Rewrite slow queries
+- Add missing indexes
+- Remove unused indexes
+- Optimize joins
+
+### Step 3: Schema Optimization
+**Agent:** @database-admin
+
+- Review data types
+- Consider partitioning
+- Evaluate denormalization
+- Optimize storage
+
+### Step 4: Configuration Tuning
+**Agent:** @database-admin
+
+- Review DB configuration
+- Tune memory settings
+- Optimize connections
+- Configure caching
+
+### Step 5: Validation
 **Agent:** @tester
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
-
-### Step 3: Refactoring
-**Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
-
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
-
-### Step 4: Validation
-**Agent:** @tester
-**Command:** `/dev:test`
-
-- Run all tests
-- Verify no regressions
-- Check performance impact
-
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
-
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Benchmark improvements
+- Compare to baseline
+- Test under load
+- Document gains
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Performance analyzed
+- [ ] Queries optimized
+- [ ] Schema improved
+- [ ] Configuration tuned
+- [ ] Improvements validated
 
-Execute each step sequentially. Show progress after each step.
+Execute each step. Measure impact.
 
 
 
@@ -95,7 +96,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:optimization "your input here"
 ```
 
 ### With Context
@@ -105,7 +106,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:optimization "detailed description"
 ```
 
 ## Tips

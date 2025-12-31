@@ -1,79 +1,81 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:api-testing"
+description: "Comprehensive API testing workflow"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:api-testing <API to test>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Comprehensive API testing workflow
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:api-testing "API
 ```
 
 
-# Refactor Workflow
+# API Testing Workflow
 
-Refactor: **\<refactor scope\>**
+Test API: **\<API to test\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
-
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
-
-### Step 2: Test Coverage
+### Step 1: Test Planning
 **Agent:** @tester
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
+- Review API spec
+- Identify test cases
+- Plan coverage
+- Set up environment
 
-### Step 3: Refactoring
-**Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
-
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
-
-### Step 4: Validation
+### Step 2: Functional Testing
 **Agent:** @tester
 **Command:** `/dev:test`
 
-- Run all tests
-- Verify no regressions
-- Check performance impact
+- Test all endpoints
+- Verify responses
+- Check error handling
+- Test edge cases
 
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
+### Step 3: Contract Testing
+**Agent:** @tester
 
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Validate against schema
+- Check backwards compatibility
+- Test versioning
+- Verify contracts
+
+### Step 4: Performance Testing
+**Agent:** @tester
+
+- Load testing
+- Stress testing
+- Measure latency
+- Identify bottlenecks
+
+### Step 5: Security Testing
+**Agent:** @security-auditor
+
+- Authentication tests
+- Authorization tests
+- Input validation
+- Security headers
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Tests planned
+- [ ] Functional tests pass
+- [ ] Contracts validated
+- [ ] Performance tested
+- [ ] Security verified
 
-Execute each step sequentially. Show progress after each step.
+Execute thoroughly. API reliability matters.
 
 
 
@@ -95,7 +97,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:api-testing "your input here"
 ```
 
 ### With Context
@@ -105,7 +107,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:api-testing "detailed description"
 ```
 
 ## Tips

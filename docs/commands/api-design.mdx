@@ -1,79 +1,81 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:api-design"
+description: "Design RESTful or GraphQL APIs"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:api-design <API description>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Design RESTful or GraphQL APIs
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:api-design "API
 ```
 
 
-# Refactor Workflow
+# API Design Workflow
 
-Refactor: **\<refactor scope\>**
+Design API for: **\<API description\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Requirements
+**Agent:** @api-designer
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Gather API requirements
+- Identify consumers
+- Define use cases
+- Document constraints
 
-### Step 2: Test Coverage
-**Agent:** @tester
+### Step 2: Resource Design
+**Agent:** @api-designer
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
+- Define resources
+- Design endpoints
+- Plan versioning
+- Document conventions
 
-### Step 3: Refactoring
+### Step 3: Schema Design
+**Agent:** @api-designer
+**Command:** `/quality:api-gen`
+
+- Create OpenAPI spec
+- Define request/response schemas
+- Document error codes
+- Add examples
+
+### Step 4: Implementation
 **Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
+- Implement endpoints
+- Add validation
+- Handle errors
+- Write middleware
 
-### Step 4: Validation
-**Agent:** @tester
-**Command:** `/dev:test`
+### Step 5: Documentation
+**Agent:** @docs-manager
 
-- Run all tests
-- Verify no regressions
-- Check performance impact
-
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
-
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Generate API docs
+- Add usage examples
+- Create SDKs
+- Publish docs
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Requirements gathered
+- [ ] Resources designed
+- [ ] Schemas defined
+- [ ] Implemented
+- [ ] Documented
 
-Execute each step sequentially. Show progress after each step.
+Execute each step. Create developer-friendly API.
 
 
 
@@ -95,7 +97,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:api-design "your input here"
 ```
 
 ### With Context
@@ -105,7 +107,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:api-design "detailed description"
 ```
 
 ## Tips

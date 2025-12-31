@@ -259,6 +259,40 @@
       ]
     },
     {
+      "group": "Workflow Commands",
+      "pages": [
+        "commands/feature",
+        "commands/bug-fix",
+        "commands/refactor",
+        "commands/code-review",
+        "commands/rag-development",
+        "commands/model-evaluation",
+        "commands/prompt-engineering",
+        "commands/agent-development",
+        "commands/fine-tuning",
+        "commands/10x-improvement",
+        "commands/100x-architecture",
+        "commands/1000x-innovation",
+        "commands/sprint-setup",
+        "commands/sprint-execution",
+        "commands/sprint-retrospective",
+        "commands/security-audit",
+        "commands/penetration-testing",
+        "commands/schema-design",
+        "commands/migration",
+        "commands/optimization",
+        "commands/api-design",
+        "commands/api-testing",
+        "commands/full-feature",
+        "commands/authentication",
+        "commands/technical-docs",
+        "commands/marketing",
+        "commands/technology-research",
+        "commands/best-practices",
+        "commands/performance-optimization"
+      ]
+    },
+    {
       "group": "Skills Overview",
       "pages": [
         "skills/overview"

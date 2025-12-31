@@ -1,79 +1,80 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:migration"
+description: "Safe database migration workflow"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:migration <migration description>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Safe database migration workflow
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:migration "migration
 ```
 
 
-# Refactor Workflow
+# Database Migration Workflow
 
-Refactor: **\<refactor scope\>**
+Migration: **\<migration description\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Change Analysis
+**Agent:** @database-admin
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Analyze required changes
+- Assess impact
+- Identify risks
+- Plan approach
 
-### Step 2: Test Coverage
+### Step 2: Migration Design
+**Agent:** @database-admin
+
+- Design migration strategy
+- Plan zero-downtime approach
+- Create rollback plan
+- Document steps
+
+### Step 3: Migration Creation
+**Agent:** @database-admin
+
+- Write migration scripts
+- Include rollback
+- Add data transformations
+- Test locally
+
+### Step 4: Staging Test
 **Agent:** @tester
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
+- Run on staging
+- Verify data integrity
+- Test rollback
+- Measure performance
 
-### Step 3: Refactoring
-**Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
+### Step 5: Production Deploy
+**Agent:** @database-admin
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
-
-### Step 4: Validation
-**Agent:** @tester
-**Command:** `/dev:test`
-
-- Run all tests
-- Verify no regressions
-- Check performance impact
-
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
-
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Execute migration
+- Monitor closely
+- Verify success
+- Document completion
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Changes analyzed
+- [ ] Migration designed
+- [ ] Scripts created
+- [ ] Staging tested
+- [ ] Production deployed
 
-Execute each step sequentially. Show progress after each step.
+Execute carefully. Data integrity is critical.
 
 
 
@@ -95,7 +96,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:migration "your input here"
 ```
 
 ### With Context
@@ -105,7 +106,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:migration "detailed description"
 ```
 
 ## Tips

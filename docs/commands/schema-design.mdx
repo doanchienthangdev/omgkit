@@ -1,0 +1,148 @@
+---
+title: "/workflow:schema-design"
+description: "Design production-grade database schemas"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Workflow
+
+  **Syntax:** `/workflow:schema-design <data model description>`
+</Info>
+
+## Overview
+
+Design production-grade database schemas
+
+## Quick Start
+
+```bash
+/workflow:schema-design "data
+```
+
+
+# Schema Design Workflow
+
+Design schema for: **\<data model description\>**
+
+## Workflow Steps
+
+### Step 1: Requirements Gathering
+**Agent:** @planner
+
+- Identify entities
+- Map relationships
+- Estimate data volumes
+- Document access patterns
+
+### Step 2: ER Design
+**Agent:** @database-admin
+
+- Create ER diagram
+- Define attributes
+- Set cardinality
+- Document constraints
+
+### Step 3: Normalization
+**Agent:** @database-admin
+
+- Apply normal forms (1NF, 2NF, 3NF)
+- Eliminate redundancy
+- Balance normalization vs performance
+- Document decisions
+
+### Step 4: Index Design
+**Agent:** @database-admin
+
+- Design primary keys
+- Add foreign key indexes
+- Create query-based indexes
+- Plan composite indexes
+
+### Step 5: Migration Creation
+**Agent:** @database-admin
+
+- Generate migration files
+- Include rollback scripts
+- Add seed data
+- Test migrations
+
+### Step 6: Validation
+**Agent:** @tester
+**Command:** `/dev:test`
+
+- Run migrations
+- Verify constraints
+- Test relationships
+- Baseline performance
+
+## Progress Tracking
+- [ ] Requirements documented
+- [ ] ER diagram complete
+- [ ] Schema normalized
+- [ ] Indexes designed
+- [ ] Migrations created
+- [ ] Validation passed
+
+Execute each step. Create production-ready schema.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Edit** - Enables edit capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/workflow:schema-design "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/workflow:schema-design "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Workflow Commands" icon="terminal" href="/commands/overview#workflow">
+    More workflow commands
+  </Card>
+</CardGroup>

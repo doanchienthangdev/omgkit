@@ -1,0 +1,127 @@
+---
+title: "/workflow:code-review"
+description: "Comprehensive code review workflow"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Workflow
+
+  **Syntax:** `/workflow:code-review <file or directory to review>`
+</Info>
+
+## Overview
+
+Comprehensive code review workflow
+
+## Quick Start
+
+```bash
+/workflow:code-review "file
+```
+
+
+# Code Review Workflow
+
+Review: **\<file or directory to review\>**
+
+## Workflow Steps
+
+### Step 1: Code Analysis
+**Agent:** @code-reviewer
+**Command:** `/dev:review \<file or directory to review\>`
+
+- Review code quality
+- Check naming conventions
+- Verify code structure
+- Assess complexity
+
+### Step 2: Security Review
+**Agent:** @security-auditor
+**Command:** `/quality:security-scan`
+
+- Check for vulnerabilities
+- OWASP Top 10 review
+- Input validation check
+- Authentication/authorization review
+
+### Step 3: Test Review
+**Agent:** @tester
+
+- Review test coverage
+- Check test quality
+- Identify missing tests
+- Verify edge cases
+
+### Step 4: Documentation
+**Agent:** @code-reviewer
+
+- Compile review findings
+- Prioritize issues
+- Create actionable feedback
+
+## Progress Tracking
+- [ ] Step 1: Code quality reviewed
+- [ ] Step 2: Security reviewed
+- [ ] Step 3: Tests reviewed
+- [ ] Step 4: Review documented
+
+Execute each step. Compile comprehensive review report.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/workflow:code-review "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/workflow:code-review "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Workflow Commands" icon="terminal" href="/commands/overview#workflow">
+    More workflow commands
+  </Card>
+</CardGroup>

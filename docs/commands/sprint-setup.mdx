@@ -1,79 +1,84 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:sprint-setup"
+description: "Initialize and plan a new sprint"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:sprint-setup <sprint name>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Initialize and plan a new sprint
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:sprint-setup "sprint
 ```
 
 
-# Refactor Workflow
+# Sprint Setup Workflow
 
-Refactor: **\<refactor scope\>**
+Setup sprint: **\<sprint name\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Vision Review
+**Agent:** @sprint-master
+**Command:** `/vision:show`
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Review product vision
+- Check current progress
+- Identify priorities
+- Align with stakeholders
 
-### Step 2: Test Coverage
-**Agent:** @tester
+### Step 2: Backlog Grooming
+**Agent:** @planner
+**Command:** `/backlog:show`
 
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
+- Review backlog items
+- Estimate effort
+- Prioritize by value
+- Identify dependencies
 
-### Step 3: Refactoring
-**Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
+### Step 3: Sprint Planning
+**Agent:** @sprint-master
+**Command:** `/sprint:new "\<sprint name\>"`
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
+- Select sprint items
+- Define sprint goal
+- Assign to agents
+- Set capacity
 
-### Step 4: Validation
-**Agent:** @tester
-**Command:** `/dev:test`
+### Step 4: Task Breakdown
+**Agent:** @planner
 
-- Run all tests
-- Verify no regressions
-- Check performance impact
+- Break down stories
+- Create implementation tasks
+- Define acceptance criteria
+- Identify risks
 
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
+### Step 5: Kickoff
+**Agent:** @sprint-master
+**Command:** `/sprint:start`
 
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Communicate sprint goal
+- Confirm assignments
+- Set up tracking
+- Start sprint
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Vision reviewed
+- [ ] Backlog groomed
+- [ ] Sprint planned
+- [ ] Tasks broken down
+- [ ] Sprint started
 
-Execute each step sequentially. Show progress after each step.
+Execute each step. Sprint ready to begin.
 
 
 
@@ -95,7 +100,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:sprint-setup "your input here"
 ```
 
 ### With Context
@@ -105,7 +110,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:sprint-setup "detailed description"
 ```
 
 ## Tips

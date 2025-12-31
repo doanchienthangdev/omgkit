@@ -1,77 +1,78 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:agent-development"
+description: "Build AI agents with tool use and planning"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:agent-development <agent description>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Build AI agents with tool use and planning
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:agent-development "agent
 ```
 
 
-# Refactor Workflow
+# Agent Development Workflow
 
-Refactor: **\<refactor scope\>**
+Build agent: **\<agent description\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Agent Design
+**Agent:** @architect
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Define agent capabilities
+- Design tool interfaces
+- Plan memory system
+- Architecture decisions
 
-### Step 2: Test Coverage
-**Agent:** @tester
-
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
-
-### Step 3: Refactoring
+### Step 2: Tool Implementation
 **Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
+- Implement agent tools
+- Create tool schemas
+- Add error handling
+- Test tool functions
 
-### Step 4: Validation
+### Step 3: Agent Logic
+**Agent:** @fullstack-developer
+
+- Implement planning strategy (ReAct, Plan-and-Execute)
+- Add memory management
+- Create execution loop
+- Handle failures
+
+### Step 4: Testing
 **Agent:** @tester
-**Command:** `/dev:test`
 
-- Run all tests
-- Verify no regressions
-- Check performance impact
+- Unit test tools
+- Integration test agent
+- Stress testing
+- Edge case validation
 
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
+### Step 5: Evaluation
+**Agent:** @tester
 
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Measure task completion
+- Evaluate efficiency
+- Benchmark performance
+- Compare baselines
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Agent designed
+- [ ] Tools implemented
+- [ ] Agent logic complete
+- [ ] Testing passed
+- [ ] Evaluation done
 
 Execute each step sequentially. Show progress after each step.
 
@@ -95,7 +96,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:agent-development "your input here"
 ```
 
 ### With Context
@@ -105,7 +106,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:agent-development "detailed description"
 ```
 
 ## Tips

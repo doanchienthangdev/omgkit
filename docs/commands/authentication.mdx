@@ -1,79 +1,80 @@
 ---
-title: "/workflow:refactor"
-description: "Code refactoring and improvement workflow"
+title: "/workflow:authentication"
+description: "Implement secure authentication system"
 icon: "terminal"
 ---
 
 <Info>
   **Category:** Workflow
 
-  **Syntax:** `/workflow:refactor <refactor scope>`
+  **Syntax:** `/workflow:authentication <auth requirements>`
 </Info>
 
 ## Overview
 
-Code refactoring and improvement workflow
+Implement secure authentication system
 
 ## Quick Start
 
 ```bash
-/workflow:refactor "refactor
+/workflow:authentication "auth
 ```
 
 
-# Refactor Workflow
+# Authentication Workflow
 
-Refactor: **\<refactor scope\>**
+Implement auth: **\<auth requirements\>**
 
 ## Workflow Steps
 
-### Step 1: Analysis
-**Agent:** @code-reviewer
+### Step 1: Auth Design
+**Agent:** @security-auditor
 
-- Identify code smells
-- Document current issues
-- Propose improvements
-- Assess risk
+- Choose auth method (JWT, sessions, OAuth)
+- Design token strategy
+- Plan security measures
+- Document requirements
 
-### Step 2: Test Coverage
-**Agent:** @tester
-
-- Ensure existing tests pass
-- Add tests for uncovered code
-- Create safety net for refactoring
-
-### Step 3: Refactoring
+### Step 2: Backend Auth
 **Agent:** @fullstack-developer
-**Command:** `/quality:refactor`
 
-- Apply refactoring patterns
-- Improve code structure
-- Enhance readability
-- Remove duplication
+- Implement auth endpoints
+- Password hashing (bcrypt/argon2)
+- Token generation
+- Session management
 
-### Step 4: Validation
+### Step 3: Frontend Auth
+**Agent:** @fullstack-developer
+
+- Login/register forms
+- Token storage
+- Protected routes
+- Auth state management
+
+### Step 4: Security Hardening
+**Agent:** @security-auditor
+
+- Rate limiting
+- CSRF protection
+- XSS prevention
+- Secure headers
+
+### Step 5: Testing
 **Agent:** @tester
-**Command:** `/dev:test`
 
-- Run all tests
-- Verify no regressions
-- Check performance impact
-
-### Step 5: Review & Commit
-**Agent:** @code-reviewer, @git-manager
-
-- Review changes
-- Verify improvements
-- Commit with clear message
+- Auth flow tests
+- Security tests
+- Edge cases
+- Token expiry
 
 ## Progress Tracking
-- [ ] Step 1: Analysis complete
-- [ ] Step 2: Test coverage adequate
-- [ ] Step 3: Refactoring complete
-- [ ] Step 4: All tests passing
-- [ ] Step 5: Reviewed and committed
+- [ ] Auth designed
+- [ ] Backend implemented
+- [ ] Frontend implemented
+- [ ] Security hardened
+- [ ] Tests passing
 
-Execute each step sequentially. Show progress after each step.
+Execute carefully. Security is critical.
 
 
 
@@ -95,7 +96,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/workflow:refactor "your input here"
+/workflow:authentication "your input here"
 ```
 
 ### With Context
@@ -105,7 +106,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/workflow:refactor "detailed description"
+/workflow:authentication "detailed description"
 ```
 
 ## Tips

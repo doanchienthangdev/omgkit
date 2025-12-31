@@ -1,0 +1,157 @@
+---
+title: "/workflow:rag-development"
+description: "Build Retrieval-Augmented Generation systems"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Workflow
+
+  **Syntax:** `/workflow:rag-development <RAG system description>`
+</Info>
+
+## Overview
+
+Build Retrieval-Augmented Generation systems
+
+## Quick Start
+
+```bash
+/workflow:rag-development "RAG
+```
+
+
+# RAG Development Workflow
+
+Build RAG system: **\<RAG system description\>**
+
+## Workflow Steps
+
+### Step 1: Research
+**Agent:** @researcher
+**Command:** `/planning:research "RAG best practices"`
+
+- Study RAG architectures
+- Evaluate chunking strategies
+- Compare embedding models
+- Review retrieval methods
+
+### Step 2: Architecture Design
+**Agent:** @architect
+
+- Define system architecture
+- Select components (vector DB, embeddings, LLM)
+- Plan data pipeline
+- Design API interface
+
+### Step 3: Data Preparation
+**Agent:** @fullstack-developer
+
+- Implement document loaders
+- Create chunking pipeline
+- Handle different formats
+- Clean and normalize text
+
+### Step 4: Embedding Pipeline
+**Agent:** @fullstack-developer
+
+- Integrate embedding model
+- Create batch processing
+- Store in vector database
+- Optimize indexing
+
+### Step 5: Retrieval System
+**Agent:** @fullstack-developer
+
+- Implement semantic search
+- Add hybrid retrieval (BM25 + vector)
+- Build reranking pipeline
+- Context assembly
+
+### Step 6: Generation Pipeline
+**Agent:** @fullstack-developer
+
+- Create prompt templates
+- Context injection
+- LLM integration
+- Response formatting
+
+### Step 7: Evaluation
+**Agent:** @tester
+
+- Test retrieval accuracy (Recall@K, MRR)
+- Measure answer quality
+- Benchmark latency
+- Analyze costs
+
+## Progress Tracking
+- [ ] Research complete
+- [ ] Architecture designed
+- [ ] Data pipeline ready
+- [ ] Embeddings working
+- [ ] Retrieval system built
+- [ ] Generation working
+- [ ] Evaluation passed
+
+Execute each step sequentially. Show progress after each step.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Edit** - Enables edit capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/workflow:rag-development "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/workflow:rag-development "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Workflow Commands" icon="terminal" href="/commands/overview#workflow">
+    More workflow commands
+  </Card>
+</CardGroup>
