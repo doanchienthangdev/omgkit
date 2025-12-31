@@ -20,11 +20,11 @@ const ARCHETYPES_DIR = path.join(
 );
 
 describe('Autonomous Archetypes', () => {
-  // List of expected archetypes (12 total: 5 original + 7 new)
+  // List of expected archetypes (14 total: 5 original + 9 new)
   const expectedArchetypes = [
     'saas-mvp', 'api-service', 'cli-tool', 'library', 'fullstack-app',
     'mobile-app', 'ai-powered-app', 'ai-model-building', 'desktop-app',
-    'iot-app', 'game-app', 'simulation-app'
+    'iot-app', 'game-app', 'simulation-app', 'microservices-app', 'event-driven-app'
   ];
 
   describe('Archetype Files Exist', () => {
@@ -126,9 +126,9 @@ describe('Autonomous Archetypes', () => {
     it('all archetypes should have planning or design phase', () => {
       Object.values(allArchetypes).forEach((archetype) => {
         // Different archetypes use different names for the planning phase:
-        // planning, design, modeling, or exploration (for ML archetypes)
+        // planning, design, modeling, exploration (for ML), or architecture (for microservices/event-driven)
         const planningPhase = archetype.phases.find((p) =>
-          p.id === 'planning' || p.id === 'design' || p.id === 'modeling' || p.id === 'exploration'
+          p.id === 'planning' || p.id === 'design' || p.id === 'modeling' || p.id === 'exploration' || p.id === 'architecture'
         );
         expect(planningPhase).toBeDefined();
       });
@@ -144,7 +144,7 @@ describe('Autonomous Archetypes', () => {
     it('planning/design phase should have checkpoint', () => {
       Object.values(allArchetypes).forEach((archetype) => {
         const planningPhase = archetype.phases.find((p) =>
-          p.id === 'planning' || p.id === 'design' || p.id === 'modeling' || p.id === 'exploration'
+          p.id === 'planning' || p.id === 'design' || p.id === 'modeling' || p.id === 'exploration' || p.id === 'architecture'
         );
         expect(planningPhase.checkpoint).toBe(true);
       });
@@ -576,6 +576,174 @@ describe('Autonomous Archetypes', () => {
     it('should have optimization phase', () => {
       const optimizationPhase = simulation.phases.find((p) => p.id === 'optimization');
       expect(optimizationPhase).toBeDefined();
+    });
+  });
+
+  describe('Microservices App Archetype Specifics', () => {
+    let microservices;
+
+    beforeAll(() => {
+      const microservicesPath = path.join(ARCHETYPES_DIR, 'microservices-app.yaml');
+      const content = fs.readFileSync(microservicesPath, 'utf8');
+      microservices = yaml.load(content);
+    });
+
+    it('should have language defaults', () => {
+      expect(microservices.defaults.language).toBeDefined();
+    });
+
+    it('should have framework defaults', () => {
+      expect(microservices.defaults.framework).toBeDefined();
+    });
+
+    it('should have gateway defaults', () => {
+      expect(microservices.defaults.gateway).toBeDefined();
+    });
+
+    it('should have orchestration defaults', () => {
+      expect(microservices.defaults.orchestration).toBeDefined();
+    });
+
+    it('should have architecture phase', () => {
+      const archPhase = microservices.phases.find((p) => p.id === 'architecture');
+      expect(archPhase).toBeDefined();
+    });
+
+    it('should have foundation phase', () => {
+      const foundationPhase = microservices.phases.find((p) => p.id === 'foundation');
+      expect(foundationPhase).toBeDefined();
+    });
+
+    it('should have core_services phase', () => {
+      const corePhase = microservices.phases.find((p) => p.id === 'core_services');
+      expect(corePhase).toBeDefined();
+    });
+
+    it('should have integration phase', () => {
+      const integrationPhase = microservices.phases.find((p) => p.id === 'integration');
+      expect(integrationPhase).toBeDefined();
+    });
+
+    it('should have testing phase', () => {
+      const testingPhase = microservices.phases.find((p) => p.id === 'testing');
+      expect(testingPhase).toBeDefined();
+    });
+
+    it('should have devops phase', () => {
+      const devopsPhase = microservices.phases.find((p) => p.id === 'devops');
+      expect(devopsPhase).toBeDefined();
+    });
+
+    it('should have alternatives for orchestration', () => {
+      expect(microservices.alternatives.orchestration).toBeDefined();
+      expect(microservices.alternatives.orchestration.length).toBeGreaterThan(1);
+    });
+
+    it('should have alternatives for gateway', () => {
+      expect(microservices.alternatives.gateway).toBeDefined();
+      expect(microservices.alternatives.gateway.length).toBeGreaterThan(1);
+    });
+
+    it('should have discovery_additions for microservices-specific questions', () => {
+      expect(microservices.discovery_additions).toBeDefined();
+      expect(microservices.discovery_additions.length).toBeGreaterThan(0);
+    });
+
+    it('should have gateway in high autonomy level', () => {
+      const gatewayRule = microservices.autonomy_rules?.find((r) => r.pattern?.includes('gateway'));
+      expect(gatewayRule).toBeDefined();
+      expect(gatewayRule.level).toBe(3);
+    });
+
+    it('should have k8s in high autonomy level', () => {
+      const k8sRule = microservices.autonomy_rules?.find((r) => r.pattern?.includes('k8s'));
+      expect(k8sRule).toBeDefined();
+      expect(k8sRule.level).toBe(3);
+    });
+  });
+
+  describe('Event-Driven App Archetype Specifics', () => {
+    let eventDriven;
+
+    beforeAll(() => {
+      const eventDrivenPath = path.join(ARCHETYPES_DIR, 'event-driven-app.yaml');
+      const content = fs.readFileSync(eventDrivenPath, 'utf8');
+      eventDriven = yaml.load(content);
+    });
+
+    it('should have broker defaults', () => {
+      expect(eventDriven.defaults.broker).toBeDefined();
+    });
+
+    it('should have language defaults', () => {
+      expect(eventDriven.defaults.language).toBeDefined();
+    });
+
+    it('should have event_store defaults', () => {
+      expect(eventDriven.defaults.event_store).toBeDefined();
+    });
+
+    it('should have architecture phase', () => {
+      const archPhase = eventDriven.phases.find((p) => p.id === 'architecture');
+      expect(archPhase).toBeDefined();
+    });
+
+    it('should have foundation phase', () => {
+      const foundationPhase = eventDriven.phases.find((p) => p.id === 'foundation');
+      expect(foundationPhase).toBeDefined();
+    });
+
+    it('should have producers phase', () => {
+      const producersPhase = eventDriven.phases.find((p) => p.id === 'producers');
+      expect(producersPhase).toBeDefined();
+    });
+
+    it('should have consumers phase', () => {
+      const consumersPhase = eventDriven.phases.find((p) => p.id === 'consumers');
+      expect(consumersPhase).toBeDefined();
+    });
+
+    it('should have cqrs phase', () => {
+      const cqrsPhase = eventDriven.phases.find((p) => p.id === 'cqrs');
+      expect(cqrsPhase).toBeDefined();
+    });
+
+    it('should have monitoring phase', () => {
+      const monitoringPhase = eventDriven.phases.find((p) => p.id === 'monitoring');
+      expect(monitoringPhase).toBeDefined();
+    });
+
+    it('should have alternatives for broker', () => {
+      expect(eventDriven.alternatives.broker).toBeDefined();
+      expect(eventDriven.alternatives.broker.length).toBeGreaterThan(1);
+    });
+
+    it('should have alternatives for event_store', () => {
+      expect(eventDriven.alternatives.event_store).toBeDefined();
+      expect(eventDriven.alternatives.event_store.length).toBeGreaterThan(1);
+    });
+
+    it('should have discovery_additions for event-driven specific questions', () => {
+      expect(eventDriven.discovery_additions).toBeDefined();
+      expect(eventDriven.discovery_additions.length).toBeGreaterThan(0);
+    });
+
+    it('should have events in high autonomy level', () => {
+      const eventsRule = eventDriven.autonomy_rules?.find((r) => r.pattern?.includes('events'));
+      expect(eventsRule).toBeDefined();
+      expect(eventsRule.level).toBe(3);
+    });
+
+    it('should have sagas in high autonomy level', () => {
+      const sagasRule = eventDriven.autonomy_rules?.find((r) => r.pattern?.includes('sagas'));
+      expect(sagasRule).toBeDefined();
+      expect(sagasRule.level).toBe(3);
+    });
+
+    it('should have schemas in high autonomy level', () => {
+      const schemasRule = eventDriven.autonomy_rules?.find((r) => r.pattern?.includes('schemas'));
+      expect(schemasRule).toBeDefined();
+      expect(schemasRule.level).toBe(3);
     });
   });
 });

@@ -14,7 +14,7 @@ schema:
     type:
       type: string
       required: true
-      enum: [saas, api, cli, library, fullstack, mobile, ai, desktop, iot, game, simulation]
+      enum: [saas, api, cli, library, fullstack, mobile, ai, desktop, iot, game, simulation, microservices, event_driven]
       description: Type of project being built
 
     archetype:

@@ -1,0 +1,431 @@
+name: "Microservices Application"
+id: microservices-app
+description: "Distributed system with independently deployable services, API gateway, and container orchestration"
+estimated_duration: "8-16 weeks"
+icon: "cubes"
+
+# Default technology recommendations
+defaults:
+  language: typescript
+  framework: nestjs
+  gateway: kong
+  discovery: kubernetes_dns
+  containers: docker
+  orchestration: kubernetes
+  tracing: jaeger
+  metrics: prometheus
+  cicd: github_actions
+
+# Alternative technology stacks
+alternatives:
+  language:
+    - id: typescript
+      name: "TypeScript/Node.js"
+      description: "Fast development, good ecosystem"
+    - id: go
+      name: "Go"
+      description: "High performance, low resource usage"
+    - id: java
+      name: "Java (Spring Boot)"
+      description: "Enterprise-grade, Spring Cloud ecosystem"
+    - id: python
+      name: "Python (FastAPI)"
+      description: "Rapid development, async support"
+
+  framework:
+    - id: nestjs
+      name: "NestJS"
+      description: "Modular architecture, built-in microservices"
+    - id: express
+      name: "Express.js"
+      description: "Lightweight, flexible"
+    - id: spring_boot
+      name: "Spring Boot"
+      description: "Full-featured enterprise framework"
+    - id: fastapi
+      name: "FastAPI"
+      description: "Modern Python with automatic docs"
+
+  gateway:
+    - id: kong
+      name: "Kong"
+      description: "Powerful API gateway with plugins"
+    - id: traefik
+      name: "Traefik"
+      description: "Cloud-native, auto-discovery"
+    - id: nginx
+      name: "Nginx"
+      description: "High performance reverse proxy"
+    - id: aws_api_gateway
+      name: "AWS API Gateway"
+      description: "Managed, serverless option"
+
+  orchestration:
+    - id: kubernetes
+      name: "Kubernetes"
+      description: "Industry standard container orchestration"
+    - id: docker_swarm
+      name: "Docker Swarm"
+      description: "Simpler orchestration"
+    - id: ecs
+      name: "AWS ECS"
+      description: "Managed container service"
+    - id: nomad
+      name: "HashiCorp Nomad"
+      description: "Flexible workload orchestration"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "Domain Discovery"
+    description: "Identify bounded contexts, service boundaries, and domain decomposition"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      Domain discovery complete. Review:
+      - Bounded contexts and service boundaries
+      - Service dependency map
+      - Data ownership strategy
+      - Communication patterns
+
+      Approve to proceed with architecture design.
+
+    steps:
+      - id: domain_analysis
+        name: "Domain Analysis"
+        agent: researcher
+        description: "Analyze business domain using DDD principles"
+
+      - id: bounded_contexts
+        name: "Bounded Contexts"
+        agent: architect
+        description: "Identify bounded contexts and service boundaries"
+
+      - id: service_mapping
+        name: "Service Mapping"
+        agent: architect
+        description: "Map service dependencies and interactions"
+
+      - id: data_strategy
+        name: "Data Strategy"
+        agent: architect
+        description: "Define data ownership per service"
+
+    outputs:
+      - ".omgkit/generated/domain-model.md"
+      - ".omgkit/generated/service-map.md"
+      - ".omgkit/generated/data-ownership.md"
+
+  - id: architecture
+    name: "Architecture Design"
+    description: "Design system architecture, contracts, and communication patterns"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Architecture design complete. Review:
+      - Service contracts (OpenAPI specs)
+      - API Gateway routing
+      - Communication patterns
+      - Deployment strategy
+
+      Approve to begin foundation setup.
+
+    steps:
+      - id: service_contracts
+        name: "Service Contracts"
+        agent: api-designer
+        description: "Define OpenAPI specs for each service"
+
+      - id: gateway_design
+        name: "Gateway Design"
+        agent: architect
+        description: "Design API Gateway routing and policies"
+
+      - id: communication_patterns
+        name: "Communication Patterns"
+        agent: architect
+        description: "Define sync/async communication"
+
+      - id: deployment_strategy
+        name: "Deployment Strategy"
+        agent: architect
+        description: "Design deployment and scaling approach"
+
+    outputs:
+      - ".omgkit/generated/architecture.md"
+      - ".omgkit/generated/api-contracts/"
+      - ".omgkit/generated/deployment-strategy.md"
+
+  - id: foundation
+    name: "Infrastructure Foundation"
+    description: "Set up containerization, orchestration, and shared infrastructure"
+    order: 3
+    checkpoint: false
+
+    steps:
+      - id: monorepo_setup
+        name: "Monorepo Setup"
+        agent: fullstack-developer
+        description: "Initialize monorepo structure"
+
+      - id: docker_config
+        name: "Docker Configuration"
+        agent: fullstack-developer
+        description: "Create Dockerfiles for services"
+
+      - id: kubernetes_manifests
+        name: "Kubernetes Manifests"
+        agent: fullstack-developer
+        description: "Create K8s deployments, services"
+
+      - id: gateway_setup
+        name: "API Gateway Setup"
+        agent: fullstack-developer
+        description: "Configure API gateway"
+
+      - id: shared_libraries
+        name: "Shared Libraries"
+        agent: fullstack-developer
+        description: "Create shared code packages"
+
+    outputs:
+      - "docker-compose.yml"
+      - "k8s/"
+      - "packages/shared/"
+      - "services/"
+
+  - id: core_services
+    name: "Core Services"
+    description: "Implement individual microservices"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Core services implemented. Review:
+      - Service implementations
+      - API endpoints
+      - Health checks
+      - Database schemas
+
+      Approve to proceed with integration.
+
+    steps:
+      - id: service_scaffolding
+        name: "Service Scaffolding"
+        agent: fullstack-developer
+        description: "Create service boilerplates"
+
+      - id: service_implementation
+        name: "Service Implementation"
+        agent: fullstack-developer
+        description: "Implement business logic per service"
+
+      - id: database_per_service
+        name: "Database Per Service"
+        agent: database-admin
+        description: "Set up databases for each service"
+
+      - id: health_checks
+        name: "Health Checks"
+        agent: fullstack-developer
+        description: "Implement health and readiness probes"
+
+      - id: service_tests
+        name: "Service Tests"
+        agent: tester
+        description: "Unit tests for each service"
+
+    outputs:
+      - "services/*/src/"
+      - "services/*/tests/"
+
+  - id: integration
+    name: "Service Integration"
+    description: "Inter-service communication, tracing, and resilience"
+    order: 5
+    checkpoint: true
+    checkpoint_message: |
+      Integration complete. Review:
+      - Inter-service communication
+      - Distributed tracing
+      - Circuit breakers
+      - Error handling
+
+      Approve to proceed with testing.
+
+    steps:
+      - id: service_communication
+        name: "Service Communication"
+        agent: fullstack-developer
+        description: "Implement inter-service calls"
+
+      - id: distributed_tracing
+        name: "Distributed Tracing"
+        agent: fullstack-developer
+        description: "Set up Jaeger/Zipkin tracing"
+
+      - id: circuit_breakers
+        name: "Circuit Breakers"
+        agent: fullstack-developer
+        description: "Implement resilience patterns"
+
+      - id: retry_policies
+        name: "Retry Policies"
+        agent: fullstack-developer
+        description: "Configure retry and timeout policies"
+
+    outputs:
+      - "services/*/src/clients/"
+      - "packages/resilience/"
+
+  - id: testing
+    name: "Comprehensive Testing"
+    description: "Integration tests, contract tests, and chaos engineering"
+    order: 6
+    checkpoint: false
+
+    steps:
+      - id: integration_tests
+        name: "Integration Tests"
+        agent: tester
+        description: "Cross-service integration tests"
+
+      - id: contract_tests
+        name: "Contract Tests"
+        agent: tester
+        description: "Consumer-driven contract tests (Pact)"
+
+      - id: e2e_tests
+        name: "E2E Tests"
+        agent: tester
+        description: "End-to-end flow tests"
+
+      - id: load_tests
+        name: "Load Tests"
+        agent: tester
+        description: "Performance and load testing"
+
+    outputs:
+      - "tests/integration/"
+      - "tests/contracts/"
+      - "tests/e2e/"
+      - "tests/load/"
+
+  - id: devops
+    name: "DevOps & Deployment"
+    description: "CI/CD pipelines, monitoring, and production deployment"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      DevOps setup complete. Review:
+      - CI/CD pipelines per service
+      - Monitoring dashboards
+      - Alerting rules
+      - Deployment procedures
+
+      This is the final checkpoint.
+
+    steps:
+      - id: cicd_pipelines
+        name: "CI/CD Pipelines"
+        agent: cicd-manager
+        description: "Create pipelines per service"
+
+      - id: monitoring
+        name: "Monitoring Setup"
+        agent: fullstack-developer
+        description: "Prometheus metrics, Grafana dashboards"
+
+      - id: alerting
+        name: "Alerting"
+        agent: fullstack-developer
+        description: "Configure alerts for SLOs"
+
+      - id: deployment_docs
+        name: "Deployment Documentation"
+        agent: docs-manager
+        description: "Document deployment procedures"
+
+    outputs:
+      - ".github/workflows/"
+      - "monitoring/"
+      - "docs/deployment/"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/gateway/**"
+    level: 3
+    reason: "API Gateway is critical infrastructure"
+  - pattern: "**/k8s/**"
+    level: 3
+    reason: "Kubernetes manifests affect deployment"
+  - pattern: "**/kubernetes/**"
+    level: 3
+    reason: "Kubernetes config is critical"
+  - pattern: "**/shared/**"
+    level: 3
+    reason: "Shared libraries affect all services"
+  - pattern: "**/services/*/src/**"
+    level: 2
+    reason: "Service implementation needs review"
+  - pattern: "Dockerfile*"
+    level: 2
+    reason: "Container configuration"
+  - pattern: "**/migrations/**"
+    level: 3
+    reason: "Database migrations critical"
+  - pattern: ".env*"
+    level: 4
+    reason: "Environment secrets"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "npm test"
+    - "npm run lint"
+    - "docker build --check"
+  before_checkpoint:
+    - "all service tests pass"
+    - "integration tests pass"
+    - "contract tests pass"
+  before_deploy:
+    - "load tests pass"
+    - "security scan clean"
+    - "all services healthy"
+
+# Microservices-specific discovery questions
+discovery_additions:
+  - category: "Domain"
+    questions:
+      - "What are the main business domains/capabilities?"
+      - "How many services do you envision?"
+      - "What are the bounded contexts?"
+      - "Which services have the most dependencies?"
+      - "Any existing monolith to decompose?"
+
+  - category: "Communication"
+    questions:
+      - "Synchronous (REST/gRPC) or asynchronous (events)?"
+      - "Need for event-driven patterns?"
+      - "API versioning strategy?"
+      - "Rate limiting requirements?"
+
+  - category: "Data"
+    questions:
+      - "Database per service or shared?"
+      - "Data consistency requirements (eventual ok?)?"
+      - "Need for distributed transactions?"
+      - "Data replication strategy?"
+
+  - category: "Infrastructure"
+    questions:
+      - "Cloud provider preference?"
+      - "Existing Kubernetes cluster?"
+      - "Container registry?"
+      - "Service mesh needed (Istio, Linkerd)?"
+
+  - category: "Team"
+    questions:
+      - "Team structure (aligned with services)?"
+      - "Deployment ownership model?"
+      - "On-call rotation?"
+      - "Experience with K8s?"

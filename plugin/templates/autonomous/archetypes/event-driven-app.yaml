@@ -1,0 +1,460 @@
+name: "Event-Driven Application"
+id: event-driven-app
+description: "Asynchronous system with message brokers, event sourcing, CQRS, and saga patterns"
+estimated_duration: "6-14 weeks"
+icon: "bolt"
+
+# Default technology recommendations
+defaults:
+  broker: kafka
+  language: typescript
+  framework: nestjs
+  event_store: kafka
+  read_database: postgresql
+  schema_registry: confluent
+  streaming: kafka_streams
+
+# Alternative technology stacks
+alternatives:
+  broker:
+    - id: kafka
+      name: "Apache Kafka"
+      description: "High-throughput distributed streaming"
+    - id: rabbitmq
+      name: "RabbitMQ"
+      description: "Feature-rich message broker"
+    - id: aws_sqs_sns
+      name: "AWS SQS/SNS"
+      description: "Managed messaging service"
+    - id: redis_streams
+      name: "Redis Streams"
+      description: "Lightweight, low-latency"
+    - id: azure_service_bus
+      name: "Azure Service Bus"
+      description: "Enterprise messaging"
+
+  language:
+    - id: typescript
+      name: "TypeScript/Node.js"
+      description: "Async-first, good Kafka libraries"
+    - id: java
+      name: "Java (Spring Cloud Stream)"
+      description: "Mature ecosystem, Kafka Streams"
+    - id: go
+      name: "Go"
+      description: "High performance consumers"
+    - id: python
+      name: "Python"
+      description: "Data processing, Faust library"
+
+  framework:
+    - id: nestjs
+      name: "NestJS"
+      description: "Built-in microservices transport"
+    - id: spring_cloud_stream
+      name: "Spring Cloud Stream"
+      description: "Declarative event binding"
+    - id: fastapi
+      name: "FastAPI"
+      description: "Async Python framework"
+    - id: axon
+      name: "Axon Framework"
+      description: "Event sourcing & CQRS framework"
+
+  event_store:
+    - id: kafka
+      name: "Kafka (as event store)"
+      description: "Log-based event storage"
+    - id: eventstoredb
+      name: "EventStoreDB"
+      description: "Purpose-built event store"
+    - id: postgres_eventide
+      name: "PostgreSQL + Eventide"
+      description: "SQL-based event store"
+    - id: dynamodb
+      name: "DynamoDB Streams"
+      description: "Serverless event storage"
+
+  streaming:
+    - id: kafka_streams
+      name: "Kafka Streams"
+      description: "Native Kafka stream processing"
+    - id: ksqldb
+      name: "ksqlDB"
+      description: "SQL for stream processing"
+    - id: flink
+      name: "Apache Flink"
+      description: "Stateful stream processing"
+    - id: spark_streaming
+      name: "Spark Streaming"
+      description: "Big data stream processing"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "Event Discovery"
+    description: "Event storming, domain events identification, and aggregate design"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      Event discovery complete. Review:
+      - Domain events catalog
+      - Aggregate boundaries
+      - Command/event flows
+      - Event ownership
+
+      Approve to proceed with architecture.
+
+    steps:
+      - id: event_storming
+        name: "Event Storming"
+        agent: researcher
+        description: "Conduct event storming workshop"
+
+      - id: domain_events
+        name: "Domain Events"
+        agent: architect
+        description: "Catalog all domain events"
+
+      - id: aggregates
+        name: "Aggregate Design"
+        agent: architect
+        description: "Define aggregate boundaries"
+
+      - id: command_flows
+        name: "Command Flows"
+        agent: architect
+        description: "Map commands to events"
+
+    outputs:
+      - ".omgkit/generated/event-catalog.md"
+      - ".omgkit/generated/aggregates.md"
+      - ".omgkit/generated/command-flows.md"
+
+  - id: architecture
+    name: "Event Architecture"
+    description: "Topic design, schemas, CQRS strategy, and saga patterns"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Architecture design complete. Review:
+      - Topic/queue design
+      - Event schemas (Avro/JSON)
+      - CQRS implementation plan
+      - Saga patterns for transactions
+
+      Approve to begin foundation.
+
+    steps:
+      - id: topic_design
+        name: "Topic Design"
+        agent: architect
+        description: "Design topics, partitions, retention"
+
+      - id: schema_design
+        name: "Schema Design"
+        agent: architect
+        description: "Design event schemas with versioning"
+
+      - id: cqrs_design
+        name: "CQRS Design"
+        agent: architect
+        description: "Plan command/query separation"
+
+      - id: saga_design
+        name: "Saga Design"
+        agent: architect
+        description: "Design distributed transaction patterns"
+
+    outputs:
+      - ".omgkit/generated/topic-design.md"
+      - ".omgkit/generated/event-schemas/"
+      - ".omgkit/generated/cqrs-design.md"
+      - ".omgkit/generated/saga-patterns.md"
+
+  - id: foundation
+    name: "Infrastructure Foundation"
+    description: "Message broker, schema registry, and base configuration"
+    order: 3
+    checkpoint: false
+
+    steps:
+      - id: broker_setup
+        name: "Broker Setup"
+        agent: fullstack-developer
+        description: "Set up Kafka/RabbitMQ"
+
+      - id: schema_registry
+        name: "Schema Registry"
+        agent: fullstack-developer
+        description: "Configure schema registry"
+
+      - id: topic_creation
+        name: "Topic Creation"
+        agent: fullstack-developer
+        description: "Create topics with configs"
+
+      - id: dlq_setup
+        name: "Dead Letter Queue"
+        agent: fullstack-developer
+        description: "Set up DLQ for failed messages"
+
+      - id: shared_libs
+        name: "Shared Libraries"
+        agent: fullstack-developer
+        description: "Event types, serialization"
+
+    outputs:
+      - "docker-compose.yml"
+      - "schemas/"
+      - "packages/events/"
+
+  - id: producers
+    name: "Event Producers"
+    description: "Implement command handlers and event publishing"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Producers implemented. Review:
+      - Command handlers
+      - Event publishing
+      - Transactional outbox
+      - Idempotency keys
+
+      Approve to proceed with consumers.
+
+    steps:
+      - id: command_handlers
+        name: "Command Handlers"
+        agent: fullstack-developer
+        description: "Implement command processing"
+
+      - id: event_publishing
+        name: "Event Publishing"
+        agent: fullstack-developer
+        description: "Implement event producers"
+
+      - id: outbox_pattern
+        name: "Transactional Outbox"
+        agent: fullstack-developer
+        description: "Implement outbox for reliability"
+
+      - id: idempotency
+        name: "Idempotency"
+        agent: fullstack-developer
+        description: "Add idempotency keys"
+
+      - id: producer_tests
+        name: "Producer Tests"
+        agent: tester
+        description: "Test event publishing"
+
+    outputs:
+      - "src/commands/"
+      - "src/producers/"
+      - "tests/producers/"
+
+  - id: consumers
+    name: "Event Consumers"
+    description: "Event handlers, projections, and saga orchestrators"
+    order: 5
+    checkpoint: true
+    checkpoint_message: |
+      Consumers implemented. Review:
+      - Event handlers
+      - Projections (read models)
+      - Saga orchestration
+      - Error handling
+
+      Approve to proceed with CQRS.
+
+    steps:
+      - id: event_handlers
+        name: "Event Handlers"
+        agent: fullstack-developer
+        description: "Implement event consumers"
+
+      - id: projections
+        name: "Projections"
+        agent: fullstack-developer
+        description: "Build read model projections"
+
+      - id: saga_orchestrators
+        name: "Saga Orchestrators"
+        agent: fullstack-developer
+        description: "Implement saga patterns"
+
+      - id: error_handling
+        name: "Error Handling"
+        agent: fullstack-developer
+        description: "Retries, DLQ, compensation"
+
+      - id: consumer_tests
+        name: "Consumer Tests"
+        agent: tester
+        description: "Test event consumption"
+
+    outputs:
+      - "src/consumers/"
+      - "src/projections/"
+      - "src/sagas/"
+      - "tests/consumers/"
+
+  - id: cqrs
+    name: "CQRS Implementation"
+    description: "Query side APIs, read models, and eventual consistency"
+    order: 6
+    checkpoint: false
+
+    steps:
+      - id: read_models
+        name: "Read Models"
+        agent: fullstack-developer
+        description: "Design optimized read models"
+
+      - id: query_apis
+        name: "Query APIs"
+        agent: fullstack-developer
+        description: "Implement query endpoints"
+
+      - id: consistency_handling
+        name: "Consistency Handling"
+        agent: fullstack-developer
+        description: "Handle eventual consistency UX"
+
+      - id: cache_strategy
+        name: "Cache Strategy"
+        agent: fullstack-developer
+        description: "Cache read models if needed"
+
+    outputs:
+      - "src/queries/"
+      - "src/read-models/"
+
+  - id: monitoring
+    name: "Testing & Monitoring"
+    description: "Event flow testing, consumer lag monitoring, and observability"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      Monitoring complete. Review:
+      - Event flow tests
+      - Consumer lag alerts
+      - Schema evolution tests
+      - Observability dashboards
+
+      This is the final checkpoint.
+
+    steps:
+      - id: flow_tests
+        name: "Event Flow Tests"
+        agent: tester
+        description: "Test complete event flows"
+
+      - id: lag_monitoring
+        name: "Lag Monitoring"
+        agent: fullstack-developer
+        description: "Monitor consumer lag"
+
+      - id: schema_tests
+        name: "Schema Evolution Tests"
+        agent: tester
+        description: "Test schema compatibility"
+
+      - id: observability
+        name: "Observability"
+        agent: fullstack-developer
+        description: "Dashboards for events"
+
+      - id: replay_testing
+        name: "Replay Testing"
+        agent: tester
+        description: "Test event replay scenarios"
+
+    outputs:
+      - "tests/flows/"
+      - "monitoring/"
+      - "docs/"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/events/**"
+    level: 3
+    reason: "Event schemas are contracts"
+  - pattern: "**/schemas/**"
+    level: 3
+    reason: "Schema changes affect all consumers"
+  - pattern: "**/sagas/**"
+    level: 3
+    reason: "Saga logic is transaction-critical"
+  - pattern: "**/projections/**"
+    level: 2
+    reason: "Read model changes need review"
+  - pattern: "**/handlers/**"
+    level: 2
+    reason: "Event handling logic"
+  - pattern: "**/consumers/**"
+    level: 2
+    reason: "Consumer configuration"
+  - pattern: "kafka*.yaml"
+    level: 3
+    reason: "Broker configuration"
+  - pattern: "**/dlq/**"
+    level: 3
+    reason: "Dead letter queue handling"
+  - pattern: ".env*"
+    level: 4
+    reason: "Environment secrets"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "npm test"
+    - "npm run lint"
+    - "schema compatibility check"
+  before_checkpoint:
+    - "all unit tests pass"
+    - "event flow tests pass"
+    - "no consumer lag issues"
+  before_deploy:
+    - "schema registry healthy"
+    - "replay tests pass"
+    - "monitoring configured"
+
+# Event-driven specific discovery questions
+discovery_additions:
+  - category: "Events"
+    questions:
+      - "What are the main domain events?"
+      - "Event sourcing needed or just messaging?"
+      - "Event replay requirements?"
+      - "Event retention period?"
+      - "Schema evolution strategy?"
+
+  - category: "Consistency"
+    questions:
+      - "Eventual consistency acceptable?"
+      - "Need distributed transactions (sagas)?"
+      - "Ordering requirements (strict or relaxed)?"
+      - "Exactly-once or at-least-once semantics?"
+
+  - category: "CQRS"
+    questions:
+      - "Separate read and write models?"
+      - "Query performance requirements?"
+      - "Real-time projections needed?"
+      - "Historical query needs?"
+
+  - category: "Infrastructure"
+    questions:
+      - "Message broker preference?"
+      - "Expected message throughput?"
+      - "Partition strategy?"
+      - "Multi-region requirements?"
+
+  - category: "Integration"
+    questions:
+      - "External systems to integrate?"
+      - "Legacy system events?"
+      - "Webhook requirements?"
+      - "CDC (Change Data Capture) needs?"

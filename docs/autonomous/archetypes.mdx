@@ -47,6 +47,12 @@ Archetypes are pre-configured project templates that define the phases, workflow
   <Card title="Simulation" icon="chart-line">
     Scientific or engineering simulations with numerical methods
   </Card>
+  <Card title="Microservices" icon="cubes">
+    Distributed systems with API gateway, service discovery, and Kubernetes
+  </Card>
+  <Card title="Event-Driven" icon="bolt">
+    Asynchronous systems with message brokers, CQRS, and saga patterns
+  </Card>
 </CardGroup>
 
 ---
@@ -523,6 +529,99 @@ before_checkpoint:
 
 ---
 
+## Microservices
+
+**Best for**: Distributed systems with independently deployable services, API gateway, and container orchestration.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| Language | TypeScript/Node.js |
+| Framework | NestJS |
+| API Gateway | Kong |
+| Service Discovery | Kubernetes DNS |
+| Containers | Docker |
+| Orchestration | Kubernetes |
+| Tracing | Jaeger |
+| Metrics | Prometheus |
+
+### Phases
+
+1. **Discovery** - Domain analysis, bounded contexts, service boundaries
+2. **Architecture** - Service contracts, gateway design, communication patterns
+3. **Foundation** - Docker, Kubernetes manifests, shared libraries
+4. **Core Services** - Per-service implementation
+5. **Integration** - Inter-service communication, tracing, circuit breakers
+6. **Testing** - Integration tests, contract tests, load tests
+7. **DevOps** - CI/CD pipelines, monitoring, deployment
+
+### Discovery Questions
+
+- What are the main business domains/capabilities?
+- How many services do you envision?
+- Synchronous or asynchronous communication?
+- Existing Kubernetes cluster?
+- Team structure (aligned with services)?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/gateway/**` | 3 | API Gateway critical |
+| `**/k8s/**` | 3 | Infrastructure |
+| `**/shared/**` | 3 | Affects all services |
+| `**/services/*/src/**` | 2 | Service code |
+| `Dockerfile*` | 2 | Container config |
+
+---
+
+## Event-Driven
+
+**Best for**: Asynchronous systems with message brokers, event sourcing, CQRS, and saga patterns.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| Message Broker | Apache Kafka |
+| Language | TypeScript/Node.js |
+| Framework | NestJS |
+| Event Store | Kafka |
+| Read Database | PostgreSQL |
+| Schema Registry | Confluent |
+| Streaming | Kafka Streams |
+
+### Phases
+
+1. **Discovery** - Event storming, domain events, aggregate design
+2. **Architecture** - Topic design, schemas, CQRS strategy, saga patterns
+3. **Foundation** - Broker setup, schema registry, DLQ
+4. **Producers** - Command handlers, event publishing, outbox pattern
+5. **Consumers** - Event handlers, projections, saga orchestrators
+6. **CQRS** - Read models, query APIs, eventual consistency
+7. **Monitoring** - Event flow tests, consumer lag, observability
+
+### Discovery Questions
+
+- What are the main domain events?
+- Event sourcing needed or just messaging?
+- CQRS required (separate read/write models)?
+- Ordering requirements?
+- Exactly-once or at-least-once semantics?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/events/**` | 3 | Event schemas are contracts |
+| `**/schemas/**` | 3 | Affects all consumers |
+| `**/sagas/**` | 3 | Transaction-critical |
+| `**/projections/**` | 2 | Read model changes |
+| `**/consumers/**` | 2 | Consumer configuration |
+
+---
+
 ## Choosing an Archetype
 
 ### Decision Guide
@@ -535,18 +634,23 @@ graph TD
     C -->|Yes| E[Library]
     C -->|No| F{Is it a CLI?}
     F -->|Yes| G[CLI Tool]
-    F -->|No| H[API Service]
-    D -->|Web| I{Has payments?}
-    D -->|Mobile| J[Mobile App]
-    D -->|Desktop| K[Desktop App]
-    D -->|Game| L[Game]
-    D -->|Simulation| M[Simulation]
-    I -->|Yes| N[SaaS MVP]
-    I -->|No| O{Uses AI?}
-    O -->|Yes| P{Building models?}
-    O -->|No| Q[Full-Stack App]
-    P -->|Yes| R[AI Model Building]
-    P -->|No| S[AI-Powered App]
+    F -->|No| H{Distributed system?}
+    H -->|No| I[API Service]
+    H -->|Yes| J{Event-driven?}
+    J -->|Yes| K[Event-Driven]
+    J -->|No| L[Microservices]
+    D -->|Web| M{Has payments?}
+    D -->|Mobile| N[Mobile App]
+    D -->|Desktop| O[Desktop App]
+    D -->|Game| P[Game]
+    D -->|Simulation| Q[Simulation]
+    D -->|IoT| R[IoT App]
+    M -->|Yes| S[SaaS MVP]
+    M -->|No| T{Uses AI?}
+    T -->|Yes| U{Building models?}
+    T -->|No| V[Full-Stack App]
+    U -->|Yes| W[AI Model Building]
+    U -->|No| X[AI-Powered App]
 ```
 
 ### Quick Reference
@@ -565,6 +669,8 @@ graph TD
 | IoT/sensor system | IoT App |
 | Video game | Game |
 | Scientific simulation | Simulation |
+| Distributed services with K8s | Microservices |
+| Async system with message broker | Event-Driven |
 
 ---
 

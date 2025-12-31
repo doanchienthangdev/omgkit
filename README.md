@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **AI Team System for Claude Code**
-> 23 Agents • 58 Commands • 29 Workflows • 88 Skills • 10 Modes • 12 Archetypes
+> 23 Agents • 58 Commands • 29 Workflows • 88 Skills • 10 Modes • 14 Archetypes
 > *"Think Omega. Build Omega. Be Omega."*
 
 OMGKIT transforms Claude Code into an autonomous AI development team with sprint management, specialized agents, and Omega-level thinking for 10x-1000x productivity improvements.
@@ -21,7 +21,7 @@ OMGKIT transforms Claude Code into an autonomous AI development team with sprint
 | **Workflows** | 29 | Complete development processes |
 | **Skills** | 88 | Domain expertise modules |
 | **Modes** | 10 | Behavioral configurations |
-| **Archetypes** | 12 | Project templates for autonomous dev |
+| **Archetypes** | 14 | Project templates for autonomous dev |
 | **Sprint Management** | ✅ | Vision, backlog, team autonomy |
 | **Omega Thinking** | ✅ | 7 modes for 10x-1000x solutions |
 | **Autonomous Dev** | ✅ | Build complete apps from idea to deploy |
@@ -176,7 +176,7 @@ After installation, use these commands in Claude Code:
 /auto:resume        # Resume from saved state
 ```
 
-## 🤖 Autonomous Development (12 Archetypes)
+## 🤖 Autonomous Development (14 Archetypes)
 
 Build complete applications autonomously from idea to deployment.
 
@@ -194,6 +194,8 @@ Build complete applications autonomously from idea to deployment.
 | **IoT App** | Device management, real-time data |
 | **Game** | Unity/Godot game development |
 | **Simulation** | Scientific/engineering simulations |
+| **Microservices** | Distributed services with K8s, API gateway |
+| **Event-Driven** | Async systems with Kafka, CQRS, sagas |
 
 ### Artifacts System
 
