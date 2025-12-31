@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "name": "OMGKIT Documentation",
-  "version": "2.13.0",
+  "version": "2.14.0",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -137,7 +137,8 @@
         "agents/docs-manager",
         "agents/project-manager",
         "agents/database-admin",
-        "agents/ui-ux-designer"
+        "agents/ui-ux-designer",
+        "agents/observability-engineer"
       ]
     },
     {
@@ -148,7 +149,8 @@
         "agents/security-auditor",
         "agents/api-designer",
         "agents/vulnerability-scanner",
-        "agents/pipeline-architect"
+        "agents/pipeline-architect",
+        "agents/devsecops"
       ]
     },
     {
@@ -165,6 +167,34 @@
         "agents/oracle",
         "agents/architect",
         "agents/sprint-master"
+      ]
+    },
+    {
+      "group": "Architecture",
+      "pages": [
+        "agents/domain-decomposer",
+        "agents/platform-engineer"
+      ]
+    },
+    {
+      "group": "Data & ML",
+      "pages": [
+        "agents/data-engineer",
+        "agents/ml-engineer"
+      ]
+    },
+    {
+      "group": "Performance",
+      "pages": [
+        "agents/performance-engineer"
+      ]
+    },
+    {
+      "group": "Specialized",
+      "pages": [
+        "agents/game-systems-designer",
+        "agents/embedded-systems",
+        "agents/scientific-computing"
       ]
     },
     {
@@ -264,6 +294,32 @@
         "commands/team-run",
         "commands/team-status",
         "commands/team-ask"
+      ]
+    },
+    {
+      "group": "SRE",
+      "pages": [
+        "commands/dashboard",
+        "commands/pipeline"
+      ]
+    },
+    {
+      "group": "ML Commands",
+      "pages": [
+        "commands/train",
+        "commands/evaluate"
+      ]
+    },
+    {
+      "group": "Game",
+      "pages": [
+        "commands/balance"
+      ]
+    },
+    {
+      "group": "IoT",
+      "pages": [
+        "commands/provision"
       ]
     },
     {
@@ -369,6 +425,16 @@
       ]
     },
     {
+      "group": "Mobile Advanced",
+      "pages": [
+        "skills/react-native-deep",
+        "skills/mobile-ci-cd",
+        "skills/mobile-security",
+        "skills/offline-first",
+        "skills/push-notifications"
+      ]
+    },
+    {
       "group": "DevOps",
       "pages": [
         "skills/docker",
@@ -463,9 +529,72 @@
       ]
     },
     {
+      "group": "AI-ML Operations",
+      "pages": [
+        "skills/experiment-tracking",
+        "skills/feature-stores",
+        "skills/model-serving",
+        "skills/ml-pipelines",
+        "skills/model-monitoring",
+        "skills/llm-ops"
+      ]
+    },
+    {
       "group": "Autonomous",
       "pages": [
         "skills/project-orchestration"
+      ]
+    },
+    {
+      "group": "Microservices",
+      "pages": [
+        "skills/api-gateway-patterns",
+        "skills/circuit-breaker-patterns",
+        "skills/service-mesh",
+        "skills/distributed-tracing",
+        "skills/service-discovery",
+        "skills/contract-testing"
+      ]
+    },
+    {
+      "group": "Event-Driven",
+      "pages": [
+        "skills/kafka-deep",
+        "skills/event-sourcing",
+        "skills/cqrs-patterns",
+        "skills/saga-orchestration",
+        "skills/schema-registry",
+        "skills/stream-processing"
+      ]
+    },
+    {
+      "group": "Game Development",
+      "pages": [
+        "skills/unity-patterns",
+        "skills/godot-patterns",
+        "skills/game-networking",
+        "skills/game-audio",
+        "skills/shader-programming"
+      ]
+    },
+    {
+      "group": "IoT",
+      "pages": [
+        "skills/mqtt-deep",
+        "skills/edge-computing",
+        "skills/device-provisioning",
+        "skills/ota-updates",
+        "skills/industrial-protocols"
+      ]
+    },
+    {
+      "group": "Simulation",
+      "pages": [
+        "skills/numerical-methods",
+        "skills/physics-engines",
+        "skills/parallel-computing",
+        "skills/visualization-scientific",
+        "skills/validation-verification"
       ]
     },
     {
@@ -491,6 +620,16 @@
         "workflows/prompt-engineering",
         "workflows/agent-development",
         "workflows/fine-tuning"
+      ]
+    },
+    {
+      "group": "AI-ML Workflows",
+      "pages": [
+        "workflows/data-pipeline",
+        "workflows/experiment-cycle",
+        "workflows/model-deployment",
+        "workflows/monitoring-setup",
+        "workflows/feature-engineering"
       ]
     },
     {
@@ -556,6 +695,36 @@
       "group": "Quality",
       "pages": [
         "workflows/performance-optimization"
+      ]
+    },
+    {
+      "group": "Microservices Workflows",
+      "pages": [
+        "workflows/domain-decomposition",
+        "workflows/service-scaffolding",
+        "workflows/contract-first",
+        "workflows/integration-testing",
+        "workflows/service-mesh-setup",
+        "workflows/distributed-tracing"
+      ]
+    },
+    {
+      "group": "Event-Driven Workflows",
+      "pages": [
+        "workflows/event-storming",
+        "workflows/schema-evolution",
+        "workflows/saga-implementation",
+        "workflows/replay-testing",
+        "workflows/consumer-groups"
+      ]
+    },
+    {
+      "group": "Game Development Workflows",
+      "pages": [
+        "workflows/prototype-to-production",
+        "workflows/content-pipeline",
+        "workflows/playtesting",
+        "workflows/platform-submission"
       ]
     }
   ],

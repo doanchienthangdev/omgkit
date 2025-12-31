@@ -1,0 +1,153 @@
+---
+description: Configure service mesh for traffic management and security
+triggers:
+  - manual
+  - infrastructure:mesh
+agents:
+  - platform-engineer
+  - site-reliability-engineer
+---
+
+# Service Mesh Setup Workflow
+
+Deploy and configure service mesh infrastructure.
+
+## Prerequisites
+- [ ] Kubernetes cluster available
+- [ ] Services containerized
+- [ ] Network policies defined
+
+## Phase 1: Mesh Installation
+
+### Step 1.1: Choose and Install Mesh
+```yaml
+agent: platform-engineer
+action: install
+options:
+  - Istio
+  - Linkerd
+  - Consul Connect
+configuration:
+  - control_plane
+  - data_plane_sidecars
+  - ingress_gateway
+```
+
+### Step 1.2: Configure Namespace Injection
+```yaml
+agent: platform-engineer
+action: configure
+namespaces:
+  - production
+  - staging
+settings:
+  - auto_sidecar_injection: true
+  - mtls_mode: STRICT
+```
+
+## Phase 2: Traffic Management
+
+### Step 2.1: Configure Virtual Services
+```yaml
+agent: platform-engineer
+action: create
+resources:
+  - VirtualService
+  - DestinationRule
+features:
+  - traffic_routing
+  - load_balancing
+  - retries
+  - timeouts
+```
+
+### Step 2.2: Configure Traffic Policies
+```yaml
+agent: platform-engineer
+action: configure
+policies:
+  - circuit_breaker:
+      consecutive_errors: 5
+      interval: 30s
+      ejection_time: 30s
+  - rate_limit:
+      requests_per_second: 100
+  - retry:
+      attempts: 3
+      per_try_timeout: 2s
+```
+
+## Phase 3: Security Configuration
+
+### Step 3.1: mTLS Setup
+```yaml
+agent: platform-engineer
+action: configure
+security:
+  - peer_authentication: STRICT
+  - certificate_rotation: automatic
+  - trust_domain: cluster.local
+```
+
+### Step 3.2: Authorization Policies
+```yaml
+agent: platform-engineer
+action: create
+resources:
+  - AuthorizationPolicy
+rules:
+  - service_to_service_access
+  - namespace_isolation
+  - deny_by_default
+```
+
+## Phase 4: Observability Integration
+
+### Step 4.1: Configure Telemetry
+```yaml
+agent: site-reliability-engineer
+action: configure
+integrations:
+  - prometheus_metrics
+  - jaeger_tracing
+  - kiali_dashboard
+  - access_logging
+```
+
+### Step 4.2: Create Dashboards
+```yaml
+agent: site-reliability-engineer
+action: create
+dashboards:
+  - service_mesh_overview
+  - traffic_flow
+  - error_rates
+  - latency_distribution
+```
+
+## Phase 5: Testing and Validation
+
+### Step 5.1: Verify Mesh Functionality
+```yaml
+agent: site-reliability-engineer
+action: test
+validations:
+  - mtls_working
+  - traffic_routing
+  - circuit_breaker
+  - observability_data
+```
+
+## Outputs
+- [ ] Service mesh installation
+- [ ] Traffic management rules
+- [ ] Security policies
+- [ ] Observability dashboards
+- [ ] Runbooks
+
+## Quality Gates
+- All sidecars healthy
+- mTLS verified between services
+- Traffic routing working
+- Observability data flowing
+- Rollback plan documented

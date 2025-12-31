@@ -1,0 +1,390 @@
+# ML Pipelines
+
+Kubeflow, Airflow ML, MLflow Pipelines, end-to-end workflow orchestration, and CI/CD for ML.
+
+## Overview
+
+ML pipelines orchestrate the end-to-end machine learning workflow from data ingestion to model deployment, ensuring reproducibility and automation.
+
+## Core Concepts
+
+### Pipeline Components
+- **Data Ingestion**: Load and validate data
+- **Data Processing**: Transform and feature engineering
+- **Training**: Model training and hyperparameter tuning
+- **Evaluation**: Model validation and metrics
+- **Deployment**: Model serving and monitoring
+
+### Pipeline Properties
+- **Reproducibility**: Same inputs → same outputs
+- **Versioning**: Track data, code, models
+- **Orchestration**: Dependency management
+- **Scalability**: Distributed execution
+
+## Kubeflow Pipelines
+
+### Pipeline Definition
+```python
+from kfp import dsl
+from kfp.dsl import Input, Output, Dataset, Model, Metrics
+
+@dsl.component(base_image="python:3.10")
+def load_data(
+    data_path: str,
+    output_data: Output[Dataset]
+):
+    import pandas as pd
+
+    df = pd.read_parquet(data_path)
+    df.to_parquet(output_data.path)
+
+@dsl.component(base_image="python:3.10-slim")
+def preprocess_data(
+    input_data: Input[Dataset],
+    output_data: Output[Dataset],
+    test_size: float = 0.2
+):
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler
+
+    df = pd.read_parquet(input_data.path)
+
+    X = df.drop("target", axis=1)
+    y = df["target"]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=test_size, random_state=42
+    )
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    # Save processed data
+    result = {
+        "X_train": X_train_scaled.tolist(),
+        "X_test": X_test_scaled.tolist(),
+        "y_train": y_train.tolist(),
+        "y_test": y_test.tolist()
+    }
+    pd.DataFrame(result).to_parquet(output_data.path)
+
+@dsl.component(
+    base_image="python:3.10",
+    packages_to_install=["scikit-learn", "xgboost"]
+)
+def train_model(
+    input_data: Input[Dataset],
+    model_output: Output[Model],
+    metrics_output: Output[Metrics],
+    n_estimators: int = 100,
+    max_depth: int = 6
+):
+    import pandas as pd
+    import xgboost as xgb
+    from sklearn.metrics import accuracy_score, f1_score
+    import joblib
+
+    data = pd.read_parquet(input_data.path)
+
+    model = xgb.XGBClassifier(
+        n_estimators=n_estimators,
+        max_depth=max_depth,
+        random_state=42
+    )
+
+    model.fit(data["X_train"], data["y_train"])
+
+    predictions = model.predict(data["X_test"])
+    accuracy = accuracy_score(data["y_test"], predictions)
+    f1 = f1_score(data["y_test"], predictions, average="weighted")
+
+    # Log metrics
+    metrics_output.log_metric("accuracy", accuracy)
+    metrics_output.log_metric("f1_score", f1)
+
+    # Save model
+    joblib.dump(model, model_output.path)
+
+@dsl.pipeline(
+    name="ML Training Pipeline",
+    description="End-to-end ML training pipeline"
+)
+def ml_pipeline(
+    data_path: str,
+    n_estimators: int = 100,
+    max_depth: int = 6
+):
+    load_task = load_data(data_path=data_path)
+
+    preprocess_task = preprocess_data(
+        input_data=load_task.outputs["output_data"]
+    )
+
+    train_task = train_model(
+        input_data=preprocess_task.outputs["output_data"],
+        n_estimators=n_estimators,
+        max_depth=max_depth
+    )
+```
+
+### Pipeline Compilation and Execution
+```python
+from kfp import compiler
+from kfp.client import Client
+
+# Compile pipeline
+compiler.Compiler().compile(
+    pipeline_func=ml_pipeline,
+    package_path="ml_pipeline.yaml"
+)
+
+# Submit to Kubeflow
+client = Client(host="https://kubeflow.example.com")
+
+run = client.create_run_from_pipeline_func(
+    ml_pipeline,
+    arguments={
+        "data_path": "s3://bucket/data.parquet",
+        "n_estimators": 200,
+        "max_depth": 8
+    },
+    experiment_name="ml-experiments"
+)
+```
+
+## Apache Airflow ML
+
+### DAG Definition
+```python
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.providers.amazon.aws.operators.s3 import S3Hook
+from datetime import datetime, timedelta
+
+default_args = {
+    "owner": "ml-team",
+    "depends_on_past": False,
+    "email_on_failure": True,
+    "email": ["ml-team@example.com"],
+    "retries": 3,
+    "retry_delay": timedelta(minutes=5)
+}
+
+def extract_data(**context):
+    # Extract data from source
+    s3 = S3Hook(aws_conn_id="aws_default")
+    data = s3.read_key("raw-data/latest.parquet", bucket_name="data-bucket")
+    context["ti"].xcom_push(key="raw_data_path", value=data)
+
+def transform_data(**context):
+    import pandas as pd
+    from sklearn.preprocessing import StandardScaler
+
+    raw_path = context["ti"].xcom_pull(key="raw_data_path")
+    df = pd.read_parquet(raw_path)
+
+    # Feature engineering
+    scaler = StandardScaler()
+    df_scaled = scaler.fit_transform(df)
+
+    output_path = f"s3://data-bucket/processed/{context['ds']}/data.parquet"
+    pd.DataFrame(df_scaled).to_parquet(output_path)
+
+    context["ti"].xcom_push(key="processed_data_path", value=output_path)
+
+def train_model(**context):
+    import mlflow
+    from sklearn.ensemble import RandomForestClassifier
+
+    data_path = context["ti"].xcom_pull(key="processed_data_path")
+
+    with mlflow.start_run():
+        model = RandomForestClassifier(n_estimators=100)
+        model.fit(X_train, y_train)
+
+        mlflow.sklearn.log_model(model, "model")
+        mlflow.log_metric("accuracy", accuracy)
+
+def evaluate_model(**context):
+    # Evaluate and decide on deployment
+    metrics = get_model_metrics()
+    if metrics["accuracy"] > 0.85:
+        context["ti"].xcom_push(key="deploy", value=True)
+    else:
+        context["ti"].xcom_push(key="deploy", value=False)
+
+def deploy_model(**context):
+    should_deploy = context["ti"].xcom_pull(key="deploy")
+    if should_deploy:
+        # Deploy to serving infrastructure
+        deploy_to_kubernetes()
+
+with DAG(
+    "ml_training_pipeline",
+    default_args=default_args,
+    description="ML Training Pipeline",
+    schedule_interval="0 2 * * *",  # Daily at 2 AM
+    start_date=datetime(2024, 1, 1),
+    catchup=False,
+    tags=["ml", "training"]
+) as dag:
+
+    extract = PythonOperator(
+        task_id="extract_data",
+        python_callable=extract_data
+    )
+
+    transform = PythonOperator(
+        task_id="transform_data",
+        python_callable=transform_data
+    )
+
+    train = PythonOperator(
+        task_id="train_model",
+        python_callable=train_model
+    )
+
+    evaluate = PythonOperator(
+        task_id="evaluate_model",
+        python_callable=evaluate_model
+    )
+
+    deploy = PythonOperator(
+        task_id="deploy_model",
+        python_callable=deploy_model
+    )
+
+    extract >> transform >> train >> evaluate >> deploy
+```
+
+## CI/CD for ML
+
+### GitHub Actions Pipeline
+```yaml
+name: ML Pipeline CI/CD
+
+on:
+  push:
+    paths:
+      - 'models/**'
+      - 'data/**'
+      - 'pipelines/**'
+
+env:
+  MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_URI }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run tests
+        run: pytest tests/ --cov=models --cov-report=xml
+
+      - name: Data validation
+        run: python scripts/validate_data.py
+
+  train:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Train model
+        run: python pipelines/train.py --experiment-name "ci-${GITHUB_SHA}"
+
+      - name: Evaluate model
+        id: evaluate
+        run: |
+          METRICS=$(python pipelines/evaluate.py)
+          echo "accuracy=$(echo $METRICS | jq .accuracy)" >> $GITHUB_OUTPUT
+
+      - name: Check quality gate
+        run: |
+          if (( $(echo "${{ steps.evaluate.outputs.accuracy }} < 0.85" | bc -l) )); then
+            echo "Model accuracy below threshold"
+            exit 1
+          fi
+
+  deploy:
+    needs: train
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to staging
+        run: |
+          python pipelines/deploy.py --environment staging
+
+      - name: Run integration tests
+        run: pytest tests/integration/
+
+      - name: Deploy to production
+        run: |
+          python pipelines/deploy.py --environment production
+```
+
+## Best Practices
+
+1. **Idempotent Steps**: Re-runnable without side effects
+2. **Data Versioning**: DVC or similar tools
+3. **Artifact Tracking**: Store all intermediate outputs
+4. **Parameterization**: Make pipelines configurable
+5. **Testing**: Unit and integration tests
+
+## Pipeline Patterns
+
+### Feature/Training/Inference Split
+```
+Feature Pipeline (scheduled):
+  Raw Data → Feature Engineering → Feature Store
+
+Training Pipeline (on-demand/scheduled):
+  Feature Store → Training → Model Registry
+
+Inference Pipeline (real-time):
+  Feature Store → Model → Predictions
+```
+
+### Continuous Training
+```
+Data Change → Trigger Pipeline → Train → Evaluate → Deploy
+Model Drift → Trigger Retrain → Update Model
+```
+
+## Anti-Patterns
+
+- Monolithic pipelines
+- Hardcoded paths/configs
+- Missing data validation
+- No artifact versioning
+- Skipping testing steps
+
+## When to Use
+
+- Production ML systems
+- Need reproducibility
+- Team collaboration
+- Automated retraining
+- Regulatory compliance
+
+## When NOT to Use
+
+- Exploratory analysis
+- One-off experiments
+- Simple batch jobs
+- No automation needed

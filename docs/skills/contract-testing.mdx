@@ -1,0 +1,337 @@
+---
+title: "contract-testing"
+description: "Consumer-driven contract testing with Pact, schema validation, provider verification, and CI/CD integration."
+icon: "cubes"
+---
+
+<Info>
+  **Category:** Microservices
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Consumer-driven contract testing with Pact, schema validation, provider verification, and CI/CD integration.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Contract Testing
+
+Consumer-driven contract testing with Pact, schema validation, provider verification, and CI/CD integration.
+
+## Overview
+
+Contract testing ensures services can communicate correctly by verifying that providers meet consumer expectations without requiring full integration tests.
+
+## Key Concepts
+
+### Consumer-Driven Contracts
+- **Consumer**: Service that calls another service
+- **Provider**: Service being called
+- **Contract**: Expected interactions defined by consumer
+- **Pact**: Contract file containing interactions
+
+### Contract Types
+- **Consumer Contracts**: What consumer expects
+- **Provider Contracts**: What provider guarantees
+- **Bidirectional**: Both sides define expectations
+
+## Pact Implementation
+
+### Consumer Test (JavaScript)
+```javascript
+const { Pact } = require('@pact-foundation/pact');
+
+const provider = new Pact({
+  consumer: 'OrderService',
+  provider: 'UserService',
+  port: 1234,
+});
+
+describe('User Service Contract', () => {
+  beforeAll(() => provider.setup());
+  afterAll(() => provider.finalize());
+  afterEach(() => provider.verify());
+
+  describe('get user by id', () => {
+    beforeEach(() => {
+      return provider.addInteraction({
+        state: 'user with id 123 exists',
+        uponReceiving: 'a request for user 123',
+        withRequest: {
+          method: 'GET',
+          path: '/users/123',
+          headers: {
+            Accept: 'application/json',
+          },
+        },
+        willRespondWith: {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: {
+            id: '123',
+            name: Matchers.string('John Doe'),
+            email: Matchers.email(),
+            createdAt: Matchers.iso8601DateTime(),
+          },
+        },
+      });
+    });
+
+    it('returns user details', async () => {
+      const user = await userClient.getUser('123');
+      expect(user.id).toBe('123');
+      expect(user.name).toBeDefined();
+    });
+  });
+});
+```
+
+### Provider Verification (JavaScript)
+```javascript
+const { Verifier } = require('@pact-foundation/pact');
+
+describe('User Service Provider Verification', () => {
+  it('validates the expectations of OrderService', async () => {
+    const verifier = new Verifier({
+      provider: 'UserService',
+      providerBaseUrl: 'http://localhost:8080',
+      pactBrokerUrl: 'https://pact-broker.example.com',
+      publishVerificationResult: true,
+      providerVersion: process.env.GIT_SHA,
+      stateHandlers: {
+        'user with id 123 exists': async () => {
+          await createTestUser({ id: '123', name: 'John Doe' });
+        },
+        'no users exist': async () => {
+          await clearAllUsers();
+        },
+      },
+    });
+
+    await verifier.verifyProvider();
+  });
+});
+```
+
+### Pact Matchers
+```javascript
+const { Matchers } = require('@pact-foundation/pact');
+
+// Type matchers
+Matchers.string('example')      // Any string
+Matchers.integer(123)           // Any integer
+Matchers.decimal(12.34)         // Any decimal
+Matchers.boolean(true)          // Any boolean
+
+// Format matchers
+Matchers.email()                // Valid email
+Matchers.uuid()                 // Valid UUID
+Matchers.iso8601DateTime()      // ISO 8601 datetime
+Matchers.ipv4Address()          // IPv4 address
+
+// Collection matchers
+Matchers.eachLike({             // Array with items like...
+  id: Matchers.integer(),
+  name: Matchers.string()
+}, { min: 1 })
+
+// Regex matcher
+Matchers.term({
+  matcher: '^[A-Z]{2}[0-9]{4}$',
+  generate: 'AB1234'
+})
+```
+
+## Pact Broker
+
+### Publishing Contracts
+```bash
+# Publish pact files to broker
+pact-broker publish ./pacts \
+  --consumer-app-version=$GIT_SHA \
+  --branch=$GIT_BRANCH \
+  --broker-base-url=https://pact-broker.example.com \
+  --broker-token=$PACT_BROKER_TOKEN
+```
+
+### Can-I-Deploy Check
+```bash
+# Check if safe to deploy
+pact-broker can-i-deploy \
+  --pacticipant=OrderService \
+  --version=$GIT_SHA \
+  --to-environment=production \
+  --broker-base-url=https://pact-broker.example.com
+```
+
+### Webhooks
+```json
+{
+  "description": "Trigger provider verification on contract change",
+  "events": [
+    { "name": "contract_content_changed" }
+  ],
+  "request": {
+    "method": "POST",
+    "url": "https://ci.example.com/trigger",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "provider": "${pactbroker.providerName}",
+      "consumer": "${pactbroker.consumerName}",
+      "pactUrl": "${pactbroker.pactUrl}"
+    }
+  }
+}
+```
+
+## CI/CD Integration
+
+### Consumer Pipeline
+```yaml
+# GitHub Actions - Consumer
+name: Consumer Contract Tests
+
+on: [push]
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run contract tests
+        run: npm run test:contract
+
+      - name: Publish contracts
+        run: |
+          pact-broker publish ./pacts \
+            --consumer-app-version=${{ github.sha }} \
+            --branch=${{ github.ref_name }} \
+            --broker-base-url=${{ secrets.PACT_BROKER_URL }} \
+            --broker-token=${{ secrets.PACT_BROKER_TOKEN }}
+
+      - name: Can I deploy?
+        run: |
+          pact-broker can-i-deploy \
+            --pacticipant=OrderService \
+            --version=${{ github.sha }} \
+            --to-environment=staging
+```
+
+### Provider Pipeline
+```yaml
+# GitHub Actions - Provider
+name: Provider Verification
+
+on:
+  push:
+  repository_dispatch:
+    types: [pact_changed]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Start provider
+        run: docker-compose up -d
+
+      - name: Verify contracts
+        run: npm run test:pact:verify
+        env:
+          PACT_BROKER_URL: ${{ secrets.PACT_BROKER_URL }}
+          PACT_BROKER_TOKEN: ${{ secrets.PACT_BROKER_TOKEN }}
+          PROVIDER_VERSION: ${{ github.sha }}
+```
+
+## Best Practices
+
+1. **Consumer First**: Let consumers define expectations
+2. **Minimal Contracts**: Only test what consumer needs
+3. **State Management**: Proper provider state setup
+4. **Version Everything**: Use git SHA for versions
+5. **Automate Can-I-Deploy**: Gate deployments on verification
+
+## Contract Design Guidelines
+
+### What to Include
+- Request path and method
+- Required headers
+- Request body structure
+- Response status codes
+- Response body structure
+
+### What to Avoid
+- Implementation details
+- Exact values (use matchers)
+- Optional fields unless needed
+- Authentication details
+
+## Anti-Patterns
+
+- Testing every field exhaustively
+- Coupling to specific values
+- Ignoring provider states
+- Skipping can-i-deploy checks
+- Not versioning contracts
+
+## When to Use
+
+- Microservices with multiple consumers
+- Independent team deployments
+- APIs with breaking change risk
+- Contract evolution tracking
+
+## When NOT to Use
+
+- Single consumer APIs
+- Rapidly prototyping
+- Internal implementation details
+- UI testing
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  contract-testing:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Microservices" icon="cubes" href="/skills/overview#microservices">
+    More microservices skills
+  </Card>
+</CardGroup>

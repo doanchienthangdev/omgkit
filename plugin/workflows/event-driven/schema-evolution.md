@@ -1,0 +1,173 @@
+---
+description: Safely evolve event schemas with backward/forward compatibility
+triggers:
+  - manual
+  - schema:change
+agents:
+  - architect
+  - fullstack-developer
+  - tester
+---
+
+# Schema Evolution Workflow
+
+Evolve event schemas without breaking consumers.
+
+## Prerequisites
+- [ ] Schema registry in place
+- [ ] Current schema version documented
+- [ ] Consumer inventory identified
+
+## Phase 1: Change Analysis
+
+### Step 1.1: Classify Schema Change
+```yaml
+agent: architect
+action: analyze
+change_types:
+  - backward_compatible:
+      - Add optional field
+      - Add new event type
+      - Add default value
+  - forward_compatible:
+      - Remove optional field
+      - Ignore unknown fields
+  - breaking:
+      - Remove required field
+      - Change field type
+      - Rename field
+```
+
+### Step 1.2: Impact Assessment
+```yaml
+agent: architect
+action: assess
+considerations:
+  - Affected consumers
+  - Required timeline
+  - Rollback strategy
+  - Data migration needs
+```
+
+## Phase 2: Schema Design
+
+### Step 2.1: Design New Schema Version
+```yaml
+agent: fullstack-developer
+action: design
+formats:
+  - Avro
+  - Protobuf
+  - JSON Schema
+best_practices:
+  - Use optional fields by default
+  - Include schema version field
+  - Document deprecations
+  - Plan for unknown fields
+```
+
+### Step 2.2: Validate Compatibility
+```yaml
+agent: fullstack-developer
+action: validate
+checks:
+  - backward_compatibility_test
+  - forward_compatibility_test
+  - schema_registry_compatibility
+tools:
+  - Confluent Schema Registry
+  - AWS Glue Schema Registry
+```
+
+## Phase 3: Consumer Preparation
+
+### Step 3.1: Update Consumer Code
+```yaml
+agent: fullstack-developer
+action: update
+patterns:
+  - Handle missing optional fields
+  - Ignore unknown fields
+  - Version-aware deserialization
+  - Graceful degradation
+```
+
+### Step 3.2: Deploy Consumer Updates
+```yaml
+agent: fullstack-developer
+action: deploy
+strategy:
+  - Deploy consumers first
+  - Verify backward compatibility
+  - No data loss on old messages
+```
+
+## Phase 4: Producer Update
+
+### Step 4.1: Register New Schema
+```yaml
+agent: fullstack-developer
+action: register
+steps:
+  - Submit to schema registry
+  - Verify compatibility check passes
+  - Document schema version
+```
+
+### Step 4.2: Update Producer Code
+```yaml
+agent: fullstack-developer
+action: update
+requirements:
+  - Use new schema for serialization
+  - Include schema ID in messages
+  - Test with new format
+```
+
+### Step 4.3: Deploy Producer
+```yaml
+agent: fullstack-developer
+action: deploy
+strategy:
+  - Canary deployment
+  - Monitor consumer errors
+  - Verify message processing
+```
+
+## Phase 5: Cleanup (Breaking Changes Only)
+
+### Step 5.1: Migration Period
+```yaml
+agent: architect
+action: monitor
+period: grace_period
+checks:
+  - Old schema messages processed
+  - No consumer errors
+  - All consumers upgraded
+```
+
+### Step 5.2: Deprecate Old Schema
+```yaml
+agent: fullstack-developer
+action: deprecate
+steps:
+  - Mark old schema deprecated
+  - Set deletion date
+  - Notify remaining consumers
+  - Eventually delete
+```
+
+## Outputs
+- [ ] New schema version
+- [ ] Compatibility validation report
+- [ ] Updated consumer code
+- [ ] Updated producer code
+- [ ] Migration documentation
+
+## Quality Gates
+- Schema passes compatibility checks
+- All consumers handle new schema
+- No message processing errors
+- Rollback plan tested
+- Documentation updated

@@ -1,0 +1,246 @@
+---
+name: distributed-tracing
+description: Comprehensive distributed tracing with Jaeger, Zipkin, OpenTelemetry, correlation IDs, and span design.
+---
+
+# Distributed Tracing
+
+Comprehensive distributed tracing with Jaeger, Zipkin, OpenTelemetry, correlation IDs, and span design.
+
+## Overview
+
+Distributed tracing tracks requests as they flow through multiple services, enabling debugging and performance analysis in microservices architectures.
+
+## Key Concepts
+
+### Trace Model
+- **Trace**: End-to-end request journey
+- **Span**: Single operation within a trace
+- **Span Context**: Propagated trace information
+- **Baggage**: Custom key-value pairs carried across services
+
+### Span Attributes
+- **Operation Name**: What the span represents
+- **Start/End Time**: Duration measurement
+- **Tags**: Indexed metadata for querying
+- **Logs**: Time-stamped events within span
+- **Status**: Success, error, or unset
+
+## OpenTelemetry Implementation
+
+### Instrumentation Setup
+```javascript
+// Node.js OpenTelemetry setup
+const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
+const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
+const { registerInstrumentations } = require('@opentelemetry/instrumentation');
+const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
+const { ExpressInstrumentation } = require('@opentelemetry/instrumentation-express');
+
+const provider = new NodeTracerProvider();
+
+provider.addSpanProcessor(
+  new SimpleSpanProcessor(
+    new JaegerExporter({
+      endpoint: 'http://jaeger:14268/api/traces',
+    })
+  )
+);
+
+provider.register();
+
+registerInstrumentations({
+  instrumentations: [
+    new HttpInstrumentation(),
+    new ExpressInstrumentation(),
+  ],
+});
+```
+
+### Manual Span Creation
+```javascript
+const { trace } = require('@opentelemetry/api');
+
+const tracer = trace.getTracer('my-service');
+
+async function processOrder(orderId) {
+  return tracer.startActiveSpan('processOrder', async (span) => {
+    try {
+      span.setAttribute('order.id', orderId);
+
+      // Child span for database operation
+      await tracer.startActiveSpan('db.query', async (dbSpan) => {
+        dbSpan.setAttribute('db.system', 'postgresql');
+        dbSpan.setAttribute('db.statement', 'SELECT * FROM orders WHERE id = $1');
+        await db.query('SELECT * FROM orders WHERE id = $1', [orderId]);
+        dbSpan.end();
+      });
+
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      span.recordException(error);
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+}
+```
+
+### Context Propagation
+```javascript
+const { context, propagation } = require('@opentelemetry/api');
+
+// Extract context from incoming request
+app.use((req, res, next) => {
+  const ctx = propagation.extract(context.active(), req.headers);
+  context.with(ctx, next);
+});
+
+// Inject context into outgoing request
+async function callService(url) {
+  const headers = {};
+  propagation.inject(context.active(), headers);
+
+  return fetch(url, { headers });
+}
+```
+
+## Jaeger Configuration
+
+### Kubernetes Deployment
+```yaml
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger
+spec:
+  strategy: production
+  storage:
+    type: elasticsearch
+    elasticsearch:
+      nodeCount: 3
+      resources:
+        requests:
+          cpu: 1
+          memory: 4Gi
+  collector:
+    maxReplicas: 5
+  query:
+    replicas: 2
+```
+
+### Sampling Strategies
+```yaml
+# Jaeger sampling configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jaeger-sampling
+data:
+  sampling: |
+    {
+      "service_strategies": [
+        {
+          "service": "order-service",
+          "type": "probabilistic",
+          "param": 0.5
+        },
+        {
+          "service": "payment-service",
+          "type": "ratelimiting",
+          "param": 100
+        }
+      ],
+      "default_strategy": {
+        "type": "probabilistic",
+        "param": 0.1
+      }
+    }
+```
+
+## Span Design Guidelines
+
+### Naming Conventions
+```
+HTTP spans:    HTTP {METHOD} {route}
+               HTTP GET /api/users/:id
+
+Database:      {db.system}.{operation}
+               postgresql.query
+
+Message:       {messaging.system} {operation} {destination}
+               kafka send orders-topic
+
+RPC:           {rpc.system}/{service}/{method}
+               grpc/UserService/GetUser
+```
+
+### Essential Attributes
+```javascript
+// HTTP spans
+span.setAttribute('http.method', 'GET');
+span.setAttribute('http.url', 'https://api.example.com/users/123');
+span.setAttribute('http.status_code', 200);
+span.setAttribute('http.request_content_length', 0);
+span.setAttribute('http.response_content_length', 1234);
+
+// Database spans
+span.setAttribute('db.system', 'postgresql');
+span.setAttribute('db.name', 'mydb');
+span.setAttribute('db.statement', 'SELECT * FROM users WHERE id = $1');
+span.setAttribute('db.operation', 'SELECT');
+
+// Messaging spans
+span.setAttribute('messaging.system', 'kafka');
+span.setAttribute('messaging.destination', 'orders');
+span.setAttribute('messaging.operation', 'send');
+```
+
+## Best Practices
+
+1. **Consistent Naming**: Follow semantic conventions
+2. **Don't Over-Trace**: Sample appropriately
+3. **Meaningful Spans**: Business-relevant operations
+4. **Error Recording**: Always record exceptions
+5. **Context Propagation**: Ensure trace continuity
+
+## Sampling Strategies
+
+### Head-Based Sampling
+- Decision made at trace start
+- Simpler, consistent
+- May miss interesting traces
+
+### Tail-Based Sampling
+- Decision made at trace end
+- Keeps all errors and slow traces
+- More resource intensive
+
+### Adaptive Sampling
+- Adjusts rate based on traffic
+- Balances cost and coverage
+- Best for variable traffic
+
+## Anti-Patterns
+
+- Creating spans for every function call
+- Not propagating context across service boundaries
+- Ignoring span errors
+- Sampling 100% in production
+- Not correlating traces with logs
+
+## When to Use
+
+- Microservices with complex request flows
+- Debugging latency issues
+- Understanding service dependencies
+- Capacity planning
+
+## When NOT to Use
+
+- Monolithic applications
+- Very high-throughput systems without sampling
+- When storage costs are a concern

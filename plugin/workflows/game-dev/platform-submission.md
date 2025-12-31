@@ -1,0 +1,263 @@
+---
+description: Prepare and submit game builds to platform stores
+triggers:
+  - manual
+  - game:submit
+agents:
+  - game-designer
+  - fullstack-developer
+  - tester
+---
+
+# Platform Submission Workflow
+
+Navigate platform certification and store submission.
+
+## Prerequisites
+- [ ] Game content complete
+- [ ] Developer accounts set up
+- [ ] Platform SDK integrated
+
+## Phase 1: Pre-Submission Checklist
+
+### Step 1.1: Platform Requirements Review
+```yaml
+agent: game-designer
+action: review
+platforms:
+  steam:
+    - Steamworks SDK integrated
+    - Achievements configured
+    - Trading cards (optional)
+    - Cloud saves
+    - Controller support
+  playstation:
+    - TRC compliance
+    - Trophy system
+    - PS Plus features
+    - Activity cards
+  xbox:
+    - XR compliance
+    - Achievements
+    - Smart Delivery
+    - Quick Resume support
+  nintendo:
+    - Lotcheck requirements
+    - Save data handling
+    - Sleep mode handling
+  mobile:
+    - Store guidelines
+    - IAP integration
+    - Privacy policy
+    - Age ratings
+```
+
+### Step 1.2: Content Rating
+```yaml
+agent: game-designer
+action: submit
+rating_boards:
+  - ESRB (North America)
+  - PEGI (Europe)
+  - USK (Germany)
+  - CERO (Japan)
+  - GRAC (Korea)
+  - ClassInd (Brazil)
+process:
+  - Complete questionnaires
+  - Submit content samples
+  - Receive ratings
+  - Display correctly in-game
+```
+
+## Phase 2: Build Preparation
+
+### Step 2.1: Release Build Configuration
+```yaml
+agent: fullstack-developer
+action: configure
+settings:
+  - Remove debug code
+  - Enable optimizations
+  - Strip debug symbols
+  - Configure crash reporting
+  - Set version numbers
+  - Update copyright
+```
+
+### Step 2.2: Platform-Specific Builds
+```yaml
+agent: fullstack-developer
+action: build
+per_platform:
+  steam:
+    - Windows x64
+    - Linux (optional)
+    - macOS (optional)
+    - Steam Deck verified
+  console:
+    - Platform-specific SDK
+    - Certification build flags
+    - Signed packages
+  mobile:
+    - Android APK/AAB
+    - iOS IPA
+    - App bundles
+```
+
+### Step 2.3: DRM and Protection
+```yaml
+agent: fullstack-developer
+action: configure
+protection:
+  - Platform DRM (Steam, console)
+  - Online requirements
+  - License verification
+  - Anti-cheat (if multiplayer)
+```
+
+## Phase 3: Quality Assurance
+
+### Step 3.1: Certification Testing
+```yaml
+agent: tester
+action: test
+test_areas:
+  - First-time user experience
+  - Network disconnection handling
+  - Save data corruption recovery
+  - Suspend/resume behavior
+  - Controller disconnection
+  - Achievement triggering
+  - Localization accuracy
+  - Accessibility features
+```
+
+### Step 3.2: Platform Compliance
+```yaml
+agent: tester
+action: verify
+requirements:
+  - Load times within limits
+  - Frame rate stability
+  - Memory usage
+  - Terminology compliance
+  - Button prompts correct
+  - Legal notices displayed
+```
+
+### Step 3.3: Regression Testing
+```yaml
+agent: tester
+action: test
+scope:
+  - Full playthrough
+  - All features
+  - All platforms
+  - Performance validation
+```
+
+## Phase 4: Store Assets
+
+### Step 4.1: Marketing Materials
+```yaml
+agent: game-designer
+action: prepare
+assets:
+  - Store page screenshots (platform sizes)
+  - Trailer video
+  - Game description
+  - Feature list
+  - System requirements
+  - Developer info
+```
+
+### Step 4.2: Store Configuration
+```yaml
+agent: game-designer
+action: configure
+settings:
+  - Pricing
+  - Release date
+  - Regions
+  - Languages
+  - Age gates
+  - Purchase options
+  - DLC/Bundles
+```
+
+## Phase 5: Submission
+
+### Step 5.1: Upload Build
+```yaml
+agent: fullstack-developer
+action: upload
+per_platform:
+  steam: Upload via SteamPipe
+  playstation: Upload via Partner portal
+  xbox: Upload via Partner Center
+  nintendo: Upload via Partner portal
+  ios: Upload via App Store Connect
+  android: Upload via Play Console
+```
+
+### Step 5.2: Submit for Review
+```yaml
+agent: game-designer
+action: submit
+documentation:
+  - Build notes
+  - Test account credentials
+  - Known issues (if any)
+  - Special instructions
+  - Video walkthrough
+timeline:
+  - Steam: ~3 days review
+  - PlayStation: 1-2 weeks
+  - Xbox: 1-2 weeks
+  - Nintendo: 2-4 weeks
+  - iOS: 1-3 days
+  - Android: 1-7 days
+```
+
+## Phase 6: Post-Submission
+
+### Step 6.1: Handle Feedback
+```yaml
+agent: game-designer
+action: respond
+scenarios:
+  approved:
+    - Schedule release
+    - Prepare launch marketing
+  rejected:
+    - Address issues
+    - Resubmit
+    - Update timeline
+```
+
+### Step 6.2: Launch Preparation
+```yaml
+agent: game-designer
+action: prepare
+launch_checklist:
+  - Press kit ready
+  - Social media scheduled
+  - Support team briefed
+  - Day-one patch ready
+  - Server infrastructure ready
+```
+
+## Outputs
+- [ ] Certified builds
+- [ ] Content ratings
+- [ ] Store pages
+- [ ] Submission documentation
+- [ ] Launch checklist
+
+## Quality Gates
+- All certification tests pass
+- Builds uploaded successfully
+- Store pages complete
+- Ratings received
+- Submission approved

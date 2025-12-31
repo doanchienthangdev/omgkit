@@ -1,0 +1,338 @@
+# Experiment Tracking
+
+MLflow, Weights & Biases, experiment versioning, hyperparameter tracking, and model registry integration.
+
+## Overview
+
+Experiment tracking provides systematic recording and comparison of ML experiments including parameters, metrics, artifacts, and model versions.
+
+## Core Concepts
+
+### What to Track
+- **Parameters**: Hyperparameters, configurations
+- **Metrics**: Loss, accuracy, custom metrics
+- **Artifacts**: Models, plots, datasets
+- **Code**: Git commit, environment
+- **Metadata**: Tags, notes, lineage
+
+### Tracking Hierarchy
+```
+Project
+└── Experiment (logical grouping)
+    └── Run (single training execution)
+        ├── Parameters
+        ├── Metrics
+        ├── Artifacts
+        └── Tags
+```
+
+## MLflow Implementation
+
+### Basic Tracking
+```python
+import mlflow
+from mlflow.tracking import MlflowClient
+
+# Set tracking URI
+mlflow.set_tracking_uri("http://mlflow-server:5000")
+
+# Set experiment
+mlflow.set_experiment("recommendation-model")
+
+# Start run
+with mlflow.start_run(run_name="baseline-v1") as run:
+    # Log parameters
+    mlflow.log_params({
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "epochs": 100,
+        "optimizer": "adam",
+        "model_type": "transformer"
+    })
+
+    # Training loop
+    for epoch in range(100):
+        train_loss, val_loss = train_epoch(model, data)
+
+        # Log metrics
+        mlflow.log_metrics({
+            "train_loss": train_loss,
+            "val_loss": val_loss,
+            "epoch": epoch
+        }, step=epoch)
+
+    # Log model
+    mlflow.pytorch.log_model(model, "model")
+
+    # Log artifacts
+    mlflow.log_artifact("confusion_matrix.png")
+    mlflow.log_artifact("feature_importance.json")
+
+    # Set tags
+    mlflow.set_tags({
+        "team": "ml-platform",
+        "version": "1.0.0",
+        "stage": "development"
+    })
+```
+
+### Model Registry
+```python
+from mlflow.tracking import MlflowClient
+
+client = MlflowClient()
+
+# Register model
+model_uri = f"runs:/{run.info.run_id}/model"
+model_version = mlflow.register_model(model_uri, "RecommendationModel")
+
+# Transition to staging
+client.transition_model_version_stage(
+    name="RecommendationModel",
+    version=model_version.version,
+    stage="Staging"
+)
+
+# Add description
+client.update_model_version(
+    name="RecommendationModel",
+    version=model_version.version,
+    description="Baseline transformer model with 85% accuracy"
+)
+
+# Load model by stage
+model = mlflow.pyfunc.load_model(
+    model_uri="models:/RecommendationModel/Production"
+)
+```
+
+### Autologging
+```python
+# Enable autologging for framework
+mlflow.pytorch.autolog()
+mlflow.sklearn.autolog()
+mlflow.tensorflow.autolog()
+
+# All parameters, metrics, and models logged automatically
+with mlflow.start_run():
+    model.fit(X_train, y_train)
+    # Automatically logs: parameters, metrics, model, feature importance
+```
+
+## Weights & Biases
+
+### Basic Tracking
+```python
+import wandb
+
+# Initialize
+wandb.init(
+    project="recommendation-model",
+    name="baseline-v1",
+    config={
+        "learning_rate": 0.001,
+        "batch_size": 32,
+        "epochs": 100,
+        "architecture": "transformer"
+    }
+)
+
+# Training loop
+for epoch in range(100):
+    train_loss, val_loss = train_epoch(model, data)
+
+    # Log metrics
+    wandb.log({
+        "train_loss": train_loss,
+        "val_loss": val_loss,
+        "epoch": epoch
+    })
+
+# Log artifacts
+wandb.log({"confusion_matrix": wandb.Image("confusion_matrix.png")})
+wandb.log({"model": wandb.Artifact("model", type="model")})
+
+# Finish
+wandb.finish()
+```
+
+### Hyperparameter Sweeps
+```python
+# Define sweep configuration
+sweep_config = {
+    "method": "bayes",
+    "metric": {"name": "val_loss", "goal": "minimize"},
+    "parameters": {
+        "learning_rate": {"min": 0.0001, "max": 0.1, "distribution": "log_uniform_values"},
+        "batch_size": {"values": [16, 32, 64, 128]},
+        "hidden_size": {"min": 64, "max": 512, "distribution": "int_uniform"},
+        "dropout": {"min": 0.1, "max": 0.5}
+    }
+}
+
+# Create sweep
+sweep_id = wandb.sweep(sweep_config, project="recommendation-model")
+
+# Define training function
+def train():
+    wandb.init()
+    config = wandb.config
+
+    model = create_model(
+        hidden_size=config.hidden_size,
+        dropout=config.dropout
+    )
+
+    optimizer = Adam(model.parameters(), lr=config.learning_rate)
+
+    for epoch in range(100):
+        loss = train_epoch(model, config.batch_size)
+        wandb.log({"val_loss": loss})
+
+# Run sweep
+wandb.agent(sweep_id, train, count=50)
+```
+
+### Tables and Visualizations
+```python
+# Create table for predictions
+columns = ["image", "prediction", "ground_truth", "confidence"]
+table = wandb.Table(columns=columns)
+
+for img, pred, gt, conf in predictions:
+    table.add_data(
+        wandb.Image(img),
+        pred,
+        gt,
+        conf
+    )
+
+wandb.log({"predictions": table})
+
+# Custom charts
+wandb.log({
+    "pr_curve": wandb.plot.pr_curve(y_true, y_scores),
+    "roc_curve": wandb.plot.roc_curve(y_true, y_scores),
+    "confusion_matrix": wandb.plot.confusion_matrix(
+        y_true=y_true,
+        preds=y_pred,
+        class_names=class_names
+    )
+})
+```
+
+## Experiment Comparison
+
+### MLflow Query API
+```python
+from mlflow.tracking import MlflowClient
+
+client = MlflowClient()
+
+# Search runs
+runs = client.search_runs(
+    experiment_ids=["1"],
+    filter_string="metrics.val_accuracy > 0.8 AND params.model_type = 'transformer'",
+    order_by=["metrics.val_accuracy DESC"],
+    max_results=10
+)
+
+# Compare runs
+for run in runs:
+    print(f"Run: {run.info.run_id}")
+    print(f"  Accuracy: {run.data.metrics['val_accuracy']}")
+    print(f"  Learning Rate: {run.data.params['learning_rate']}")
+```
+
+### Reproducibility
+```python
+import mlflow
+import random
+import numpy as np
+import torch
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+with mlflow.start_run():
+    seed = 42
+    set_seed(seed)
+
+    # Log environment
+    mlflow.log_params({
+        "seed": seed,
+        "python_version": sys.version,
+        "torch_version": torch.__version__,
+        "cuda_version": torch.version.cuda
+    })
+
+    # Log git commit
+    mlflow.set_tag("git_commit", get_git_commit())
+
+    # Log requirements
+    mlflow.log_artifact("requirements.txt")
+```
+
+## Best Practices
+
+1. **Consistent Naming**: Use clear experiment/run names
+2. **Version Control**: Link to git commits
+3. **Environment Logging**: Capture dependencies
+4. **Artifact Organization**: Structure artifacts logically
+5. **Tagging Strategy**: Use tags for filtering
+
+## CI/CD Integration
+
+### GitHub Actions
+```yaml
+name: ML Experiment
+on:
+  push:
+    paths:
+      - 'models/**'
+      - 'experiments/**'
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Train model
+        env:
+          MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_URI }}
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+        run: |
+          pip install -r requirements.txt
+          python train.py --experiment-name "ci-${GITHUB_SHA}"
+```
+
+## Anti-Patterns
+
+- Not logging all hyperparameters
+- Missing environment information
+- Inconsistent metric names
+- Not tagging experiments properly
+- Ignoring failed runs
+
+## When to Use
+
+- Model development and iteration
+- Hyperparameter optimization
+- Team collaboration on ML
+- Reproducibility requirements
+- Model governance
+
+## When NOT to Use
+
+- Simple one-off scripts
+- No iteration expected
+- Strict air-gapped environments

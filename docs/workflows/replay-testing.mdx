@@ -1,0 +1,230 @@
+---
+title: "replay-testing"
+description: "Test event-driven systems by replaying production events"
+icon: "bolt"
+---
+
+<Info>
+  **Category:** Event Driven
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:replay-testing "your description here"
+```
+
+
+# Replay Testing Workflow
+
+Test system behavior by replaying historical events.
+
+## Prerequisites
+- [ ] Event store with historical data
+- [ ] Isolated test environment
+- [ ] Anonymization requirements defined
+
+## Phase 1: Event Preparation
+
+### Step 1.1: Select Events for Replay
+```yaml
+agent: data-engineer
+action: query
+criteria:
+  - Time range
+  - Event types
+  - Specific scenarios
+  - Edge cases
+sources:
+  - Event store
+  - Kafka topics (with retention)
+  - Dead letter queues
+```
+
+### Step 1.2: Anonymize Events
+```yaml
+agent: data-engineer
+action: transform
+anonymization:
+  - PII fields: hash or fake
+  - Financial data: obfuscate
+  - IDs: maintain referential integrity
+  - Timestamps: optional offset
+```
+
+### Step 1.3: Create Event Dataset
+```yaml
+agent: data-engineer
+action: export
+format:
+  - JSON Lines
+  - Avro files
+  - Parquet
+outputs:
+  - event_dataset
+  - metadata (counts, types, time range)
+```
+
+## Phase 2: Environment Setup
+
+### Step 2.1: Provision Test Environment
+```yaml
+agent: tester
+action: setup
+components:
+  - Service under test
+  - Dependencies (mocked or real)
+  - Database (clean state)
+  - Message broker
+isolation:
+  - Network isolation
+  - No production access
+  - Clean state between runs
+```
+
+### Step 2.2: Configure Replay Infrastructure
+```yaml
+agent: tester
+action: configure
+replay_tools:
+  - Kafka replay consumer
+  - Custom replay script
+  - Event sourcing replay
+settings:
+  - Replay speed (1x, 10x, max)
+  - Ordering guarantees
+  - Pause/resume capability
+```
+
+## Phase 3: Replay Execution
+
+### Step 3.1: Baseline Replay
+```yaml
+agent: tester
+action: replay
+mode: baseline
+purpose: Establish expected behavior
+capture:
+  - Final state
+  - Processing metrics
+  - Error counts
+```
+
+### Step 3.2: Modified Replay
+```yaml
+agent: tester
+action: replay
+mode: comparison
+with_changes:
+  - New code version
+  - Modified configuration
+  - Different event order
+capture:
+  - State differences
+  - Performance differences
+  - New errors
+```
+
+## Phase 4: Analysis
+
+### Step 4.1: State Comparison
+```yaml
+agent: tester
+action: compare
+aspects:
+  - Database state diff
+  - Emitted events diff
+  - Side effects diff
+  - Error handling diff
+tools:
+  - Database diff tools
+  - Event comparison scripts
+  - State snapshot comparison
+```
+
+### Step 4.2: Performance Analysis
+```yaml
+agent: tester
+action: analyze
+metrics:
+  - Processing throughput
+  - Latency distribution
+  - Resource usage
+  - Error rates
+```
+
+### Step 4.3: Issue Identification
+```yaml
+agent: tester
+action: identify
+issues:
+  - State inconsistencies
+  - Missing events
+  - Processing errors
+  - Performance regressions
+```
+
+## Phase 5: Reporting
+
+### Step 5.1: Generate Report
+```yaml
+agent: tester
+action: report
+contents:
+  - Replay summary
+  - State comparison results
+  - Performance metrics
+  - Identified issues
+  - Recommendations
+```
+
+## Outputs
+- [ ] Anonymized event dataset
+- [ ] Replay configuration
+- [ ] Baseline results
+- [ ] Comparison report
+- [ ] Issue list
+
+## Quality Gates
+- Events properly anonymized
+- Replay environment isolated
+- Baseline established
+- Differences explained
+- No data leakage
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+- **[@data-engineer](/agents/data-engineer)** - Specialized agent for data engineer tasks
+
+
+
+
+
+
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Event Driven" icon="bolt" href="/workflows/overview#event-driven">
+    More event-driven workflows
+  </Card>
+</CardGroup>

@@ -1,0 +1,418 @@
+# MQTT Deep
+
+Advanced MQTT patterns including QoS levels, retained messages, last will, topic design, and broker clustering.
+
+## Overview
+
+MQTT (Message Queuing Telemetry Transport) is a lightweight publish-subscribe protocol designed for constrained devices and unreliable networks.
+
+## Core Concepts
+
+### Quality of Service (QoS)
+- **QoS 0**: At most once (fire and forget)
+- **QoS 1**: At least once (acknowledged)
+- **QoS 2**: Exactly once (4-step handshake)
+
+### Key Features
+- **Retained Messages**: Last known value for new subscribers
+- **Last Will and Testament (LWT)**: Disconnection notification
+- **Clean Session**: Session state persistence
+- **Keep Alive**: Connection heartbeat
+
+## Topic Design
+
+### Hierarchical Structure
+```
+# Good topic design
+home/living-room/temperature
+home/living-room/humidity
+home/bedroom/temperature
+factory/line-1/machine-001/status
+factory/line-1/machine-001/metrics/temperature
+factory/line-1/machine-001/metrics/vibration
+
+# Topic wildcards
+home/+/temperature     # Single level: matches any room
+home/#                 # Multi level: matches all under home
+factory/+/+/status     # Status of all machines in all lines
+```
+
+### Topic Best Practices
+```
+# Use lowercase
+sensors/temperature    ✓
+Sensors/Temperature    ✗
+
+# Use hyphens for spaces
+living-room           ✓
+living_room           ✗
+livingRoom            ✗
+
+# Include device/location context
+{environment}/{location}/{device}/{metric}
+prod/building-a/sensor-001/temperature
+
+# Command topics (bidirectional)
+devices/{device-id}/commands      # Commands to device
+devices/{device-id}/commands/ack  # Acknowledgments
+devices/{device-id}/telemetry     # Data from device
+```
+
+## Client Implementation
+
+### Node.js Client
+```typescript
+import mqtt, { MqttClient, IClientOptions } from 'mqtt';
+
+interface DeviceMessage {
+  deviceId: string;
+  timestamp: number;
+  data: Record<string, any>;
+}
+
+class MQTTService {
+  private client: MqttClient;
+  private readonly options: IClientOptions;
+
+  constructor(brokerUrl: string, clientId: string) {
+    this.options = {
+      clientId,
+      clean: false, // Persistent session
+      connectTimeout: 30000,
+      reconnectPeriod: 5000,
+      keepalive: 60,
+      // Authentication
+      username: process.env.MQTT_USER,
+      password: process.env.MQTT_PASS,
+      // TLS
+      protocol: 'mqtts',
+      rejectUnauthorized: true,
+      // Last Will and Testament
+      will: {
+        topic: `devices/${clientId}/status`,
+        payload: JSON.stringify({ status: 'offline', timestamp: Date.now() }),
+        qos: 1,
+        retain: true
+      }
+    };
+
+    this.client = mqtt.connect(brokerUrl, this.options);
+    this.setupHandlers();
+  }
+
+  private setupHandlers(): void {
+    this.client.on('connect', () => {
+      console.log('Connected to MQTT broker');
+      // Publish online status (retained)
+      this.publish(
+        `devices/${this.options.clientId}/status`,
+        { status: 'online', timestamp: Date.now() },
+        { qos: 1, retain: true }
+      );
+    });
+
+    this.client.on('error', (error) => {
+      console.error('MQTT error:', error);
+    });
+
+    this.client.on('offline', () => {
+      console.log('MQTT client offline');
+    });
+
+    this.client.on('reconnect', () => {
+      console.log('MQTT reconnecting...');
+    });
+  }
+
+  subscribe(
+    topic: string,
+    handler: (topic: string, message: any) => void,
+    qos: 0 | 1 | 2 = 1
+  ): void {
+    this.client.subscribe(topic, { qos }, (err) => {
+      if (err) {
+        console.error(`Subscribe error for ${topic}:`, err);
+        return;
+      }
+      console.log(`Subscribed to ${topic}`);
+    });
+
+    this.client.on('message', (receivedTopic, payload) => {
+      if (this.topicMatches(topic, receivedTopic)) {
+        try {
+          const message = JSON.parse(payload.toString());
+          handler(receivedTopic, message);
+        } catch {
+          handler(receivedTopic, payload.toString());
+        }
+      }
+    });
+  }
+
+  publish(
+    topic: string,
+    message: any,
+    options: { qos?: 0 | 1 | 2; retain?: boolean } = {}
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const payload = typeof message === 'string'
+        ? message
+        : JSON.stringify(message);
+
+      this.client.publish(
+        topic,
+        payload,
+        { qos: options.qos || 1, retain: options.retain || false },
+        (err) => {
+          if (err) reject(err);
+          else resolve();
+        }
+      );
+    });
+  }
+
+  private topicMatches(pattern: string, topic: string): boolean {
+    const patternParts = pattern.split('/');
+    const topicParts = topic.split('/');
+
+    for (let i = 0; i < patternParts.length; i++) {
+      if (patternParts[i] === '#') return true;
+      if (patternParts[i] === '+') continue;
+      if (patternParts[i] !== topicParts[i]) return false;
+    }
+
+    return patternParts.length === topicParts.length;
+  }
+
+  async disconnect(): Promise<void> {
+    // Publish offline status before disconnecting
+    await this.publish(
+      `devices/${this.options.clientId}/status`,
+      { status: 'offline', timestamp: Date.now() },
+      { qos: 1, retain: true }
+    );
+
+    return new Promise((resolve) => {
+      this.client.end(false, {}, resolve);
+    });
+  }
+}
+```
+
+### Embedded Client (ESP32/Arduino)
+```cpp
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+
+const char* WIFI_SSID = "your-ssid";
+const char* WIFI_PASS = "your-password";
+const char* MQTT_SERVER = "mqtt.example.com";
+const int MQTT_PORT = 8883;
+const char* MQTT_USER = "device";
+const char* MQTT_PASS = "password";
+const char* DEVICE_ID = "sensor-001";
+
+WiFiClientSecure espClient;
+PubSubClient mqtt(espClient);
+
+void callback(char* topic, byte* payload, unsigned int length) {
+    StaticJsonDocument<256> doc;
+    DeserializationError err = deserializeJson(doc, payload, length);
+
+    if (err) {
+        Serial.println("JSON parse error");
+        return;
+    }
+
+    const char* command = doc["command"];
+    if (strcmp(command, "reboot") == 0) {
+        ESP.restart();
+    } else if (strcmp(command, "config") == 0) {
+        // Apply configuration
+    }
+}
+
+void reconnect() {
+    while (!mqtt.connected()) {
+        String clientId = String(DEVICE_ID);
+
+        // LWT configuration
+        String lwt_topic = "devices/" + clientId + "/status";
+        String lwt_payload = "{\"status\":\"offline\"}";
+
+        if (mqtt.connect(
+            clientId.c_str(),
+            MQTT_USER,
+            MQTT_PASS,
+            lwt_topic.c_str(),
+            1,    // QoS 1
+            true, // Retain
+            lwt_payload.c_str()
+        )) {
+            Serial.println("MQTT connected");
+
+            // Publish online status
+            String status_topic = "devices/" + clientId + "/status";
+            mqtt.publish(status_topic.c_str(), "{\"status\":\"online\"}", true);
+
+            // Subscribe to commands
+            String cmd_topic = "devices/" + clientId + "/commands";
+            mqtt.subscribe(cmd_topic.c_str(), 1);
+        } else {
+            delay(5000);
+        }
+    }
+}
+
+void publishTelemetry(float temperature, float humidity) {
+    StaticJsonDocument<256> doc;
+    doc["device_id"] = DEVICE_ID;
+    doc["timestamp"] = millis();
+    doc["temperature"] = temperature;
+    doc["humidity"] = humidity;
+
+    char buffer[256];
+    serializeJson(doc, buffer);
+
+    String topic = String("devices/") + DEVICE_ID + "/telemetry";
+    mqtt.publish(topic.c_str(), buffer, false);
+}
+
+void setup() {
+    Serial.begin(115200);
+
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+    }
+
+    espClient.setCACert(root_ca);
+    mqtt.setServer(MQTT_SERVER, MQTT_PORT);
+    mqtt.setCallback(callback);
+    mqtt.setBufferSize(512);
+}
+
+void loop() {
+    if (!mqtt.connected()) {
+        reconnect();
+    }
+    mqtt.loop();
+
+    static unsigned long lastPublish = 0;
+    if (millis() - lastPublish > 30000) {
+        publishTelemetry(readTemperature(), readHumidity());
+        lastPublish = millis();
+    }
+}
+```
+
+## Broker Configuration
+
+### Mosquitto Config
+```conf
+# mosquitto.conf
+listener 1883
+listener 8883
+
+# TLS
+cafile /etc/mosquitto/certs/ca.crt
+certfile /etc/mosquitto/certs/server.crt
+keyfile /etc/mosquitto/certs/server.key
+require_certificate false
+
+# Authentication
+password_file /etc/mosquitto/passwd
+allow_anonymous false
+
+# ACL
+acl_file /etc/mosquitto/acl
+
+# Persistence
+persistence true
+persistence_location /var/lib/mosquitto/
+
+# Logging
+log_dest file /var/log/mosquitto/mosquitto.log
+log_type all
+
+# Limits
+max_connections 1000
+max_inflight_messages 20
+max_queued_messages 1000
+```
+
+### ACL Configuration
+```
+# acl
+# Device access
+user device-%c
+topic read devices/%c/commands
+topic write devices/%c/telemetry
+topic write devices/%c/status
+
+# Admin access
+user admin
+topic readwrite #
+
+# Service access
+user telemetry-service
+topic read devices/+/telemetry
+topic read devices/+/status
+```
+
+## MQTT 5 Features
+
+### Request/Response
+```typescript
+// Request (using correlation data)
+const correlationId = uuid();
+
+await client.publish('devices/sensor-001/commands', {
+  command: 'get-config',
+  correlationId
+}, {
+  responseTopic: 'responses/' + clientId,
+  correlationData: Buffer.from(correlationId)
+});
+
+// Response handling
+client.subscribe('responses/' + clientId);
+client.on('message', (topic, payload, packet) => {
+  if (packet.properties?.correlationData) {
+    const corrId = packet.properties.correlationData.toString();
+    // Match with request
+  }
+});
+```
+
+## Best Practices
+
+1. **Use QoS Appropriately**: QoS 0 for telemetry, QoS 1 for commands
+2. **Implement LWT**: Detect device disconnections
+3. **Use Retained Messages**: For device status
+4. **Topic Hierarchy**: Logical, consistent structure
+5. **Connection Recovery**: Handle reconnections gracefully
+
+## Anti-Patterns
+
+- Publishing to # wildcard
+- Very deep topic hierarchies
+- Large payloads (>256KB)
+- Too frequent publishes
+- Not implementing LWT
+
+## When to Use
+
+- IoT device communication
+- Real-time messaging
+- Resource-constrained devices
+- Unreliable networks
+- Pub/sub patterns
+
+## When NOT to Use
+
+- Request/response dominant (use HTTP)
+- Large file transfers
+- Strict ordering requirements
+- Database replication

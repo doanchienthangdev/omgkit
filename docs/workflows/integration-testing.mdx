@@ -1,0 +1,193 @@
+---
+title: "integration-testing"
+description: "Comprehensive integration testing for microservices architecture"
+icon: "cubes"
+---
+
+<Info>
+  **Category:** Microservices
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:integration-testing "your description here"
+```
+
+
+# Integration Testing Workflow
+
+Test service interactions and system behavior.
+
+## Prerequisites
+- [ ] Services deployed to test environment
+- [ ] Test data prepared
+- [ ] External dependencies mockable
+
+## Phase 1: Test Environment Setup
+
+### Step 1.1: Provision Test Infrastructure
+```yaml
+agent: fullstack-developer
+action: setup
+using: docker_compose
+services:
+  - service_under_test
+  - dependencies
+  - databases
+  - message_brokers
+```
+
+### Step 1.2: Seed Test Data
+```yaml
+agent: tester
+action: seed_data
+strategies:
+  - fixtures
+  - factories
+  - snapshots
+```
+
+## Phase 2: Service Integration Tests
+
+### Step 2.1: API Integration Tests
+```yaml
+agent: tester
+action: test
+type: api_integration
+coverage:
+  - happy_paths
+  - error_handling
+  - authentication
+  - authorization
+  - pagination
+  - rate_limiting
+```
+
+### Step 2.2: Database Integration Tests
+```yaml
+agent: tester
+action: test
+type: database_integration
+coverage:
+  - CRUD_operations
+  - transactions
+  - migrations
+  - constraints
+```
+
+## Phase 3: Service-to-Service Testing
+
+### Step 3.1: Synchronous Communication
+```yaml
+agent: tester
+action: test
+type: service_communication
+patterns:
+  - REST_calls
+  - gRPC_calls
+  - circuit_breaker_behavior
+  - retry_logic
+  - timeout_handling
+```
+
+### Step 3.2: Asynchronous Communication
+```yaml
+agent: tester
+action: test
+type: async_communication
+patterns:
+  - message_publishing
+  - message_consumption
+  - dead_letter_handling
+  - ordering_guarantees
+```
+
+## Phase 4: End-to-End Scenarios
+
+### Step 4.1: Business Flow Tests
+```yaml
+agent: tester
+action: test
+type: e2e_flows
+scenarios:
+  - user_journey_1
+  - user_journey_2
+  - failure_recovery
+```
+
+### Step 4.2: Chaos Testing
+```yaml
+agent: tester
+action: test
+type: chaos
+scenarios:
+  - service_failure
+  - network_partition
+  - database_unavailable
+  - slow_dependencies
+```
+
+## Phase 5: Reporting
+
+### Step 5.1: Generate Reports
+```yaml
+agent: tester
+action: report
+outputs:
+  - test_results
+  - coverage_report
+  - performance_metrics
+  - failure_analysis
+```
+
+## Outputs
+- [ ] Test suites (integration, e2e)
+- [ ] Test environment configuration
+- [ ] Test data fixtures
+- [ ] Test reports
+- [ ] Coverage metrics
+
+## Quality Gates
+- All integration tests pass
+- Coverage > 70% for critical paths
+- No flaky tests
+- Performance within SLA
+- All failure scenarios handled
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+
+
+
+
+
+
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Microservices" icon="cubes" href="/workflows/overview#microservices">
+    More microservices workflows
+  </Card>
+</CardGroup>

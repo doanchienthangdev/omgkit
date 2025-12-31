@@ -1,0 +1,109 @@
+---
+title: "/domain:analyze"
+description: "Analyze domain and identify bounded contexts using DDD principles"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Domain
+
+  **Syntax:** `/domain:analyze <domain or codebase area>`
+</Info>
+
+## Overview
+
+Analyze domain and identify bounded contexts using DDD principles
+
+## Quick Start
+
+```bash
+/domain:analyze "domain
+```
+
+
+# 🔍 Domain Analysis: \<domain or codebase area\>
+
+Analyze domain: **\<domain or codebase area\>**
+
+## Agent
+Uses **domain-decomposer** agent for DDD analysis.
+
+## Workflow
+1. **Discovery** - Understand domain language and concepts
+2. **Context Mapping** - Identify bounded contexts
+3. **Aggregate Design** - Define aggregates and entities
+4. **Event Storming** - Map domain events
+
+## Outputs
+- Bounded context map
+- Aggregate definitions
+- Domain event catalog
+- Context relationships (upstream/downstream)
+- Ubiquitous language glossary
+
+## Progress
+- [ ] Domain discovery complete
+- [ ] Bounded contexts identified
+- [ ] Aggregates defined
+- [ ] Events mapped
+- [ ] Documentation generated
+
+Report findings with visual context map.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/domain:analyze "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/domain:analyze "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Domain Commands" icon="terminal" href="/commands/overview#domain">
+    More domain commands
+  </Card>
+</CardGroup>

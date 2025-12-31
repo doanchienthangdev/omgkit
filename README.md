@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **AI Team System for Claude Code**
-> 23 Agents • 58 Commands • 29 Workflows • 88 Skills • 10 Modes • 14 Archetypes
+> 33 Agents • 111 Commands • 49 Workflows • 127 Skills • 10 Modes • 14 Archetypes
 > *"Think Omega. Build Omega. Be Omega."*
 
 OMGKIT transforms Claude Code into an autonomous AI development team with sprint management, specialized agents, and Omega-level thinking for 10x-1000x productivity improvements.
@@ -16,10 +16,10 @@ OMGKIT transforms Claude Code into an autonomous AI development team with sprint
 
 | Component | Count | Description |
 |-----------|-------|-------------|
-| **Agents** | 23 | Specialized AI team members |
-| **Commands** | 58 | Slash commands for every task |
-| **Workflows** | 29 | Complete development processes |
-| **Skills** | 88 | Domain expertise modules |
+| **Agents** | 33 | Specialized AI team members |
+| **Commands** | 111 | Slash commands for every task |
+| **Workflows** | 49 | Complete development processes |
+| **Skills** | 127 | Domain expertise modules |
 | **Modes** | 10 | Behavioral configurations |
 | **Archetypes** | 14 | Project templates for autonomous dev |
 | **Sprint Management** | ✅ | Vision, backlog, team autonomy |
@@ -60,7 +60,7 @@ After installation, use these commands in Claude Code:
 /10x "improve performance"
 ```
 
-## 🤖 Agents (23)
+## 🤖 Agents (33)
 
 ### Core Development
 | Agent | Description |
@@ -80,6 +80,7 @@ After installation, use these commands in Claude Code:
 | `project-manager` | Progress tracking, coordination |
 | `database-admin` | Schema design, query optimization |
 | `ui-ux-designer` | UI components, responsive design |
+| `observability-engineer` | Monitoring, logging, tracing, alerting |
 
 ### Extended
 | Agent | Description |
@@ -90,6 +91,7 @@ After installation, use these commands in Claude Code:
 | `api-designer` | API design, OpenAPI specs |
 | `vulnerability-scanner` | Security scanning |
 | `pipeline-architect` | Pipeline optimization |
+| `devsecops` | Security automation, SAST/DAST |
 
 ### Creative
 | Agent | Description |
@@ -98,6 +100,26 @@ After installation, use these commands in Claude Code:
 | `brainstormer` | Creative exploration |
 | `journal-writer` | Failure documentation |
 
+### Architecture & Platform
+| Agent | Description |
+|-------|-------------|
+| `domain-decomposer` | DDD, bounded contexts, service boundaries |
+| `platform-engineer` | Internal developer platforms, golden paths |
+| `performance-engineer` | Profiling, load testing, optimization |
+
+### Data & ML
+| Agent | Description |
+|-------|-------------|
+| `data-engineer` | Data pipelines, ETL, schema design |
+| `ml-engineer` | ML pipelines, model training, MLOps |
+
+### Specialized
+| Agent | Description |
+|-------|-------------|
+| `game-systems-designer` | Game mechanics, balancing, multiplayer |
+| `embedded-systems` | Firmware, RTOS, IoT connectivity |
+| `scientific-computing` | Numerical methods, simulations |
+
 ### Omega Exclusive ⭐
 | Agent | Description |
 |-------|-------------|
@@ -105,7 +127,7 @@ After installation, use these commands in Claude Code:
 | `architect` | System design, leverage multiplication |
 | `sprint-master` | Sprint management, team orchestration |
 
-## ⚡ Commands (58)
+## ⚡ Commands (111)
 
 ### Development
 ```bash
@@ -211,7 +233,7 @@ Provide project context through artifacts:
 └── examples/   # Code samples
 ```
 
-## 📋 Workflows (29)
+## 📋 Workflows (49)
 
 Workflows are orchestrated sequences of agents, commands, and skills that guide complete development processes.
 
@@ -232,6 +254,15 @@ Workflows are orchestrated sequences of agents, commands, and skills that guide 
 | `agent-development` | Build AI agents |
 | `fine-tuning` | Model fine-tuning workflow |
 
+### AI-ML Operations
+| Workflow | Description |
+|----------|-------------|
+| `data-pipeline` | Build ML data pipelines |
+| `experiment-cycle` | ML experiment tracking |
+| `model-deployment` | Model serving and deployment |
+| `monitoring-setup` | ML model monitoring |
+| `feature-engineering` | Feature store development |
+
 ### Omega ⭐
 | Workflow | Description |
 |----------|-------------|
@@ -245,6 +276,33 @@ Workflows are orchestrated sequences of agents, commands, and skills that guide 
 | `sprint-setup` | Initialize and plan sprints |
 | `sprint-execution` | Execute sprint tasks |
 | `sprint-retrospective` | Review and improve |
+
+### Microservices
+| Workflow | Description |
+|----------|-------------|
+| `domain-decomposition` | DDD bounded context analysis |
+| `service-scaffolding` | Service template generation |
+| `contract-first` | API contract development |
+| `integration-testing` | Service integration tests |
+| `service-mesh-setup` | Istio/Linkerd configuration |
+| `distributed-tracing` | Tracing implementation |
+
+### Event-Driven
+| Workflow | Description |
+|----------|-------------|
+| `event-storming` | Domain event modeling |
+| `schema-evolution` | Event schema management |
+| `saga-implementation` | Distributed transaction patterns |
+| `replay-testing` | Event replay testing |
+| `consumer-groups` | Consumer group setup |
+
+### Game Development
+| Workflow | Description |
+|----------|-------------|
+| `prototype-to-production` | Game development lifecycle |
+| `content-pipeline` | Asset management |
+| `playtesting` | Testing and balancing |
+| `platform-submission` | Store submission |
 
 ### Other Categories
 - **Security**: `security-audit`, `penetration-testing`
@@ -298,9 +356,12 @@ Switch modes with: `/mode <name>`
 | 🕸️ Systemic | Interconnections and emergence |
 | ⚛️ Quantum | Multiple possibilities |
 
-## 🧠 AI Engineering Skills (12)
+## 🧠 Skills (127)
 
-Based on Chip Huyen's "AI Engineering" book, OMGKIT includes comprehensive skills for building production AI applications:
+OMGKIT includes 127 skills across 22 categories:
+
+### AI Engineering (12 skills)
+Based on Chip Huyen's "AI Engineering" book for building production AI applications:
 
 | Skill | Description |
 |-------|-------------|
@@ -316,6 +377,28 @@ Based on Chip Huyen's "AI Engineering" book, OMGKIT includes comprehensive skill
 | `ai-architecture` | Gateway, routing, observability |
 | `guardrails-safety` | Input/output guards, PII protection |
 | `user-feedback` | Explicit/implicit signals, A/B testing |
+
+### Other Skill Categories
+
+| Category | Count | Description |
+|----------|-------|-------------|
+| AI-ML Operations | 6 | MLOps, feature stores, model serving |
+| Microservices | 6 | Service mesh, API gateway, distributed tracing |
+| Event-Driven | 6 | Kafka, event sourcing, CQRS, sagas |
+| Game Development | 5 | Unity, Godot, networking, shaders |
+| IoT | 5 | MQTT, edge computing, device management |
+| Mobile Advanced | 5 | React Native deep, CI/CD, offline-first |
+| Simulation | 5 | Numerical methods, physics, parallel computing |
+| Languages | 3 | Python, TypeScript, JavaScript |
+| Frameworks | 10 | React, Next.js, Django, FastAPI, etc. |
+| Backend | 4 | API architecture, caching, real-time |
+| Databases | 9 | PostgreSQL, MongoDB, Redis, migrations |
+| Frontend | 7 | Tailwind, shadcn/ui, Three.js, accessibility |
+| DevOps | 7 | Docker, Kubernetes, GitHub Actions, AWS |
+| Security | 4 | OWASP, OAuth, security hardening |
+| Testing | 3 | Pytest, Vitest, Playwright |
+| Methodology | 17 | TDD, code review, debugging practices |
+| Omega | 5 | Omega-level development practices |
 
 ## 🛠️ CLI Commands
 

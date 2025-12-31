@@ -1,0 +1,131 @@
+---
+title: "/security:scan"
+description: "Run security scans including SAST, SCA, and secrets detection"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Security
+
+  **Syntax:** `/security:scan <path or scope>`
+</Info>
+
+## Overview
+
+Run security scans including SAST, SCA, and secrets detection
+
+## Quick Start
+
+```bash
+/security:scan "path
+```
+
+
+# 🔒 Security Scan: \<path or scope\>
+
+Scan for vulnerabilities: **\<path or scope\>**
+
+## Agent
+Uses **devsecops** agent for security scanning.
+
+## Scan Types
+- **SAST** - Static code analysis
+- **SCA** - Dependency vulnerabilities
+- **Secrets** - Credential detection
+- **Container** - Image scanning
+- **IaC** - Infrastructure as code
+
+## Tools
+- Semgrep (SAST)
+- Snyk / Dependabot (SCA)
+- TruffleHog / GitLeaks (Secrets)
+- Trivy (Container)
+- Checkov (IaC)
+
+## Workflow
+1. **Configure** - Set up scanners
+2. **Execute** - Run all scans
+3. **Aggregate** - Combine results
+4. **Prioritize** - Rank by severity
+5. **Report** - Generate findings
+
+## Severity Levels
+- 🔴 Critical - Fix immediately
+- 🟠 High - Fix this sprint
+- 🟡 Medium - Plan fix
+- 🟢 Low - Track
+
+## Outputs
+- Vulnerability report
+- CVE list with fixes
+- Secret findings
+- Compliance status
+- Remediation plan
+
+## Progress
+- [ ] SAST complete
+- [ ] SCA complete
+- [ ] Secrets scanned
+- [ ] Containers scanned
+- [ ] Report generated
+
+Fail on critical/high findings if --strict.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/security:scan "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/security:scan "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Security Commands" icon="terminal" href="/commands/overview#security">
+    More security commands
+  </Card>
+</CardGroup>

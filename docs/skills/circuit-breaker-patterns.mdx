@@ -1,0 +1,303 @@
+---
+title: "Circuit Breaker Patterns"
+description: "Resilience patterns with Resilience4j, Polly, bulkheads, timeouts, retries, and fallback strategies."
+icon: "cubes"
+---
+
+<Info>
+  **Category:** Microservices
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Resilience patterns with Resilience4j, Polly, bulkheads, timeouts, retries, and fallback strategies.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Circuit Breaker Patterns
+
+Resilience patterns with Resilience4j, Polly, bulkheads, timeouts, retries, and fallback strategies.
+
+## Overview
+
+Circuit breakers prevent cascade failures in distributed systems by detecting failures and temporarily stopping requests to failing services.
+
+## Key Patterns
+
+### Circuit Breaker States
+- **Closed**: Normal operation, requests pass through
+- **Open**: Failure threshold exceeded, requests fail fast
+- **Half-Open**: Testing if service recovered
+
+### Related Patterns
+- **Retry**: Attempt failed operations again
+- **Timeout**: Limit operation duration
+- **Bulkhead**: Isolate failures to prevent spread
+- **Fallback**: Provide alternative when primary fails
+
+## Resilience4j Implementation
+
+### Circuit Breaker
+```java
+// Configuration
+CircuitBreakerConfig config = CircuitBreakerConfig.custom()
+    .failureRateThreshold(50)                 // Open if 50% fail
+    .waitDurationInOpenState(Duration.ofSeconds(30))
+    .permittedNumberOfCallsInHalfOpenState(3)
+    .slidingWindowType(SlidingWindowType.COUNT_BASED)
+    .slidingWindowSize(10)
+    .build();
+
+CircuitBreaker circuitBreaker = CircuitBreaker.of("userService", config);
+
+// Usage
+Supplier<User> decoratedSupplier = CircuitBreaker
+    .decorateSupplier(circuitBreaker, () -> userService.getUser(userId));
+
+Try<User> result = Try.ofSupplier(decoratedSupplier)
+    .recover(CallNotPermittedException.class, e -> getCachedUser(userId));
+```
+
+### Retry with Backoff
+```java
+RetryConfig retryConfig = RetryConfig.custom()
+    .maxAttempts(3)
+    .waitDuration(Duration.ofMillis(500))
+    .exponentialBackoff(2, Duration.ofSeconds(10))
+    .retryOnException(e -> e instanceof TransientException)
+    .build();
+
+Retry retry = Retry.of("userService", retryConfig);
+
+Supplier<User> retryingSupplier = Retry
+    .decorateSupplier(retry, () -> userService.getUser(userId));
+```
+
+### Bulkhead
+```java
+// Thread pool bulkhead
+ThreadPoolBulkheadConfig bulkheadConfig = ThreadPoolBulkheadConfig.custom()
+    .maxThreadPoolSize(10)
+    .coreThreadPoolSize(5)
+    .queueCapacity(20)
+    .build();
+
+ThreadPoolBulkhead bulkhead = ThreadPoolBulkhead.of("userService", bulkheadConfig);
+
+CompletionStage<User> result = bulkhead.executeSupplier(
+    () -> userService.getUser(userId)
+);
+```
+
+### Combined Resilience
+```java
+// Combine patterns
+Supplier<User> resilientSupplier = Decorators
+    .ofSupplier(() -> userService.getUser(userId))
+    .withRetry(retry)
+    .withCircuitBreaker(circuitBreaker)
+    .withBulkhead(bulkhead)
+    .withFallback(Arrays.asList(
+        CallNotPermittedException.class,
+        BulkheadFullException.class
+    ), e -> getCachedUser(userId))
+    .decorate();
+```
+
+## Node.js Implementation (opossum)
+
+### Basic Circuit Breaker
+```javascript
+const CircuitBreaker = require('opossum');
+
+const options = {
+  timeout: 3000,           // 3 seconds
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000,     // 30 seconds
+  volumeThreshold: 5,      // Minimum calls before calculating
+};
+
+const breaker = new CircuitBreaker(callExternalService, options);
+
+// Events
+breaker.on('success', (result) => console.log('Success:', result));
+breaker.on('timeout', () => console.log('Timeout'));
+breaker.on('reject', () => console.log('Rejected - circuit open'));
+breaker.on('open', () => console.log('Circuit opened'));
+breaker.on('halfOpen', () => console.log('Circuit half-open'));
+breaker.on('close', () => console.log('Circuit closed'));
+breaker.on('fallback', (result) => console.log('Fallback:', result));
+
+// Fallback
+breaker.fallback(() => ({ cached: true, data: getCachedData() }));
+
+// Usage
+const result = await breaker.fire(requestParams);
+```
+
+### Health Check Integration
+```javascript
+const breaker = new CircuitBreaker(callService, options);
+
+// Health endpoint
+app.get('/health', (req, res) => {
+  const health = {
+    status: breaker.opened ? 'degraded' : 'healthy',
+    circuitBreaker: {
+      state: breaker.opened ? 'open' : (breaker.halfOpen ? 'half-open' : 'closed'),
+      stats: breaker.stats
+    }
+  };
+  res.json(health);
+});
+```
+
+## Configuration Guidelines
+
+### Circuit Breaker Tuning
+```yaml
+# Conservative (for critical services)
+failure_threshold: 25%
+sliding_window: 20 calls
+wait_in_open: 60 seconds
+half_open_calls: 3
+
+# Aggressive (for non-critical services)
+failure_threshold: 50%
+sliding_window: 10 calls
+wait_in_open: 30 seconds
+half_open_calls: 5
+```
+
+### Retry Configuration
+```yaml
+# Idempotent operations (safe to retry)
+max_attempts: 3
+initial_delay: 100ms
+multiplier: 2
+max_delay: 5s
+jitter: 0.1
+
+# Non-idempotent (use with caution)
+max_attempts: 1
+# Or use retry only for specific errors
+```
+
+### Timeout Guidelines
+```yaml
+# Timeouts should be:
+# - Shorter than user patience (< 5s for UI)
+# - Longer than P99 latency
+# - Account for downstream timeouts
+
+http_client: 5s
+database: 10s
+external_api: 15s
+batch_operations: 60s
+```
+
+## Best Practices
+
+1. **Fail Fast**: Don't wait for timeouts when circuit is open
+2. **Graceful Degradation**: Always have fallbacks
+3. **Monitor Circuit State**: Alert on open circuits
+4. **Tune Thresholds**: Based on actual failure patterns
+5. **Test Failure Modes**: Chaos engineering
+
+## Fallback Strategies
+
+### Cached Response
+```javascript
+async function getUser(userId) {
+  try {
+    return await userService.getUser(userId);
+  } catch (error) {
+    return await cache.get(`user:${userId}`);
+  }
+}
+```
+
+### Default Value
+```javascript
+async function getRecommendations(userId) {
+  try {
+    return await recommendationService.get(userId);
+  } catch (error) {
+    return getDefaultRecommendations();
+  }
+}
+```
+
+### Degraded Service
+```javascript
+async function getProductDetails(productId) {
+  try {
+    return await getFullDetails(productId);
+  } catch (error) {
+    // Return basic info from database
+    return await getBasicDetails(productId);
+  }
+}
+```
+
+## Anti-Patterns
+
+- Circuit breaker without fallback
+- Same timeout as downstream service
+- Not resetting circuit after deployment
+- Ignoring circuit breaker metrics
+- Retrying non-idempotent operations
+
+## When to Use
+
+- Calling external/third-party services
+- Microservice-to-microservice communication
+- Operations that can fail transiently
+- When graceful degradation is acceptable
+
+## When NOT to Use
+
+- Local operations that won't fail externally
+- When all-or-nothing is required
+- Very fast operations where overhead matters
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  circuit-breaker-patterns:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Microservices" icon="cubes" href="/skills/overview#microservices">
+    More microservices skills
+  </Card>
+</CardGroup>

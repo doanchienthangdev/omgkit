@@ -1,0 +1,397 @@
+---
+title: "Feature Stores"
+description: "Feast, Tecton, feature engineering pipelines, online/offline feature serving, and feature versioning."
+icon: "brain-circuit"
+---
+
+<Info>
+  **Category:** Ai-ml
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Feast, Tecton, feature engineering pipelines, online/offline feature serving, and feature versioning.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Feature Stores
+
+Feast, Tecton, feature engineering pipelines, online/offline feature serving, and feature versioning.
+
+## Overview
+
+Feature stores provide centralized management of ML features, enabling consistent feature computation, storage, and serving across training and inference.
+
+## Core Concepts
+
+### Feature Store Components
+- **Feature Registry**: Metadata and definitions
+- **Offline Store**: Historical features for training
+- **Online Store**: Low-latency features for inference
+- **Feature Transformation**: Computation pipelines
+- **Feature Serving**: API for retrieving features
+
+### Feature Types
+```
+Point-in-Time Features:
+- User age at transaction time
+- Account balance when order placed
+
+Aggregated Features:
+- 7-day rolling average spend
+- Count of logins last 30 days
+
+Real-time Features:
+- Current session duration
+- Items in cart right now
+```
+
+## Feast Implementation
+
+### Feature Definitions
+```python
+from feast import Entity, Feature, FeatureView, FileSource, ValueType
+from feast.types import Float32, Int64, String
+from datetime import timedelta
+
+# Define entity
+customer = Entity(
+    name="customer_id",
+    value_type=ValueType.STRING,
+    description="Unique customer identifier"
+)
+
+# Define data source
+customer_stats_source = FileSource(
+    path="s3://bucket/customer_stats.parquet",
+    timestamp_field="event_timestamp",
+    created_timestamp_column="created_timestamp"
+)
+
+# Define feature view
+customer_stats_fv = FeatureView(
+    name="customer_stats",
+    entities=["customer_id"],
+    ttl=timedelta(days=1),
+    schema=[
+        Feature(name="total_transactions", dtype=Int64),
+        Feature(name="avg_transaction_amount", dtype=Float32),
+        Feature(name="days_since_last_purchase", dtype=Int64),
+        Feature(name="customer_segment", dtype=String),
+    ],
+    online=True,
+    source=customer_stats_source,
+    tags={"team": "ml-platform", "owner": "data-team"}
+)
+```
+
+### Feature Registration
+```python
+from feast import FeatureStore
+
+# Initialize store
+store = FeatureStore(repo_path="feature_repo/")
+
+# Apply definitions
+store.apply([customer, customer_stats_fv])
+
+# Materialize to online store
+store.materialize_incremental(end_date=datetime.now())
+```
+
+### Training Data Retrieval
+```python
+from feast import FeatureStore
+import pandas as pd
+
+store = FeatureStore(repo_path="feature_repo/")
+
+# Entity dataframe with timestamps
+entity_df = pd.DataFrame({
+    "customer_id": ["C001", "C002", "C003"],
+    "event_timestamp": [
+        datetime(2024, 1, 15),
+        datetime(2024, 1, 16),
+        datetime(2024, 1, 17)
+    ]
+})
+
+# Get historical features (point-in-time correct)
+training_df = store.get_historical_features(
+    entity_df=entity_df,
+    features=[
+        "customer_stats:total_transactions",
+        "customer_stats:avg_transaction_amount",
+        "customer_stats:days_since_last_purchase",
+        "customer_stats:customer_segment"
+    ]
+).to_df()
+```
+
+### Online Feature Retrieval
+```python
+# Get features for inference
+feature_vector = store.get_online_features(
+    features=[
+        "customer_stats:total_transactions",
+        "customer_stats:avg_transaction_amount",
+        "customer_stats:customer_segment"
+    ],
+    entity_rows=[
+        {"customer_id": "C001"},
+        {"customer_id": "C002"}
+    ]
+).to_dict()
+```
+
+## On-Demand Features
+
+### Real-time Transformations
+```python
+from feast import on_demand_feature_view, Field
+from feast.types import Float32
+import pandas as pd
+
+@on_demand_feature_view(
+    sources=[customer_stats_fv],
+    schema=[
+        Field(name="transaction_velocity", dtype=Float32),
+        Field(name="is_high_value", dtype=Int64)
+    ]
+)
+def customer_derived_features(inputs: pd.DataFrame) -> pd.DataFrame:
+    df = pd.DataFrame()
+    df["transaction_velocity"] = (
+        inputs["total_transactions"] /
+        (inputs["days_since_last_purchase"] + 1)
+    )
+    df["is_high_value"] = (inputs["avg_transaction_amount"] > 100).astype(int)
+    return df
+```
+
+## Stream Features
+
+### Kafka Integration
+```python
+from feast import KafkaSource, FeatureView
+from feast.data_format import JsonFormat
+
+# Kafka source for real-time features
+click_stream_source = KafkaSource(
+    name="click_stream",
+    kafka_bootstrap_servers="kafka:9092",
+    topic="user_clicks",
+    timestamp_field="event_timestamp",
+    message_format=JsonFormat(
+        schema_json="""
+        {
+            "type": "record",
+            "name": "click",
+            "fields": [
+                {"name": "user_id", "type": "string"},
+                {"name": "page_id", "type": "string"},
+                {"name": "event_timestamp", "type": "long"}
+            ]
+        }
+        """
+    )
+)
+
+# Stream feature view
+click_features = FeatureView(
+    name="user_click_features",
+    entities=["user_id"],
+    ttl=timedelta(minutes=30),
+    schema=[
+        Feature(name="click_count_30m", dtype=Int64),
+        Feature(name="unique_pages_30m", dtype=Int64)
+    ],
+    source=click_stream_source,
+    online=True
+)
+```
+
+## Feature Engineering Pipelines
+
+### Batch Pipeline (Spark)
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.window import Window
+
+def compute_customer_features(spark: SparkSession, date: str):
+    transactions = spark.read.parquet(f"s3://data/transactions/date={date}")
+
+    # Aggregation window
+    window_30d = Window.partitionBy("customer_id").orderBy("timestamp").rangeBetween(-30*86400, 0)
+
+    features = transactions.groupBy("customer_id").agg(
+        F.count("*").alias("total_transactions"),
+        F.avg("amount").alias("avg_transaction_amount"),
+        F.sum("amount").alias("total_spend"),
+        F.max("timestamp").alias("last_transaction"),
+        F.countDistinct("merchant_id").alias("unique_merchants")
+    )
+
+    # Compute derived features
+    features = features.withColumn(
+        "days_since_last_purchase",
+        F.datediff(F.current_date(), F.col("last_transaction"))
+    )
+
+    # Write to feature store
+    features.write.mode("overwrite").parquet(
+        f"s3://feature-store/customer_stats/date={date}"
+    )
+
+    return features
+```
+
+### Streaming Pipeline (Flink)
+```python
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.table import StreamTableEnvironment
+
+def create_streaming_features():
+    env = StreamExecutionEnvironment.get_execution_environment()
+    t_env = StreamTableEnvironment.create(env)
+
+    # Read from Kafka
+    t_env.execute_sql("""
+        CREATE TABLE clicks (
+            user_id STRING,
+            page_id STRING,
+            event_time TIMESTAMP(3),
+            WATERMARK FOR event_time AS event_time - INTERVAL '5' SECOND
+        ) WITH (
+            'connector' = 'kafka',
+            'topic' = 'user_clicks',
+            'properties.bootstrap.servers' = 'kafka:9092',
+            'format' = 'json'
+        )
+    """)
+
+    # Windowed aggregation
+    t_env.execute_sql("""
+        CREATE TABLE click_features (
+            user_id STRING,
+            window_start TIMESTAMP(3),
+            click_count BIGINT,
+            unique_pages BIGINT,
+            PRIMARY KEY (user_id) NOT ENFORCED
+        ) WITH (
+            'connector' = 'upsert-kafka',
+            'topic' = 'click_features',
+            'properties.bootstrap.servers' = 'kafka:9092',
+            'key.format' = 'json',
+            'value.format' = 'json'
+        )
+    """)
+
+    t_env.execute_sql("""
+        INSERT INTO click_features
+        SELECT
+            user_id,
+            TUMBLE_START(event_time, INTERVAL '30' MINUTE) as window_start,
+            COUNT(*) as click_count,
+            COUNT(DISTINCT page_id) as unique_pages
+        FROM clicks
+        GROUP BY user_id, TUMBLE(event_time, INTERVAL '30' MINUTE)
+    """)
+```
+
+## Best Practices
+
+1. **Point-in-Time Correctness**: Prevent data leakage
+2. **Feature Documentation**: Clear descriptions
+3. **Version Control**: Track feature definitions
+4. **Monitoring**: Feature freshness and quality
+5. **Naming Conventions**: Consistent feature names
+
+## Feature Quality Monitoring
+
+```python
+from great_expectations import DataContext
+
+def validate_features(feature_df):
+    context = DataContext()
+
+    expectation_suite = context.create_expectation_suite("feature_validation")
+
+    # Add expectations
+    validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="feature_validation"
+    )
+
+    validator.expect_column_values_to_not_be_null("customer_id")
+    validator.expect_column_values_to_be_between("avg_transaction_amount", 0, 10000)
+    validator.expect_column_values_to_be_in_set("customer_segment", ["bronze", "silver", "gold"])
+
+    results = validator.validate()
+    return results.success
+```
+
+## Anti-Patterns
+
+- Training/serving skew
+- Missing point-in-time correctness
+- Feature definitions in notebooks only
+- No feature documentation
+- Ignoring feature freshness
+
+## When to Use
+
+- Multiple models share features
+- Need training/serving consistency
+- Feature computation is expensive
+- Team collaboration on features
+- Regulatory requirements
+
+## When NOT to Use
+
+- Single simple model
+- Features change frequently
+- No reuse expected
+- Small team, simple pipeline
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  feature-stores:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ai-ml" icon="brain-circuit" href="/skills/overview#ai-ml">
+    More ai-ml skills
+  </Card>
+</CardGroup>

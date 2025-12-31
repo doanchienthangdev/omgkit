@@ -1,0 +1,126 @@
+---
+title: "/data:quality"
+description: "Analyze and implement data quality checks and validation"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Data
+
+  **Syntax:** `/data:quality <dataset or table name>`
+</Info>
+
+## Overview
+
+Analyze and implement data quality checks and validation
+
+## Quick Start
+
+```bash
+/data:quality "dataset
+```
+
+
+# ✅ Data Quality: \<dataset or table name\>
+
+Analyze data quality for: **\<dataset or table name\>**
+
+## Agent
+Uses **data-engineer** agent for quality implementation.
+
+## Quality Dimensions
+- **Completeness** - Missing values
+- **Accuracy** - Correct values
+- **Consistency** - Cross-field rules
+- **Timeliness** - Freshness
+- **Uniqueness** - No duplicates
+- **Validity** - Format/range
+
+## Workflow
+1. **Profile** - Statistical analysis
+2. **Define Rules** - Quality expectations
+3. **Implement Checks** - Validation code
+4. **Alerting** - Failure notifications
+5. **Remediation** - Fix strategies
+
+## Technologies
+- Great Expectations
+- dbt tests
+- Soda Core
+- Custom validators
+
+## Outputs
+- Data profile report
+- Quality rule definitions
+- Validation code/tests
+- Alert configurations
+- Quality dashboard
+
+## Progress
+- [ ] Data profiled
+- [ ] Rules defined
+- [ ] Checks implemented
+- [ ] Alerts configured
+- [ ] Dashboard created
+
+Generate Great Expectations suite.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/data:quality "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/data:quality "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Data Commands" icon="terminal" href="/commands/overview#data">
+    More data commands
+  </Card>
+</CardGroup>

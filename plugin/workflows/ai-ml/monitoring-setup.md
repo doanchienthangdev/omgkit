@@ -1,0 +1,227 @@
+---
+description: Set up comprehensive ML model monitoring for drift and performance
+triggers:
+  - manual
+  - ml:monitoring
+agents:
+  - ml-engineer
+  - site-reliability-engineer
+---
+
+# ML Monitoring Setup Workflow
+
+Implement production monitoring for ML models.
+
+## Prerequisites
+- [ ] Model deployed to production
+- [ ] Baseline metrics established
+- [ ] Logging infrastructure available
+
+## Phase 1: Monitoring Strategy
+
+### Step 1.1: Define Monitoring Scope
+```yaml
+agent: ml-engineer
+action: define
+monitoring_types:
+  - Data monitoring: Input feature health
+  - Model monitoring: Prediction quality
+  - Operational monitoring: System health
+  - Business monitoring: Impact metrics
+```
+
+### Step 1.2: Establish Baselines
+```yaml
+agent: ml-engineer
+action: baseline
+metrics:
+  - Feature distributions
+  - Prediction distributions
+  - Model performance (with labels)
+  - Latency percentiles
+window: Training data period
+```
+
+## Phase 2: Data Monitoring
+
+### Step 2.1: Feature Monitoring
+```yaml
+agent: ml-engineer
+action: configure
+checks:
+  - Missing values: Count nulls per feature
+  - Type validation: Expected data types
+  - Range validation: Min/max bounds
+  - Distribution shift: Statistical tests
+methods:
+  - KS test (continuous)
+  - Chi-square (categorical)
+  - PSI (Population Stability Index)
+```
+
+### Step 2.2: Data Quality Alerts
+```yaml
+agent: ml-engineer
+action: configure
+alerts:
+  - schema_violation:
+      condition: Unexpected schema change
+      severity: critical
+  - missing_rate_high:
+      threshold: > 5% missing
+      severity: warning
+  - distribution_drift:
+      threshold: PSI > 0.2
+      severity: warning
+```
+
+## Phase 3: Model Monitoring
+
+### Step 3.1: Prediction Monitoring
+```yaml
+agent: ml-engineer
+action: configure
+metrics:
+  - Prediction distribution
+  - Confidence scores
+  - Prediction counts by class
+  - Output drift detection
+tools:
+  - Evidently
+  - Whylogs
+  - Arize
+  - Custom monitoring
+```
+
+### Step 3.2: Performance Monitoring
+```yaml
+agent: ml-engineer
+action: configure
+with_ground_truth:
+  - Accuracy over time
+  - Precision/Recall trends
+  - AUC trends
+  - Error rate by segment
+delayed_labels:
+  - Label collection pipeline
+  - Performance calculation job
+  - Alerting on degradation
+```
+
+### Step 3.3: Model Drift Detection
+```yaml
+agent: ml-engineer
+action: configure
+drift_types:
+  - Concept drift: Relationship change
+  - Data drift: Feature distribution change
+  - Prediction drift: Output change
+detection:
+  - Statistical tests
+  - Page-Hinkley test
+  - ADWIN algorithm
+  - Custom detectors
+```
+
+## Phase 4: Operational Monitoring
+
+### Step 4.1: System Metrics
+```yaml
+agent: site-reliability-engineer
+action: configure
+metrics:
+  - Request latency (p50, p95, p99)
+  - Throughput (requests/second)
+  - Error rate
+  - GPU/CPU utilization
+  - Memory usage
+  - Queue depth
+```
+
+### Step 4.2: SLI/SLO Definition
+```yaml
+agent: site-reliability-engineer
+action: define
+slis:
+  - Availability: Successful requests / Total requests
+  - Latency: % requests < threshold
+  - Freshness: Time since last successful prediction
+slos:
+  - availability: 99.9%
+  - latency_p99: < 100ms
+  - freshness: < 1 minute
+```
+
+## Phase 5: Alerting and Response
+
+### Step 5.1: Alert Configuration
+```yaml
+agent: site-reliability-engineer
+action: configure
+alert_rules:
+  - model_drift_detected:
+      severity: warning
+      action: notify_ml_team
+  - performance_degradation:
+      severity: critical
+      action: page_on_call
+  - latency_spike:
+      severity: warning
+      action: auto_scale
+  - error_rate_high:
+      severity: critical
+      action: rollback_ready
+```
+
+### Step 5.2: Response Playbooks
+```yaml
+agent: site-reliability-engineer
+action: document
+playbooks:
+  - drift_detected:
+      - Investigate data changes
+      - Check upstream systems
+      - Consider retraining
+  - performance_degraded:
+      - Check recent deployments
+      - Analyze error patterns
+      - Rollback if needed
+  - latency_high:
+      - Check resource usage
+      - Scale horizontally
+      - Optimize batch sizes
+```
+
+## Phase 6: Dashboards
+
+### Step 6.1: Create Dashboards
+```yaml
+agent: site-reliability-engineer
+action: create
+dashboards:
+  - model_health:
+      - Prediction volume
+      - Drift metrics
+      - Performance trends
+  - operational:
+      - Latency distribution
+      - Error rates
+      - Resource usage
+  - business:
+      - Model impact metrics
+      - A/B test results
+```
+
+## Outputs
+- [ ] Monitoring configuration
+- [ ] Alert rules
+- [ ] Dashboards
+- [ ] SLI/SLO definitions
+- [ ] Response playbooks
+
+## Quality Gates
+- All critical metrics monitored
+- Alerts tested and working
+- Dashboards accurate
+- Playbooks documented
+- Team trained on response

@@ -1,0 +1,455 @@
+---
+title: "Model Monitoring"
+description: "Data drift detection, model performance monitoring, explainability dashboards, and alerting systems."
+icon: "brain-circuit"
+---
+
+<Info>
+  **Category:** Ai-ml
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Data drift detection, model performance monitoring, explainability dashboards, and alerting systems.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Model Monitoring
+
+Data drift detection, model performance monitoring, explainability dashboards, and alerting systems.
+
+## Overview
+
+Model monitoring ensures ML models perform correctly in production by detecting drift, tracking performance, and alerting on anomalies.
+
+## Core Concepts
+
+### Types of Drift
+- **Data Drift**: Input distribution changes
+- **Concept Drift**: Relationship between X→Y changes
+- **Prediction Drift**: Output distribution changes
+- **Label Drift**: Ground truth distribution changes
+
+### Monitoring Dimensions
+- **Data Quality**: Missing values, outliers, schema
+- **Model Performance**: Accuracy, latency, throughput
+- **Feature Health**: Statistical properties over time
+- **Business Metrics**: Revenue impact, user engagement
+
+## Data Drift Detection
+
+### Statistical Tests
+```python
+from scipy import stats
+import numpy as np
+from typing import Dict, Tuple
+
+class DriftDetector:
+    def __init__(self, reference_data: np.ndarray):
+        self.reference = reference_data
+
+    def detect_drift(
+        self,
+        current_data: np.ndarray,
+        method: str = "ks"
+    ) -> Dict[str, float]:
+        if method == "ks":
+            # Kolmogorov-Smirnov test
+            statistic, p_value = stats.ks_2samp(self.reference, current_data)
+        elif method == "chi2":
+            # Chi-squared test for categorical
+            statistic, p_value = stats.chisquare(current_data, self.reference)
+        elif method == "psi":
+            # Population Stability Index
+            statistic = self._calculate_psi(current_data)
+            p_value = None
+
+        return {
+            "statistic": statistic,
+            "p_value": p_value,
+            "drift_detected": p_value < 0.05 if p_value else statistic > 0.25
+        }
+
+    def _calculate_psi(self, current_data: np.ndarray) -> float:
+        # Bin data
+        bins = np.histogram_bin_edges(self.reference, bins=10)
+        ref_counts = np.histogram(self.reference, bins=bins)[0]
+        cur_counts = np.histogram(current_data, bins=bins)[0]
+
+        # Calculate PSI
+        ref_pct = ref_counts / len(self.reference) + 0.0001
+        cur_pct = cur_counts / len(current_data) + 0.0001
+
+        psi = np.sum((cur_pct - ref_pct) * np.log(cur_pct / ref_pct))
+        return psi
+```
+
+### Evidently AI Integration
+```python
+from evidently import ColumnMapping
+from evidently.report import Report
+from evidently.metric_preset import DataDriftPreset, DataQualityPreset
+from evidently.metrics import (
+    DataDriftTable,
+    DatasetDriftMetric,
+    ColumnDriftMetric
+)
+
+# Define column mapping
+column_mapping = ColumnMapping(
+    target="label",
+    prediction="prediction",
+    numerical_features=["feature1", "feature2", "feature3"],
+    categorical_features=["category1", "category2"]
+)
+
+# Create drift report
+report = Report(metrics=[
+    DatasetDriftMetric(),
+    DataDriftTable(),
+    ColumnDriftMetric(column_name="feature1"),
+    ColumnDriftMetric(column_name="feature2")
+])
+
+report.run(
+    reference_data=reference_df,
+    current_data=current_df,
+    column_mapping=column_mapping
+)
+
+# Export results
+report.save_html("drift_report.html")
+drift_metrics = report.as_dict()
+```
+
+## Performance Monitoring
+
+### Metrics Tracking
+```python
+from dataclasses import dataclass
+from typing import List, Optional
+from datetime import datetime
+import prometheus_client as prom
+
+# Define metrics
+PREDICTION_LATENCY = prom.Histogram(
+    "model_prediction_latency_seconds",
+    "Time spent processing prediction",
+    ["model_name", "model_version"],
+    buckets=[0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0]
+)
+
+PREDICTION_COUNT = prom.Counter(
+    "model_predictions_total",
+    "Total number of predictions",
+    ["model_name", "model_version", "prediction_class"]
+)
+
+PREDICTION_ERROR = prom.Counter(
+    "model_prediction_errors_total",
+    "Total prediction errors",
+    ["model_name", "model_version", "error_type"]
+)
+
+@dataclass
+class PredictionLog:
+    request_id: str
+    model_name: str
+    model_version: str
+    features: dict
+    prediction: any
+    probability: Optional[float]
+    latency_ms: float
+    timestamp: datetime
+
+class ModelMonitor:
+    def __init__(self, model_name: str, model_version: str):
+        self.model_name = model_name
+        self.model_version = model_version
+
+    def log_prediction(self, log: PredictionLog):
+        # Record latency
+        PREDICTION_LATENCY.labels(
+            model_name=self.model_name,
+            model_version=self.model_version
+        ).observe(log.latency_ms / 1000)
+
+        # Record prediction class
+        PREDICTION_COUNT.labels(
+            model_name=self.model_name,
+            model_version=self.model_version,
+            prediction_class=str(log.prediction)
+        ).inc()
+
+        # Store for offline analysis
+        self._store_log(log)
+
+    def log_error(self, error_type: str):
+        PREDICTION_ERROR.labels(
+            model_name=self.model_name,
+            model_version=self.model_version,
+            error_type=error_type
+        ).inc()
+```
+
+### Ground Truth Comparison
+```python
+import pandas as pd
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score,
+    f1_score, roc_auc_score, confusion_matrix
+)
+from datetime import datetime, timedelta
+
+class PerformanceMonitor:
+    def __init__(self, db_connection):
+        self.db = db_connection
+
+    def calculate_metrics(
+        self,
+        start_date: datetime,
+        end_date: datetime
+    ) -> dict:
+        # Join predictions with ground truth
+        query = """
+        SELECT p.prediction, p.probability, g.actual
+        FROM predictions p
+        JOIN ground_truth g ON p.request_id = g.request_id
+        WHERE p.timestamp BETWEEN %s AND %s
+        """
+
+        df = pd.read_sql(query, self.db, params=[start_date, end_date])
+
+        if len(df) == 0:
+            return {}
+
+        return {
+            "accuracy": accuracy_score(df["actual"], df["prediction"]),
+            "precision": precision_score(df["actual"], df["prediction"], average="weighted"),
+            "recall": recall_score(df["actual"], df["prediction"], average="weighted"),
+            "f1": f1_score(df["actual"], df["prediction"], average="weighted"),
+            "auc": roc_auc_score(df["actual"], df["probability"]) if "probability" in df else None,
+            "sample_count": len(df),
+            "confusion_matrix": confusion_matrix(df["actual"], df["prediction"]).tolist()
+        }
+
+    def detect_performance_degradation(
+        self,
+        current_metrics: dict,
+        baseline_metrics: dict,
+        threshold: float = 0.05
+    ) -> bool:
+        for metric in ["accuracy", "precision", "recall", "f1"]:
+            if current_metrics[metric] < baseline_metrics[metric] - threshold:
+                return True
+        return False
+```
+
+## Alerting System
+
+### Alert Configuration
+```python
+from dataclasses import dataclass
+from enum import Enum
+from typing import Callable, List
+import smtplib
+from email.mime.text import MIMEText
+
+class AlertSeverity(Enum):
+    INFO = "info"
+    WARNING = "warning"
+    CRITICAL = "critical"
+
+@dataclass
+class AlertRule:
+    name: str
+    condition: Callable[[dict], bool]
+    severity: AlertSeverity
+    message_template: str
+
+class AlertManager:
+    def __init__(self, rules: List[AlertRule]):
+        self.rules = rules
+        self.channels = []
+
+    def add_channel(self, channel):
+        self.channels.append(channel)
+
+    def evaluate(self, metrics: dict):
+        for rule in self.rules:
+            if rule.condition(metrics):
+                alert = {
+                    "name": rule.name,
+                    "severity": rule.severity,
+                    "message": rule.message_template.format(**metrics),
+                    "metrics": metrics
+                }
+                self._send_alert(alert)
+
+    def _send_alert(self, alert: dict):
+        for channel in self.channels:
+            channel.send(alert)
+
+# Define rules
+rules = [
+    AlertRule(
+        name="accuracy_drop",
+        condition=lambda m: m.get("accuracy", 1.0) < 0.80,
+        severity=AlertSeverity.CRITICAL,
+        message="Model accuracy dropped to {accuracy:.2%}"
+    ),
+    AlertRule(
+        name="high_latency",
+        condition=lambda m: m.get("p99_latency_ms", 0) > 500,
+        severity=AlertSeverity.WARNING,
+        message="P99 latency is {p99_latency_ms}ms"
+    ),
+    AlertRule(
+        name="data_drift",
+        condition=lambda m: m.get("drift_score", 0) > 0.25,
+        severity=AlertSeverity.WARNING,
+        message="Data drift detected: PSI={drift_score:.3f}"
+    )
+]
+```
+
+### Slack Integration
+```python
+import requests
+from typing import Dict
+
+class SlackChannel:
+    def __init__(self, webhook_url: str):
+        self.webhook_url = webhook_url
+
+    def send(self, alert: Dict):
+        color = {
+            AlertSeverity.INFO: "#36a64f",
+            AlertSeverity.WARNING: "#ff9800",
+            AlertSeverity.CRITICAL: "#f44336"
+        }[alert["severity"]]
+
+        payload = {
+            "attachments": [{
+                "color": color,
+                "title": f":warning: {alert['name']}",
+                "text": alert["message"],
+                "fields": [
+                    {"title": k, "value": str(v), "short": True}
+                    for k, v in alert["metrics"].items()
+                ],
+                "footer": "ML Monitoring System"
+            }]
+        }
+
+        requests.post(self.webhook_url, json=payload)
+```
+
+## Monitoring Dashboard
+
+### Grafana Queries
+```promql
+# Prediction latency percentiles
+histogram_quantile(0.99,
+  sum(rate(model_prediction_latency_seconds_bucket[5m])) by (le, model_name)
+)
+
+# Predictions per second
+sum(rate(model_predictions_total[1m])) by (model_name, prediction_class)
+
+# Error rate
+sum(rate(model_prediction_errors_total[5m]))
+/
+sum(rate(model_predictions_total[5m]))
+
+# Feature drift over time (custom metric)
+model_feature_drift_psi{feature_name=~"feature.*"}
+```
+
+## Best Practices
+
+1. **Baseline Metrics**: Establish clear baselines
+2. **Granular Monitoring**: Per-segment analysis
+3. **Alert Fatigue**: Tune thresholds carefully
+4. **Root Cause Analysis**: Correlate metrics
+5. **Automated Remediation**: Retrain triggers
+
+## Monitoring Checklist
+
+```
+□ Data quality checks (schema, nulls, ranges)
+□ Feature distribution monitoring
+□ Prediction distribution tracking
+□ Latency monitoring (p50, p95, p99)
+□ Error rate tracking
+□ Ground truth collection pipeline
+□ Performance metrics computation
+□ Drift detection (statistical tests)
+□ Alert rules configured
+□ Dashboard created
+□ Runbook documented
+```
+
+## Anti-Patterns
+
+- Monitoring only accuracy
+- Ignoring data quality
+- Alert threshold too sensitive
+- Missing ground truth pipeline
+- No historical comparison
+
+## When to Use
+
+- Production ML models
+- High-stakes predictions
+- Regulatory requirements
+- Continuous learning systems
+- Multi-model environments
+
+## When NOT to Use
+
+- Development/testing only
+- Batch jobs with manual review
+- Very stable domains
+- Low-volume predictions
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  model-monitoring:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ai-ml" icon="brain-circuit" href="/skills/overview#ai-ml">
+    More ai-ml skills
+  </Card>
+</CardGroup>

@@ -1,0 +1,309 @@
+---
+title: "Kafka Deep Dive"
+description: "Advanced Apache Kafka patterns including partitioning, consumer groups, exactly-once semantics, compaction, and operational best practices."
+icon: "bolt"
+---
+
+<Info>
+  **Category:** Event-driven
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Advanced Apache Kafka patterns including partitioning, consumer groups, exactly-once semantics, compaction, and operational best practices.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Kafka Deep Dive
+
+Advanced Apache Kafka patterns including partitioning, consumer groups, exactly-once semantics, compaction, and operational best practices.
+
+## Overview
+
+Apache Kafka is a distributed streaming platform for building real-time data pipelines and streaming applications.
+
+## Core Concepts
+
+### Topics and Partitions
+- **Topic**: Named feed of messages
+- **Partition**: Ordered, immutable sequence
+- **Offset**: Position within partition
+- **Segment**: On-disk storage unit
+
+### Producer Patterns
+- **Partitioning**: Key-based or round-robin
+- **Batching**: Accumulate before send
+- **Compression**: Reduce network/storage
+- **Idempotence**: Exactly-once writes
+
+### Consumer Patterns
+- **Consumer Groups**: Parallel processing
+- **Offset Management**: At-least-once, exactly-once
+- **Rebalancing**: Partition reassignment
+- **Commit Strategies**: Auto vs manual
+
+## Producer Configuration
+
+### High Throughput
+```properties
+# Maximize throughput
+batch.size=65536
+linger.ms=10
+compression.type=lz4
+buffer.memory=67108864
+acks=1
+```
+
+### High Reliability
+```properties
+# Maximize durability
+acks=all
+enable.idempotence=true
+max.in.flight.requests.per.connection=5
+retries=2147483647
+delivery.timeout.ms=120000
+```
+
+### Exactly-Once Producer
+```java
+Properties props = new Properties();
+props.put("bootstrap.servers", "localhost:9092");
+props.put("enable.idempotence", true);
+props.put("transactional.id", "my-transactional-id");
+
+KafkaProducer<String, String> producer = new KafkaProducer<>(props);
+producer.initTransactions();
+
+try {
+    producer.beginTransaction();
+    producer.send(new ProducerRecord<>("topic1", "key", "value1"));
+    producer.send(new ProducerRecord<>("topic2", "key", "value2"));
+    producer.commitTransaction();
+} catch (Exception e) {
+    producer.abortTransaction();
+}
+```
+
+## Consumer Configuration
+
+### Consumer Group Setup
+```java
+Properties props = new Properties();
+props.put("bootstrap.servers", "localhost:9092");
+props.put("group.id", "my-consumer-group");
+props.put("enable.auto.commit", false);
+props.put("auto.offset.reset", "earliest");
+props.put("max.poll.records", 500);
+props.put("max.poll.interval.ms", 300000);
+
+KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+consumer.subscribe(Arrays.asList("my-topic"));
+
+while (true) {
+    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+    for (ConsumerRecord<String, String> record : records) {
+        processRecord(record);
+    }
+    consumer.commitSync();
+}
+```
+
+### Exactly-Once Consumer
+```java
+// Read-process-write pattern with transactions
+props.put("isolation.level", "read_committed");
+
+while (true) {
+    ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+
+    producer.beginTransaction();
+    try {
+        for (ConsumerRecord<String, String> record : records) {
+            ProducerRecord<String, String> output = process(record);
+            producer.send(output);
+        }
+
+        // Commit offsets as part of transaction
+        producer.sendOffsetsToTransaction(
+            getOffsetsToCommit(records),
+            consumer.groupMetadata()
+        );
+        producer.commitTransaction();
+    } catch (Exception e) {
+        producer.abortTransaction();
+    }
+}
+```
+
+## Partitioning Strategies
+
+### Key-Based Partitioning
+```java
+// Default: hash(key) % numPartitions
+producer.send(new ProducerRecord<>("topic", "userId-123", "data"));
+
+// Custom partitioner
+public class CustomPartitioner implements Partitioner {
+    @Override
+    public int partition(String topic, Object key, byte[] keyBytes,
+                        Object value, byte[] valueBytes, Cluster cluster) {
+        List<PartitionInfo> partitions = cluster.partitionsForTopic(topic);
+        int numPartitions = partitions.size();
+
+        if (key instanceof String) {
+            String keyStr = (String) key;
+            if (keyStr.startsWith("VIP-")) {
+                return 0;  // VIP customers to partition 0
+            }
+        }
+        return Math.abs(Utils.murmur2(keyBytes)) % numPartitions;
+    }
+}
+```
+
+### Partition Count Guidelines
+```
+Partitions = max(T/P, T/C)
+
+Where:
+T = Target throughput (MB/s)
+P = Producer throughput per partition
+C = Consumer throughput per partition
+
+Rules of thumb:
+- Start with 6-12 partitions per topic
+- More partitions = more parallelism
+- Too many = more overhead, longer rebalances
+- Can only increase, never decrease
+```
+
+## Log Compaction
+
+### Compacted Topic Configuration
+```properties
+# Topic configuration
+cleanup.policy=compact
+min.cleanable.dirty.ratio=0.5
+segment.ms=604800000
+delete.retention.ms=86400000
+```
+
+### Use Cases
+```
+- Changelog topics (database CDC)
+- State stores (Kafka Streams)
+- Configuration distribution
+- Latest value per key scenarios
+```
+
+## Operational Patterns
+
+### Monitoring Metrics
+```yaml
+# Key producer metrics
+record-send-rate            # Records sent per second
+record-error-rate           # Failed sends per second
+request-latency-avg         # Average request latency
+batch-size-avg              # Average batch size
+buffer-available-bytes      # Available buffer memory
+
+# Key consumer metrics
+records-consumed-rate       # Records consumed per second
+records-lag                 # Consumer lag per partition
+commit-latency-avg          # Commit latency
+rebalance-latency-avg       # Rebalance duration
+
+# Broker metrics
+UnderReplicatedPartitions   # Partitions with insufficient replicas
+ActiveControllerCount       # Should be 1 in cluster
+OfflinePartitionsCount      # Unavailable partitions
+```
+
+### Consumer Lag Management
+```bash
+# Check consumer lag
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 \
+  --group my-group --describe
+
+# Reset offsets
+kafka-consumer-groups.sh --bootstrap-server localhost:9092 \
+  --group my-group --topic my-topic \
+  --reset-offsets --to-earliest --execute
+```
+
+## Best Practices
+
+1. **Key Design**: Choose keys for even distribution
+2. **Partition Count**: Plan for growth
+3. **Replication Factor**: Minimum 3 for production
+4. **Retention**: Balance storage vs replay needs
+5. **Monitoring**: Track lag and throughput
+
+## Common Issues
+
+### Consumer Lag
+- Cause: Slow processing, too few consumers
+- Fix: Scale consumers, optimize processing
+
+### Rebalancing Storms
+- Cause: Frequent joins/leaves
+- Fix: Increase session.timeout.ms, use static membership
+
+### Data Skew
+- Cause: Hot keys
+- Fix: Composite keys, custom partitioner
+
+## When to Use
+
+- High-throughput event streaming
+- Event sourcing and CQRS
+- Log aggregation
+- Stream processing
+
+## When NOT to Use
+
+- Simple pub/sub (use Redis/RabbitMQ)
+- Very low latency requirements
+- Small data volumes
+- When ordering isn't important
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  kafka-deep:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Event-driven" icon="bolt" href="/skills/overview#event-driven">
+    More event-driven skills
+  </Card>
+</CardGroup>

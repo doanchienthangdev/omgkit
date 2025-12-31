@@ -1,0 +1,405 @@
+# Device Provisioning
+
+Secure device onboarding, certificate management, fleet provisioning, and zero-touch deployment.
+
+## Overview
+
+Device provisioning securely onboards IoT devices to a fleet, establishing identity, credentials, and configuration.
+
+## Core Concepts
+
+### Provisioning Methods
+- **Pre-provisioning**: Credentials loaded at manufacture
+- **Just-in-time**: Credentials issued on first connection
+- **Self-provisioning**: Device generates own credentials
+- **Fleet provisioning**: Template-based bulk provisioning
+
+### Security Requirements
+- Unique device identity
+- Secure credential storage
+- Certificate rotation
+- Revocation capability
+
+## AWS IoT Device Provisioning
+
+### Fleet Provisioning Template
+```json
+{
+  "Parameters": {
+    "SerialNumber": { "Type": "String" },
+    "DeviceType": { "Type": "String" },
+    "FirmwareVersion": { "Type": "String" }
+  },
+  "Resources": {
+    "certificate": {
+      "Type": "AWS::IoT::Certificate",
+      "Properties": {
+        "CertificateId": { "Ref": "AWS::IoT::Certificate::Id" },
+        "Status": "Active"
+      }
+    },
+    "policy": {
+      "Type": "AWS::IoT::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["iot:Connect"],
+              "Resource": {
+                "Fn::Join": ["", [
+                  "arn:aws:iot:",
+                  { "Ref": "AWS::Region" },
+                  ":",
+                  { "Ref": "AWS::AccountId" },
+                  ":client/${iot:Connection.Thing.ThingName}"
+                ]]
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["iot:Publish", "iot:Receive"],
+              "Resource": {
+                "Fn::Join": ["", [
+                  "arn:aws:iot:",
+                  { "Ref": "AWS::Region" },
+                  ":",
+                  { "Ref": "AWS::AccountId" },
+                  ":topic/devices/${iot:Connection.Thing.ThingName}/*"
+                ]]
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["iot:Subscribe"],
+              "Resource": {
+                "Fn::Join": ["", [
+                  "arn:aws:iot:",
+                  { "Ref": "AWS::Region" },
+                  ":",
+                  { "Ref": "AWS::AccountId" },
+                  ":topicfilter/devices/${iot:Connection.Thing.ThingName}/*"
+                ]]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "thing": {
+      "Type": "AWS::IoT::Thing",
+      "Properties": {
+        "ThingName": { "Fn::Join": ["-", ["device", { "Ref": "SerialNumber" }]] },
+        "AttributePayload": {
+          "serialNumber": { "Ref": "SerialNumber" },
+          "deviceType": { "Ref": "DeviceType" },
+          "firmwareVersion": { "Ref": "FirmwareVersion" }
+        },
+        "ThingGroups": [{ "Ref": "DeviceType" }]
+      },
+      "OverrideSettings": {
+        "AttributePayload": "MERGE",
+        "ThingGroups": "DO_NOTHING"
+      }
+    }
+  }
+}
+```
+
+### Device-Side Provisioning (ESP32)
+```cpp
+#include <WiFiClientSecure.h>
+#include <MQTTClient.h>
+#include <ArduinoJson.h>
+#include "Preferences.h"
+
+// Claim certificate (embedded at manufacture)
+const char* CLAIM_CERT = "-----BEGIN CERTIFICATE-----\n...";
+const char* CLAIM_KEY = "-----BEGIN RSA PRIVATE KEY-----\n...";
+const char* ROOT_CA = "-----BEGIN CERTIFICATE-----\n...";
+
+Preferences prefs;
+WiFiClientSecure net;
+MQTTClient mqtt(4096);
+
+struct DeviceCredentials {
+    String certificatePem;
+    String privateKey;
+    String thingName;
+    bool provisioned;
+};
+
+DeviceCredentials credentials;
+
+void loadCredentials() {
+    prefs.begin("credentials", true);
+    credentials.provisioned = prefs.getBool("provisioned", false);
+    if (credentials.provisioned) {
+        credentials.certificatePem = prefs.getString("cert");
+        credentials.privateKey = prefs.getString("key");
+        credentials.thingName = prefs.getString("thing");
+    }
+    prefs.end();
+}
+
+void saveCredentials() {
+    prefs.begin("credentials", false);
+    prefs.putBool("provisioned", true);
+    prefs.putString("cert", credentials.certificatePem);
+    prefs.putString("key", credentials.privateKey);
+    prefs.putString("thing", credentials.thingName);
+    prefs.end();
+}
+
+void provisionDevice() {
+    // Connect with claim certificate
+    net.setCACert(ROOT_CA);
+    net.setCertificate(CLAIM_CERT);
+    net.setPrivateKey(CLAIM_KEY);
+
+    mqtt.begin("xxx.iot.region.amazonaws.com", 8883, net);
+
+    if (!mqtt.connect("provisioning-client")) {
+        Serial.println("Provisioning connection failed");
+        return;
+    }
+
+    // Subscribe to provisioning topics
+    mqtt.subscribe("$aws/provisioning-templates/MyTemplate/provision/json/accepted");
+    mqtt.subscribe("$aws/provisioning-templates/MyTemplate/provision/json/rejected");
+
+    // Create provisioning request
+    StaticJsonDocument<256> doc;
+    doc["serialNumber"] = getChipId();
+    doc["deviceType"] = "sensor-v2";
+    doc["firmwareVersion"] = FIRMWARE_VERSION;
+
+    String payload;
+    serializeJson(doc, payload);
+
+    mqtt.publish("$aws/provisioning-templates/MyTemplate/provision/json", payload);
+
+    // Wait for response
+    unsigned long start = millis();
+    while (millis() - start < 30000) {
+        mqtt.loop();
+
+        if (credentials.provisioned) {
+            Serial.println("Provisioning successful");
+            break;
+        }
+
+        delay(100);
+    }
+
+    mqtt.disconnect();
+}
+
+void handleProvisioningResponse(String& topic, String& payload) {
+    if (topic.endsWith("/accepted")) {
+        StaticJsonDocument<2048> doc;
+        deserializeJson(doc, payload);
+
+        credentials.certificatePem = doc["certificatePem"].as<String>();
+        credentials.privateKey = doc["privateKeyPem"].as<String>();
+        credentials.thingName = doc["thingName"].as<String>();
+        credentials.provisioned = true;
+
+        saveCredentials();
+    }
+}
+
+void setup() {
+    Serial.begin(115200);
+    connectWiFi();
+
+    loadCredentials();
+
+    if (!credentials.provisioned) {
+        Serial.println("Starting provisioning...");
+        provisionDevice();
+    }
+
+    if (credentials.provisioned) {
+        // Connect with device certificate
+        connectWithDeviceCert();
+    }
+}
+```
+
+## Certificate Management
+
+### Certificate Rotation
+```python
+from datetime import datetime, timedelta
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
+class CertificateManager:
+    def __init__(self, ca_cert_path: str, ca_key_path: str):
+        with open(ca_cert_path, 'rb') as f:
+            self.ca_cert = x509.load_pem_x509_certificate(f.read())
+        with open(ca_key_path, 'rb') as f:
+            self.ca_key = serialization.load_pem_private_key(f.read(), password=None)
+
+    def issue_certificate(
+        self,
+        device_id: str,
+        validity_days: int = 365
+    ) -> tuple:
+        """Issue a new device certificate"""
+        # Generate key pair
+        private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=2048
+        )
+
+        # Create certificate
+        subject = x509.Name([
+            x509.NameAttribute(NameOID.COMMON_NAME, device_id),
+            x509.NameAttribute(NameOID.ORGANIZATION_NAME, "IoT Fleet")
+        ])
+
+        cert = (
+            x509.CertificateBuilder()
+            .subject_name(subject)
+            .issuer_name(self.ca_cert.subject)
+            .public_key(private_key.public_key())
+            .serial_number(x509.random_serial_number())
+            .not_valid_before(datetime.utcnow())
+            .not_valid_after(datetime.utcnow() + timedelta(days=validity_days))
+            .add_extension(
+                x509.BasicConstraints(ca=False, path_length=None),
+                critical=True
+            )
+            .sign(self.ca_key, hashes.SHA256())
+        )
+
+        # Serialize
+        cert_pem = cert.public_bytes(serialization.Encoding.PEM)
+        key_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        )
+
+        return cert_pem, key_pem
+
+    def should_rotate(self, cert_pem: bytes, threshold_days: int = 30) -> bool:
+        """Check if certificate needs rotation"""
+        cert = x509.load_pem_x509_certificate(cert_pem)
+        days_until_expiry = (cert.not_valid_after - datetime.utcnow()).days
+        return days_until_expiry < threshold_days
+```
+
+## Provisioning Service
+
+### Backend API
+```python
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import boto3
+
+app = FastAPI()
+iot = boto3.client('iot')
+
+class ProvisioningRequest(BaseModel):
+    serial_number: str
+    device_type: str
+    firmware_version: str
+    claim_token: str
+
+class ProvisioningResponse(BaseModel):
+    thing_name: str
+    certificate_pem: str
+    private_key: str
+    root_ca: str
+    endpoint: str
+
+@app.post("/provision", response_model=ProvisioningResponse)
+async def provision_device(request: ProvisioningRequest):
+    # Validate claim token
+    if not validate_claim_token(request.claim_token, request.serial_number):
+        raise HTTPException(status_code=401, detail="Invalid claim token")
+
+    # Check if device already provisioned
+    thing_name = f"device-{request.serial_number}"
+    try:
+        iot.describe_thing(thingName=thing_name)
+        raise HTTPException(status_code=409, detail="Device already provisioned")
+    except iot.exceptions.ResourceNotFoundException:
+        pass
+
+    # Create certificate
+    cert_response = iot.create_keys_and_certificate(setAsActive=True)
+
+    # Create thing
+    iot.create_thing(
+        thingName=thing_name,
+        thingTypeName=request.device_type,
+        attributePayload={
+            'attributes': {
+                'serialNumber': request.serial_number,
+                'firmwareVersion': request.firmware_version
+            }
+        }
+    )
+
+    # Attach certificate to thing
+    iot.attach_thing_principal(
+        thingName=thing_name,
+        principal=cert_response['certificateArn']
+    )
+
+    # Attach policy
+    iot.attach_policy(
+        policyName=f"{request.device_type}-policy",
+        target=cert_response['certificateArn']
+    )
+
+    # Get endpoint
+    endpoint = iot.describe_endpoint(endpointType='iot:Data-ATS')
+
+    return ProvisioningResponse(
+        thing_name=thing_name,
+        certificate_pem=cert_response['certificatePem'],
+        private_key=cert_response['keyPair']['PrivateKey'],
+        root_ca=get_root_ca(),
+        endpoint=endpoint['endpointAddress']
+    )
+```
+
+## Best Practices
+
+1. **Unique Identity**: Each device has unique credentials
+2. **Secure Storage**: Use hardware security modules
+3. **Certificate Rotation**: Auto-rotate before expiry
+4. **Audit Trail**: Log all provisioning events
+5. **Revocation Support**: Ability to revoke compromised devices
+
+## Anti-Patterns
+
+- Shared credentials across devices
+- Hardcoded credentials
+- No certificate expiration
+- Missing revocation mechanism
+- Unencrypted credential storage
+
+## When to Use
+
+- Fleet management at scale
+- Security-critical deployments
+- Regulatory compliance requirements
+- Zero-touch deployment needs
+- Dynamic fleet scaling
+
+## When NOT to Use
+
+- Small fixed fleet
+- Dev/prototype phase
+- No security requirements
+- Manual deployment acceptable

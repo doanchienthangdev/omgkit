@@ -1,0 +1,313 @@
+# Stream Processing
+
+Real-time stream processing with Kafka Streams, Apache Flink, windowing, aggregations, and stateful processing.
+
+## Overview
+
+Stream processing enables real-time analysis and transformation of continuous data streams.
+
+## Core Concepts
+
+### Stream vs Table
+- **Stream**: Unbounded sequence of events
+- **Table**: Point-in-time snapshot of state
+- **Duality**: Streams and tables are interchangeable
+
+### Processing Semantics
+- **At-most-once**: May lose messages
+- **At-least-once**: May duplicate messages
+- **Exactly-once**: Each message processed once
+
+### Time Concepts
+- **Event Time**: When event occurred
+- **Processing Time**: When event is processed
+- **Ingestion Time**: When event entered system
+
+## Kafka Streams
+
+### Basic Topology
+```java
+StreamsBuilder builder = new StreamsBuilder();
+
+// Read from topic
+KStream<String, Order> orders = builder.stream("orders");
+
+// Transform
+KStream<String, EnrichedOrder> enrichedOrders = orders
+    .mapValues(order -> enrichOrder(order))
+    .filter((key, order) -> order.getAmount() > 100);
+
+// Write to topic
+enrichedOrders.to("enriched-orders");
+
+// Build and start
+KafkaStreams streams = new KafkaStreams(builder.build(), config);
+streams.start();
+```
+
+### Stateful Operations
+```java
+// Group by key and count
+KTable<String, Long> orderCounts = orders
+    .groupByKey()
+    .count();
+
+// Group by and aggregate
+KTable<String, OrderStats> orderStats = orders
+    .groupBy((key, order) -> order.getCustomerId())
+    .aggregate(
+        OrderStats::new,
+        (customerId, order, stats) -> stats.add(order),
+        Materialized.with(Serdes.String(), orderStatsSerde)
+    );
+
+// Join streams
+KStream<String, EnrichedOrder> enriched = orders.join(
+    customers,
+    (order, customer) -> new EnrichedOrder(order, customer),
+    JoinWindows.of(Duration.ofMinutes(5))
+);
+```
+
+### Windowing
+```java
+// Tumbling window (fixed, non-overlapping)
+KTable<Windowed<String>, Long> hourlyCount = orders
+    .groupByKey()
+    .windowedBy(TimeWindows.of(Duration.ofHours(1)))
+    .count();
+
+// Hopping window (fixed, overlapping)
+KTable<Windowed<String>, Long> slidingCount = orders
+    .groupByKey()
+    .windowedBy(TimeWindows.of(Duration.ofMinutes(10))
+        .advanceBy(Duration.ofMinutes(1)))
+    .count();
+
+// Session window (activity-based)
+KTable<Windowed<String>, Long> sessionCount = orders
+    .groupByKey()
+    .windowedBy(SessionWindows.with(Duration.ofMinutes(30)))
+    .count();
+```
+
+## Apache Flink
+
+### DataStream API
+```java
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+DataStream<Order> orders = env
+    .addSource(new FlinkKafkaConsumer<>("orders", new OrderSchema(), props));
+
+// Transform
+DataStream<EnrichedOrder> enriched = orders
+    .filter(order -> order.getAmount() > 100)
+    .map(order -> enrichOrder(order));
+
+// Window aggregation
+DataStream<OrderStats> stats = orders
+    .keyBy(Order::getCustomerId)
+    .window(TumblingEventTimeWindows.of(Time.hours(1)))
+    .aggregate(new OrderAggregator());
+
+// Sink
+enriched.addSink(new FlinkKafkaProducer<>("enriched-orders", new EnrichedOrderSchema(), props));
+
+env.execute("Order Processing");
+```
+
+### Stateful Processing
+```java
+public class OrderProcessor extends KeyedProcessFunction<String, Order, Alert> {
+
+    private ValueState<CustomerState> state;
+
+    @Override
+    public void open(Configuration parameters) {
+        state = getRuntimeContext().getState(
+            new ValueStateDescriptor<>("customer-state", CustomerState.class)
+        );
+    }
+
+    @Override
+    public void processElement(Order order, Context ctx, Collector<Alert> out) throws Exception {
+        CustomerState current = state.value();
+        if (current == null) {
+            current = new CustomerState();
+        }
+
+        current.addOrder(order);
+
+        if (current.detectFraud(order)) {
+            out.collect(new Alert(order.getCustomerId(), "Potential fraud"));
+        }
+
+        state.update(current);
+
+        // Register timer for state cleanup
+        ctx.timerService().registerEventTimeTimer(
+            ctx.timestamp() + Duration.ofDays(1).toMillis()
+        );
+    }
+
+    @Override
+    public void onTimer(long timestamp, OnTimerContext ctx, Collector<Alert> out) {
+        // Cleanup old state
+        state.clear();
+    }
+}
+```
+
+### Complex Event Processing
+```java
+// Detect pattern: 3 failed logins within 5 minutes
+Pattern<LoginEvent, ?> pattern = Pattern.<LoginEvent>begin("first")
+    .where(event -> !event.isSuccess())
+    .next("second")
+    .where(event -> !event.isSuccess())
+    .next("third")
+    .where(event -> !event.isSuccess())
+    .within(Time.minutes(5));
+
+PatternStream<LoginEvent> patternStream = CEP.pattern(loginEvents.keyBy(LoginEvent::getUserId), pattern);
+
+DataStream<Alert> alerts = patternStream.select(
+    (Map<String, List<LoginEvent>> pattern) -> {
+        LoginEvent first = pattern.get("first").get(0);
+        return new Alert(first.getUserId(), "Multiple failed logins");
+    }
+);
+```
+
+## ksqlDB
+
+### Stream Creation
+```sql
+-- Create stream from topic
+CREATE STREAM orders (
+    order_id VARCHAR KEY,
+    customer_id VARCHAR,
+    amount DOUBLE,
+    created_at TIMESTAMP
+) WITH (
+    KAFKA_TOPIC = 'orders',
+    VALUE_FORMAT = 'JSON',
+    TIMESTAMP = 'created_at'
+);
+
+-- Create derived stream
+CREATE STREAM high_value_orders AS
+SELECT *
+FROM orders
+WHERE amount > 1000;
+```
+
+### Aggregations
+```sql
+-- Materialized view with aggregation
+CREATE TABLE customer_order_totals AS
+SELECT
+    customer_id,
+    COUNT(*) AS order_count,
+    SUM(amount) AS total_amount
+FROM orders
+GROUP BY customer_id
+EMIT CHANGES;
+
+-- Windowed aggregation
+CREATE TABLE hourly_order_stats AS
+SELECT
+    customer_id,
+    WINDOWSTART AS window_start,
+    WINDOWEND AS window_end,
+    COUNT(*) AS order_count,
+    SUM(amount) AS total_amount
+FROM orders
+WINDOW TUMBLING (SIZE 1 HOUR)
+GROUP BY customer_id
+EMIT CHANGES;
+```
+
+### Joins
+```sql
+-- Stream-Table join
+CREATE STREAM enriched_orders AS
+SELECT
+    o.order_id,
+    o.customer_id,
+    c.name AS customer_name,
+    o.amount
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id;
+
+-- Stream-Stream join
+CREATE STREAM order_shipments AS
+SELECT
+    o.order_id,
+    o.customer_id,
+    s.tracking_number
+FROM orders o
+INNER JOIN shipments s
+    WITHIN 7 DAYS
+    ON o.order_id = s.order_id;
+```
+
+## Best Practices
+
+1. **Handle Late Data**: Configure grace periods
+2. **State Management**: Size state stores appropriately
+3. **Checkpointing**: Enable for exactly-once
+4. **Monitoring**: Track lag and processing time
+5. **Testing**: Unit test topologies
+
+## Windowing Strategies
+
+### Tumbling Windows
+```
+|-------|-------|-------|
+   1hr     1hr     1hr
+Non-overlapping, fixed size
+```
+
+### Hopping Windows
+```
+|-------|
+    |-------|
+        |-------|
+Overlapping, fixed size
+```
+
+### Session Windows
+```
+|---|   |---------|   |--|
+Activity-based, variable size
+```
+
+### Sliding Windows
+```
+Continuous, based on time range before event
+```
+
+## Anti-Patterns
+
+- Large state without TTL
+- Ignoring late arrivals
+- Not handling out-of-order events
+- Insufficient checkpointing
+- Not monitoring consumer lag
+
+## When to Use
+
+- Real-time analytics
+- Event-driven architectures
+- Continuous ETL
+- Fraud detection
+- IoT data processing
+
+## When NOT to Use
+
+- Simple message passing
+- Batch processing sufficient
+- Very low latency requirements
+- Small data volumes

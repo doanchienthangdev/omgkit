@@ -1,0 +1,438 @@
+# Industrial Protocols
+
+Industrial IoT protocols including Modbus, OPC UA, BACnet, and protocol bridging for industrial automation.
+
+## Overview
+
+Industrial protocols enable communication with PLCs, sensors, and control systems in manufacturing, building automation, and industrial environments.
+
+## Core Concepts
+
+### Protocol Categories
+- **Fieldbus**: Modbus, Profibus, CAN
+- **Industrial Ethernet**: EtherNet/IP, PROFINET, Modbus TCP
+- **Building Automation**: BACnet, KNX, LonWorks
+- **Universal**: OPC UA (platform independent)
+
+### Communication Models
+- **Master/Slave**: Modbus, BACnet MS/TP
+- **Producer/Consumer**: EtherNet/IP
+- **Client/Server**: OPC UA
+- **Publisher/Subscriber**: OPC UA PubSub
+
+## Modbus
+
+### Modbus TCP Client (Python)
+```python
+from pymodbus.client import ModbusTcpClient
+from pymodbus.exceptions import ModbusException
+from dataclasses import dataclass
+from typing import List, Optional
+import struct
+
+@dataclass
+class ModbusDevice:
+    host: str
+    port: int = 502
+    unit_id: int = 1
+
+@dataclass
+class RegisterMapping:
+    address: int
+    count: int
+    name: str
+    data_type: str  # 'int16', 'uint16', 'int32', 'float32'
+    scale: float = 1.0
+    unit: str = ''
+
+class ModbusReader:
+    def __init__(self, device: ModbusDevice):
+        self.device = device
+        self.client = ModbusTcpClient(
+            host=device.host,
+            port=device.port,
+            timeout=3
+        )
+
+    def connect(self) -> bool:
+        return self.client.connect()
+
+    def disconnect(self):
+        self.client.close()
+
+    def read_holding_registers(
+        self,
+        mapping: RegisterMapping
+    ) -> Optional[float]:
+        """Read holding registers and convert to value"""
+        try:
+            result = self.client.read_holding_registers(
+                address=mapping.address,
+                count=mapping.count,
+                slave=self.device.unit_id
+            )
+
+            if result.isError():
+                return None
+
+            return self._convert_registers(result.registers, mapping)
+
+        except ModbusException as e:
+            print(f"Modbus error: {e}")
+            return None
+
+    def read_input_registers(
+        self,
+        mapping: RegisterMapping
+    ) -> Optional[float]:
+        """Read input registers"""
+        try:
+            result = self.client.read_input_registers(
+                address=mapping.address,
+                count=mapping.count,
+                slave=self.device.unit_id
+            )
+
+            if result.isError():
+                return None
+
+            return self._convert_registers(result.registers, mapping)
+
+        except ModbusException as e:
+            print(f"Modbus error: {e}")
+            return None
+
+    def read_coils(self, address: int, count: int = 1) -> Optional[List[bool]]:
+        """Read coil status (discrete outputs)"""
+        result = self.client.read_coils(
+            address=address,
+            count=count,
+            slave=self.device.unit_id
+        )
+        return result.bits[:count] if not result.isError() else None
+
+    def write_register(self, address: int, value: int) -> bool:
+        """Write single holding register"""
+        result = self.client.write_register(
+            address=address,
+            value=value,
+            slave=self.device.unit_id
+        )
+        return not result.isError()
+
+    def write_coil(self, address: int, value: bool) -> bool:
+        """Write single coil"""
+        result = self.client.write_coil(
+            address=address,
+            value=value,
+            slave=self.device.unit_id
+        )
+        return not result.isError()
+
+    def _convert_registers(
+        self,
+        registers: List[int],
+        mapping: RegisterMapping
+    ) -> float:
+        """Convert raw registers to typed value"""
+        if mapping.data_type == 'int16':
+            value = registers[0] if registers[0] < 32768 else registers[0] - 65536
+        elif mapping.data_type == 'uint16':
+            value = registers[0]
+        elif mapping.data_type == 'int32':
+            raw = (registers[0] << 16) | registers[1]
+            value = raw if raw < 2147483648 else raw - 4294967296
+        elif mapping.data_type == 'float32':
+            raw = struct.pack('>HH', registers[0], registers[1])
+            value = struct.unpack('>f', raw)[0]
+        else:
+            value = registers[0]
+
+        return value * mapping.scale
+
+# Usage example
+device = ModbusDevice(host='192.168.1.100', unit_id=1)
+reader = ModbusReader(device)
+
+mappings = [
+    RegisterMapping(address=0, count=2, name='temperature', data_type='float32', scale=0.1, unit='°C'),
+    RegisterMapping(address=2, count=2, name='pressure', data_type='float32', scale=0.01, unit='bar'),
+    RegisterMapping(address=4, count=1, name='status', data_type='uint16'),
+]
+
+if reader.connect():
+    for mapping in mappings:
+        value = reader.read_holding_registers(mapping)
+        print(f"{mapping.name}: {value} {mapping.unit}")
+    reader.disconnect()
+```
+
+## OPC UA
+
+### OPC UA Client
+```python
+from asyncua import Client, ua
+from asyncua.common.subscription import DataChangeNotif
+from typing import Dict, Any, Callable
+import asyncio
+
+class OPCUAClient:
+    def __init__(self, endpoint: str):
+        self.endpoint = endpoint
+        self.client = Client(endpoint)
+        self.subscriptions: Dict[str, Any] = {}
+
+    async def connect(self, username: str = None, password: str = None):
+        """Connect to OPC UA server"""
+        if username and password:
+            self.client.set_user(username)
+            self.client.set_password(password)
+
+        await self.client.connect()
+        print(f"Connected to {self.endpoint}")
+
+    async def disconnect(self):
+        await self.client.disconnect()
+
+    async def browse_nodes(self, node_id: str = None) -> list:
+        """Browse available nodes"""
+        if node_id:
+            node = self.client.get_node(node_id)
+        else:
+            node = self.client.get_root_node()
+
+        children = await node.get_children()
+        result = []
+
+        for child in children:
+            browse_name = await child.read_browse_name()
+            node_class = await child.read_node_class()
+            result.append({
+                'node_id': child.nodeid.to_string(),
+                'browse_name': browse_name.Name,
+                'node_class': node_class.name
+            })
+
+        return result
+
+    async def read_value(self, node_id: str) -> Any:
+        """Read a single value"""
+        node = self.client.get_node(node_id)
+        value = await node.read_value()
+        return value
+
+    async def read_multiple(self, node_ids: list) -> Dict[str, Any]:
+        """Read multiple values efficiently"""
+        nodes = [self.client.get_node(nid) for nid in node_ids]
+        values = await self.client.read_values(nodes)
+        return dict(zip(node_ids, values))
+
+    async def write_value(self, node_id: str, value: Any, data_type: ua.VariantType = None):
+        """Write a value to a node"""
+        node = self.client.get_node(node_id)
+
+        if data_type:
+            variant = ua.Variant(value, data_type)
+            await node.write_value(variant)
+        else:
+            await node.write_value(value)
+
+    async def subscribe(
+        self,
+        node_ids: list,
+        callback: Callable[[str, Any], None],
+        interval_ms: int = 1000
+    ):
+        """Subscribe to data changes"""
+        handler = DataChangeHandler(callback)
+
+        subscription = await self.client.create_subscription(
+            interval_ms,
+            handler
+        )
+
+        nodes = [self.client.get_node(nid) for nid in node_ids]
+        await subscription.subscribe_data_change(nodes)
+
+        return subscription
+
+    async def call_method(
+        self,
+        object_id: str,
+        method_id: str,
+        *args
+    ) -> Any:
+        """Call an OPC UA method"""
+        obj = self.client.get_node(object_id)
+        method = self.client.get_node(method_id)
+        result = await obj.call_method(method, *args)
+        return result
+
+class DataChangeHandler:
+    def __init__(self, callback: Callable[[str, Any], None]):
+        self.callback = callback
+
+    def datachange_notification(self, node: Any, val: Any, data: DataChangeNotif):
+        node_id = node.nodeid.to_string()
+        self.callback(node_id, val)
+
+# Usage
+async def main():
+    client = OPCUAClient("opc.tcp://localhost:4840")
+    await client.connect()
+
+    # Browse
+    nodes = await client.browse_nodes("ns=2;s=Machine1")
+
+    # Read
+    temp = await client.read_value("ns=2;s=Machine1.Temperature")
+    print(f"Temperature: {temp}")
+
+    # Subscribe
+    def on_change(node_id: str, value: Any):
+        print(f"{node_id} changed to {value}")
+
+    await client.subscribe(
+        ["ns=2;s=Machine1.Temperature", "ns=2;s=Machine1.Pressure"],
+        on_change,
+        interval_ms=500
+    )
+
+    # Keep running
+    await asyncio.sleep(60)
+    await client.disconnect()
+
+asyncio.run(main())
+```
+
+## Protocol Gateway
+
+### Modbus to MQTT Bridge
+```python
+import asyncio
+import json
+from dataclasses import asdict
+from aiomqtt import Client as MQTTClient
+from pymodbus.client import AsyncModbusTcpClient
+
+class ModbusMQTTGateway:
+    def __init__(
+        self,
+        modbus_host: str,
+        mqtt_broker: str,
+        device_id: str
+    ):
+        self.modbus_host = modbus_host
+        self.mqtt_broker = mqtt_broker
+        self.device_id = device_id
+        self.modbus = None
+        self.mqtt = None
+        self.running = False
+
+    async def start(self):
+        """Start the gateway"""
+        self.modbus = AsyncModbusTcpClient(self.modbus_host)
+        await self.modbus.connect()
+
+        async with MQTTClient(self.mqtt_broker) as mqtt:
+            self.mqtt = mqtt
+            self.running = True
+
+            # Subscribe to commands
+            await mqtt.subscribe(f"devices/{self.device_id}/commands")
+
+            # Start tasks
+            await asyncio.gather(
+                self.poll_and_publish(),
+                self.handle_commands()
+            )
+
+    async def poll_and_publish(self):
+        """Poll Modbus and publish to MQTT"""
+        while self.running:
+            try:
+                # Read Modbus registers
+                result = await self.modbus.read_holding_registers(0, 10, slave=1)
+
+                if not result.isError():
+                    payload = {
+                        'device_id': self.device_id,
+                        'timestamp': datetime.utcnow().isoformat(),
+                        'registers': result.registers
+                    }
+
+                    await self.mqtt.publish(
+                        f"devices/{self.device_id}/telemetry",
+                        json.dumps(payload)
+                    )
+
+            except Exception as e:
+                print(f"Polling error: {e}")
+
+            await asyncio.sleep(1)
+
+    async def handle_commands(self):
+        """Handle commands from MQTT"""
+        async for message in self.mqtt.messages:
+            try:
+                command = json.loads(message.payload)
+
+                if command['action'] == 'write_register':
+                    await self.modbus.write_register(
+                        command['address'],
+                        command['value'],
+                        slave=1
+                    )
+
+                elif command['action'] == 'write_coil':
+                    await self.modbus.write_coil(
+                        command['address'],
+                        command['value'],
+                        slave=1
+                    )
+
+            except Exception as e:
+                print(f"Command error: {e}")
+```
+
+## Best Practices
+
+1. **Error Handling**: Industrial protocols can be unreliable
+2. **Timeout Management**: Set appropriate timeouts
+3. **Polling Intervals**: Balance responsiveness with load
+4. **Security**: Use OPC UA security features
+5. **Data Validation**: Validate all read values
+
+## Protocol Selection Guide
+
+```
+High-speed, Real-time: EtherNet/IP, PROFINET
+Legacy Equipment: Modbus RTU/TCP
+New Installations: OPC UA
+Building Automation: BACnet
+Simple Sensors: Modbus
+Secure/Interoperable: OPC UA
+```
+
+## Anti-Patterns
+
+- No error handling
+- Ignoring timeouts
+- Polling too frequently
+- No security (OPC UA anonymous)
+- Not handling disconnects
+
+## When to Use
+
+- Industrial automation
+- Building management
+- Manufacturing equipment
+- Legacy system integration
+- SCADA systems
+
+## When NOT to Use
+
+- Consumer IoT (use MQTT)
+- Web applications (use REST)
+- Mobile apps
+- Non-industrial use cases

@@ -1,0 +1,549 @@
+---
+title: "Shader Programming"
+description: "GPU shader development including HLSL/GLSL, vertex/fragment shaders, compute shaders, and visual effects."
+icon: "gamepad"
+---
+
+<Info>
+  **Category:** Game
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+GPU shader development including HLSL/GLSL, vertex/fragment shaders, compute shaders, and visual effects.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Shader Programming
+
+GPU shader development including HLSL/GLSL, vertex/fragment shaders, compute shaders, and visual effects.
+
+## Overview
+
+Shader programming enables custom rendering effects, visual styles, and GPU-accelerated computations through programmable graphics pipeline stages.
+
+## Core Concepts
+
+### Shader Types
+- **Vertex Shader**: Transform vertices
+- **Fragment/Pixel Shader**: Calculate pixel colors
+- **Geometry Shader**: Generate/modify primitives
+- **Compute Shader**: General-purpose GPU computing
+
+### Rendering Pipeline
+```
+Vertices → Vertex Shader → Rasterization → Fragment Shader → Output
+```
+
+## HLSL Basics (Unity/DirectX)
+
+### Simple Unlit Shader
+```hlsl
+Shader "Custom/SimpleUnlit"
+{
+    Properties
+    {
+        _MainTex ("Texture", 2D) = "white" {}
+        _Color ("Color", Color) = (1,1,1,1)
+    }
+
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" }
+        LOD 100
+
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "UnityCG.cginc"
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+            };
+
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
+            float4 _Color;
+
+            v2f vert (appdata v)
+            {
+                v2f o;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                return o;
+            }
+
+            fixed4 frag (v2f i) : SV_Target
+            {
+                fixed4 col = tex2D(_MainTex, i.uv) * _Color;
+                return col;
+            }
+            ENDCG
+        }
+    }
+}
+```
+
+### Lit Shader with Normal Mapping
+```hlsl
+Shader "Custom/NormalMapped"
+{
+    Properties
+    {
+        _MainTex ("Albedo", 2D) = "white" {}
+        _BumpMap ("Normal Map", 2D) = "bump" {}
+        _BumpScale ("Normal Scale", Range(0, 2)) = 1.0
+        _Metallic ("Metallic", Range(0, 1)) = 0.0
+        _Smoothness ("Smoothness", Range(0, 1)) = 0.5
+    }
+
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" }
+
+        CGPROGRAM
+        #pragma surface surf Standard fullforwardshadows
+        #pragma target 3.0
+
+        sampler2D _MainTex;
+        sampler2D _BumpMap;
+        half _BumpScale;
+        half _Metallic;
+        half _Smoothness;
+
+        struct Input
+        {
+            float2 uv_MainTex;
+            float2 uv_BumpMap;
+        };
+
+        void surf (Input IN, inout SurfaceOutputStandard o)
+        {
+            fixed4 c = tex2D(_MainTex, IN.uv_MainTex);
+            o.Albedo = c.rgb;
+
+            o.Normal = UnpackScaleNormal(
+                tex2D(_BumpMap, IN.uv_BumpMap),
+                _BumpScale
+            );
+
+            o.Metallic = _Metallic;
+            o.Smoothness = _Smoothness;
+            o.Alpha = c.a;
+        }
+        ENDCG
+    }
+
+    FallBack "Diffuse"
+}
+```
+
+## Visual Effects
+
+### Dissolve Effect
+```hlsl
+Shader "Custom/Dissolve"
+{
+    Properties
+    {
+        _MainTex ("Texture", 2D) = "white" {}
+        _NoiseTex ("Noise Texture", 2D) = "white" {}
+        _DissolveAmount ("Dissolve Amount", Range(0, 1)) = 0
+        _EdgeColor ("Edge Color", Color) = (1, 0.5, 0, 1)
+        _EdgeWidth ("Edge Width", Range(0, 0.2)) = 0.05
+    }
+
+    SubShader
+    {
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" }
+        Blend SrcAlpha OneMinusSrcAlpha
+
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "UnityCG.cginc"
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+            };
+
+            sampler2D _MainTex;
+            sampler2D _NoiseTex;
+            float _DissolveAmount;
+            float4 _EdgeColor;
+            float _EdgeWidth;
+
+            v2f vert (appdata v)
+            {
+                v2f o;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = v.uv;
+                return o;
+            }
+
+            fixed4 frag (v2f i) : SV_Target
+            {
+                fixed4 col = tex2D(_MainTex, i.uv);
+                float noise = tex2D(_NoiseTex, i.uv).r;
+
+                // Dissolve threshold
+                float dissolve = noise - _DissolveAmount;
+
+                // Clip pixels below threshold
+                clip(dissolve);
+
+                // Edge glow
+                if (dissolve < _EdgeWidth)
+                {
+                    float edgeBlend = dissolve / _EdgeWidth;
+                    col.rgb = lerp(_EdgeColor.rgb, col.rgb, edgeBlend);
+                    col.rgb += _EdgeColor.rgb * (1 - edgeBlend) * 2;
+                }
+
+                return col;
+            }
+            ENDCG
+        }
+    }
+}
+```
+
+### Outline Shader
+```hlsl
+Shader "Custom/Outline"
+{
+    Properties
+    {
+        _MainTex ("Texture", 2D) = "white" {}
+        _OutlineColor ("Outline Color", Color) = (0, 0, 0, 1)
+        _OutlineWidth ("Outline Width", Range(0, 0.1)) = 0.02
+    }
+
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" }
+
+        // Outline pass
+        Pass
+        {
+            Cull Front
+
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "UnityCG.cginc"
+
+            float _OutlineWidth;
+            float4 _OutlineColor;
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float3 normal : NORMAL;
+            };
+
+            struct v2f
+            {
+                float4 vertex : SV_POSITION;
+            };
+
+            v2f vert (appdata v)
+            {
+                v2f o;
+                // Expand vertices along normals
+                float3 expandedPos = v.vertex.xyz + v.normal * _OutlineWidth;
+                o.vertex = UnityObjectToClipPos(float4(expandedPos, 1));
+                return o;
+            }
+
+            fixed4 frag (v2f i) : SV_Target
+            {
+                return _OutlineColor;
+            }
+            ENDCG
+        }
+
+        // Regular pass
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #include "UnityCG.cginc"
+
+            sampler2D _MainTex;
+
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
+
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                float4 vertex : SV_POSITION;
+            };
+
+            v2f vert (appdata v)
+            {
+                v2f o;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = v.uv;
+                return o;
+            }
+
+            fixed4 frag (v2f i) : SV_Target
+            {
+                return tex2D(_MainTex, i.uv);
+            }
+            ENDCG
+        }
+    }
+}
+```
+
+## GLSL (WebGL/OpenGL)
+
+### Basic Fragment Shader
+```glsl
+#version 300 es
+precision highp float;
+
+uniform sampler2D uTexture;
+uniform float uTime;
+uniform vec2 uResolution;
+
+in vec2 vUv;
+out vec4 fragColor;
+
+void main() {
+    vec2 uv = vUv;
+
+    // Animated wave distortion
+    uv.x += sin(uv.y * 10.0 + uTime) * 0.02;
+    uv.y += cos(uv.x * 10.0 + uTime) * 0.02;
+
+    vec4 color = texture(uTexture, uv);
+    fragColor = color;
+}
+```
+
+### Post-Processing Effect
+```glsl
+#version 300 es
+precision highp float;
+
+uniform sampler2D uSceneTexture;
+uniform float uVignetteStrength;
+uniform float uSaturation;
+uniform vec3 uColorGrade;
+
+in vec2 vUv;
+out vec4 fragColor;
+
+vec3 adjustSaturation(vec3 color, float saturation) {
+    vec3 grey = vec3(dot(color, vec3(0.299, 0.587, 0.114)));
+    return mix(grey, color, saturation);
+}
+
+float vignette(vec2 uv, float strength) {
+    vec2 center = uv - 0.5;
+    float dist = length(center);
+    return 1.0 - smoothstep(0.3, 0.7, dist * strength);
+}
+
+void main() {
+    vec4 scene = texture(uSceneTexture, vUv);
+
+    // Apply saturation
+    vec3 color = adjustSaturation(scene.rgb, uSaturation);
+
+    // Apply color grading
+    color *= uColorGrade;
+
+    // Apply vignette
+    float vig = vignette(vUv, uVignetteStrength);
+    color *= vig;
+
+    fragColor = vec4(color, scene.a);
+}
+```
+
+## Compute Shaders
+
+### Particle Simulation
+```hlsl
+#pragma kernel UpdateParticles
+
+struct Particle
+{
+    float3 position;
+    float3 velocity;
+    float life;
+    float size;
+};
+
+RWStructuredBuffer<Particle> particles;
+float deltaTime;
+float3 gravity;
+int particleCount;
+
+[numthreads(256, 1, 1)]
+void UpdateParticles(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= (uint)particleCount) return;
+
+    Particle p = particles[id.x];
+
+    // Update physics
+    p.velocity += gravity * deltaTime;
+    p.position += p.velocity * deltaTime;
+
+    // Update life
+    p.life -= deltaTime;
+
+    // Respawn if dead
+    if (p.life <= 0)
+    {
+        p.position = float3(0, 0, 0);
+        p.velocity = float3(
+            (frac(sin(id.x * 12.9898) * 43758.5453) - 0.5) * 2,
+            frac(sin(id.x * 78.233) * 43758.5453) * 5 + 2,
+            (frac(sin(id.x * 45.164) * 43758.5453) - 0.5) * 2
+        );
+        p.life = 3.0;
+    }
+
+    particles[id.x] = p;
+}
+```
+
+## Unity Shader Graph
+
+### Custom Function Node
+```hlsl
+// Custom function for Shader Graph
+void Fresnel_float(
+    float3 Normal,
+    float3 ViewDir,
+    float Power,
+    out float Out)
+{
+    Out = pow(1.0 - saturate(dot(Normal, ViewDir)), Power);
+}
+
+void Triplanar_float(
+    Texture2D Tex,
+    SamplerState SS,
+    float3 Position,
+    float3 Normal,
+    float Blend,
+    out float4 Out)
+{
+    float3 bf = pow(abs(Normal), Blend);
+    bf /= dot(bf, 1.0);
+
+    float4 xAxis = SAMPLE_TEXTURE2D(Tex, SS, Position.yz);
+    float4 yAxis = SAMPLE_TEXTURE2D(Tex, SS, Position.xz);
+    float4 zAxis = SAMPLE_TEXTURE2D(Tex, SS, Position.xy);
+
+    Out = xAxis * bf.x + yAxis * bf.y + zAxis * bf.z;
+}
+```
+
+## Best Practices
+
+1. **Minimize Branching**: GPUs prefer uniform execution
+2. **Batch Draw Calls**: Combine similar materials
+3. **LOD Shaders**: Simpler shaders for distant objects
+4. **Profile GPU**: Use tools like RenderDoc
+5. **Fallbacks**: Provide simpler shader alternatives
+
+## Anti-Patterns
+
+- Complex math in fragment shader
+- Too many texture samples
+- Dynamic branching in loops
+- Ignoring precision (mobile)
+- No shader variants
+
+## When to Use
+
+- Custom visual styles
+- Performance-critical effects
+- GPU-accelerated computation
+- Unique rendering techniques
+- VFX and post-processing
+
+## When NOT to Use
+
+- Standard rendering suffices
+- Prototyping phase
+- No GPU expertise on team
+- Target hardware too weak
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  shader-programming:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Game" icon="gamepad" href="/skills/overview#game">
+    More game skills
+  </Card>
+</CardGroup>

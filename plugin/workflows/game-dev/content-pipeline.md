@@ -1,0 +1,218 @@
+---
+description: Set up efficient content creation and integration pipeline
+triggers:
+  - manual
+  - game:content
+agents:
+  - game-designer
+  - fullstack-developer
+---
+
+# Content Pipeline Workflow
+
+Create efficient pipeline for game content creation.
+
+## Prerequisites
+- [ ] Art style defined
+- [ ] Content tools selected
+- [ ] Version control configured
+
+## Phase 1: Pipeline Design
+
+### Step 1.1: Identify Content Types
+```yaml
+agent: game-designer
+action: catalog
+content_types:
+  - 2D_assets: Sprites, UI, textures
+  - 3D_assets: Models, animations, rigs
+  - Audio: Music, SFX, voice
+  - Data: Levels, items, enemies
+  - Localization: Text, subtitles
+```
+
+### Step 1.2: Define Pipeline Flow
+```yaml
+agent: game-designer
+action: design
+flow:
+  creation:
+    - Artist creates asset
+    - Export to intermediate format
+    - Commit to version control
+  processing:
+    - Import into engine
+    - Apply processing rules
+    - Generate variants
+  integration:
+    - Create/update prefab
+    - Wire up references
+    - Test in game
+```
+
+## Phase 2: Tool Setup
+
+### Step 2.1: DCC Integration
+```yaml
+agent: fullstack-developer
+action: configure
+tools:
+  - Blender: 3D modeling, animation
+  - Photoshop/GIMP: 2D art
+  - Substance: Texturing
+  - Spine/DragonBones: 2D animation
+export_scripts:
+  - Automated export
+  - Naming validation
+  - Format conversion
+```
+
+### Step 2.2: Engine Import Setup
+```yaml
+agent: fullstack-developer
+action: configure
+import_rules:
+  textures:
+    - Format: PNG/TGA
+    - Compression: Platform-specific
+    - MipMaps: Generate automatically
+  models:
+    - Format: FBX/GLTF
+    - Scale: 1 unit = 1 meter
+    - Materials: Auto-assign
+  animations:
+    - Format: FBX
+    - Compression: Optimal
+    - Root motion: Configure
+```
+
+## Phase 3: Version Control
+
+### Step 3.1: Configure LFS
+```yaml
+agent: fullstack-developer
+action: configure
+git_lfs:
+  - *.png
+  - *.psd
+  - *.fbx
+  - *.wav
+  - *.mp3
+  - *.unity (or engine scenes)
+```
+
+### Step 3.2: Branching Strategy
+```yaml
+agent: fullstack-developer
+action: define
+branches:
+  - main: Stable builds
+  - develop: Integration
+  - feature/*: New content
+  - release/*: Release prep
+content_specific:
+  - content/*: Large content updates
+  - Lock files for binary conflicts
+```
+
+## Phase 4: Automation
+
+### Step 4.1: Asset Validation
+```yaml
+agent: fullstack-developer
+action: implement
+validators:
+  - Naming convention check
+  - Texture size limits
+  - Polygon count limits
+  - Material validation
+  - Reference validation
+triggers:
+  - Pre-commit hook
+  - CI pipeline
+```
+
+### Step 4.2: Asset Processing
+```yaml
+agent: fullstack-developer
+action: implement
+automation:
+  - Texture atlas generation
+  - LOD generation
+  - Animation retargeting
+  - Audio normalization
+  - Localization extraction
+```
+
+### Step 4.3: Build Pipeline
+```yaml
+agent: fullstack-developer
+action: implement
+builds:
+  - Asset bundles creation
+  - Platform-specific builds
+  - DLC packaging
+  - Addressables (Unity)
+  - Pak files (Unreal)
+```
+
+## Phase 5: Content Management
+
+### Step 5.1: Data-Driven Content
+```yaml
+agent: game-designer
+action: design
+systems:
+  - JSON/YAML game data
+  - ScriptableObjects (Unity)
+  - DataAssets (Unreal)
+  - Spreadsheet integration
+tools:
+  - Google Sheets sync
+  - Custom editors
+  - Validation tools
+```
+
+### Step 5.2: Localization Pipeline
+```yaml
+agent: fullstack-developer
+action: implement
+pipeline:
+  - String extraction
+  - Translation management
+  - Import localized assets
+  - Font management
+  - RTL support (if needed)
+tools:
+  - POEditor
+  - Crowdin
+  - Custom tools
+```
+
+## Phase 6: Documentation
+
+### Step 6.1: Content Guidelines
+```yaml
+agent: game-designer
+action: document
+guidelines:
+  - Art style guide
+  - Naming conventions
+  - File formats
+  - Quality requirements
+  - Submission process
+```
+
+## Outputs
+- [ ] DCC tool configurations
+- [ ] Import settings
+- [ ] Validation scripts
+- [ ] Build pipeline
+- [ ] Content guidelines
+
+## Quality Gates
+- All assets pass validation
+- Build succeeds
+- No missing references
+- Performance targets met
+- Guidelines documented

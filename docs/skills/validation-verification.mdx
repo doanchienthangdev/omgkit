@@ -1,0 +1,536 @@
+---
+title: "Validation and Verification"
+description: "V&V practices for scientific simulations including code verification, solution validation, uncertainty quantification, and benchmarking."
+icon: "atom"
+---
+
+<Info>
+  **Category:** Simulation
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+V&V practices for scientific simulations including code verification, solution validation, uncertainty quantification, and benchmarking.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Validation and Verification
+
+V&V practices for scientific simulations including code verification, solution validation, uncertainty quantification, and benchmarking.
+
+## Overview
+
+Validation and Verification (V&V) ensures simulation codes are correctly implemented and accurately represent physical reality.
+
+## Core Concepts
+
+### Definitions
+- **Verification**: "Solving the equations right" (math correctness)
+- **Validation**: "Solving the right equations" (physical accuracy)
+- **Uncertainty Quantification (UQ)**: Quantifying prediction uncertainty
+
+### V&V Hierarchy
+```
+Code Verification → Solution Verification → Model Validation
+      ↓                    ↓                      ↓
+  Bug-free code    Numerical accuracy     Physical fidelity
+```
+
+## Code Verification
+
+### Unit Testing for Numerical Code
+```python
+import numpy as np
+import pytest
+from typing import Callable
+
+class TestNumericalMethods:
+    """Unit tests for numerical methods"""
+
+    def test_derivative_accuracy(self):
+        """Test derivative approximation order"""
+        f = lambda x: np.sin(x)
+        df_exact = lambda x: np.cos(x)
+        x0 = 1.0
+
+        def forward_diff(f, x, h):
+            return (f(x + h) - f(x)) / h
+
+        def central_diff(f, x, h):
+            return (f(x + h) - f(x - h)) / (2 * h)
+
+        h_values = [0.1, 0.01, 0.001, 0.0001]
+
+        for h in h_values:
+            forward_error = abs(forward_diff(f, x0, h) - df_exact(x0))
+            central_error = abs(central_diff(f, x0, h) - df_exact(x0))
+
+            # Forward diff should be O(h)
+            # Central diff should be O(h^2)
+            if h == 0.01:
+                assert forward_error < 0.01  # O(h)
+                assert central_error < 0.0001  # O(h^2)
+
+    def test_convergence_order(self):
+        """Verify expected convergence order"""
+        errors = []
+        h_values = []
+
+        for n in [10, 20, 40, 80, 160]:
+            h = 1.0 / n
+            h_values.append(h)
+            error = compute_error(n)  # Your method
+            errors.append(error)
+
+        # Compute convergence order
+        orders = []
+        for i in range(len(errors) - 1):
+            order = np.log(errors[i] / errors[i+1]) / np.log(h_values[i] / h_values[i+1])
+            orders.append(order)
+
+        # Should converge to expected order (e.g., 2 for second-order method)
+        expected_order = 2.0
+        assert abs(orders[-1] - expected_order) < 0.1
+
+    def test_conservation_properties(self):
+        """Test conservation of invariants"""
+        # Example: Energy conservation in Hamiltonian system
+        initial_energy = compute_energy(initial_state)
+
+        # Run simulation
+        for step in range(1000):
+            state = integrate_step(state)
+            current_energy = compute_energy(state)
+
+            # Energy should be conserved (within tolerance)
+            assert abs(current_energy - initial_energy) / initial_energy < 1e-6
+
+    def test_symmetry_preservation(self):
+        """Test that symmetric problems yield symmetric solutions"""
+        # Create symmetric initial condition
+        n = 100
+        x = np.linspace(-1, 1, n)
+        u0 = np.exp(-x**2)  # Symmetric about x=0
+
+        # Solve
+        u_final = solve(u0)
+
+        # Check symmetry
+        assert np.allclose(u_final, u_final[::-1], rtol=1e-10)
+```
+
+### Method of Manufactured Solutions (MMS)
+```python
+import sympy as sp
+import numpy as np
+
+class ManufacturedSolution:
+    """
+    Method of Manufactured Solutions for code verification
+    """
+
+    def __init__(self):
+        # Define symbolic variables
+        self.x, self.y, self.t = sp.symbols('x y t')
+        self.alpha = sp.Symbol('alpha')  # Diffusion coefficient
+
+    def verify_diffusion_equation(self):
+        """
+        Verify diffusion equation solver: ∂u/∂t = α∇²u + f
+        """
+        # Choose manufactured solution
+        u_mms = sp.sin(sp.pi * self.x) * sp.sin(sp.pi * self.y) * sp.exp(-self.t)
+
+        # Compute required source term
+        du_dt = sp.diff(u_mms, self.t)
+        laplacian_u = sp.diff(u_mms, self.x, 2) + sp.diff(u_mms, self.y, 2)
+
+        # Source term: f = ∂u/∂t - α∇²u
+        f = du_dt - self.alpha * laplacian_u
+        f = sp.simplify(f)
+
+        # Convert to numerical functions
+        u_exact = sp.lambdify((self.x, self.y, self.t), u_mms, 'numpy')
+        source = sp.lambdify((self.x, self.y, self.t, self.alpha), f, 'numpy')
+
+        return u_exact, source
+
+    def run_convergence_study(self, solver, u_exact, source, alpha=1.0):
+        """Run grid convergence study"""
+        results = []
+
+        for nx in [16, 32, 64, 128, 256]:
+            # Set up grid
+            x = np.linspace(0, 1, nx)
+            y = np.linspace(0, 1, nx)
+            dx = x[1] - x[0]
+
+            # Get manufactured source
+            X, Y = np.meshgrid(x, y)
+            t_final = 0.1
+            f = source(X, Y, t_final, alpha)
+
+            # Solve with manufactured source
+            u_computed = solver(nx, alpha, f, t_final)
+
+            # Compute error
+            u_true = u_exact(X, Y, t_final)
+            l2_error = np.sqrt(np.mean((u_computed - u_true)**2))
+            linf_error = np.max(np.abs(u_computed - u_true))
+
+            results.append({
+                'nx': nx,
+                'dx': dx,
+                'l2_error': l2_error,
+                'linf_error': linf_error
+            })
+
+        # Compute convergence order
+        for i in range(len(results) - 1):
+            order = np.log(results[i]['l2_error'] / results[i+1]['l2_error']) / np.log(2)
+            results[i+1]['order'] = order
+
+        return results
+```
+
+## Solution Verification
+
+### Grid Convergence Index (GCI)
+```python
+class GridConvergenceIndex:
+    """
+    Roache's Grid Convergence Index for solution verification
+    """
+
+    def __init__(self, refinement_ratio: float = 2.0):
+        self.r = refinement_ratio
+        self.Fs = 1.25  # Safety factor (1.25 for 3+ grids)
+
+    def compute_gci(
+        self,
+        f1: float,  # Fine grid solution
+        f2: float,  # Medium grid solution
+        f3: float,  # Coarse grid solution
+        p_formal: float = None  # Formal order of accuracy
+    ) -> dict:
+        """
+        Compute GCI for three grid solutions
+
+        Returns Richardson extrapolation and GCI estimates
+        """
+        # Compute observed order of convergence
+        epsilon_32 = f3 - f2
+        epsilon_21 = f2 - f1
+
+        if epsilon_32 * epsilon_21 < 0:
+            # Oscillatory convergence
+            return {'error': 'Oscillatory convergence detected'}
+
+        # Observed order
+        p = np.log(epsilon_32 / epsilon_21) / np.log(self.r)
+
+        # Richardson extrapolation
+        f_exact = f1 + (f1 - f2) / (self.r**p - 1)
+
+        # GCI
+        gci_fine = self.Fs * abs((f1 - f2) / f1) / (self.r**p - 1) * 100
+        gci_medium = self.Fs * abs((f2 - f3) / f2) / (self.r**p - 1) * 100
+
+        # Asymptotic range check
+        asymptotic_ratio = gci_medium / (self.r**p * gci_fine)
+
+        return {
+            'observed_order': p,
+            'richardson_extrapolation': f_exact,
+            'gci_fine': gci_fine,
+            'gci_medium': gci_medium,
+            'asymptotic_ratio': asymptotic_ratio,
+            'in_asymptotic_range': abs(asymptotic_ratio - 1.0) < 0.1
+        }
+
+    def compute_with_uncertainty(self, solutions: list, grid_sizes: list) -> dict:
+        """
+        Comprehensive grid convergence with uncertainty estimates
+        """
+        # Ensure at least 3 solutions
+        assert len(solutions) >= 3
+
+        # Use finest three grids
+        f1, f2, f3 = solutions[0], solutions[1], solutions[2]
+        gci_result = self.compute_gci(f1, f2, f3)
+
+        # Uncertainty estimate
+        numerical_uncertainty = gci_result['gci_fine'] / 100 * f1
+
+        return {
+            **gci_result,
+            'best_estimate': gci_result['richardson_extrapolation'],
+            'numerical_uncertainty': numerical_uncertainty,
+            'confidence_interval': (
+                gci_result['richardson_extrapolation'] - numerical_uncertainty,
+                gci_result['richardson_extrapolation'] + numerical_uncertainty
+            )
+        }
+```
+
+## Model Validation
+
+### Comparison with Experiments
+```python
+import numpy as np
+from scipy import stats
+from dataclasses import dataclass
+from typing import List
+
+@dataclass
+class ValidationMetrics:
+    """Metrics for model validation"""
+    rmse: float
+    bias: float
+    correlation: float
+    skill_score: float
+    within_uncertainty: float  # Fraction within experimental uncertainty
+
+def compute_validation_metrics(
+    simulation: np.ndarray,
+    experiment: np.ndarray,
+    exp_uncertainty: np.ndarray = None
+) -> ValidationMetrics:
+    """
+    Compute comprehensive validation metrics
+    """
+    residuals = simulation - experiment
+
+    # Root Mean Square Error
+    rmse = np.sqrt(np.mean(residuals**2))
+
+    # Bias (systematic error)
+    bias = np.mean(residuals)
+
+    # Correlation
+    correlation = np.corrcoef(simulation, experiment)[0, 1]
+
+    # Skill score (relative to climatology/baseline)
+    mse = np.mean(residuals**2)
+    variance = np.var(experiment)
+    skill_score = 1 - mse / variance
+
+    # Fraction within uncertainty bounds
+    if exp_uncertainty is not None:
+        within = np.abs(residuals) <= exp_uncertainty
+        within_uncertainty = np.mean(within)
+    else:
+        within_uncertainty = np.nan
+
+    return ValidationMetrics(
+        rmse=rmse,
+        bias=bias,
+        correlation=correlation,
+        skill_score=skill_score,
+        within_uncertainty=within_uncertainty
+    )
+
+def validation_hypothesis_test(
+    simulation: np.ndarray,
+    experiment: np.ndarray,
+    exp_uncertainty: np.ndarray,
+    significance: float = 0.05
+) -> dict:
+    """
+    Statistical hypothesis test for model validation
+
+    H0: Model predictions are within experimental uncertainty
+    """
+    # Normalized residuals
+    normalized_residuals = (simulation - experiment) / exp_uncertainty
+
+    # Chi-squared test
+    chi2_stat = np.sum(normalized_residuals**2)
+    dof = len(simulation) - 1
+    p_value = 1 - stats.chi2.cdf(chi2_stat, dof)
+
+    return {
+        'chi2_statistic': chi2_stat,
+        'degrees_of_freedom': dof,
+        'p_value': p_value,
+        'reject_null': p_value < significance,
+        'validated': p_value >= significance
+    }
+```
+
+## Uncertainty Quantification
+
+### Monte Carlo UQ
+```python
+import numpy as np
+from typing import Callable, List
+from scipy import stats
+
+class MonteCarloUQ:
+    """Monte Carlo uncertainty quantification"""
+
+    def __init__(self, model: Callable, n_samples: int = 10000):
+        self.model = model
+        self.n_samples = n_samples
+
+    def propagate_uncertainty(
+        self,
+        param_distributions: dict
+    ) -> dict:
+        """
+        Propagate input uncertainty through model
+
+        param_distributions: {param_name: scipy.stats distribution}
+        """
+        # Sample parameters
+        samples = {}
+        for name, dist in param_distributions.items():
+            samples[name] = dist.rvs(size=self.n_samples)
+
+        # Run model for each sample
+        outputs = []
+        for i in range(self.n_samples):
+            params = {name: samples[name][i] for name in samples}
+            output = self.model(**params)
+            outputs.append(output)
+
+        outputs = np.array(outputs)
+
+        # Compute statistics
+        return {
+            'mean': np.mean(outputs),
+            'std': np.std(outputs),
+            'median': np.median(outputs),
+            'percentile_5': np.percentile(outputs, 5),
+            'percentile_95': np.percentile(outputs, 95),
+            'samples': outputs
+        }
+
+    def sensitivity_analysis(
+        self,
+        param_distributions: dict,
+        output_name: str = 'output'
+    ) -> dict:
+        """
+        Compute Sobol sensitivity indices
+        """
+        from SALib.sample import saltelli
+        from SALib.analyze import sobol
+
+        # Define problem
+        problem = {
+            'num_vars': len(param_distributions),
+            'names': list(param_distributions.keys()),
+            'bounds': [[d.ppf(0.01), d.ppf(0.99)]
+                      for d in param_distributions.values()]
+        }
+
+        # Generate samples
+        param_values = saltelli.sample(problem, self.n_samples)
+
+        # Evaluate model
+        Y = np.array([self.model(**dict(zip(problem['names'], x)))
+                     for x in param_values])
+
+        # Analyze
+        Si = sobol.analyze(problem, Y)
+
+        return {
+            'first_order': dict(zip(problem['names'], Si['S1'])),
+            'total_order': dict(zip(problem['names'], Si['ST'])),
+            'second_order': Si['S2']
+        }
+```
+
+## Best Practices
+
+1. **Test Known Solutions**: Analytical solutions, MMS
+2. **Convergence Studies**: Verify expected order
+3. **Document Assumptions**: Model limitations
+4. **Quantify Uncertainty**: Input and numerical
+5. **Peer Review**: Independent verification
+
+## V&V Checklist
+
+```
+Code Verification:
+□ Unit tests pass
+□ MMS verification complete
+□ Expected convergence order achieved
+□ Conservation properties verified
+
+Solution Verification:
+□ Grid convergence study
+□ Time step convergence
+□ GCI computed
+□ Asymptotic range confirmed
+
+Validation:
+□ Comparison with experiments
+□ Statistical metrics computed
+□ Uncertainty quantified
+□ Limitations documented
+```
+
+## Anti-Patterns
+
+- Only testing with "working" cases
+- Ignoring numerical uncertainty
+- Overfitting to validation data
+- Not documenting model limitations
+- Skipping convergence studies
+
+## When to Use
+
+- Safety-critical simulations
+- Publication/peer review
+- Regulatory compliance
+- High-consequence predictions
+- Production deployment
+
+## When NOT to Use
+
+- Early prototyping
+- Quick estimates
+- Educational examples
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  validation-verification:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Simulation" icon="atom" href="/skills/overview#simulation">
+    More simulation skills
+  </Card>
+</CardGroup>

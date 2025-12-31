@@ -1,0 +1,249 @@
+---
+title: "prototype-to-production"
+description: "Transform game prototype into production-ready code"
+icon: "gamepad"
+---
+
+<Info>
+  **Category:** Game Dev
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:prototype-to-production "your description here"
+```
+
+
+# Prototype to Production Workflow
+
+Convert rapid game prototype into maintainable production code.
+
+## Prerequisites
+- [ ] Working prototype with core mechanics
+- [ ] Game design document
+- [ ] Target platforms defined
+
+## Phase 1: Prototype Assessment
+
+### Step 1.1: Evaluate Prototype
+```yaml
+agent: game-designer
+action: assess
+evaluation:
+  - Core mechanics working
+  - Fun factor validated
+  - Technical feasibility
+  - Performance baseline
+  - Technical debt inventory
+```
+
+### Step 1.2: Define Production Requirements
+```yaml
+agent: game-designer
+action: define
+requirements:
+  - Target frame rate: 60fps
+  - Memory budget: <2GB
+  - Load time: <10s
+  - Platform requirements
+  - Accessibility features
+```
+
+## Phase 2: Architecture Refactoring
+
+### Step 2.1: Design Production Architecture
+```yaml
+agent: game-designer
+action: design
+patterns:
+  - Component system (ECS or composition)
+  - State machine for game states
+  - Event system for decoupling
+  - Object pooling for performance
+  - Asset management system
+```
+
+### Step 2.2: Create Core Systems
+```yaml
+agent: fullstack-developer
+action: implement
+systems:
+  - Game loop manager
+  - Scene management
+  - Input handling
+  - Audio manager
+  - Save/load system
+  - UI framework
+```
+
+## Phase 3: Code Migration
+
+### Step 3.1: Extract Reusable Components
+```yaml
+agent: fullstack-developer
+action: refactor
+from_prototype:
+  - Identify reusable code
+  - Extract to components
+  - Add proper interfaces
+  - Remove hardcoding
+  - Add configuration
+```
+
+### Step 3.2: Implement Production Code
+```yaml
+agent: fullstack-developer
+action: implement
+standards:
+  - Clean code principles
+  - SOLID for game code
+  - Proper error handling
+  - Logging and debugging
+  - Performance considerations
+```
+
+## Phase 4: Asset Pipeline
+
+### Step 4.1: Setup Asset Pipeline
+```yaml
+agent: fullstack-developer
+action: configure
+pipeline:
+  - Asset import settings
+  - Compression configuration
+  - LOD generation
+  - Texture atlasing
+  - Audio compression
+  - Localization support
+```
+
+### Step 4.2: Asset Organization
+```yaml
+agent: fullstack-developer
+action: organize
+structure:
+  - /Assets
+    - /Art
+    - /Audio
+    - /Prefabs
+    - /Scripts
+    - /Scenes
+    - /UI
+  - Naming conventions
+  - Folder structure guidelines
+```
+
+## Phase 5: Testing Infrastructure
+
+### Step 5.1: Unit Testing
+```yaml
+agent: tester
+action: implement
+tests:
+  - Core mechanics
+  - State machines
+  - Calculations
+  - Utility functions
+  - Data validation
+```
+
+### Step 5.2: Integration Testing
+```yaml
+agent: tester
+action: implement
+tests:
+  - Scene loading
+  - Save/load cycle
+  - Input handling
+  - Audio playback
+  - UI navigation
+```
+
+### Step 5.3: Playtest Framework
+```yaml
+agent: tester
+action: configure
+framework:
+  - Automated playthroughs
+  - Metrics collection
+  - Bug reproduction
+  - Performance profiling
+```
+
+## Phase 6: Performance Optimization
+
+### Step 6.1: Profile and Optimize
+```yaml
+agent: fullstack-developer
+action: optimize
+areas:
+  - Draw call batching
+  - Object pooling
+  - Memory management
+  - Physics optimization
+  - Script optimization
+```
+
+### Step 6.2: Platform Optimization
+```yaml
+agent: fullstack-developer
+action: optimize
+per_platform:
+  - PC settings
+  - Console optimizations
+  - Mobile considerations
+  - Quality settings system
+```
+
+## Outputs
+- [ ] Production architecture
+- [ ] Refactored codebase
+- [ ] Asset pipeline
+- [ ] Test suite
+- [ ] Performance profile
+
+## Quality Gates
+- 60fps on target hardware
+- Memory within budget
+- All tests passing
+- No critical bugs
+- Code review passed
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@game-designer](/agents/game-designer)** - Specialized agent for game designer tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+
+
+
+
+
+
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Game Dev" icon="gamepad" href="/workflows/overview#game-dev">
+    More game-dev workflows
+  </Card>
+</CardGroup>

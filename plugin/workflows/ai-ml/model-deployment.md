@@ -1,0 +1,199 @@
+---
+description: Deploy ML models to production with proper validation and monitoring
+triggers:
+  - manual
+  - ml:deploy
+agents:
+  - ml-engineer
+  - site-reliability-engineer
+---
+
+# Model Deployment Workflow
+
+Deploy models safely to production environments.
+
+## Prerequisites
+- [ ] Model trained and validated
+- [ ] Serving infrastructure ready
+- [ ] Monitoring configured
+
+## Phase 1: Pre-Deployment Validation
+
+### Step 1.1: Model Validation
+```yaml
+agent: ml-engineer
+action: validate
+checks:
+  - Performance on holdout set
+  - Performance on recent data
+  - Bias and fairness metrics
+  - Edge case handling
+comparison:
+  - vs current production model
+  - vs baseline
+```
+
+### Step 1.2: Technical Validation
+```yaml
+agent: ml-engineer
+action: validate
+checks:
+  - Model loads correctly
+  - Input/output schema correct
+  - Inference latency acceptable
+  - Memory footprint acceptable
+  - Batch inference works
+```
+
+## Phase 2: Model Packaging
+
+### Step 2.1: Export Model
+```yaml
+agent: ml-engineer
+action: export
+formats:
+  - ONNX (portable)
+  - SavedModel (TensorFlow)
+  - TorchScript (PyTorch)
+  - Pickle (sklearn)
+  - MLflow Model format
+```
+
+### Step 2.2: Create Serving Container
+```yaml
+agent: ml-engineer
+action: containerize
+components:
+  - Model artifacts
+  - Inference code
+  - Dependencies
+  - Health checks
+  - Metrics endpoint
+base_images:
+  - tensorflow/serving
+  - pytorch/torchserve
+  - Custom Python
+```
+
+## Phase 3: Staging Deployment
+
+### Step 3.1: Deploy to Staging
+```yaml
+agent: site-reliability-engineer
+action: deploy
+environment: staging
+infrastructure:
+  - Kubernetes deployment
+  - Auto-scaling config
+  - Resource limits
+  - Health probes
+```
+
+### Step 3.2: Integration Testing
+```yaml
+agent: ml-engineer
+action: test
+tests:
+  - End-to-end inference
+  - Load testing
+  - Error handling
+  - Timeout behavior
+  - Batch processing
+```
+
+## Phase 4: Production Deployment
+
+### Step 4.1: Canary Deployment
+```yaml
+agent: site-reliability-engineer
+action: deploy
+strategy: canary
+configuration:
+  initial_traffic: 5%
+  increment: 10%
+  evaluation_period: 30m
+  rollback_threshold:
+    error_rate: 1%
+    latency_p99: 500ms
+```
+
+### Step 4.2: Shadow Deployment (Optional)
+```yaml
+agent: site-reliability-engineer
+action: deploy
+strategy: shadow
+configuration:
+  - Mirror production traffic
+  - Compare predictions
+  - No impact on production
+  - Log discrepancies
+```
+
+### Step 4.3: Full Rollout
+```yaml
+agent: site-reliability-engineer
+action: promote
+after:
+  - Canary success
+  - No anomalies detected
+  - Stakeholder approval
+steps:
+  - Increase traffic gradually
+  - Monitor metrics
+  - Keep rollback ready
+```
+
+## Phase 5: Post-Deployment
+
+### Step 5.1: Configure Monitoring
+```yaml
+agent: site-reliability-engineer
+action: configure
+monitoring:
+  - Prediction latency
+  - Throughput
+  - Error rates
+  - Model-specific metrics
+  - Resource usage
+dashboards:
+  - Real-time metrics
+  - Prediction distribution
+  - Feature drift
+```
+
+### Step 5.2: Configure Alerts
+```yaml
+agent: site-reliability-engineer
+action: configure
+alerts:
+  - High error rate
+  - Latency degradation
+  - Model drift detected
+  - Resource exhaustion
+  - Prediction anomalies
+```
+
+### Step 5.3: Update Model Registry
+```yaml
+agent: ml-engineer
+action: update
+registry:
+  - Mark as production
+  - Update version info
+  - Link to deployment
+  - Document changes
+```
+
+## Outputs
+- [ ] Packaged model
+- [ ] Serving container
+- [ ] Deployment configuration
+- [ ] Monitoring dashboards
+- [ ] Runbook
+
+## Quality Gates
+- Staging tests pass
+- Canary metrics acceptable
+- No prediction drift
+- Latency within SLA
+- Rollback tested

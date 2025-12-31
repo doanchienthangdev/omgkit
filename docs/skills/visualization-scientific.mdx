@@ -1,0 +1,422 @@
+---
+title: "Scientific Visualization"
+description: "Data visualization for scientific computing including 2D/3D plotting, volume rendering, and interactive visualization."
+icon: "atom"
+---
+
+<Info>
+  **Category:** Simulation
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Data visualization for scientific computing including 2D/3D plotting, volume rendering, and interactive visualization.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Scientific Visualization
+
+Data visualization for scientific computing including 2D/3D plotting, volume rendering, and interactive visualization.
+
+## Overview
+
+Scientific visualization transforms complex numerical data into visual representations for analysis, understanding, and communication.
+
+## Core Concepts
+
+### Visualization Types
+- **Scalar Fields**: Contours, heatmaps, isosurfaces
+- **Vector Fields**: Streamlines, quiver plots, glyphs
+- **Volume Data**: Volume rendering, slicing
+- **Time Series**: Animation, temporal plots
+
+### Visualization Pipeline
+```
+Data → Filter → Map → Render → Display
+```
+
+## Matplotlib (2D)
+
+### Publication-Quality Plots
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
+
+def setup_publication_style():
+    """Configure matplotlib for publication"""
+    plt.rcParams.update({
+        'font.family': 'serif',
+        'font.serif': ['Times New Roman'],
+        'font.size': 10,
+        'axes.labelsize': 12,
+        'axes.titlesize': 12,
+        'xtick.labelsize': 10,
+        'ytick.labelsize': 10,
+        'legend.fontsize': 10,
+        'figure.figsize': (6.4, 4.8),
+        'figure.dpi': 300,
+        'savefig.dpi': 300,
+        'savefig.bbox': 'tight',
+        'axes.grid': True,
+        'grid.alpha': 0.3,
+        'lines.linewidth': 1.5,
+        'axes.linewidth': 0.8
+    })
+
+def create_multi_panel_figure():
+    """Create publication multi-panel figure"""
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+
+    # Panel labels
+    labels = ['(a)', '(b)', '(c)', '(d)']
+
+    for ax, label in zip(axes.flat, labels):
+        ax.text(-0.1, 1.05, label, transform=ax.transAxes,
+                fontsize=14, fontweight='bold', va='top')
+
+    plt.tight_layout()
+    return fig, axes
+
+def plot_with_uncertainty(ax, x, y, y_err, label='Data'):
+    """Plot with shaded uncertainty region"""
+    line, = ax.plot(x, y, label=label)
+    ax.fill_between(x, y - y_err, y + y_err, alpha=0.3, color=line.get_color())
+    return line
+```
+
+### Contour and Heatmaps
+```python
+def plot_scalar_field(data, x, y, title='Scalar Field'):
+    """Plot 2D scalar field with contours"""
+    fig, ax = plt.subplots(figsize=(8, 6))
+
+    # Filled contours
+    levels = np.linspace(data.min(), data.max(), 20)
+    cf = ax.contourf(x, y, data, levels=levels, cmap='viridis')
+
+    # Contour lines
+    cs = ax.contour(x, y, data, levels=levels[::2], colors='white',
+                    linewidths=0.5, alpha=0.5)
+    ax.clabel(cs, inline=True, fontsize=8, fmt='%.2f')
+
+    # Colorbar
+    cbar = plt.colorbar(cf, ax=ax, label='Value', shrink=0.8)
+
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_title(title)
+    ax.set_aspect('equal')
+
+    return fig
+
+def plot_vector_field(ax, x, y, u, v, skip=5):
+    """Plot 2D vector field"""
+    # Downsample for clarity
+    magnitude = np.sqrt(u**2 + v**2)
+
+    # Quiver plot
+    q = ax.quiver(x[::skip, ::skip], y[::skip, ::skip],
+                  u[::skip, ::skip], v[::skip, ::skip],
+                  magnitude[::skip, ::skip],
+                  cmap='coolwarm', scale=50)
+
+    plt.colorbar(q, ax=ax, label='Magnitude')
+
+    # Streamlines
+    ax.streamplot(x, y, u, v, density=1.5, color='gray',
+                  linewidth=0.5, arrowsize=0.5)
+```
+
+## PyVista (3D)
+
+### 3D Surface and Volume
+```python
+import pyvista as pv
+import numpy as np
+
+def plot_3d_surface(data, x, y, z):
+    """Plot 3D surface"""
+    # Create structured grid
+    grid = pv.StructuredGrid(x, y, z)
+    grid['values'] = data.flatten(order='F')
+
+    # Create plotter
+    plotter = pv.Plotter()
+    plotter.add_mesh(grid, scalars='values', cmap='viridis',
+                     show_edges=False, opacity=0.8)
+    plotter.add_scalar_bar('Value')
+    plotter.show_axes()
+
+    return plotter
+
+def plot_isosurface(data, spacing=(1, 1, 1), isovalues=None):
+    """Plot isosurfaces from volume data"""
+    # Create uniform grid
+    grid = pv.UniformGrid()
+    grid.dimensions = np.array(data.shape) + 1
+    grid.spacing = spacing
+    grid.cell_data['values'] = data.flatten(order='F')
+
+    # Generate isosurfaces
+    if isovalues is None:
+        isovalues = np.linspace(data.min(), data.max(), 5)[1:-1]
+
+    plotter = pv.Plotter()
+
+    for i, iso in enumerate(isovalues):
+        contour = grid.contour([iso])
+        opacity = 0.3 + 0.4 * (i / len(isovalues))
+        plotter.add_mesh(contour, opacity=opacity, label=f'iso={iso:.2f}')
+
+    plotter.add_legend()
+    return plotter
+
+def volume_rendering(data, spacing=(1, 1, 1)):
+    """Direct volume rendering"""
+    grid = pv.UniformGrid()
+    grid.dimensions = np.array(data.shape) + 1
+    grid.spacing = spacing
+    grid.cell_data['values'] = data.flatten(order='F')
+
+    plotter = pv.Plotter()
+    plotter.add_volume(grid, scalars='values', cmap='viridis',
+                       opacity='sigmoid', shade=True)
+
+    return plotter
+
+def plot_streamlines_3d(velocity_field, seed_points):
+    """3D streamline visualization"""
+    # Create vector field grid
+    grid = pv.RectilinearGrid(x, y, z)
+    grid['velocity'] = np.column_stack([
+        velocity_field[0].flatten(order='F'),
+        velocity_field[1].flatten(order='F'),
+        velocity_field[2].flatten(order='F')
+    ])
+
+    # Generate streamlines
+    streamlines = grid.streamlines(
+        vectors='velocity',
+        source_center=seed_points.mean(axis=0),
+        source_radius=1.0,
+        n_points=100,
+        max_time=100
+    )
+
+    plotter = pv.Plotter()
+    plotter.add_mesh(streamlines.tube(radius=0.05), cmap='rainbow')
+    plotter.add_mesh(grid.outline(), color='black')
+
+    return plotter
+```
+
+## Plotly (Interactive)
+
+### Interactive 3D Plots
+```python
+import plotly.graph_objects as go
+import plotly.express as px
+import numpy as np
+
+def interactive_surface(x, y, z):
+    """Create interactive 3D surface"""
+    fig = go.Figure(data=[go.Surface(
+        x=x, y=y, z=z,
+        colorscale='Viridis',
+        colorbar=dict(title='Value')
+    )])
+
+    fig.update_layout(
+        title='Interactive Surface',
+        scene=dict(
+            xaxis_title='X',
+            yaxis_title='Y',
+            zaxis_title='Z'
+        ),
+        width=800,
+        height=600
+    )
+
+    return fig
+
+def animated_time_series(data_sequence, times):
+    """Create animated visualization of time-evolving data"""
+    frames = []
+
+    for i, (data, t) in enumerate(zip(data_sequence, times)):
+        frames.append(go.Frame(
+            data=[go.Heatmap(z=data, colorscale='Viridis')],
+            name=str(i),
+            layout=go.Layout(title=f't = {t:.2f}')
+        ))
+
+    fig = go.Figure(
+        data=[go.Heatmap(z=data_sequence[0], colorscale='Viridis')],
+        frames=frames
+    )
+
+    fig.update_layout(
+        updatemenus=[{
+            'type': 'buttons',
+            'showactive': False,
+            'buttons': [
+                {'label': 'Play', 'method': 'animate',
+                 'args': [None, {'frame': {'duration': 100}}]},
+                {'label': 'Pause', 'method': 'animate',
+                 'args': [[None], {'frame': {'duration': 0}, 'mode': 'immediate'}]}
+            ]
+        }],
+        sliders=[{
+            'currentvalue': {'prefix': 'Frame: '},
+            'steps': [{'args': [[f.name], {'frame': {'duration': 0}}],
+                      'label': str(i), 'method': 'animate'}
+                     for i, f in enumerate(frames)]
+        }]
+    )
+
+    return fig
+```
+
+## VTK (Advanced)
+
+### Custom VTK Pipeline
+```python
+import vtk
+import numpy as np
+
+def create_vtk_visualization(data, spacing=(1, 1, 1)):
+    """Create VTK visualization pipeline"""
+    # Create image data
+    image_data = vtk.vtkImageData()
+    image_data.SetDimensions(*data.shape)
+    image_data.SetSpacing(*spacing)
+
+    # Convert numpy to VTK
+    vtk_array = vtk.vtkFloatArray()
+    vtk_array.SetNumberOfComponents(1)
+    vtk_array.SetName('values')
+    vtk_array.SetArray(data.flatten(order='F'), data.size, True)
+    image_data.GetPointData().SetScalars(vtk_array)
+
+    # Volume mapper
+    volume_mapper = vtk.vtkSmartVolumeMapper()
+    volume_mapper.SetInputData(image_data)
+
+    # Transfer functions
+    color_func = vtk.vtkColorTransferFunction()
+    color_func.AddRGBPoint(data.min(), 0.0, 0.0, 1.0)
+    color_func.AddRGBPoint(data.mean(), 0.0, 1.0, 0.0)
+    color_func.AddRGBPoint(data.max(), 1.0, 0.0, 0.0)
+
+    opacity_func = vtk.vtkPiecewiseFunction()
+    opacity_func.AddPoint(data.min(), 0.0)
+    opacity_func.AddPoint(data.max(), 1.0)
+
+    # Volume property
+    volume_property = vtk.vtkVolumeProperty()
+    volume_property.SetColor(color_func)
+    volume_property.SetScalarOpacity(opacity_func)
+    volume_property.SetInterpolationTypeToLinear()
+    volume_property.ShadeOn()
+
+    # Volume actor
+    volume = vtk.vtkVolume()
+    volume.SetMapper(volume_mapper)
+    volume.SetProperty(volume_property)
+
+    # Renderer
+    renderer = vtk.vtkRenderer()
+    renderer.AddVolume(volume)
+    renderer.SetBackground(0.1, 0.1, 0.1)
+
+    # Render window
+    render_window = vtk.vtkRenderWindow()
+    render_window.AddRenderer(renderer)
+    render_window.SetSize(800, 600)
+
+    return render_window
+```
+
+## Best Practices
+
+1. **Choose Appropriate Colormap**: Sequential, diverging, categorical
+2. **Label Everything**: Axes, colorbars, units
+3. **Maintain Aspect Ratio**: For physical data
+4. **Use Perceptually Uniform Colormaps**: viridis, plasma
+5. **Export Vector Graphics**: PDF, SVG for publications
+
+## Visualization Selection Guide
+
+```
+2D Scalar: Heatmap, Contour
+2D Vector: Quiver, Streamlines
+3D Scalar: Isosurface, Volume Render
+3D Vector: 3D Streamlines, Glyphs
+Time Series: Animation, Small Multiples
+Large Data: Downsampling, LOD
+```
+
+## Anti-Patterns
+
+- Rainbow colormaps for sequential data
+- Missing labels/units
+- Overcrowded plots
+- Poor color contrast
+- Ignoring colorblind accessibility
+
+## When to Use
+
+- Data analysis
+- Publication figures
+- Presentations
+- Interactive exploration
+- Result validation
+
+## When NOT to Use
+
+- Simple tables sufficient
+- Extremely large datasets (specialize)
+- Real-time requirements (use game engines)
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  visualization-scientific:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Simulation" icon="atom" href="/skills/overview#simulation">
+    More simulation skills
+  </Card>
+</CardGroup>

@@ -1,0 +1,460 @@
+---
+title: "Mobile Security"
+description: "Secure storage, certificate pinning, biometric authentication, app hardening, and OWASP mobile security."
+icon: "mobile-screen"
+---
+
+<Info>
+  **Category:** Mobile-advanced
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Secure storage, certificate pinning, biometric authentication, app hardening, and OWASP mobile security.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Mobile Security
+
+Secure storage, certificate pinning, biometric authentication, app hardening, and OWASP mobile security.
+
+## Overview
+
+Mobile security protects applications and user data from threats including reverse engineering, data theft, and network attacks.
+
+## Core Concepts
+
+### OWASP Mobile Top 10
+1. Improper Platform Usage
+2. Insecure Data Storage
+3. Insecure Communication
+4. Insecure Authentication
+5. Insufficient Cryptography
+6. Insecure Authorization
+7. Client Code Quality
+8. Code Tampering
+9. Reverse Engineering
+10. Extraneous Functionality
+
+### Security Layers
+- **Data at Rest**: Encrypted storage
+- **Data in Transit**: TLS, certificate pinning
+- **Authentication**: Biometrics, tokens
+- **Code Protection**: Obfuscation, integrity checks
+
+## Secure Storage
+
+### React Native Implementation
+```typescript
+import * as Keychain from 'react-native-keychain';
+import EncryptedStorage from 'react-native-encrypted-storage';
+
+class SecureStorage {
+  // For sensitive credentials (passwords, tokens)
+  async storeCredentials(username: string, password: string): Promise<void> {
+    await Keychain.setGenericPassword(username, password, {
+      accessControl: Keychain.ACCESS_CONTROL.BIOMETRY_ANY_OR_DEVICE_PASSCODE,
+      accessible: Keychain.ACCESSIBLE.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+      securityLevel: Keychain.SECURITY_LEVEL.SECURE_HARDWARE
+    });
+  }
+
+  async getCredentials(): Promise<{ username: string; password: string } | null> {
+    const credentials = await Keychain.getGenericPassword();
+    if (credentials) {
+      return {
+        username: credentials.username,
+        password: credentials.password
+      };
+    }
+    return null;
+  }
+
+  // For larger encrypted data
+  async storeEncrypted(key: string, value: string): Promise<void> {
+    await EncryptedStorage.setItem(key, value);
+  }
+
+  async getEncrypted(key: string): Promise<string | null> {
+    return await EncryptedStorage.getItem(key);
+  }
+
+  async clearAll(): Promise<void> {
+    await Keychain.resetGenericPassword();
+    await EncryptedStorage.clear();
+  }
+}
+```
+
+### iOS Keychain (Native)
+```swift
+import Security
+
+class KeychainManager {
+    static func save(key: String, data: Data) -> Bool {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        ]
+
+        SecItemDelete(query as CFDictionary)
+        let status = SecItemAdd(query as CFDictionary, nil)
+        return status == errSecSuccess
+    }
+
+    static func load(key: String) -> Data? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        guard status == errSecSuccess else { return nil }
+        return result as? Data
+    }
+}
+```
+
+### Android EncryptedSharedPreferences
+```kotlin
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
+
+class SecurePreferences(context: Context) {
+    private val masterKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+
+    private val prefs = EncryptedSharedPreferences.create(
+        context,
+        "secure_prefs",
+        masterKey,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
+
+    fun saveToken(token: String) {
+        prefs.edit().putString("auth_token", token).apply()
+    }
+
+    fun getToken(): String? = prefs.getString("auth_token", null)
+
+    fun clear() = prefs.edit().clear().apply()
+}
+```
+
+## Certificate Pinning
+
+### React Native (SSL Pinning)
+```typescript
+import { fetch } from 'react-native-ssl-pinning';
+
+const API_PINS = {
+  'api.example.com': {
+    // SHA256 hash of certificate public key
+    pins: [
+      'sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+      'sha256/BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=' // Backup
+    ]
+  }
+};
+
+async function secureFetch(url: string, options: RequestInit) {
+  const hostname = new URL(url).hostname;
+  const pinConfig = API_PINS[hostname];
+
+  if (!pinConfig) {
+    throw new Error(`No pins configured for ${hostname}`);
+  }
+
+  return fetch(url, {
+    ...options,
+    sslPinning: {
+      certs: pinConfig.pins
+    },
+    timeoutInterval: 30000
+  });
+}
+```
+
+### iOS Native (TrustKit)
+```swift
+import TrustKit
+
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+
+        let trustKitConfig: [String: Any] = [
+            kTSKSwizzleNetworkDelegates: true,
+            kTSKPinnedDomains: [
+                "api.example.com": [
+                    kTSKEnforcePinning: true,
+                    kTSKIncludeSubdomains: true,
+                    kTSKPublicKeyHashes: [
+                        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                        "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
+                    ],
+                    kTSKReportUris: ["https://report.example.com/pinning"]
+                ]
+            ]
+        ]
+
+        TrustKit.initSharedInstance(withConfiguration: trustKitConfig)
+        return true
+    }
+}
+```
+
+## Biometric Authentication
+
+### React Native
+```typescript
+import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics';
+
+class BiometricAuth {
+  private biometrics = new ReactNativeBiometrics();
+
+  async isAvailable(): Promise<{ available: boolean; type: string }> {
+    const { available, biometryType } = await this.biometrics.isSensorAvailable();
+    return { available, type: biometryType || 'none' };
+  }
+
+  async authenticate(promptMessage: string): Promise<boolean> {
+    try {
+      const { success } = await this.biometrics.simplePrompt({
+        promptMessage,
+        cancelButtonText: 'Cancel',
+        fallbackPromptMessage: 'Use passcode'
+      });
+      return success;
+    } catch (error) {
+      console.error('Biometric auth failed:', error);
+      return false;
+    }
+  }
+
+  // Create biometric-protected key pair
+  async createKeys(): Promise<string> {
+    const { publicKey } = await this.biometrics.createKeys();
+    return publicKey;
+  }
+
+  // Sign data with biometric verification
+  async signWithBiometrics(payload: string): Promise<string | null> {
+    try {
+      const { success, signature } = await this.biometrics.createSignature({
+        promptMessage: 'Authenticate to sign',
+        payload
+      });
+
+      return success ? signature : null;
+    } catch {
+      return null;
+    }
+  }
+}
+```
+
+## App Hardening
+
+### Root/Jailbreak Detection
+```typescript
+import JailMonkey from 'jail-monkey';
+
+class SecurityChecker {
+  isCompromised(): boolean {
+    return (
+      JailMonkey.isJailBroken() ||
+      JailMonkey.isOnExternalStorage() ||
+      JailMonkey.isDebuggedMode() ||
+      JailMonkey.hookDetected() ||
+      !JailMonkey.AdbEnabled()
+    );
+  }
+
+  enforceSecurityPolicy(): void {
+    if (this.isCompromised()) {
+      // Log security event
+      analytics.logEvent('security_violation', {
+        jailbroken: JailMonkey.isJailBroken(),
+        debugged: JailMonkey.isDebuggedMode()
+      });
+
+      // Disable sensitive features or exit
+      if (__DEV__) {
+        console.warn('Running on compromised device');
+      } else {
+        // Production: restrict functionality
+        this.restrictSensitiveFeatures();
+      }
+    }
+  }
+}
+```
+
+### Code Obfuscation (Android)
+```groovy
+// android/app/build.gradle
+android {
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+```
+
+```proguard
+# proguard-rules.pro
+# Keep React Native
+-keep class com.facebook.react.** { *; }
+-keep class com.facebook.hermes.** { *; }
+
+# Obfuscate app code
+-repackageclasses 'o'
+-allowaccessmodification
+-optimizations !code/simplification/arithmetic
+
+# Remove logging
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** v(...);
+    public static *** i(...);
+}
+```
+
+## Network Security
+
+### Android Network Security Config
+```xml
+<!-- android/app/src/main/res/xml/network_security_config.xml -->
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <domain-config>
+        <domain includeSubdomains="true">api.example.com</domain>
+        <pin-set expiration="2025-01-01">
+            <pin digest="SHA-256">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</pin>
+            <pin digest="SHA-256">BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>
+```
+
+### iOS App Transport Security
+```xml
+<!-- ios/App/Info.plist -->
+<key>NSAppTransportSecurity</key>
+<dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <false/>
+    <key>NSExceptionDomains</key>
+    <dict>
+        <key>api.example.com</key>
+        <dict>
+            <key>NSIncludesSubdomains</key>
+            <true/>
+            <key>NSRequiresCertificateTransparency</key>
+            <true/>
+        </dict>
+    </dict>
+</dict>
+```
+
+## Best Practices
+
+1. **Never Store Secrets in Code**: Use secure storage
+2. **Certificate Pinning**: Pin to public key, not cert
+3. **Biometric + PIN**: Always have fallback
+4. **Obfuscate Production Builds**: ProGuard/R8
+5. **Security Logging**: Monitor for attacks
+
+## Security Checklist
+
+```
+□ Secure credential storage (Keychain/EncryptedPrefs)
+□ Certificate pinning implemented
+□ Biometric authentication available
+□ Root/jailbreak detection
+□ Code obfuscation enabled
+□ Debug logging removed in production
+□ Network security config (no cleartext)
+□ Input validation
+□ Session management secure
+□ Sensitive data wiped on logout
+```
+
+## Anti-Patterns
+
+- Storing tokens in AsyncStorage
+- Hardcoded API keys
+- No certificate pinning
+- Logging sensitive data
+- Trusting client-side validation
+
+## When to Use
+
+- Apps with sensitive data
+- Financial applications
+- Healthcare apps
+- Enterprise applications
+- Any production app
+
+## When NOT to Use
+
+- Never skip security basics
+- Even prototypes should have basic security
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  mobile-security:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Mobile-advanced" icon="mobile-screen" href="/skills/overview#mobile-advanced">
+    More mobile-advanced skills
+  </Card>
+</CardGroup>

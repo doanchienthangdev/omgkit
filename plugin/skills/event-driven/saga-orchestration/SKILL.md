@@ -1,0 +1,335 @@
+# Saga Orchestration
+
+Distributed transaction patterns with saga choreography, orchestration, compensation logic, and failure handling.
+
+## Overview
+
+Sagas manage distributed transactions across multiple services by breaking them into a sequence of local transactions with compensating actions.
+
+## Saga Patterns
+
+### Choreography
+- Each service publishes events
+- Other services react to events
+- No central coordinator
+- Decentralized decision making
+
+### Orchestration
+- Central coordinator (orchestrator)
+- Commands sent to participants
+- Orchestrator manages flow
+- Centralized logic
+
+## Choreography Implementation
+
+### Event Flow
+```
+Order Service          Payment Service        Inventory Service
+      │                      │                      │
+      │ OrderCreated ────────┼──────────────────────▶
+      │                      │                      │
+      │                      │◀──── InventoryReserved
+      │                      │                      │
+      │◀─── PaymentCompleted │                      │
+      │                      │                      │
+      ▼ OrderConfirmed       │                      │
+```
+
+### Service Implementation
+```typescript
+// Order Service
+class OrderService {
+  @EventHandler('PaymentCompleted')
+  async onPaymentCompleted(event: PaymentCompleted): Promise<void> {
+    const order = await this.orderRepository.find(event.orderId);
+    order.confirm();
+    await this.orderRepository.save(order);
+    await this.eventBus.publish(new OrderConfirmed(order.id));
+  }
+
+  @EventHandler('PaymentFailed')
+  async onPaymentFailed(event: PaymentFailed): Promise<void> {
+    const order = await this.orderRepository.find(event.orderId);
+    order.cancel(event.reason);
+    await this.orderRepository.save(order);
+    // Trigger compensation
+    await this.eventBus.publish(new OrderCancelled(order.id));
+  }
+}
+
+// Inventory Service
+class InventoryService {
+  @EventHandler('OrderCreated')
+  async onOrderCreated(event: OrderCreated): Promise<void> {
+    try {
+      await this.inventoryRepository.reserve(event.items);
+      await this.eventBus.publish(new InventoryReserved(event.orderId));
+    } catch (error) {
+      await this.eventBus.publish(new InventoryReservationFailed(event.orderId));
+    }
+  }
+
+  @EventHandler('OrderCancelled')
+  async onOrderCancelled(event: OrderCancelled): Promise<void> {
+    // Compensating action
+    await this.inventoryRepository.releaseReservation(event.orderId);
+  }
+}
+```
+
+## Orchestration Implementation
+
+### Saga Orchestrator
+```typescript
+interface SagaStep<T> {
+  execute(context: T): Promise<void>;
+  compensate(context: T): Promise<void>;
+}
+
+class OrderSagaOrchestrator {
+  private steps: SagaStep<OrderSagaContext>[] = [
+    new ReserveInventoryStep(),
+    new ProcessPaymentStep(),
+    new ConfirmOrderStep()
+  ];
+
+  async execute(order: Order): Promise<void> {
+    const context: OrderSagaContext = {
+      orderId: order.id,
+      items: order.items,
+      amount: order.totalAmount,
+      completedSteps: []
+    };
+
+    for (const step of this.steps) {
+      try {
+        await step.execute(context);
+        context.completedSteps.push(step);
+      } catch (error) {
+        await this.compensate(context);
+        throw new SagaFailedException(error);
+      }
+    }
+  }
+
+  private async compensate(context: OrderSagaContext): Promise<void> {
+    // Compensate in reverse order
+    for (const step of context.completedSteps.reverse()) {
+      try {
+        await step.compensate(context);
+      } catch (error) {
+        // Log but continue compensation
+        this.logger.error(`Compensation failed for step`, error);
+      }
+    }
+  }
+}
+
+// Step implementations
+class ReserveInventoryStep implements SagaStep<OrderSagaContext> {
+  async execute(context: OrderSagaContext): Promise<void> {
+    const reservationId = await this.inventoryService.reserve(context.items);
+    context.reservationId = reservationId;
+  }
+
+  async compensate(context: OrderSagaContext): Promise<void> {
+    if (context.reservationId) {
+      await this.inventoryService.releaseReservation(context.reservationId);
+    }
+  }
+}
+
+class ProcessPaymentStep implements SagaStep<OrderSagaContext> {
+  async execute(context: OrderSagaContext): Promise<void> {
+    const paymentId = await this.paymentService.process(
+      context.orderId,
+      context.amount
+    );
+    context.paymentId = paymentId;
+  }
+
+  async compensate(context: OrderSagaContext): Promise<void> {
+    if (context.paymentId) {
+      await this.paymentService.refund(context.paymentId);
+    }
+  }
+}
+```
+
+### State Machine Orchestrator
+```typescript
+enum OrderSagaState {
+  STARTED = 'STARTED',
+  INVENTORY_RESERVED = 'INVENTORY_RESERVED',
+  PAYMENT_PROCESSED = 'PAYMENT_PROCESSED',
+  COMPLETED = 'COMPLETED',
+  COMPENSATING = 'COMPENSATING',
+  FAILED = 'FAILED'
+}
+
+class OrderSagaStateMachine {
+  private state: OrderSagaState = OrderSagaState.STARTED;
+
+  async transition(event: SagaEvent): Promise<void> {
+    const transition = this.getTransition(this.state, event);
+    if (!transition) {
+      throw new InvalidTransitionError(this.state, event);
+    }
+
+    await transition.action();
+    this.state = transition.nextState;
+    await this.persistState();
+  }
+
+  private getTransition(state: OrderSagaState, event: SagaEvent) {
+    const transitions: Record<string, Transition> = {
+      [`${OrderSagaState.STARTED}:InventoryReserved`]: {
+        nextState: OrderSagaState.INVENTORY_RESERVED,
+        action: () => this.processPayment()
+      },
+      [`${OrderSagaState.STARTED}:InventoryFailed`]: {
+        nextState: OrderSagaState.FAILED,
+        action: () => this.failOrder('Inventory unavailable')
+      },
+      [`${OrderSagaState.INVENTORY_RESERVED}:PaymentCompleted`]: {
+        nextState: OrderSagaState.COMPLETED,
+        action: () => this.completeOrder()
+      },
+      [`${OrderSagaState.INVENTORY_RESERVED}:PaymentFailed`]: {
+        nextState: OrderSagaState.COMPENSATING,
+        action: () => this.compensateInventory()
+      }
+    };
+
+    return transitions[`${state}:${event.type}`];
+  }
+}
+```
+
+## Compensation Patterns
+
+### Semantic Compensation
+```typescript
+// Original action
+async function shipOrder(orderId: string): Promise<void> {
+  await shippingService.createShipment(orderId);
+}
+
+// Compensation (semantic rollback)
+async function compensateShipment(orderId: string): Promise<void> {
+  // Can't undo shipment, so create return
+  await shippingService.createReturn(orderId);
+  await notificationService.notifyCustomerOfReturn(orderId);
+}
+```
+
+### Compensation with Timeout
+```typescript
+class TimeBoundSaga {
+  async executeWithTimeout(timeout: number): Promise<void> {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new SagaTimeoutError()), timeout);
+    });
+
+    try {
+      await Promise.race([
+        this.executeSaga(),
+        timeoutPromise
+      ]);
+    } catch (error) {
+      if (error instanceof SagaTimeoutError) {
+        await this.compensate();
+      }
+      throw error;
+    }
+  }
+}
+```
+
+## Saga Persistence
+
+### Saga State Store
+```sql
+CREATE TABLE saga_instances (
+  saga_id UUID PRIMARY KEY,
+  saga_type VARCHAR(255) NOT NULL,
+  state VARCHAR(50) NOT NULL,
+  context JSONB NOT NULL,
+  completed_steps JSONB DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  deadline TIMESTAMPTZ
+);
+
+CREATE INDEX idx_saga_state ON saga_instances(saga_type, state);
+CREATE INDEX idx_saga_deadline ON saga_instances(deadline)
+  WHERE state NOT IN ('COMPLETED', 'FAILED');
+```
+
+### Recovery
+```typescript
+class SagaRecoveryService {
+  @Scheduled('every 1 minute')
+  async recoverStaleSagas(): Promise<void> {
+    const staleSagas = await this.sagaRepository.findStale(
+      Duration.ofMinutes(5)
+    );
+
+    for (const saga of staleSagas) {
+      try {
+        if (saga.shouldCompensate()) {
+          await this.compensateSaga(saga);
+        } else {
+          await this.resumeSaga(saga);
+        }
+      } catch (error) {
+        this.logger.error(`Recovery failed for saga ${saga.id}`, error);
+      }
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Idempotent Steps**: Handle retries safely
+2. **Persist State**: Survive crashes
+3. **Timeout Handling**: Don't wait forever
+4. **Compensation Design**: Plan for failures
+5. **Monitoring**: Track saga progress
+
+## Choosing Choreography vs Orchestration
+
+### Choreography
+- Loose coupling
+- Services remain autonomous
+- Complex to understand flow
+- Good for: Simple flows, few services
+
+### Orchestration
+- Centralized logic
+- Easier to understand
+- Single point of failure
+- Good for: Complex flows, many services
+
+## Anti-Patterns
+
+- Mixing choreography and orchestration
+- Not planning compensation
+- Synchronous saga execution
+- Missing saga timeout
+- No idempotency
+
+## When to Use
+
+- Multi-service transactions
+- Long-running processes
+- Eventual consistency acceptable
+- Need for audit trail
+
+## When NOT to Use
+
+- Single service operations
+- Strong consistency required
+- Simple workflows
+- Very low latency requirements

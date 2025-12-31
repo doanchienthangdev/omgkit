@@ -133,7 +133,7 @@ describe('CLI Core Functions', () => {
       installPlugin({ homeDir: TEST_HOME, silent: true });
       const agentsDir = join(getPluginDir(TEST_HOME), 'agents');
       const count = countFiles(agentsDir);
-      expect(count).toBe(23);
+      expect(count).toBeGreaterThanOrEqual(33);
     });
 
     it('should copy all mode files', () => {

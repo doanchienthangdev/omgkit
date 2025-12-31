@@ -179,6 +179,76 @@ const AGENT_METADATA = {
     worksWellWith: ['project-manager', 'planner', 'oracle'],
     triggersCommands: ['/team:run', '/team:status', '/sprint:new', '/sprint:start'],
     bestFor: 'AI Team orchestration, sprint management, velocity tracking'
+  },
+  'domain-decomposer': {
+    icon: 'puzzle-piece',
+    category: 'Architecture',
+    worksWellWith: ['architect', 'planner', 'fullstack-developer'],
+    triggersCommands: [],
+    bestFor: 'Domain-Driven Design, bounded contexts, service boundaries'
+  },
+  'data-engineer': {
+    icon: 'database',
+    category: 'Data & ML',
+    worksWellWith: ['ml-engineer', 'database-admin', 'architect'],
+    triggersCommands: [],
+    bestFor: 'Data pipelines, ETL, data quality, schema design'
+  },
+  'ml-engineer': {
+    icon: 'brain',
+    category: 'Data & ML',
+    worksWellWith: ['data-engineer', 'researcher', 'fullstack-developer'],
+    triggersCommands: [],
+    bestFor: 'ML pipelines, model training, MLOps, feature engineering'
+  },
+  'devsecops': {
+    icon: 'shield-check',
+    category: 'Security',
+    worksWellWith: ['security-auditor', 'cicd-manager', 'pipeline-architect'],
+    triggersCommands: [],
+    bestFor: 'Security automation, SAST/DAST, container security, compliance'
+  },
+  'performance-engineer': {
+    icon: 'gauge-high',
+    category: 'Performance',
+    worksWellWith: ['fullstack-developer', 'database-admin', 'architect'],
+    triggersCommands: [],
+    bestFor: 'Performance optimization, profiling, load testing, benchmarking'
+  },
+  'platform-engineer': {
+    icon: 'server',
+    category: 'Platform',
+    worksWellWith: ['cicd-manager', 'architect', 'devsecops'],
+    triggersCommands: [],
+    bestFor: 'Internal developer platforms, golden paths, self-service infrastructure'
+  },
+  'observability-engineer': {
+    icon: 'chart-line',
+    category: 'Operations',
+    worksWellWith: ['performance-engineer', 'cicd-manager', 'devsecops'],
+    triggersCommands: [],
+    bestFor: 'Monitoring, logging, tracing, alerting, SLO management'
+  },
+  'game-systems-designer': {
+    icon: 'gamepad',
+    category: 'Game Development',
+    worksWellWith: ['fullstack-developer', 'performance-engineer', 'ui-ux-designer'],
+    triggersCommands: [],
+    bestFor: 'Game mechanics, balancing, progression systems, multiplayer'
+  },
+  'embedded-systems': {
+    icon: 'microchip',
+    category: 'Embedded & IoT',
+    worksWellWith: ['architect', 'tester', 'devsecops'],
+    triggersCommands: [],
+    bestFor: 'Firmware, RTOS, hardware interfaces, IoT connectivity'
+  },
+  'scientific-computing': {
+    icon: 'atom',
+    category: 'Scientific',
+    worksWellWith: ['data-engineer', 'ml-engineer', 'performance-engineer'],
+    triggersCommands: [],
+    bestFor: 'Numerical methods, simulations, parallel computing, visualization'
   }
 };
 
@@ -193,15 +263,39 @@ const COMMAND_CATEGORIES = {
   context: { icon: 'layer-group', description: 'Context and session management commands' },
   design: { icon: 'palette', description: 'Design and UI/UX commands for visual work' },
   omega: { icon: 'wand-magic-sparkles', description: 'Omega-level strategic thinking commands' },
-  sprint: { icon: 'calendar-days', description: 'Sprint and team management commands' }
+  sprint: { icon: 'calendar-days', description: 'Sprint and team management commands' },
+  sre: { icon: 'chart-line', description: 'Site reliability and observability commands' },
+  game: { icon: 'gamepad', description: 'Game development and optimization commands' },
+  iot: { icon: 'microchip', description: 'IoT device management and provisioning commands' },
+  microservices: { icon: 'cubes', description: 'Microservices architecture commands' },
+  event: { icon: 'bolt', description: 'Event-driven architecture commands' },
+  ml: { icon: 'brain', description: 'Machine learning workflow commands' }
 };
 
 /**
  * Parse YAML frontmatter from markdown file
+ * If no YAML frontmatter, extract title/description from markdown content
  */
 function parseFrontmatter(content) {
   const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-  if (!match) return { frontmatter: {}, body: content };
+  if (!match) {
+    // No YAML frontmatter - try to extract from markdown
+    const frontmatter = {};
+
+    // Extract title from H1 header
+    const h1Match = content.match(/^#\s+(.+)$/m);
+    if (h1Match) {
+      frontmatter.name = h1Match[1].trim();
+    }
+
+    // Extract description from first paragraph after H1
+    const descMatch = content.match(/^#\s+.+\n\n([^#\n][^\n]+)/m);
+    if (descMatch) {
+      frontmatter.description = descMatch[1].trim();
+    }
+
+    return { frontmatter, body: content };
+  }
 
   const frontmatterLines = match[1].split('\n');
   const frontmatter = {};
@@ -923,18 +1017,25 @@ function formatCategoryName(cat) {
  */
 const SKILL_CATEGORIES = {
   'ai-engineering': { icon: 'microchip', description: 'AI/ML engineering patterns and best practices' },
+  'ai-ml': { icon: 'brain-circuit', description: 'MLOps, experiment tracking, and model serving' },
   autonomous: { icon: 'robot', description: 'Autonomous project development orchestration' },
   backend: { icon: 'server', description: 'Backend architecture and API patterns' },
   databases: { icon: 'database', description: 'Database design and optimization' },
   devops: { icon: 'cloud', description: 'Infrastructure, containers, and CI/CD' },
+  'event-driven': { icon: 'bolt', description: 'Event sourcing, CQRS, and streaming patterns' },
   frameworks: { icon: 'layer-group', description: 'Framework-specific patterns and best practices' },
   frontend: { icon: 'palette', description: 'Frontend tooling, styling, and UI patterns' },
+  game: { icon: 'gamepad', description: 'Game development with Unity, Godot, and networking' },
   integrations: { icon: 'plug', description: 'Third-party service integrations' },
+  iot: { icon: 'microchip-ai', description: 'IoT protocols, edge computing, and device management' },
   languages: { icon: 'code', description: 'Programming language expertise' },
   methodology: { icon: 'diagram-project', description: 'Development methodologies and workflows' },
+  microservices: { icon: 'cubes', description: 'Service mesh, API gateway, and distributed patterns' },
   mobile: { icon: 'mobile', description: 'Mobile app development patterns' },
+  'mobile-advanced': { icon: 'mobile-screen', description: 'Advanced mobile patterns and CI/CD' },
   omega: { icon: 'wand-magic-sparkles', description: 'Omega-level development practices' },
   security: { icon: 'shield-halved', description: 'Security best practices and authentication' },
+  simulation: { icon: 'atom', description: 'Scientific computing, physics, and parallel processing' },
   testing: { icon: 'flask-vial', description: 'Testing frameworks and strategies' },
   tools: { icon: 'toolbox', description: 'Development tools and utilities' }
 };
@@ -1050,7 +1151,7 @@ OMGKIT detects and activates this skill when it finds:
     skillsByCategory[skill.category].push(skill);
   }
 
-  const categoryOrder = ['ai-engineering', 'autonomous', 'languages', 'frameworks', 'backend', 'databases', 'frontend', 'mobile', 'devops', 'security', 'testing', 'tools', 'integrations', 'methodology', 'omega'];
+  const categoryOrder = ['ai-engineering', 'ai-ml', 'autonomous', 'languages', 'frameworks', 'backend', 'databases', 'frontend', 'mobile', 'mobile-advanced', 'devops', 'security', 'testing', 'tools', 'integrations', 'methodology', 'omega', 'microservices', 'event-driven', 'game', 'iot', 'simulation'];
 
   const overviewDoc = `---
 title: "Skills Overview"
@@ -1196,6 +1297,7 @@ skills:
 const WORKFLOW_CATEGORIES = {
   development: { icon: 'code', description: 'Core development workflows for features, bugs, and reviews' },
   'ai-engineering': { icon: 'microchip', description: 'AI/ML system development workflows' },
+  'ai-ml': { icon: 'brain-circuit', description: 'MLOps and model lifecycle workflows' },
   omega: { icon: 'wand-magic-sparkles', description: 'Strategic thinking and improvement workflows' },
   sprint: { icon: 'calendar-days', description: 'Sprint management and team coordination' },
   security: { icon: 'shield-halved', description: 'Security auditing and penetration testing' },
@@ -1204,7 +1306,10 @@ const WORKFLOW_CATEGORIES = {
   fullstack: { icon: 'layer-group', description: 'Full-stack feature development' },
   content: { icon: 'file-lines', description: 'Documentation and content creation' },
   research: { icon: 'magnifying-glass', description: 'Technology research and best practices' },
-  quality: { icon: 'gauge-high', description: 'Performance and quality optimization' }
+  quality: { icon: 'gauge-high', description: 'Performance and quality optimization' },
+  microservices: { icon: 'cubes', description: 'Microservices architecture and distributed systems' },
+  'event-driven': { icon: 'bolt', description: 'Event-driven architecture and streaming' },
+  'game-dev': { icon: 'gamepad', description: 'Game development lifecycle and optimization' }
 };
 
 /**
@@ -1655,7 +1760,7 @@ Provide detailed context in your workflow description. Include specific requirem
     workflowsByCategory[wf.category].push(wf);
   }
 
-  const categoryOrder = ['development', 'ai-engineering', 'omega', 'sprint', 'security', 'database', 'api', 'fullstack', 'content', 'research', 'quality'];
+  const categoryOrder = ['development', 'ai-engineering', 'ai-ml', 'omega', 'sprint', 'security', 'database', 'api', 'fullstack', 'content', 'research', 'quality', 'microservices', 'event-driven', 'game-dev'];
 
   // Generate overview page with comprehensive structure
   const overviewDoc = `---

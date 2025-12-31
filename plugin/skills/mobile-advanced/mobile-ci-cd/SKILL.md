@@ -1,0 +1,407 @@
+# Mobile CI/CD
+
+Fastlane, App Store/Play Store deployment, code signing, beta distribution, and automated release pipelines.
+
+## Overview
+
+Mobile CI/CD automates building, testing, signing, and deploying mobile applications to app stores and beta distribution channels.
+
+## Core Concepts
+
+### Pipeline Stages
+- **Build**: Compile and bundle app
+- **Test**: Unit, integration, UI tests
+- **Sign**: Code signing and provisioning
+- **Deploy**: Store submission or beta distribution
+- **Monitor**: Crash reporting, analytics
+
+### Key Challenges
+- Code signing complexity
+- Multiple environments
+- Store review processes
+- Version management
+- Build time optimization
+
+## Fastlane Setup
+
+### iOS Configuration
+```ruby
+# ios/fastlane/Fastfile
+default_platform(:ios)
+
+platform :ios do
+  desc "Build and deploy to TestFlight"
+  lane :beta do
+    setup_ci if ENV['CI']
+
+    # Match for code signing
+    match(
+      type: "appstore",
+      readonly: is_ci,
+      app_identifier: "com.company.app"
+    )
+
+    # Increment build number
+    increment_build_number(
+      build_number: ENV['BUILD_NUMBER'] || latest_testflight_build_number + 1
+    )
+
+    # Build
+    build_app(
+      workspace: "App.xcworkspace",
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "App.ipa"
+    )
+
+    # Upload to TestFlight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      changelog: changelog_from_git_commits
+    )
+
+    # Notify
+    slack(
+      message: "iOS build #{lane_context[SharedValues::BUILD_NUMBER]} uploaded to TestFlight"
+    )
+  end
+
+  desc "Deploy to App Store"
+  lane :release do
+    # Build
+    beta
+
+    # Submit for review
+    deliver(
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        add_id_info_uses_idfa: false
+      }
+    )
+  end
+end
+```
+
+### Android Configuration
+```ruby
+# android/fastlane/Fastfile
+default_platform(:android)
+
+platform :android do
+  desc "Build and deploy to Play Store internal track"
+  lane :beta do
+    # Increment version code
+    increment_version_code(
+      gradle_file_path: "app/build.gradle",
+      version_code: ENV['BUILD_NUMBER'].to_i
+    )
+
+    # Build release bundle
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      properties: {
+        "android.injected.signing.store.file" => ENV['KEYSTORE_PATH'],
+        "android.injected.signing.store.password" => ENV['KEYSTORE_PASSWORD'],
+        "android.injected.signing.key.alias" => ENV['KEY_ALIAS'],
+        "android.injected.signing.key.password" => ENV['KEY_PASSWORD']
+      }
+    )
+
+    # Upload to Play Store
+    upload_to_play_store(
+      track: "internal",
+      aab: "app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+  end
+
+  desc "Promote to production"
+  lane :release do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "production",
+      skip_upload_aab: true,
+      skip_upload_metadata: false
+    )
+  end
+end
+```
+
+## Code Signing
+
+### iOS Match Setup
+```ruby
+# Matchfile
+git_url("git@github.com:company/certificates.git")
+storage_mode("git")
+
+type("appstore") # development, adhoc, appstore
+app_identifier(["com.company.app", "com.company.app.widget"])
+username("ci@company.com")
+
+# For CI
+readonly(true) if ENV['CI']
+```
+
+### Android Signing
+```groovy
+// android/app/build.gradle
+android {
+    signingConfigs {
+        release {
+            if (System.getenv("KEYSTORE_PATH")) {
+                storeFile file(System.getenv("KEYSTORE_PATH"))
+                storePassword System.getenv("KEYSTORE_PASSWORD")
+                keyAlias System.getenv("KEY_ALIAS")
+                keyPassword System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+```
+
+## GitHub Actions Pipeline
+
+### Complete Workflow
+```yaml
+name: Mobile CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - ios
+          - android
+          - both
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '18'
+  RUBY_VERSION: '3.1'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run linter
+        run: yarn lint
+
+      - name: Run tests
+        run: yarn test --coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+
+  build-ios:
+    needs: test
+    runs-on: macos-14
+    if: github.event.inputs.platform != 'android'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: |
+          yarn install --frozen-lockfile
+          cd ios && pod install
+
+      - name: Setup certificates
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_TOKEN }}
+        run: |
+          cd ios
+          bundle exec fastlane match appstore --readonly
+
+      - name: Build iOS
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          cd ios
+          bundle exec fastlane beta
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: ios/build/*.ipa
+
+  build-android:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event.inputs.platform != 'ios'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+          bundler-cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo $KEYSTORE_BASE64 | base64 -d > android/app/release.keystore
+
+      - name: Build Android
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+          KEYSTORE_PATH: release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          cd android
+          bundle exec fastlane beta
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: android/app/build/outputs/bundle/release/*.aab
+```
+
+## Version Management
+
+### Automated Versioning
+```ruby
+# Fastlane action for semantic versioning
+desc "Bump version"
+lane :bump do |options|
+  type = options[:type] || "patch" # major, minor, patch
+
+  current = get_version_number
+  new_version = increment_version(current, type)
+
+  # Update iOS
+  increment_version_number(version_number: new_version)
+
+  # Update Android
+  android_set_version_name(version_name: new_version, gradle_file: "../android/app/build.gradle")
+
+  # Update package.json
+  package = JSON.parse(File.read("../package.json"))
+  package["version"] = new_version
+  File.write("../package.json", JSON.pretty_generate(package))
+
+  git_commit(
+    path: ["ios/", "android/app/build.gradle", "package.json"],
+    message: "chore: bump version to #{new_version}"
+  )
+
+  add_git_tag(tag: "v#{new_version}")
+end
+```
+
+## Best Practices
+
+1. **Use Match**: Centralized code signing
+2. **Separate Environments**: Dev, staging, production
+3. **Automate Everything**: No manual steps
+4. **Cache Dependencies**: Speed up builds
+5. **Notify on Failures**: Slack/email alerts
+
+## Build Optimization
+
+```yaml
+# Cache strategies
+- name: Cache Pods
+  uses: actions/cache@v3
+  with:
+    path: ios/Pods
+    key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+
+- name: Cache Gradle
+  uses: actions/cache@v3
+  with:
+    path: |
+      ~/.gradle/caches
+      ~/.gradle/wrapper
+    key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+```
+
+## Anti-Patterns
+
+- Manual code signing
+- Hardcoded secrets in code
+- Skipping test stage
+- No build number tracking
+- Missing artifact storage
+
+## When to Use
+
+- Production mobile apps
+- Team collaboration
+- Frequent releases
+- Multiple environments
+- App Store distribution
+
+## When NOT to Use
+
+- Personal side projects
+- Very early prototyping
+- No app store deployment
+- Single developer

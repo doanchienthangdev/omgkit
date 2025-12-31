@@ -1,0 +1,511 @@
+---
+title: "LLMOps"
+description: "LLM deployment, prompt management, RAG pipelines, fine-tuning workflows, and LLM evaluation frameworks."
+icon: "brain-circuit"
+---
+
+<Info>
+  **Category:** Ai-ml
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+LLM deployment, prompt management, RAG pipelines, fine-tuning workflows, and LLM evaluation frameworks.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# LLMOps
+
+LLM deployment, prompt management, RAG pipelines, fine-tuning workflows, and LLM evaluation frameworks.
+
+## Overview
+
+LLMOps extends MLOps practices for Large Language Models, addressing unique challenges like prompt engineering, context management, and evaluation of generative outputs.
+
+## Core Concepts
+
+### LLM Lifecycle
+- **Prompt Engineering**: Design and iterate prompts
+- **Fine-tuning**: Adapt models to specific tasks
+- **Deployment**: Serve models at scale
+- **Evaluation**: Measure quality and safety
+- **Monitoring**: Track performance and costs
+
+### Key Challenges
+- Non-deterministic outputs
+- Context window limitations
+- Cost management
+- Latency optimization
+- Safety and alignment
+
+## Prompt Management
+
+### Prompt Registry
+```python
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional
+from datetime import datetime
+import hashlib
+import json
+
+@dataclass
+class PromptTemplate:
+    name: str
+    version: str
+    template: str
+    variables: List[str]
+    model: str
+    temperature: float = 0.7
+    max_tokens: int = 1000
+    metadata: Dict = field(default_factory=dict)
+    created_at: datetime = field(default_factory=datetime.now)
+
+    @property
+    def hash(self) -> str:
+        content = f"{self.template}{self.model}{self.temperature}"
+        return hashlib.sha256(content.encode()).hexdigest()[:12]
+
+class PromptRegistry:
+    def __init__(self, storage_backend):
+        self.storage = storage_backend
+
+    def register(self, prompt: PromptTemplate) -> str:
+        # Check for existing version
+        existing = self.get(prompt.name, prompt.version)
+        if existing and existing.hash != prompt.hash:
+            raise ValueError(f"Version {prompt.version} exists with different content")
+
+        self.storage.save(prompt)
+        return prompt.hash
+
+    def get(self, name: str, version: str = "latest") -> Optional[PromptTemplate]:
+        return self.storage.load(name, version)
+
+    def list_versions(self, name: str) -> List[str]:
+        return self.storage.list_versions(name)
+
+    def render(self, name: str, version: str, variables: Dict) -> str:
+        prompt = self.get(name, version)
+        return prompt.template.format(**variables)
+
+# Usage
+registry = PromptRegistry(storage)
+
+prompt = PromptTemplate(
+    name="customer_support",
+    version="1.2.0",
+    template="""You are a helpful customer support agent for {company_name}.
+
+Customer query: {query}
+
+Respond helpfully and professionally. If you don't know the answer, say so.""",
+    variables=["company_name", "query"],
+    model="gpt-4",
+    temperature=0.3
+)
+
+registry.register(prompt)
+```
+
+### A/B Testing Prompts
+```python
+import random
+from typing import Callable
+
+class PromptExperiment:
+    def __init__(
+        self,
+        name: str,
+        variants: Dict[str, PromptTemplate],
+        weights: Optional[Dict[str, float]] = None
+    ):
+        self.name = name
+        self.variants = variants
+        self.weights = weights or {k: 1.0/len(variants) for k in variants}
+
+    def select_variant(self, user_id: str) -> tuple[str, PromptTemplate]:
+        # Deterministic selection based on user_id for consistency
+        hash_val = int(hashlib.md5(f"{self.name}:{user_id}".encode()).hexdigest(), 16)
+        rand_val = (hash_val % 1000) / 1000
+
+        cumulative = 0
+        for variant_name, weight in self.weights.items():
+            cumulative += weight
+            if rand_val < cumulative:
+                return variant_name, self.variants[variant_name]
+
+        return list(self.variants.items())[-1]
+
+class ExperimentTracker:
+    def __init__(self, db):
+        self.db = db
+
+    def log_experiment(
+        self,
+        experiment_name: str,
+        variant: str,
+        user_id: str,
+        input_data: dict,
+        output: str,
+        metrics: dict
+    ):
+        self.db.insert({
+            "experiment": experiment_name,
+            "variant": variant,
+            "user_id": user_id,
+            "input": input_data,
+            "output": output,
+            "metrics": metrics,
+            "timestamp": datetime.now()
+        })
+
+    def get_variant_metrics(self, experiment_name: str) -> Dict:
+        # Aggregate metrics per variant
+        return self.db.aggregate([
+            {"$match": {"experiment": experiment_name}},
+            {"$group": {
+                "_id": "$variant",
+                "count": {"$sum": 1},
+                "avg_latency": {"$avg": "$metrics.latency"},
+                "avg_quality": {"$avg": "$metrics.quality_score"}
+            }}
+        ])
+```
+
+## RAG Pipeline
+
+### Document Processing
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Pinecone
+import pinecone
+
+class RAGPipeline:
+    def __init__(self, index_name: str):
+        self.embeddings = OpenAIEmbeddings()
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            separators=["\n\n", "\n", " ", ""]
+        )
+
+        pinecone.init(api_key=os.environ["PINECONE_API_KEY"])
+        self.vectorstore = Pinecone.from_existing_index(
+            index_name,
+            self.embeddings
+        )
+
+    def ingest_documents(self, documents: List[Document]):
+        # Split documents
+        chunks = self.text_splitter.split_documents(documents)
+
+        # Add metadata
+        for i, chunk in enumerate(chunks):
+            chunk.metadata["chunk_id"] = f"{chunk.metadata['source']}_{i}"
+            chunk.metadata["ingested_at"] = datetime.now().isoformat()
+
+        # Embed and store
+        self.vectorstore.add_documents(chunks)
+
+    def retrieve(
+        self,
+        query: str,
+        k: int = 5,
+        filter: Optional[dict] = None
+    ) -> List[Document]:
+        return self.vectorstore.similarity_search(
+            query,
+            k=k,
+            filter=filter
+        )
+
+    def generate(
+        self,
+        query: str,
+        context_docs: List[Document],
+        model: str = "gpt-4"
+    ) -> str:
+        context = "\n\n".join([doc.page_content for doc in context_docs])
+
+        prompt = f"""Answer the question based on the context below.
+
+Context:
+{context}
+
+Question: {query}
+
+Answer:"""
+
+        response = openai.ChatCompletion.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3
+        )
+
+        return response.choices[0].message.content
+```
+
+### Hybrid Search
+```python
+from rank_bm25 import BM25Okapi
+import numpy as np
+
+class HybridRetriever:
+    def __init__(self, vectorstore, documents: List[str]):
+        self.vectorstore = vectorstore
+        self.documents = documents
+
+        # BM25 for keyword search
+        tokenized = [doc.split() for doc in documents]
+        self.bm25 = BM25Okapi(tokenized)
+
+    def retrieve(
+        self,
+        query: str,
+        k: int = 10,
+        alpha: float = 0.5  # Weight for vector search
+    ) -> List[Document]:
+        # Vector search
+        vector_results = self.vectorstore.similarity_search_with_score(query, k=k*2)
+
+        # BM25 search
+        tokenized_query = query.split()
+        bm25_scores = self.bm25.get_scores(tokenized_query)
+        bm25_top_k = np.argsort(bm25_scores)[-k*2:][::-1]
+
+        # Combine scores with RRF (Reciprocal Rank Fusion)
+        scores = {}
+        for rank, (doc, score) in enumerate(vector_results):
+            doc_id = doc.metadata["chunk_id"]
+            scores[doc_id] = scores.get(doc_id, 0) + alpha / (rank + 60)
+
+        for rank, idx in enumerate(bm25_top_k):
+            doc_id = self.documents[idx].metadata["chunk_id"]
+            scores[doc_id] = scores.get(doc_id, 0) + (1-alpha) / (rank + 60)
+
+        # Sort and return top k
+        sorted_ids = sorted(scores.keys(), key=lambda x: scores[x], reverse=True)[:k]
+        return [self._get_doc(doc_id) for doc_id in sorted_ids]
+```
+
+## LLM Evaluation
+
+### Evaluation Framework
+```python
+from typing import List, Dict, Callable
+from dataclasses import dataclass
+import openai
+
+@dataclass
+class EvalResult:
+    score: float
+    reasoning: str
+    metadata: dict
+
+class LLMEvaluator:
+    def __init__(self, judge_model: str = "gpt-4"):
+        self.judge_model = judge_model
+
+    def evaluate_relevance(
+        self,
+        query: str,
+        response: str,
+        context: str
+    ) -> EvalResult:
+        prompt = f"""Rate the relevance of the response to the query on a scale of 1-5.
+
+Query: {query}
+Context: {context}
+Response: {response}
+
+Provide your rating and reasoning in JSON format:
+{{"score": <1-5>, "reasoning": "<explanation>"}}"""
+
+        result = openai.ChatCompletion.create(
+            model=self.judge_model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0
+        )
+
+        parsed = json.loads(result.choices[0].message.content)
+        return EvalResult(
+            score=parsed["score"] / 5,
+            reasoning=parsed["reasoning"],
+            metadata={"query": query}
+        )
+
+    def evaluate_faithfulness(
+        self,
+        response: str,
+        context: str
+    ) -> EvalResult:
+        prompt = f"""Evaluate if the response is faithful to the context (no hallucinations).
+
+Context: {context}
+Response: {response}
+
+Rate faithfulness 1-5 and explain any hallucinations:
+{{"score": <1-5>, "reasoning": "<explanation>", "hallucinations": ["<list of hallucinated claims>"]}}"""
+
+        result = openai.ChatCompletion.create(
+            model=self.judge_model,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0
+        )
+
+        parsed = json.loads(result.choices[0].message.content)
+        return EvalResult(
+            score=parsed["score"] / 5,
+            reasoning=parsed["reasoning"],
+            metadata={"hallucinations": parsed.get("hallucinations", [])}
+        )
+
+class EvalPipeline:
+    def __init__(self, evaluators: List[Callable]):
+        self.evaluators = evaluators
+
+    def run(self, test_cases: List[dict]) -> Dict:
+        results = []
+        for case in test_cases:
+            case_results = {}
+            for evaluator in self.evaluators:
+                case_results[evaluator.__name__] = evaluator(**case)
+            results.append(case_results)
+
+        return {
+            "individual": results,
+            "aggregate": self._aggregate(results)
+        }
+
+    def _aggregate(self, results: List[dict]) -> dict:
+        metrics = {}
+        for metric in results[0].keys():
+            scores = [r[metric].score for r in results]
+            metrics[metric] = {
+                "mean": np.mean(scores),
+                "std": np.std(scores),
+                "min": min(scores),
+                "max": max(scores)
+            }
+        return metrics
+```
+
+## Cost Management
+
+### Token Tracking
+```python
+import tiktoken
+from functools import wraps
+
+class TokenTracker:
+    def __init__(self):
+        self.usage = {}
+
+    def track(self, model: str, prompt_tokens: int, completion_tokens: int):
+        if model not in self.usage:
+            self.usage[model] = {"prompt": 0, "completion": 0}
+
+        self.usage[model]["prompt"] += prompt_tokens
+        self.usage[model]["completion"] += completion_tokens
+
+    def estimate_cost(self) -> float:
+        pricing = {
+            "gpt-4": {"prompt": 0.03, "completion": 0.06},
+            "gpt-4-turbo": {"prompt": 0.01, "completion": 0.03},
+            "gpt-3.5-turbo": {"prompt": 0.0005, "completion": 0.0015}
+        }
+
+        total = 0
+        for model, usage in self.usage.items():
+            if model in pricing:
+                total += (usage["prompt"] / 1000) * pricing[model]["prompt"]
+                total += (usage["completion"] / 1000) * pricing[model]["completion"]
+        return total
+
+def track_tokens(tracker: TokenTracker):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            tracker.track(
+                model=kwargs.get("model", "gpt-4"),
+                prompt_tokens=result.usage.prompt_tokens,
+                completion_tokens=result.usage.completion_tokens
+            )
+            return result
+        return wrapper
+    return decorator
+```
+
+## Best Practices
+
+1. **Version Prompts**: Track all prompt changes
+2. **Cache Responses**: Reduce costs and latency
+3. **Structured Outputs**: Use JSON mode when possible
+4. **Fallback Models**: Have cheaper alternatives
+5. **Rate Limiting**: Protect against cost spikes
+
+## Anti-Patterns
+
+- Hardcoded prompts in code
+- No evaluation pipeline
+- Ignoring token costs
+- Missing safety filters
+- No prompt versioning
+
+## When to Use
+
+- Production LLM applications
+- Multiple prompt iterations
+- Team collaboration on prompts
+- Cost-sensitive deployments
+- RAG systems at scale
+
+## When NOT to Use
+
+- Simple one-off queries
+- Prototyping phase
+- No iteration expected
+- Single developer project
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  llm-ops:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ai-ml" icon="brain-circuit" href="/skills/overview#ai-ml">
+    More ai-ml skills
+  </Card>
+</CardGroup>

@@ -1,0 +1,426 @@
+# OTA Updates
+
+Over-the-air firmware updates including delta updates, rollback mechanisms, A/B partitioning, and update orchestration.
+
+## Overview
+
+OTA (Over-The-Air) updates enable remote firmware upgrades for IoT devices, ensuring security patches and feature updates reach deployed devices.
+
+## Core Concepts
+
+### Update Strategies
+- **Full Image**: Complete firmware replacement
+- **Delta Updates**: Only changed bytes
+- **A/B Partitioning**: Dual partition failsafe
+- **Staged Rollout**: Gradual deployment
+
+### Update Lifecycle
+```
+Create → Sign → Upload → Deploy → Monitor → Rollback (if needed)
+```
+
+## A/B Partition System
+
+### Partition Layout
+```
+Flash Memory Layout:
+┌─────────────────────────────────┐
+│ Bootloader (Protected)          │
+├─────────────────────────────────┤
+│ Partition A (Active)            │
+│ - Application                   │
+│ - Version: 1.2.0                │
+├─────────────────────────────────┤
+│ Partition B (Standby)           │
+│ - Application                   │
+│ - Version: 1.1.0                │
+├─────────────────────────────────┤
+│ Configuration (Shared)          │
+├─────────────────────────────────┤
+│ OTA Staging Area                │
+└─────────────────────────────────┘
+```
+
+### ESP32 OTA Implementation
+```cpp
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <Update.h>
+#include <esp_ota_ops.h>
+#include <ArduinoJson.h>
+
+const char* FIRMWARE_VERSION = "1.2.0";
+const char* UPDATE_SERVER = "https://ota.example.com";
+
+struct UpdateInfo {
+    String version;
+    String url;
+    String checksum;
+    size_t size;
+    bool mandatory;
+};
+
+class OTAManager {
+private:
+    String deviceId;
+    String currentVersion;
+
+public:
+    OTAManager(const String& id) : deviceId(id), currentVersion(FIRMWARE_VERSION) {}
+
+    bool checkForUpdate(UpdateInfo& info) {
+        HTTPClient http;
+        String url = String(UPDATE_SERVER) + "/api/updates/check";
+        url += "?device_id=" + deviceId;
+        url += "&current_version=" + currentVersion;
+        url += "&device_type=sensor-v2";
+
+        http.begin(url);
+        int httpCode = http.GET();
+
+        if (httpCode != 200) {
+            http.end();
+            return false;
+        }
+
+        String payload = http.getString();
+        http.end();
+
+        StaticJsonDocument<512> doc;
+        deserializeJson(doc, payload);
+
+        if (!doc["update_available"].as<bool>()) {
+            return false;
+        }
+
+        info.version = doc["version"].as<String>();
+        info.url = doc["url"].as<String>();
+        info.checksum = doc["sha256"].as<String>();
+        info.size = doc["size"].as<size_t>();
+        info.mandatory = doc["mandatory"].as<bool>();
+
+        return true;
+    }
+
+    bool performUpdate(const UpdateInfo& info) {
+        Serial.printf("Starting OTA update to version %s\n", info.version.c_str());
+
+        HTTPClient http;
+        http.begin(info.url);
+        int httpCode = http.GET();
+
+        if (httpCode != 200) {
+            Serial.println("Failed to download firmware");
+            return false;
+        }
+
+        int contentLength = http.getSize();
+        WiFiClient* stream = http.getStreamPtr();
+
+        if (!Update.begin(contentLength)) {
+            Serial.println("Not enough space for OTA");
+            return false;
+        }
+
+        // Write firmware
+        size_t written = 0;
+        uint8_t buff[1024];
+        while (http.connected() && written < contentLength) {
+            size_t available = stream->available();
+            if (available) {
+                int read = stream->readBytes(buff, min(available, sizeof(buff)));
+                Update.write(buff, read);
+                written += read;
+
+                // Progress callback
+                int progress = (written * 100) / contentLength;
+                reportProgress(progress);
+            }
+            yield();
+        }
+
+        if (!Update.end(true)) {
+            Serial.printf("Update failed: %s\n", Update.errorString());
+            return false;
+        }
+
+        // Verify checksum
+        if (!verifyChecksum(info.checksum)) {
+            Serial.println("Checksum verification failed");
+            rollback();
+            return false;
+        }
+
+        Serial.println("Update successful, rebooting...");
+        reportUpdateComplete(info.version);
+        ESP.restart();
+        return true;
+    }
+
+    void validateUpdate() {
+        // Called after boot to confirm update worked
+        const esp_partition_t* running = esp_ota_get_running_partition();
+        esp_ota_img_states_t ota_state;
+
+        if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
+            if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+                // Perform self-tests
+                if (selfTest()) {
+                    esp_ota_mark_app_valid_cancel_rollback();
+                    Serial.println("Update validated successfully");
+                } else {
+                    Serial.println("Self-test failed, rolling back");
+                    esp_ota_mark_app_invalid_rollback_and_reboot();
+                }
+            }
+        }
+    }
+
+    void rollback() {
+        const esp_partition_t* running = esp_ota_get_running_partition();
+        const esp_partition_t* other = esp_ota_get_next_update_partition(running);
+
+        if (other) {
+            esp_ota_set_boot_partition(other);
+            ESP.restart();
+        }
+    }
+
+private:
+    bool selfTest() {
+        // Verify critical systems
+        bool wifiOk = WiFi.status() == WL_CONNECTED;
+        bool sensorsOk = testSensors();
+        bool mqttOk = testMqttConnection();
+
+        return wifiOk && sensorsOk && mqttOk;
+    }
+
+    void reportProgress(int progress) {
+        // Report to cloud
+    }
+
+    void reportUpdateComplete(const String& version) {
+        // Report successful update
+    }
+
+    bool verifyChecksum(const String& expected) {
+        // Verify SHA256 of installed image
+        return true;
+    }
+};
+```
+
+## Delta Updates
+
+### Creating Delta Updates
+```python
+import bsdiff4
+import hashlib
+from pathlib import Path
+
+class DeltaUpdateGenerator:
+    def create_delta(
+        self,
+        old_firmware: Path,
+        new_firmware: Path,
+        output_path: Path
+    ) -> dict:
+        """Create a binary delta between firmware versions"""
+        old_data = old_firmware.read_bytes()
+        new_data = new_firmware.read_bytes()
+
+        # Generate delta patch
+        patch = bsdiff4.diff(old_data, new_data)
+
+        # Compress if beneficial
+        if len(patch) < len(new_data) * 0.7:
+            output_path.write_bytes(patch)
+
+            return {
+                'type': 'delta',
+                'old_version_hash': hashlib.sha256(old_data).hexdigest(),
+                'new_version_hash': hashlib.sha256(new_data).hexdigest(),
+                'patch_hash': hashlib.sha256(patch).hexdigest(),
+                'patch_size': len(patch),
+                'full_size': len(new_data),
+                'savings_percent': round((1 - len(patch) / len(new_data)) * 100, 2)
+            }
+        else:
+            # Delta not worth it, use full update
+            return None
+
+    def apply_delta(self, old_firmware: bytes, patch: bytes) -> bytes:
+        """Apply delta patch to create new firmware"""
+        return bsdiff4.patch(old_firmware, patch)
+```
+
+## Update Orchestration
+
+### Fleet Update Service
+```python
+from fastapi import FastAPI, BackgroundTasks
+from pydantic import BaseModel
+from typing import List, Optional
+from enum import Enum
+import asyncio
+
+class UpdateState(Enum):
+    PENDING = "pending"
+    DOWNLOADING = "downloading"
+    INSTALLING = "installing"
+    VALIDATING = "validating"
+    COMPLETE = "complete"
+    FAILED = "failed"
+    ROLLED_BACK = "rolled_back"
+
+class DeploymentConfig(BaseModel):
+    firmware_version: str
+    target_devices: List[str]  # Device IDs or "all"
+    target_groups: List[str]
+    rollout_percentage: int = 100
+    rollout_interval_minutes: int = 60
+    failure_threshold_percent: int = 10
+    mandatory: bool = False
+
+class DeviceUpdateStatus(BaseModel):
+    device_id: str
+    state: UpdateState
+    progress: int
+    error_message: Optional[str]
+    started_at: Optional[str]
+    completed_at: Optional[str]
+
+class UpdateOrchestrator:
+    def __init__(self, db, notification_service):
+        self.db = db
+        self.notifications = notification_service
+
+    async def create_deployment(self, config: DeploymentConfig) -> str:
+        """Create a new firmware deployment"""
+        deployment_id = generate_id()
+
+        # Get target devices
+        devices = await self.resolve_targets(config)
+
+        # Calculate rollout batches
+        batches = self.create_rollout_batches(
+            devices,
+            config.rollout_percentage,
+            config.rollout_interval_minutes
+        )
+
+        # Store deployment
+        await self.db.deployments.insert_one({
+            'id': deployment_id,
+            'config': config.dict(),
+            'batches': batches,
+            'status': 'active',
+            'created_at': datetime.utcnow()
+        })
+
+        # Start first batch
+        asyncio.create_task(self.execute_deployment(deployment_id))
+
+        return deployment_id
+
+    async def execute_deployment(self, deployment_id: str):
+        """Execute deployment batches"""
+        deployment = await self.db.deployments.find_one({'id': deployment_id})
+
+        for batch_idx, batch in enumerate(deployment['batches']):
+            if deployment['status'] == 'paused':
+                break
+
+            # Notify devices in batch
+            for device_id in batch['devices']:
+                await self.notify_device(device_id, deployment['config'])
+
+            # Wait for batch completion
+            success_count, failure_count = await self.wait_for_batch(
+                deployment_id,
+                batch['devices'],
+                timeout_minutes=30
+            )
+
+            # Check failure threshold
+            failure_rate = failure_count / len(batch['devices']) * 100
+            if failure_rate > deployment['config']['failure_threshold_percent']:
+                await self.pause_deployment(deployment_id, f"Failure rate {failure_rate}% exceeded threshold")
+                break
+
+            # Wait before next batch
+            if batch_idx < len(deployment['batches']) - 1:
+                await asyncio.sleep(deployment['config']['rollout_interval_minutes'] * 60)
+
+    async def notify_device(self, device_id: str, config: dict):
+        """Notify device of available update"""
+        await self.notifications.send(
+            device_id,
+            topic=f"devices/{device_id}/ota",
+            payload={
+                'action': 'update_available',
+                'version': config['firmware_version'],
+                'mandatory': config['mandatory']
+            }
+        )
+
+    async def report_device_status(
+        self,
+        deployment_id: str,
+        device_id: str,
+        status: DeviceUpdateStatus
+    ):
+        """Record device update status"""
+        await self.db.device_updates.update_one(
+            {'deployment_id': deployment_id, 'device_id': device_id},
+            {'$set': status.dict()},
+            upsert=True
+        )
+
+        # Check for completion
+        if status.state in [UpdateState.COMPLETE, UpdateState.FAILED, UpdateState.ROLLED_BACK]:
+            await self.check_batch_completion(deployment_id)
+```
+
+## Best Practices
+
+1. **A/B Partitions**: Always have rollback capability
+2. **Signature Verification**: Sign all firmware
+3. **Staged Rollout**: Never update all devices at once
+4. **Health Checks**: Validate after update
+5. **Failure Thresholds**: Auto-pause on failures
+
+## Security
+
+```
+□ Firmware signed with private key
+□ Signature verified before installation
+□ Secure boot enabled
+□ Encrypted transport (HTTPS/TLS)
+□ Version downgrade prevention
+□ Tamper detection
+```
+
+## Anti-Patterns
+
+- No rollback capability
+- Updating all devices simultaneously
+- Skipping signature verification
+- No progress reporting
+- Missing failure handling
+
+## When to Use
+
+- Deployed IoT fleets
+- Security patch distribution
+- Feature updates
+- Bug fixes
+- Configuration changes
+
+## When NOT to Use
+
+- Development devices (use wired)
+- Single prototype
+- No connectivity
+- Critical real-time systems (plan carefully)

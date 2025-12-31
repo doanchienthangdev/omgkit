@@ -1,0 +1,166 @@
+---
+description: Implement distributed tracing across microservices
+triggers:
+  - manual
+  - observability:tracing
+agents:
+  - site-reliability-engineer
+  - fullstack-developer
+---
+
+# Distributed Tracing Workflow
+
+Set up end-to-end request tracing across services.
+
+## Prerequisites
+- [ ] Services identified for instrumentation
+- [ ] Tracing backend selected
+- [ ] Sampling strategy defined
+
+## Phase 1: Infrastructure Setup
+
+### Step 1.1: Deploy Tracing Backend
+```yaml
+agent: site-reliability-engineer
+action: deploy
+options:
+  - Jaeger
+  - Zipkin
+  - Tempo
+  - AWS X-Ray
+configuration:
+  - collector
+  - storage_backend
+  - query_service
+  - ui
+```
+
+### Step 1.2: Configure Sampling
+```yaml
+agent: site-reliability-engineer
+action: configure
+sampling:
+  type: probabilistic  # or rate_limiting, adaptive
+  rate: 0.1  # 10% of traces
+  rules:
+    - service: payment
+      rate: 1.0  # 100% for critical
+    - path: /health
+      rate: 0.0  # Don't trace health checks
+```
+
+## Phase 2: Service Instrumentation
+
+### Step 2.1: Add Tracing Libraries
+```yaml
+agent: fullstack-developer
+action: instrument
+libraries:
+  - opentelemetry-sdk
+  - opentelemetry-auto-instrumentation
+configuration:
+  - service_name
+  - environment
+  - version
+```
+
+### Step 2.2: Propagate Context
+```yaml
+agent: fullstack-developer
+action: implement
+context_propagation:
+  - HTTP_headers:
+      - traceparent
+      - tracestate
+  - gRPC_metadata
+  - message_queue_headers
+formats:
+  - W3C_Trace_Context
+  - B3
+```
+
+## Phase 3: Custom Instrumentation
+
+### Step 3.1: Add Custom Spans
+```yaml
+agent: fullstack-developer
+action: instrument
+custom_spans:
+  - database_queries
+  - external_api_calls
+  - cache_operations
+  - business_logic
+attributes:
+  - user_id
+  - order_id
+  - operation_type
+```
+
+### Step 3.2: Add Events and Exceptions
+```yaml
+agent: fullstack-developer
+action: instrument
+additions:
+  - span_events: significant_operations
+  - exception_recording: all_errors
+  - baggage: cross_cutting_data
+```
+
+## Phase 4: Correlation
+
+### Step 4.1: Log Correlation
+```yaml
+agent: fullstack-developer
+action: configure
+log_correlation:
+  - inject_trace_id_in_logs
+  - inject_span_id_in_logs
+  - structured_logging_format
+```
+
+### Step 4.2: Metrics Correlation
+```yaml
+agent: site-reliability-engineer
+action: configure
+metrics_correlation:
+  - exemplars: trace_id_in_metrics
+  - dashboards: trace_links
+```
+
+## Phase 5: Analysis and Alerts
+
+### Step 5.1: Create Dashboards
+```yaml
+agent: site-reliability-engineer
+action: create
+dashboards:
+  - service_latency_breakdown
+  - error_trace_analysis
+  - dependency_graph
+  - critical_path_analysis
+```
+
+### Step 5.2: Configure Alerts
+```yaml
+agent: site-reliability-engineer
+action: configure
+alerts:
+  - high_latency_traces
+  - error_rate_spikes
+  - missing_spans
+  - trace_completeness
+```
+
+## Outputs
+- [ ] Tracing backend deployment
+- [ ] Instrumented services
+- [ ] Context propagation
+- [ ] Correlated logs/metrics
+- [ ] Analysis dashboards
+
+## Quality Gates
+- Traces flow end-to-end
+- Context propagated correctly
+- Sampling rate appropriate
+- No performance degradation
+- Alerts configured

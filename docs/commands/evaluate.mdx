@@ -1,0 +1,124 @@
+---
+title: "/ml:evaluate"
+description: "Evaluate ML model performance with comprehensive metrics"
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ml
+
+  **Syntax:** `/ml:evaluate <model name or path>`
+</Info>
+
+## Overview
+
+Evaluate ML model performance with comprehensive metrics
+
+## Quick Start
+
+```bash
+/ml:evaluate "model
+```
+
+
+# 📊 ML Evaluation: \<model name or path\>
+
+Evaluate model: **\<model name or path\>**
+
+## Agent
+Uses **ml-engineer** agent for model evaluation.
+
+## Evaluation Types
+- **Offline** - Test set metrics
+- **Online** - A/B testing
+- **Shadow** - Production comparison
+- **Bias** - Fairness analysis
+
+## Metrics
+- Classification: Accuracy, F1, AUC, Precision, Recall
+- Regression: RMSE, MAE, R², MAPE
+- Ranking: NDCG, MAP, MRR
+- Custom: Business metrics
+
+## Workflow
+1. **Data Split** - Ensure proper splits
+2. **Baseline** - Compare against baseline
+3. **Metrics** - Compute all metrics
+4. **Analysis** - Error analysis
+5. **Report** - Generate evaluation report
+
+## Outputs
+- Confusion matrix
+- ROC/PR curves
+- Feature importance
+- Error analysis
+- Evaluation report
+
+## Progress
+- [ ] Test data prepared
+- [ ] Baseline computed
+- [ ] Metrics calculated
+- [ ] Errors analyzed
+- [ ] Report generated
+
+Include model comparison if multiple models.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/ml:evaluate "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/ml:evaluate "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Ml Commands" icon="brain" href="/commands/overview#ml">
+    More ml commands
+  </Card>
+</CardGroup>

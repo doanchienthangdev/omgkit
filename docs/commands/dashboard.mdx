@@ -1,0 +1,130 @@
+---
+title: "/sre:dashboard"
+description: "Design and configure SRE observability dashboards with SLI/SLO tracking"
+icon: "chart-line"
+---
+
+<Info>
+  **Category:** Sre
+
+  **Syntax:** `/sre:dashboard <service or system>`
+</Info>
+
+## Overview
+
+Design and configure SRE observability dashboards with SLI/SLO tracking
+
+## Quick Start
+
+```bash
+/sre:dashboard "service
+```
+
+
+# 📊 SRE Dashboard: \<service or system\>
+
+Design observability dashboard for: **\<service or system\>**
+
+## Agent
+Uses **site-reliability-engineer** agent for dashboard design.
+
+## Dashboard Components
+- **SLI/SLO Tracking** - Error budgets, burn rates
+- **Service Health** - Availability, latency
+- **Infrastructure** - Resources, capacity
+- **Incidents** - Alerts, MTTR tracking
+- **Dependencies** - Service map, health
+
+## Metrics Framework
+- **RED** - Rate, Errors, Duration
+- **USE** - Utilization, Saturation, Errors
+- **Four Golden Signals** - Latency, Traffic, Errors, Saturation
+
+## Tools
+- Grafana dashboards
+- Prometheus queries (PromQL)
+- Datadog/New Relic
+- Custom metrics exporters
+
+## Workflow
+1. **Requirements** - Define SLIs/SLOs
+2. **Data Sources** - Configure metrics
+3. **Design** - Layout panels
+4. **Alerts** - Set thresholds
+5. **Documentation** - Runbooks
+
+## Outputs
+- Dashboard JSON/YAML
+- PromQL queries
+- Alert rules
+- SLO documentation
+- Runbook templates
+
+## Progress
+- [ ] SLIs defined
+- [ ] Data sources configured
+- [ ] Dashboard designed
+- [ ] Alerts configured
+- [ ] Runbooks created
+
+Include error budget burn rate alerts.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/sre:dashboard "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/sre:dashboard "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Sre Commands" icon="chart-line" href="/commands/overview#sre">
+    More sre commands
+  </Card>
+</CardGroup>

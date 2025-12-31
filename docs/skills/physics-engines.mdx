@@ -1,0 +1,434 @@
+---
+title: "Physics Engines"
+description: "Physics simulation including rigid body dynamics, collision detection, constraint solvers, and soft body simulation."
+icon: "atom"
+---
+
+<Info>
+  **Category:** Simulation
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Physics simulation including rigid body dynamics, collision detection, constraint solvers, and soft body simulation.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Physics Engines
+
+Physics simulation including rigid body dynamics, collision detection, constraint solvers, and soft body simulation.
+
+## Overview
+
+Physics engines simulate physical interactions in real-time or offline, used in games, robotics, engineering, and scientific visualization.
+
+## Core Concepts
+
+### Simulation Components
+- **Rigid Bodies**: Non-deformable objects
+- **Collision Detection**: Finding contacts
+- **Constraint Solving**: Joints, contacts
+- **Integration**: Time stepping
+
+### Physics Pipeline
+```
+Broad Phase → Narrow Phase → Constraint Solving → Integration
+(AABB)         (GJK/SAT)       (Sequential Impulse)  (Verlet/RK4)
+```
+
+## Rigid Body Dynamics
+
+### Basic Physics Object
+```python
+import numpy as np
+from dataclasses import dataclass, field
+from typing import List
+import quaternion
+
+@dataclass
+class Transform:
+    position: np.ndarray = field(default_factory=lambda: np.zeros(3))
+    rotation: np.quaternion = field(default_factory=lambda: np.quaternion(1, 0, 0, 0))
+    scale: np.ndarray = field(default_factory=lambda: np.ones(3))
+
+    def get_matrix(self) -> np.ndarray:
+        """Get 4x4 transformation matrix"""
+        rot_matrix = quaternion.as_rotation_matrix(self.rotation)
+        scale_matrix = np.diag(np.append(self.scale, 1))
+        trans_matrix = np.eye(4)
+        trans_matrix[:3, :3] = rot_matrix
+        trans_matrix[:3, 3] = self.position
+        return trans_matrix @ scale_matrix
+
+@dataclass
+class RigidBody:
+    transform: Transform = field(default_factory=Transform)
+    velocity: np.ndarray = field(default_factory=lambda: np.zeros(3))
+    angular_velocity: np.ndarray = field(default_factory=lambda: np.zeros(3))
+    mass: float = 1.0
+    inertia_tensor: np.ndarray = field(default_factory=lambda: np.eye(3))
+    is_kinematic: bool = False
+    restitution: float = 0.5
+    friction: float = 0.5
+
+    @property
+    def inverse_mass(self) -> float:
+        return 0.0 if self.is_kinematic else 1.0 / self.mass
+
+    @property
+    def inverse_inertia(self) -> np.ndarray:
+        if self.is_kinematic:
+            return np.zeros((3, 3))
+        return np.linalg.inv(self.inertia_tensor)
+
+    def apply_force(self, force: np.ndarray, point: np.ndarray = None):
+        """Apply force at point (or center of mass)"""
+        if self.is_kinematic:
+            return
+
+        # Linear acceleration
+        self.velocity += force * self.inverse_mass
+
+        # Angular acceleration if point specified
+        if point is not None:
+            r = point - self.transform.position
+            torque = np.cross(r, force)
+            self.angular_velocity += self.inverse_inertia @ torque
+
+    def apply_impulse(self, impulse: np.ndarray, point: np.ndarray = None):
+        """Apply instantaneous impulse"""
+        if self.is_kinematic:
+            return
+
+        self.velocity += impulse * self.inverse_mass
+
+        if point is not None:
+            r = point - self.transform.position
+            angular_impulse = np.cross(r, impulse)
+            self.angular_velocity += self.inverse_inertia @ angular_impulse
+
+    def integrate(self, dt: float, gravity: np.ndarray = np.array([0, -9.81, 0])):
+        """Semi-implicit Euler integration"""
+        if self.is_kinematic:
+            return
+
+        # Apply gravity
+        self.velocity += gravity * dt
+
+        # Update position
+        self.transform.position += self.velocity * dt
+
+        # Update rotation
+        omega_quat = np.quaternion(0, *self.angular_velocity)
+        dq = 0.5 * omega_quat * self.transform.rotation * dt
+        self.transform.rotation += dq
+        self.transform.rotation = self.transform.rotation.normalized()
+```
+
+## Collision Detection
+
+### Broad Phase (AABB)
+```python
+@dataclass
+class AABB:
+    min_point: np.ndarray
+    max_point: np.ndarray
+
+    def intersects(self, other: 'AABB') -> bool:
+        return (
+            self.min_point[0] <= other.max_point[0] and
+            self.max_point[0] >= other.min_point[0] and
+            self.min_point[1] <= other.max_point[1] and
+            self.max_point[1] >= other.min_point[1] and
+            self.min_point[2] <= other.max_point[2] and
+            self.max_point[2] >= other.min_point[2]
+        )
+
+class BroadPhase:
+    def __init__(self):
+        self.objects: List[tuple] = []  # (object_id, AABB)
+
+    def update(self, objects: List[tuple]):
+        self.objects = objects
+
+    def get_pairs(self) -> List[tuple]:
+        """Return potentially colliding pairs"""
+        pairs = []
+
+        # Sort and sweep on X axis
+        sorted_objects = sorted(self.objects, key=lambda o: o[1].min_point[0])
+
+        for i, (id_a, aabb_a) in enumerate(sorted_objects):
+            for id_b, aabb_b in sorted_objects[i + 1:]:
+                if aabb_b.min_point[0] > aabb_a.max_point[0]:
+                    break
+
+                if aabb_a.intersects(aabb_b):
+                    pairs.append((id_a, id_b))
+
+        return pairs
+```
+
+### Narrow Phase (GJK/EPA)
+```python
+from typing import Optional
+
+@dataclass
+class CollisionInfo:
+    normal: np.ndarray
+    depth: float
+    point_a: np.ndarray
+    point_b: np.ndarray
+
+def support(shape_a, shape_b, direction: np.ndarray) -> np.ndarray:
+    """Minkowski difference support function"""
+    point_a = shape_a.get_furthest_point(direction)
+    point_b = shape_b.get_furthest_point(-direction)
+    return point_a - point_b
+
+def gjk_intersection(shape_a, shape_b) -> bool:
+    """GJK algorithm for convex shapes"""
+    direction = np.array([1, 0, 0])
+    simplex = [support(shape_a, shape_b, direction)]
+
+    direction = -simplex[0]
+
+    for _ in range(32):  # Max iterations
+        point = support(shape_a, shape_b, direction)
+
+        if np.dot(point, direction) < 0:
+            return False  # No intersection
+
+        simplex.append(point)
+        direction, contains_origin = do_simplex(simplex)
+
+        if contains_origin:
+            return True
+
+    return False
+
+def epa_penetration(shape_a, shape_b, simplex: List) -> Optional[CollisionInfo]:
+    """EPA algorithm for penetration depth"""
+    # Expand simplex to tetrahedron if needed
+    polytope = expand_to_tetrahedron(simplex, shape_a, shape_b)
+    faces = get_initial_faces(polytope)
+
+    for _ in range(64):  # Max iterations
+        # Find closest face to origin
+        closest_face, closest_dist, closest_normal = find_closest_face(polytope, faces)
+
+        # Get support point in normal direction
+        new_point = support(shape_a, shape_b, closest_normal)
+        new_dist = np.dot(new_point, closest_normal)
+
+        if new_dist - closest_dist < 0.001:
+            # Converged
+            return CollisionInfo(
+                normal=closest_normal,
+                depth=closest_dist,
+                point_a=get_contact_point(shape_a, closest_normal),
+                point_b=get_contact_point(shape_b, -closest_normal)
+            )
+
+        # Expand polytope
+        polytope, faces = expand_polytope(polytope, faces, new_point)
+
+    return None
+```
+
+## Constraint Solver
+
+### Sequential Impulse Solver
+```python
+@dataclass
+class ContactConstraint:
+    body_a: RigidBody
+    body_b: RigidBody
+    normal: np.ndarray
+    point: np.ndarray
+    penetration: float
+    accumulated_impulse: float = 0.0
+
+class ConstraintSolver:
+    def __init__(self, iterations: int = 10):
+        self.iterations = iterations
+
+    def solve(self, contacts: List[ContactConstraint], dt: float):
+        """Solve contact constraints using sequential impulses"""
+        # Warm starting
+        for contact in contacts:
+            self.apply_impulse(contact, contact.accumulated_impulse)
+
+        # Iterative solving
+        for _ in range(self.iterations):
+            for contact in contacts:
+                impulse = self.calculate_impulse(contact, dt)
+                new_accumulated = max(0, contact.accumulated_impulse + impulse)
+                applied_impulse = new_accumulated - contact.accumulated_impulse
+                contact.accumulated_impulse = new_accumulated
+
+                self.apply_impulse(contact, applied_impulse)
+
+    def calculate_impulse(self, contact: ContactConstraint, dt: float) -> float:
+        """Calculate impulse magnitude for contact"""
+        a, b = contact.body_a, contact.body_b
+        n = contact.normal
+
+        # Relative velocity at contact point
+        r_a = contact.point - a.transform.position
+        r_b = contact.point - b.transform.position
+
+        v_a = a.velocity + np.cross(a.angular_velocity, r_a)
+        v_b = b.velocity + np.cross(b.angular_velocity, r_b)
+        v_rel = v_a - v_b
+
+        v_n = np.dot(v_rel, n)
+
+        # Baumgarte stabilization
+        bias = 0.2 / dt * max(0, contact.penetration - 0.01)
+
+        # Restitution
+        e = a.restitution * b.restitution
+        if v_n < -1.0:
+            bias += e * v_n
+
+        # Effective mass
+        rn_a = np.cross(r_a, n)
+        rn_b = np.cross(r_b, n)
+
+        k = (a.inverse_mass + b.inverse_mass +
+             np.dot(rn_a, a.inverse_inertia @ rn_a) +
+             np.dot(rn_b, b.inverse_inertia @ rn_b))
+
+        effective_mass = 1.0 / k if k > 0 else 0
+
+        return effective_mass * (-v_n + bias)
+
+    def apply_impulse(self, contact: ContactConstraint, impulse: float):
+        """Apply impulse to bodies"""
+        j = impulse * contact.normal
+        contact.body_a.apply_impulse(j, contact.point)
+        contact.body_b.apply_impulse(-j, contact.point)
+```
+
+## Physics World
+
+### Complete Simulation
+```python
+class PhysicsWorld:
+    def __init__(self):
+        self.bodies: List[RigidBody] = []
+        self.broad_phase = BroadPhase()
+        self.solver = ConstraintSolver(iterations=10)
+        self.gravity = np.array([0, -9.81, 0])
+
+    def add_body(self, body: RigidBody):
+        self.bodies.append(body)
+
+    def step(self, dt: float):
+        """Perform one simulation step"""
+        # Update AABBs and broad phase
+        aabb_list = [(i, self.compute_aabb(b)) for i, b in enumerate(self.bodies)]
+        potential_pairs = self.broad_phase.get_pairs()
+
+        # Narrow phase collision detection
+        contacts = []
+        for i, j in potential_pairs:
+            collision = self.detect_collision(self.bodies[i], self.bodies[j])
+            if collision:
+                contacts.append(ContactConstraint(
+                    body_a=self.bodies[i],
+                    body_b=self.bodies[j],
+                    normal=collision.normal,
+                    point=collision.point_a,
+                    penetration=collision.depth
+                ))
+
+        # Solve constraints
+        self.solver.solve(contacts, dt)
+
+        # Integrate
+        for body in self.bodies:
+            body.integrate(dt, self.gravity)
+
+    def compute_aabb(self, body: RigidBody) -> AABB:
+        """Compute AABB for body"""
+        # Implementation depends on collider type
+        pass
+
+    def detect_collision(self, a: RigidBody, b: RigidBody) -> Optional[CollisionInfo]:
+        """Narrow phase collision detection"""
+        # GJK + EPA or specialized algorithms
+        pass
+```
+
+## Best Practices
+
+1. **Substeps**: Use multiple substeps for stability
+2. **Warm Starting**: Cache impulses between frames
+3. **Sleeping**: Disable inactive bodies
+4. **Continuous Collision**: For fast-moving objects
+5. **Collision Layers**: Filter unnecessary checks
+
+## Anti-Patterns
+
+- Too large timesteps
+- No broad phase for many objects
+- Ignoring numerical precision
+- Not using spatial partitioning
+- Single iteration solving
+
+## When to Use
+
+- Games with physics
+- Robotics simulation
+- Engineering analysis
+- VR/AR applications
+- Animation systems
+
+## When NOT to Use
+
+- Simple motion (use kinematics)
+- High-precision requirements (use specialized)
+- Very large scale (use specialized solvers)
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  physics-engines:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Simulation" icon="atom" href="/skills/overview#simulation">
+    More simulation skills
+  </Card>
+</CardGroup>

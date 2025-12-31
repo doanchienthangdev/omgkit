@@ -1,0 +1,216 @@
+---
+title: "event-storming"
+description: "Facilitate event storming sessions to discover domain events and workflows"
+icon: "bolt"
+---
+
+<Info>
+  **Category:** Event Driven
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:event-storming "your description here"
+```
+
+
+# Event Storming Workflow
+
+Discover domain events and model business processes.
+
+## Prerequisites
+- [ ] Domain experts available
+- [ ] Whiteboard/digital collaboration tool
+- [ ] Business process documentation
+
+## Phase 1: Big Picture Event Storming
+
+### Step 1.1: Identify Domain Events
+```yaml
+agent: domain-decomposer
+action: discover
+focus: domain_events
+notation: orange_stickies
+guidelines:
+  - Past tense verbs (OrderPlaced, PaymentReceived)
+  - Business-meaningful names
+  - Temporal ordering
+```
+
+### Step 1.2: Timeline Organization
+```yaml
+agent: domain-decomposer
+action: organize
+steps:
+  - Place events chronologically
+  - Identify parallel flows
+  - Mark pivotal events
+  - Note questions and hotspots
+```
+
+## Phase 2: Process Modeling
+
+### Step 2.1: Add Commands
+```yaml
+agent: domain-decomposer
+action: model
+element: commands
+notation: blue_stickies
+pattern:
+  - Command triggers Event
+  - Name as imperative (PlaceOrder)
+  - Link to triggering event
+```
+
+### Step 2.2: Add Actors
+```yaml
+agent: domain-decomposer
+action: model
+element: actors
+notation: yellow_stickies
+types:
+  - Users (roles)
+  - External systems
+  - Time (scheduled events)
+```
+
+### Step 2.3: Add Policies
+```yaml
+agent: domain-decomposer
+action: model
+element: policies
+notation: purple_stickies
+pattern: "When [Event] then [Command]"
+examples:
+  - "When OrderPlaced then ReserveInventory"
+  - "When PaymentFailed then CancelOrder"
+```
+
+## Phase 3: Aggregate Discovery
+
+### Step 3.1: Group Related Concepts
+```yaml
+agent: domain-decomposer
+action: discover
+element: aggregates
+notation: yellow_boundary
+criteria:
+  - Commands that modify together
+  - Events from same source
+  - Consistency boundary
+```
+
+### Step 3.2: Define Aggregate Boundaries
+```yaml
+agent: architect
+action: define
+boundaries:
+  - Invariants protected
+  - Transaction scope
+  - Entity relationships
+outputs:
+  - aggregate_diagram
+  - invariant_rules
+```
+
+## Phase 4: Bounded Context Identification
+
+### Step 4.1: Identify Context Boundaries
+```yaml
+agent: domain-decomposer
+action: discover
+element: bounded_contexts
+indicators:
+  - Language changes
+  - Different stakeholders
+  - Different models for same concept
+  - Natural team boundaries
+```
+
+### Step 4.2: Map Context Relationships
+```yaml
+agent: architect
+action: map
+relationships:
+  - Upstream/Downstream
+  - Conformist/Anti-corruption Layer
+  - Partnership
+  - Customer/Supplier
+```
+
+## Phase 5: Documentation
+
+### Step 5.1: Create Event Catalog
+```yaml
+agent: domain-decomposer
+action: document
+outputs:
+  - event_catalog:
+      - name
+      - description
+      - payload_schema
+      - producers
+      - consumers
+```
+
+### Step 5.2: Create Process Diagrams
+```yaml
+agent: architect
+action: generate
+outputs:
+  - process_flow_diagrams
+  - aggregate_diagrams
+  - context_maps
+```
+
+## Outputs
+- [ ] Domain event catalog
+- [ ] Command list
+- [ ] Aggregate definitions
+- [ ] Bounded context map
+- [ ] Process flow diagrams
+
+## Quality Gates
+- All events have clear ownership
+- Aggregates have defined invariants
+- Context boundaries are explicit
+- Ubiquitous language documented
+- Stakeholders validated model
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@domain-decomposer](/agents/domain-decomposer)** - Specialized agent for domain decomposer tasks
+- **[@architect](/agents/architect)** - Specialized agent for architect tasks
+
+
+
+
+
+
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Event Driven" icon="bolt" href="/workflows/overview#event-driven">
+    More event-driven workflows
+  </Card>
+</CardGroup>

@@ -1,0 +1,473 @@
+# Offline-First
+
+Local-first architecture, data synchronization, conflict resolution, and offline data persistence strategies.
+
+## Overview
+
+Offline-first design ensures applications work seamlessly without network connectivity, syncing data when connections are restored.
+
+## Core Concepts
+
+### Offline-First Principles
+- **Local First**: Data stored locally before remote
+- **Background Sync**: Automatic synchronization
+- **Conflict Resolution**: Handle concurrent edits
+- **Optimistic UI**: Assume operations succeed
+
+### Sync Strategies
+- **Full Sync**: Download complete dataset
+- **Incremental Sync**: Only changes since last sync
+- **Real-time Sync**: Continuous bidirectional
+- **Manual Sync**: User-triggered
+
+## Local Database
+
+### WatermelonDB (React Native)
+```typescript
+import { Database, Model, Q } from '@nozbe/watermelondb';
+import { field, date, children, relation } from '@nozbe/watermelondb/decorators';
+import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
+
+// Schema
+const schema = appSchema({
+  version: 1,
+  tables: [
+    tableSchema({
+      name: 'tasks',
+      columns: [
+        { name: 'title', type: 'string' },
+        { name: 'description', type: 'string', isOptional: true },
+        { name: 'is_completed', type: 'boolean' },
+        { name: 'project_id', type: 'string', isIndexed: true },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+        { name: 'synced_at', type: 'number', isOptional: true },
+        { name: 'is_dirty', type: 'boolean' }
+      ]
+    }),
+    tableSchema({
+      name: 'projects',
+      columns: [
+        { name: 'name', type: 'string' },
+        { name: 'color', type: 'string' },
+        { name: 'synced_at', type: 'number', isOptional: true }
+      ]
+    })
+  ]
+});
+
+// Models
+class Task extends Model {
+  static table = 'tasks';
+  static associations = {
+    projects: { type: 'belongs_to', key: 'project_id' }
+  };
+
+  @field('title') title!: string;
+  @field('description') description?: string;
+  @field('is_completed') isCompleted!: boolean;
+  @field('is_dirty') isDirty!: boolean;
+  @date('created_at') createdAt!: Date;
+  @date('updated_at') updatedAt!: Date;
+  @date('synced_at') syncedAt?: Date;
+  @relation('projects', 'project_id') project!: Project;
+
+  async markComplete() {
+    await this.update(task => {
+      task.isCompleted = true;
+      task.isDirty = true;
+    });
+  }
+}
+
+// Database setup
+const adapter = new SQLiteAdapter({
+  schema,
+  migrations: [],
+  jsi: true,
+  onSetUpError: error => {
+    console.error('Database setup failed:', error);
+  }
+});
+
+const database = new Database({
+  adapter,
+  modelClasses: [Task, Project]
+});
+```
+
+### Queries and Operations
+```typescript
+class TaskRepository {
+  private collection = database.get<Task>('tasks');
+
+  async create(data: TaskInput): Promise<Task> {
+    return await database.write(async () => {
+      return await this.collection.create(task => {
+        task.title = data.title;
+        task.description = data.description;
+        task.isCompleted = false;
+        task.isDirty = true;
+        task.createdAt = new Date();
+        task.updatedAt = new Date();
+      });
+    });
+  }
+
+  async getByProject(projectId: string): Promise<Task[]> {
+    return await this.collection
+      .query(Q.where('project_id', projectId))
+      .fetch();
+  }
+
+  async getPendingSync(): Promise<Task[]> {
+    return await this.collection
+      .query(Q.where('is_dirty', true))
+      .fetch();
+  }
+
+  async markSynced(task: Task): Promise<void> {
+    await database.write(async () => {
+      await task.update(t => {
+        t.isDirty = false;
+        t.syncedAt = new Date();
+      });
+    });
+  }
+}
+```
+
+## Sync Engine
+
+### Bidirectional Sync
+```typescript
+interface SyncResult {
+  pushed: number;
+  pulled: number;
+  conflicts: ConflictRecord[];
+}
+
+class SyncEngine {
+  private api: ApiClient;
+  private db: Database;
+  private lastSyncTimestamp: number = 0;
+
+  async sync(): Promise<SyncResult> {
+    const result: SyncResult = { pushed: 0, pulled: 0, conflicts: [] };
+
+    try {
+      // 1. Push local changes
+      const localChanges = await this.getLocalChanges();
+      const pushResult = await this.pushChanges(localChanges);
+      result.pushed = pushResult.success.length;
+      result.conflicts.push(...pushResult.conflicts);
+
+      // 2. Pull remote changes
+      const remoteChanges = await this.api.getChanges(this.lastSyncTimestamp);
+      const pullResult = await this.applyRemoteChanges(remoteChanges);
+      result.pulled = pullResult.applied;
+      result.conflicts.push(...pullResult.conflicts);
+
+      // 3. Update sync timestamp
+      this.lastSyncTimestamp = Date.now();
+      await this.saveSyncState();
+
+      return result;
+    } catch (error) {
+      console.error('Sync failed:', error);
+      throw new SyncError('Sync failed', error);
+    }
+  }
+
+  private async getLocalChanges(): Promise<Change[]> {
+    const changes: Change[] = [];
+
+    for (const table of ['tasks', 'projects']) {
+      const dirtyRecords = await this.db
+        .get(table)
+        .query(Q.where('is_dirty', true))
+        .fetch();
+
+      for (const record of dirtyRecords) {
+        changes.push({
+          table,
+          id: record.id,
+          operation: record._raw._status === 'created' ? 'create' : 'update',
+          data: record._raw,
+          timestamp: record.updatedAt.getTime()
+        });
+      }
+    }
+
+    return changes;
+  }
+
+  private async pushChanges(changes: Change[]): Promise<PushResult> {
+    const result = await this.api.pushChanges(changes);
+
+    // Mark successfully synced records
+    await this.db.write(async () => {
+      for (const success of result.success) {
+        const record = await this.db.get(success.table).find(success.id);
+        await record.update(r => {
+          r.isDirty = false;
+          r.syncedAt = new Date();
+        });
+      }
+    });
+
+    return result;
+  }
+
+  private async applyRemoteChanges(changes: RemoteChange[]): Promise<PullResult> {
+    const conflicts: ConflictRecord[] = [];
+    let applied = 0;
+
+    await this.db.write(async () => {
+      for (const change of changes) {
+        const collection = this.db.get(change.table);
+
+        try {
+          const existing = await collection.find(change.id).catch(() => null);
+
+          if (existing && existing.isDirty) {
+            // Conflict: local and remote both modified
+            const resolution = await this.resolveConflict(existing, change);
+            conflicts.push({ local: existing._raw, remote: change, resolution });
+
+            if (resolution === 'remote') {
+              await existing.update(r => Object.assign(r, change.data));
+            }
+          } else if (existing) {
+            // Update existing
+            await existing.update(r => Object.assign(r, change.data));
+          } else {
+            // Create new
+            await collection.create(r => Object.assign(r, change.data));
+          }
+
+          applied++;
+        } catch (error) {
+          console.error(`Failed to apply change ${change.id}:`, error);
+        }
+      }
+    });
+
+    return { applied, conflicts };
+  }
+}
+```
+
+## Conflict Resolution
+
+### Resolution Strategies
+```typescript
+type ConflictStrategy = 'last-write-wins' | 'client-wins' | 'server-wins' | 'merge' | 'manual';
+
+class ConflictResolver {
+  private strategy: ConflictStrategy;
+
+  constructor(strategy: ConflictStrategy = 'last-write-wins') {
+    this.strategy = strategy;
+  }
+
+  resolve<T extends Record<string, any>>(
+    local: T,
+    remote: T,
+    base?: T
+  ): { result: T; strategy: string } {
+    switch (this.strategy) {
+      case 'last-write-wins':
+        return this.lastWriteWins(local, remote);
+
+      case 'client-wins':
+        return { result: local, strategy: 'client-wins' };
+
+      case 'server-wins':
+        return { result: remote, strategy: 'server-wins' };
+
+      case 'merge':
+        return this.mergeFields(local, remote, base);
+
+      case 'manual':
+        throw new ManualResolutionRequired(local, remote);
+    }
+  }
+
+  private lastWriteWins<T extends { updatedAt: number }>(
+    local: T,
+    remote: T
+  ): { result: T; strategy: string } {
+    return {
+      result: local.updatedAt > remote.updatedAt ? local : remote,
+      strategy: 'last-write-wins'
+    };
+  }
+
+  private mergeFields<T extends Record<string, any>>(
+    local: T,
+    remote: T,
+    base?: T
+  ): { result: T; strategy: string } {
+    const result = { ...remote };
+
+    for (const key of Object.keys(local)) {
+      const localValue = local[key];
+      const remoteValue = remote[key];
+      const baseValue = base?.[key];
+
+      // If local changed and remote didn't, use local
+      if (localValue !== baseValue && remoteValue === baseValue) {
+        result[key] = localValue;
+      }
+      // If both changed to same value, use either
+      else if (localValue === remoteValue) {
+        result[key] = localValue;
+      }
+      // If both changed to different values, use remote (or mark conflict)
+    }
+
+    return { result: result as T, strategy: 'merge' };
+  }
+}
+```
+
+## Network Detection
+
+### Connection Monitoring
+```typescript
+import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+
+class NetworkMonitor {
+  private listeners: Set<(isConnected: boolean) => void> = new Set();
+  private isConnected: boolean = true;
+  private unsubscribe?: () => void;
+
+  start(): void {
+    this.unsubscribe = NetInfo.addEventListener(state => {
+      this.handleStateChange(state);
+    });
+  }
+
+  stop(): void {
+    this.unsubscribe?.();
+  }
+
+  private handleStateChange(state: NetInfoState): void {
+    const wasConnected = this.isConnected;
+    this.isConnected = state.isConnected ?? false;
+
+    if (!wasConnected && this.isConnected) {
+      // Back online - trigger sync
+      this.notifyListeners(true);
+      this.triggerSync();
+    } else if (wasConnected && !this.isConnected) {
+      this.notifyListeners(false);
+    }
+  }
+
+  private async triggerSync(): Promise<void> {
+    try {
+      await syncEngine.sync();
+    } catch (error) {
+      console.error('Auto-sync failed:', error);
+    }
+  }
+
+  onConnectionChange(callback: (isConnected: boolean) => void): () => void {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  private notifyListeners(isConnected: boolean): void {
+    this.listeners.forEach(listener => listener(isConnected));
+  }
+}
+```
+
+## Optimistic Updates
+
+### React Hook
+```typescript
+function useOptimisticMutation<T, R>(
+  mutationFn: (data: T) => Promise<R>,
+  options: {
+    onOptimisticUpdate: (data: T) => void;
+    onSuccess?: (result: R) => void;
+    onError?: (error: Error, data: T) => void;
+    onRollback: (data: T) => void;
+  }
+) {
+  const [isPending, setIsPending] = useState(false);
+
+  const mutate = useCallback(async (data: T) => {
+    setIsPending(true);
+
+    // Optimistic update
+    options.onOptimisticUpdate(data);
+
+    try {
+      const result = await mutationFn(data);
+      options.onSuccess?.(result);
+      return result;
+    } catch (error) {
+      // Rollback on failure
+      options.onRollback(data);
+      options.onError?.(error as Error, data);
+      throw error;
+    } finally {
+      setIsPending(false);
+    }
+  }, [mutationFn, options]);
+
+  return { mutate, isPending };
+}
+
+// Usage
+const { mutate: completeTask } = useOptimisticMutation(
+  (task: Task) => api.updateTask(task.id, { completed: true }),
+  {
+    onOptimisticUpdate: (task) => {
+      setTasks(prev => prev.map(t =>
+        t.id === task.id ? { ...t, completed: true } : t
+      ));
+    },
+    onRollback: (task) => {
+      setTasks(prev => prev.map(t =>
+        t.id === task.id ? { ...t, completed: false } : t
+      ));
+    }
+  }
+);
+```
+
+## Best Practices
+
+1. **Queue Operations**: Store pending ops for retry
+2. **Idempotent Sync**: Handle duplicate syncs safely
+3. **Conflict UI**: Show conflicts to users clearly
+4. **Partial Sync**: Don't require full dataset
+5. **Background Sync**: Sync when app not active
+
+## Anti-Patterns
+
+- Blocking UI during sync
+- No conflict handling
+- Full dataset sync every time
+- Ignoring sync failures
+- No offline indicator
+
+## When to Use
+
+- Field/remote work apps
+- Note-taking apps
+- Collaborative tools
+- Apps for unreliable networks
+- Real-time collaboration
+
+## When NOT to Use
+
+- Real-time only features
+- Always-online requirements
+- Simple read-only apps
+- No data persistence needed

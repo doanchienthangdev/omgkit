@@ -1,0 +1,405 @@
+---
+title: "CQRS Patterns"
+description: "Command Query Responsibility Segregation patterns for separating read and write models, eventual consistency, and optimized query performance."
+icon: "bolt"
+---
+
+<Info>
+  **Category:** Event-driven
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Command Query Responsibility Segregation patterns for separating read and write models, eventual consistency, and optimized query performance.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# CQRS Patterns
+
+Command Query Responsibility Segregation patterns for separating read and write models, eventual consistency, and optimized query performance.
+
+## Overview
+
+CQRS separates read and write operations into different models, allowing each to be optimized independently.
+
+## Core Concepts
+
+### Command Side (Write)
+- Handles state changes
+- Validates business rules
+- Emits domain events
+- Optimized for consistency
+
+### Query Side (Read)
+- Handles data retrieval
+- Denormalized for queries
+- Eventually consistent
+- Optimized for performance
+
+## Architecture Patterns
+
+### Simple CQRS
+```
+┌─────────────┐     ┌─────────────┐
+│   Client    │     │   Client    │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+   Commands              Queries
+       │                   │
+       ▼                   ▼
+┌─────────────┐     ┌─────────────┐
+│  Command    │     │   Query     │
+│  Handler    │     │   Handler   │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+       ▼                   ▼
+┌─────────────────────────────────┐
+│          Single Database        │
+│  (Different tables/views)       │
+└─────────────────────────────────┘
+```
+
+### Full CQRS with Event Sourcing
+```
+┌─────────────┐     ┌─────────────┐
+│   Client    │     │   Client    │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+   Commands              Queries
+       │                   │
+       ▼                   ▼
+┌─────────────┐     ┌─────────────┐
+│  Command    │     │   Query     │
+│  Handler    │     │  Service    │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+       ▼                   ▼
+┌─────────────┐     ┌─────────────┐
+│   Event     │────▶│    Read     │
+│   Store     │     │   Database  │
+└─────────────┘     └─────────────┘
+         │
+         │ Events
+         ▼
+    ┌─────────────┐
+    │ Projections │
+    └─────────────┘
+```
+
+## Command Implementation
+
+### Command Handler
+```typescript
+// Command definition
+interface CreateOrderCommand {
+  type: 'CreateOrder';
+  orderId: string;
+  customerId: string;
+  items: OrderItem[];
+}
+
+// Command handler
+class CreateOrderHandler {
+  constructor(
+    private readonly orderRepository: OrderRepository,
+    private readonly eventBus: EventBus
+  ) {}
+
+  async handle(command: CreateOrderCommand): Promise<void> {
+    // Validate
+    const customer = await this.customerRepository.find(command.customerId);
+    if (!customer) {
+      throw new CustomerNotFoundError(command.customerId);
+    }
+
+    // Create aggregate
+    const order = Order.create({
+      orderId: command.orderId,
+      customerId: command.customerId,
+      items: command.items
+    });
+
+    // Persist
+    await this.orderRepository.save(order);
+
+    // Publish events
+    for (const event of order.getUncommittedEvents()) {
+      await this.eventBus.publish(event);
+    }
+  }
+}
+```
+
+### Command Bus
+```typescript
+class CommandBus {
+  private handlers: Map<string, CommandHandler<any>> = new Map();
+
+  register<T extends Command>(
+    commandType: string,
+    handler: CommandHandler<T>
+  ): void {
+    this.handlers.set(commandType, handler);
+  }
+
+  async dispatch<T extends Command>(command: T): Promise<void> {
+    const handler = this.handlers.get(command.type);
+    if (!handler) {
+      throw new Error(`No handler for command: ${command.type}`);
+    }
+    await handler.handle(command);
+  }
+}
+```
+
+## Query Implementation
+
+### Read Model
+```typescript
+// Denormalized read model
+interface OrderSummaryReadModel {
+  orderId: string;
+  customerName: string;
+  customerEmail: string;
+  status: string;
+  itemCount: number;
+  totalAmount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Query
+interface GetOrdersQuery {
+  customerId?: string;
+  status?: string;
+  fromDate?: Date;
+  toDate?: Date;
+  page: number;
+  pageSize: number;
+}
+
+// Query handler
+class GetOrdersQueryHandler {
+  constructor(private readonly readDb: ReadDatabase) {}
+
+  async handle(query: GetOrdersQuery): Promise<PaginatedResult<OrderSummaryReadModel>> {
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (query.customerId) {
+      conditions.push(`customer_id = $${params.length + 1}`);
+      params.push(query.customerId);
+    }
+
+    if (query.status) {
+      conditions.push(`status = $${params.length + 1}`);
+      params.push(query.status);
+    }
+
+    const where = conditions.length > 0
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
+
+    const offset = (query.page - 1) * query.pageSize;
+
+    const result = await this.readDb.query(`
+      SELECT * FROM order_summaries
+      ${where}
+      ORDER BY created_at DESC
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+    `, [...params, query.pageSize, offset]);
+
+    return {
+      items: result.rows,
+      page: query.page,
+      pageSize: query.pageSize,
+      total: await this.getCount(where, params)
+    };
+  }
+}
+```
+
+## Projection Patterns
+
+### Synchronous Projection (Same Transaction)
+```typescript
+class OrderProjector {
+  async project(event: DomainEvent, transaction: Transaction): Promise<void> {
+    switch (event.type) {
+      case 'OrderCreated':
+        await transaction.query(`
+          INSERT INTO order_summaries (...)
+          VALUES (...)
+        `);
+        break;
+    }
+  }
+}
+
+// Used in command handler
+await this.db.transaction(async (tx) => {
+  await this.eventStore.append(events, tx);
+  for (const event of events) {
+    await this.projector.project(event, tx);
+  }
+});
+```
+
+### Asynchronous Projection
+```typescript
+class OrderProjectionHandler {
+  @Subscribe('order-events')
+  async handle(event: DomainEvent): Promise<void> {
+    await this.projector.project(event);
+  }
+}
+
+// Idempotent projection
+class IdempotentProjector {
+  async project(event: DomainEvent): Promise<void> {
+    const processed = await this.checkProcessed(event.eventId);
+    if (processed) return;
+
+    await this.db.transaction(async (tx) => {
+      await this.applyProjection(event, tx);
+      await this.markProcessed(event.eventId, tx);
+    });
+  }
+}
+```
+
+## Eventual Consistency
+
+### Handling in UI
+```typescript
+// Optimistic UI update
+async function submitOrder(orderData: CreateOrderCommand): Promise<void> {
+  // Immediately update UI
+  uiState.orders.push({
+    ...orderData,
+    status: 'pending',
+    createdAt: new Date()
+  });
+
+  // Send command
+  await commandBus.dispatch(orderData);
+
+  // Poll for confirmation
+  await waitForEventualConsistency(orderData.orderId);
+}
+
+async function waitForEventualConsistency(orderId: string): Promise<void> {
+  const maxAttempts = 10;
+  const delay = 500;
+
+  for (let i = 0; i < maxAttempts; i++) {
+    const order = await queryService.getOrder(orderId);
+    if (order && order.status !== 'pending') {
+      return;
+    }
+    await sleep(delay);
+  }
+
+  throw new Error('Read model not updated in time');
+}
+```
+
+## Best Practices
+
+1. **Command Validation**: Validate before persisting
+2. **Idempotent Projections**: Handle duplicate events
+3. **Event Ordering**: Maintain order in projections
+4. **Projection Rebuild**: Ability to rebuild from events
+5. **Monitoring**: Track projection lag
+
+## Read Model Optimization
+
+### Materialized Views
+```sql
+-- Denormalized for specific query pattern
+CREATE MATERIALIZED VIEW customer_order_stats AS
+SELECT
+  c.customer_id,
+  c.name,
+  COUNT(o.order_id) as total_orders,
+  SUM(o.total_amount) as lifetime_value,
+  MAX(o.created_at) as last_order_date
+FROM customers c
+LEFT JOIN orders o ON c.customer_id = o.customer_id
+GROUP BY c.customer_id, c.name;
+
+-- Refresh strategy
+REFRESH MATERIALIZED VIEW CONCURRENTLY customer_order_stats;
+```
+
+### Multiple Read Models
+```
+Same events -> Different projections:
+- OrderListProjection -> For order listing
+- OrderSearchProjection -> For full-text search (Elasticsearch)
+- OrderAnalyticsProjection -> For dashboards (ClickHouse)
+- OrderNotificationProjection -> For alerts
+```
+
+## Anti-Patterns
+
+- Using queries in command handlers
+- Sharing models between read and write
+- Not planning for projection failures
+- Over-complicated when simple CRUD suffices
+- Ignoring eventual consistency in UX
+
+## When to Use
+
+- Complex domains with different read/write patterns
+- High read-to-write ratio
+- Need for specialized query databases
+- Event sourcing architectures
+
+## When NOT to Use
+
+- Simple CRUD applications
+- Low complexity domains
+- When strong consistency is mandatory
+- Small teams without CQRS experience
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  cqrs-patterns:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Event-driven" icon="bolt" href="/skills/overview#event-driven">
+    More event-driven skills
+  </Card>
+</CardGroup>

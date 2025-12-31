@@ -1,0 +1,369 @@
+# Edge Computing
+
+Edge deployment patterns including edge ML inference, data preprocessing, local decision making, and cloud synchronization.
+
+## Overview
+
+Edge computing processes data near its source, reducing latency, bandwidth usage, and enabling real-time decision making for IoT applications.
+
+## Core Concepts
+
+### Edge Architecture Layers
+- **Device Edge**: Sensors, actuators, microcontrollers
+- **Gateway Edge**: Aggregation, protocol translation
+- **Near Edge**: Local servers, edge clusters
+- **Cloud**: Central processing, long-term storage
+
+### Edge vs Cloud Trade-offs
+```
+Edge Benefits:
+- Low latency (<10ms possible)
+- Reduced bandwidth costs
+- Works offline
+- Data privacy/sovereignty
+
+Cloud Benefits:
+- Unlimited compute/storage
+- Easier management
+- Global accessibility
+- Complex analytics
+```
+
+## Edge Gateway Implementation
+
+### Gateway Architecture
+```python
+import asyncio
+from dataclasses import dataclass
+from typing import Dict, List, Callable
+from collections import deque
+import json
+
+@dataclass
+class SensorReading:
+    device_id: str
+    sensor_type: str
+    value: float
+    timestamp: float
+    metadata: Dict = None
+
+class EdgeGateway:
+    def __init__(self, gateway_id: str):
+        self.gateway_id = gateway_id
+        self.devices: Dict[str, 'DeviceConnection'] = {}
+        self.processors: List[Callable] = []
+        self.buffer: deque = deque(maxlen=10000)
+        self.cloud_client = None
+        self.is_connected = False
+
+    async def start(self):
+        """Start gateway services"""
+        await asyncio.gather(
+            self.start_device_listener(),
+            self.start_processing_loop(),
+            self.start_cloud_sync()
+        )
+
+    async def start_device_listener(self):
+        """Listen for device connections and data"""
+        # MQTT, CoAP, or custom protocol
+        pass
+
+    async def start_processing_loop(self):
+        """Process incoming data through edge pipeline"""
+        while True:
+            if self.buffer:
+                reading = self.buffer.popleft()
+                processed = await self.process(reading)
+
+                if processed.should_forward:
+                    await self.forward_to_cloud(processed)
+
+                if processed.local_action:
+                    await self.execute_action(processed.local_action)
+
+            await asyncio.sleep(0.001)
+
+    async def process(self, reading: SensorReading) -> 'ProcessedReading':
+        """Run data through processing pipeline"""
+        result = ProcessedReading(reading)
+
+        for processor in self.processors:
+            result = await processor(result)
+            if result.drop:
+                break
+
+        return result
+
+    def add_processor(self, processor: Callable):
+        """Add processing stage to pipeline"""
+        self.processors.append(processor)
+
+    async def start_cloud_sync(self):
+        """Sync with cloud when connected"""
+        while True:
+            if self.is_connected:
+                await self.sync_pending_data()
+            await asyncio.sleep(5)
+
+# Processing pipeline stages
+async def filter_noise(reading: 'ProcessedReading') -> 'ProcessedReading':
+    """Filter out noise readings"""
+    if abs(reading.value - reading.previous_value) < 0.01:
+        reading.drop = True
+    return reading
+
+async def aggregate_readings(reading: 'ProcessedReading') -> 'ProcessedReading':
+    """Aggregate readings over time window"""
+    # Compute rolling average, min, max
+    return reading
+
+async def anomaly_detection(reading: 'ProcessedReading') -> 'ProcessedReading':
+    """Detect anomalies locally"""
+    if reading.value > reading.threshold:
+        reading.local_action = AlertAction(
+            device_id=reading.device_id,
+            message=f"Threshold exceeded: {reading.value}"
+        )
+        reading.should_forward = True
+    return reading
+
+async def ml_inference(reading: 'ProcessedReading') -> 'ProcessedReading':
+    """Run edge ML model"""
+    prediction = edge_model.predict([reading.features])
+    reading.prediction = prediction
+    return reading
+```
+
+## Edge ML Inference
+
+### TensorFlow Lite on Edge
+```python
+import numpy as np
+import tflite_runtime.interpreter as tflite
+
+class EdgeMLInference:
+    def __init__(self, model_path: str):
+        self.interpreter = tflite.Interpreter(model_path=model_path)
+        self.interpreter.allocate_tensors()
+
+        self.input_details = self.interpreter.get_input_details()
+        self.output_details = self.interpreter.get_output_details()
+
+    def preprocess(self, data: np.ndarray) -> np.ndarray:
+        """Preprocess input data"""
+        # Normalize, reshape for model
+        return data.astype(np.float32).reshape(self.input_details[0]['shape'])
+
+    def predict(self, data: np.ndarray) -> np.ndarray:
+        """Run inference"""
+        input_data = self.preprocess(data)
+        self.interpreter.set_tensor(self.input_details[0]['index'], input_data)
+        self.interpreter.invoke()
+        return self.interpreter.get_tensor(self.output_details[0]['index'])
+
+    def classify_anomaly(self, sensor_readings: List[float]) -> tuple:
+        """Classify if readings indicate anomaly"""
+        features = np.array(sensor_readings)
+        prediction = self.predict(features)
+
+        is_anomaly = prediction[0][0] > 0.5
+        confidence = float(prediction[0][0])
+
+        return is_anomaly, confidence
+
+# Usage
+edge_model = EdgeMLInference('/models/anomaly_detector.tflite')
+
+async def ml_anomaly_processor(reading: ProcessedReading) -> ProcessedReading:
+    features = [reading.value, reading.rate_of_change, reading.variance]
+    is_anomaly, confidence = edge_model.classify_anomaly(features)
+
+    if is_anomaly and confidence > 0.8:
+        reading.anomaly_detected = True
+        reading.anomaly_confidence = confidence
+        reading.should_forward = True
+
+    return reading
+```
+
+### ONNX Runtime Edge
+```python
+import onnxruntime as ort
+import numpy as np
+
+class ONNXEdgeModel:
+    def __init__(self, model_path: str):
+        # Use optimized execution providers
+        providers = ['CPUExecutionProvider']
+
+        # Add hardware-specific providers if available
+        if ort.get_device() == 'GPU':
+            providers.insert(0, 'CUDAExecutionProvider')
+
+        self.session = ort.InferenceSession(
+            model_path,
+            providers=providers
+        )
+
+        self.input_name = self.session.get_inputs()[0].name
+        self.output_name = self.session.get_outputs()[0].name
+
+    def predict(self, input_data: np.ndarray) -> np.ndarray:
+        return self.session.run(
+            [self.output_name],
+            {self.input_name: input_data}
+        )[0]
+```
+
+## Data Synchronization
+
+### Store-and-Forward Pattern
+```python
+import sqlite3
+from datetime import datetime
+from typing import List, Optional
+
+class EdgeDataStore:
+    def __init__(self, db_path: str = '/data/edge.db'):
+        self.conn = sqlite3.connect(db_path)
+        self.setup_schema()
+
+    def setup_schema(self):
+        self.conn.execute('''
+            CREATE TABLE IF NOT EXISTS pending_sync (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_id TEXT NOT NULL,
+                data JSON NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                synced_at TIMESTAMP,
+                retry_count INTEGER DEFAULT 0
+            )
+        ''')
+        self.conn.execute('''
+            CREATE INDEX IF NOT EXISTS idx_pending_sync_status
+            ON pending_sync(synced_at) WHERE synced_at IS NULL
+        ''')
+        self.conn.commit()
+
+    def store(self, device_id: str, data: dict):
+        """Store data for later sync"""
+        self.conn.execute(
+            'INSERT INTO pending_sync (device_id, data) VALUES (?, ?)',
+            (device_id, json.dumps(data))
+        )
+        self.conn.commit()
+
+    def get_pending(self, limit: int = 100) -> List[dict]:
+        """Get data pending synchronization"""
+        cursor = self.conn.execute('''
+            SELECT id, device_id, data, created_at
+            FROM pending_sync
+            WHERE synced_at IS NULL AND retry_count < 5
+            ORDER BY created_at
+            LIMIT ?
+        ''', (limit,))
+
+        return [
+            {'id': row[0], 'device_id': row[1],
+             'data': json.loads(row[2]), 'created_at': row[3]}
+            for row in cursor.fetchall()
+        ]
+
+    def mark_synced(self, ids: List[int]):
+        """Mark records as synchronized"""
+        placeholders = ','.join('?' * len(ids))
+        self.conn.execute(f'''
+            UPDATE pending_sync
+            SET synced_at = ?
+            WHERE id IN ({placeholders})
+        ''', [datetime.now()] + ids)
+        self.conn.commit()
+
+    def increment_retry(self, ids: List[int]):
+        """Increment retry count for failed syncs"""
+        placeholders = ','.join('?' * len(ids))
+        self.conn.execute(f'''
+            UPDATE pending_sync
+            SET retry_count = retry_count + 1
+            WHERE id IN ({placeholders})
+        ''', ids)
+        self.conn.commit()
+
+class CloudSynchronizer:
+    def __init__(self, store: EdgeDataStore, cloud_client):
+        self.store = store
+        self.cloud = cloud_client
+
+    async def sync(self):
+        """Sync pending data to cloud"""
+        pending = self.store.get_pending(limit=100)
+        if not pending:
+            return
+
+        # Batch upload
+        try:
+            batch = [item['data'] for item in pending]
+            await self.cloud.upload_batch(batch)
+            self.store.mark_synced([item['id'] for item in pending])
+        except ConnectionError:
+            self.store.increment_retry([item['id'] for item in pending])
+```
+
+## Best Practices
+
+1. **Graceful Degradation**: Work offline
+2. **Data Prioritization**: Sync critical data first
+3. **Resource Monitoring**: Track CPU, memory, storage
+4. **Model Updates**: OTA model deployment
+5. **Security**: Encrypt data at rest and in transit
+
+## Deployment Patterns
+
+### Docker on Edge
+```yaml
+# docker-compose.yml for edge gateway
+version: '3.8'
+
+services:
+  gateway:
+    image: edge-gateway:latest
+    restart: always
+    volumes:
+      - /data:/data
+      - /models:/models:ro
+    environment:
+      - GATEWAY_ID=${GATEWAY_ID}
+      - CLOUD_ENDPOINT=${CLOUD_ENDPOINT}
+    ports:
+      - "1883:1883"  # MQTT
+      - "5683:5683/udp"  # CoAP
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 512M
+```
+
+## Anti-Patterns
+
+- Processing all data at edge
+- No offline capability
+- Ignoring resource constraints
+- No data prioritization
+- Missing security
+
+## When to Use
+
+- Low latency requirements (<100ms)
+- Limited/expensive connectivity
+- Local decision making needed
+- Data privacy requirements
+- High data volume
+
+## When NOT to Use
+
+- Reliable high-bandwidth connectivity
+- Complex analytics required
+- Centralized management preferred
+- Simple data collection

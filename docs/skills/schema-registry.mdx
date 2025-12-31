@@ -1,0 +1,385 @@
+---
+title: "Schema Registry"
+description: "Schema management with Avro, Protobuf, JSON Schema, schema evolution, and compatibility checking."
+icon: "bolt"
+---
+
+<Info>
+  **Category:** Event-driven
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Schema management with Avro, Protobuf, JSON Schema, schema evolution, and compatibility checking.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Schema Registry
+
+Schema management with Avro, Protobuf, JSON Schema, schema evolution, and compatibility checking.
+
+## Overview
+
+Schema registry provides centralized schema management for event-driven systems, ensuring data compatibility across producers and consumers.
+
+## Core Concepts
+
+### Schema Types
+- **Avro**: Binary format, schema evolution
+- **Protobuf**: Binary format, strong typing
+- **JSON Schema**: Text format, human readable
+
+### Compatibility Modes
+- **BACKWARD**: New schema can read old data
+- **FORWARD**: Old schema can read new data
+- **FULL**: Both backward and forward
+- **NONE**: No compatibility checking
+
+## Confluent Schema Registry
+
+### Schema Registration
+```bash
+# Register a schema
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+  --data '{"schema": "{\"type\":\"record\",\"name\":\"User\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"name\",\"type\":\"string\"}]}"}' \
+  http://localhost:8081/subjects/user-value/versions
+
+# Get latest schema
+curl http://localhost:8081/subjects/user-value/versions/latest
+
+# Check compatibility
+curl -X POST -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+  --data '{"schema": "{...new schema...}"}' \
+  http://localhost:8081/compatibility/subjects/user-value/versions/latest
+```
+
+### Subject Naming Strategies
+```
+TopicNameStrategy (default):
+  <topic>-key, <topic>-value
+  orders-key, orders-value
+
+RecordNameStrategy:
+  <fully-qualified-record-name>
+  com.example.Order
+
+TopicRecordNameStrategy:
+  <topic>-<fully-qualified-record-name>
+  orders-com.example.Order
+```
+
+## Avro Schema Design
+
+### Basic Schema
+```json
+{
+  "type": "record",
+  "name": "Order",
+  "namespace": "com.example.events",
+  "doc": "An order placed by a customer",
+  "fields": [
+    {
+      "name": "orderId",
+      "type": "string",
+      "doc": "Unique order identifier"
+    },
+    {
+      "name": "customerId",
+      "type": "string"
+    },
+    {
+      "name": "items",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "OrderItem",
+          "fields": [
+            {"name": "productId", "type": "string"},
+            {"name": "quantity", "type": "int"},
+            {"name": "price", "type": "double"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "totalAmount",
+      "type": "double"
+    },
+    {
+      "name": "createdAt",
+      "type": {
+        "type": "long",
+        "logicalType": "timestamp-millis"
+      }
+    }
+  ]
+}
+```
+
+### Evolution-Ready Schema
+```json
+{
+  "type": "record",
+  "name": "Order",
+  "namespace": "com.example.events",
+  "fields": [
+    {"name": "orderId", "type": "string"},
+    {"name": "customerId", "type": "string"},
+    {
+      "name": "shippingAddress",
+      "type": ["null", "string"],
+      "default": null,
+      "doc": "Added in v2"
+    },
+    {
+      "name": "metadata",
+      "type": {
+        "type": "map",
+        "values": "string"
+      },
+      "default": {},
+      "doc": "Extensible metadata"
+    }
+  ]
+}
+```
+
+## Schema Evolution Rules
+
+### Backward Compatible Changes
+```
+✅ Add optional field (with default)
+✅ Remove field with default
+✅ Change field from required to optional
+
+Example: Adding shipping address
+Before: {orderId, customerId}
+After:  {orderId, customerId, shippingAddress: null}
+```
+
+### Forward Compatible Changes
+```
+✅ Add field with default
+✅ Remove optional field
+
+Example: Removing deprecated field
+Before: {orderId, customerId, legacyField}
+After:  {orderId, customerId}
+```
+
+### Breaking Changes (Avoid)
+```
+❌ Remove required field
+❌ Change field type
+❌ Rename field
+❌ Change field order (for some formats)
+```
+
+## Producer Implementation
+
+### Java/Kafka Producer
+```java
+Properties props = new Properties();
+props.put("bootstrap.servers", "localhost:9092");
+props.put("key.serializer", StringSerializer.class);
+props.put("value.serializer", KafkaAvroSerializer.class);
+props.put("schema.registry.url", "http://localhost:8081");
+props.put("auto.register.schemas", false);  // Require explicit registration
+props.put("use.latest.version", true);
+
+KafkaProducer<String, Order> producer = new KafkaProducer<>(props);
+
+Order order = Order.newBuilder()
+    .setOrderId("order-123")
+    .setCustomerId("cust-456")
+    .setItems(Arrays.asList(...))
+    .build();
+
+producer.send(new ProducerRecord<>("orders", order.getOrderId(), order));
+```
+
+### Node.js Producer
+```typescript
+import { SchemaRegistry, SchemaType } from '@kafkajs/confluent-schema-registry';
+import { Kafka } from 'kafkajs';
+
+const registry = new SchemaRegistry({
+  host: 'http://localhost:8081'
+});
+
+const kafka = new Kafka({ brokers: ['localhost:9092'] });
+const producer = kafka.producer();
+
+async function sendOrder(order: Order): Promise<void> {
+  await producer.connect();
+
+  const schemaId = await registry.getLatestSchemaId('orders-value');
+
+  const encodedValue = await registry.encode(schemaId, order);
+
+  await producer.send({
+    topic: 'orders',
+    messages: [{
+      key: order.orderId,
+      value: encodedValue
+    }]
+  });
+}
+```
+
+## Consumer Implementation
+
+### Java/Kafka Consumer
+```java
+Properties props = new Properties();
+props.put("bootstrap.servers", "localhost:9092");
+props.put("group.id", "order-consumer");
+props.put("key.deserializer", StringDeserializer.class);
+props.put("value.deserializer", KafkaAvroDeserializer.class);
+props.put("schema.registry.url", "http://localhost:8081");
+props.put("specific.avro.reader", true);
+
+KafkaConsumer<String, Order> consumer = new KafkaConsumer<>(props);
+consumer.subscribe(Collections.singletonList("orders"));
+
+while (true) {
+    ConsumerRecords<String, Order> records = consumer.poll(Duration.ofMillis(100));
+    for (ConsumerRecord<String, Order> record : records) {
+        Order order = record.value();
+        processOrder(order);
+    }
+}
+```
+
+## CI/CD Integration
+
+### Schema Validation Pipeline
+```yaml
+name: Schema Validation
+
+on:
+  pull_request:
+    paths:
+      - 'schemas/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Check compatibility
+        run: |
+          for schema in schemas/*.avsc; do
+            subject=$(basename "$schema" .avsc)-value
+            curl -X POST \
+              -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+              --data "{\"schema\": $(cat $schema | jq -c . | jq -Rs .)}" \
+              $SCHEMA_REGISTRY_URL/compatibility/subjects/$subject/versions/latest \
+              | jq -e '.is_compatible == true'
+          done
+
+      - name: Register schemas (on merge)
+        if: github.event_name == 'push'
+        run: |
+          for schema in schemas/*.avsc; do
+            subject=$(basename "$schema" .avsc)-value
+            curl -X POST \
+              -H "Content-Type: application/vnd.schemaregistry.v1+json" \
+              --data "{\"schema\": $(cat $schema | jq -c . | jq -Rs .)}" \
+              $SCHEMA_REGISTRY_URL/subjects/$subject/versions
+          done
+```
+
+## Best Practices
+
+1. **Explicit Registration**: Don't auto-register in production
+2. **Compatibility Testing**: Check before merge
+3. **Versioning**: Use semantic versioning
+4. **Documentation**: Document schema changes
+5. **Defaults**: Always add defaults for new fields
+
+## Schema Evolution Strategy
+
+### Adding Fields
+```json
+// v1
+{"name": "Order", "fields": [{"name": "orderId", "type": "string"}]}
+
+// v2 - Add optional field
+{"name": "Order", "fields": [
+  {"name": "orderId", "type": "string"},
+  {"name": "priority", "type": ["null", "string"], "default": null}
+]}
+```
+
+### Deprecating Fields
+```json
+// Mark as deprecated, keep for compatibility
+{"name": "legacyField", "type": ["null", "string"], "default": null,
+ "doc": "DEPRECATED: Use newField instead. Will be removed in v4."}
+```
+
+## Anti-Patterns
+
+- Auto-registering schemas in production
+- Breaking compatibility without migration plan
+- Not testing schema changes
+- Ignoring schema documentation
+- Using NONE compatibility mode
+
+## When to Use
+
+- Event-driven systems with multiple services
+- Need for schema evolution
+- Data governance requirements
+- Cross-team data sharing
+
+## When NOT to Use
+
+- Single producer/consumer
+- Rapidly prototyping
+- When schema changes are rare
+- Very simple data structures
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  schema-registry:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Event-driven" icon="bolt" href="/skills/overview#event-driven">
+    More event-driven skills
+  </Card>
+</CardGroup>

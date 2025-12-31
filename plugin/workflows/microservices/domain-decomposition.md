@@ -1,0 +1,123 @@
+---
+description: Decompose monolith into bounded contexts using DDD principles
+triggers:
+  - manual
+  - archetype:microservices
+agents:
+  - domain-decomposer
+  - architect
+---
+
+# Domain Decomposition Workflow
+
+Break down a domain into bounded contexts for microservices.
+
+## Prerequisites
+- [ ] Business domain documentation
+- [ ] Existing codebase (if migrating)
+- [ ] Stakeholder access for clarification
+
+## Phase 1: Domain Discovery
+
+### Step 1.1: Gather Domain Knowledge
+```yaml
+agent: domain-decomposer
+action: analyze
+inputs:
+  - business_requirements
+  - existing_codebase
+outputs:
+  - domain_terms_glossary
+  - business_capabilities_map
+```
+
+### Step 1.2: Identify Core Domains
+```yaml
+agent: domain-decomposer
+action: categorize
+criteria:
+  - core: Competitive advantage
+  - supporting: Necessary but not differentiating
+  - generic: Commodity, can buy
+```
+
+## Phase 2: Context Mapping
+
+### Step 2.1: Draw Bounded Contexts
+```yaml
+agent: domain-decomposer
+action: draw_contexts
+patterns:
+  - Shared Kernel
+  - Customer-Supplier
+  - Conformist
+  - Anti-Corruption Layer
+  - Open Host Service
+  - Published Language
+```
+
+### Step 2.2: Define Context Relationships
+```yaml
+agent: architect
+action: define_relationships
+artifacts:
+  - context_map_diagram
+  - integration_contracts
+```
+
+## Phase 3: Aggregate Design
+
+### Step 3.1: Identify Aggregates
+```yaml
+agent: domain-decomposer
+action: identify_aggregates
+rules:
+  - Single transaction boundary
+  - Consistency boundary
+  - Minimal aggregate size
+```
+
+### Step 3.2: Define Aggregate Roots
+```yaml
+agent: domain-decomposer
+action: define_roots
+outputs:
+  - aggregate_specifications
+  - invariant_rules
+```
+
+## Phase 4: Service Boundaries
+
+### Step 4.1: Map Contexts to Services
+```yaml
+agent: architect
+action: map_services
+considerations:
+  - Team ownership
+  - Deployment independence
+  - Data ownership
+  - Communication patterns
+```
+
+### Step 4.2: Define APIs
+```yaml
+agent: architect
+action: define_apis
+style: contract-first
+artifacts:
+  - openapi_specs
+  - async_api_specs
+```
+
+## Outputs
+- [ ] Domain glossary
+- [ ] Context map diagram
+- [ ] Aggregate specifications
+- [ ] Service boundary definitions
+- [ ] API contracts
+
+## Quality Gates
+- All contexts have clear ownership
+- No cyclic dependencies between contexts
+- Aggregates are transaction-consistent
+- APIs follow organization standards

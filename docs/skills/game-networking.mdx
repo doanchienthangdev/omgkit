@@ -1,0 +1,547 @@
+---
+title: "Game Networking"
+description: "Multiplayer game networking including client-server architecture, state synchronization, lag compensation, and matchmaking."
+icon: "gamepad"
+---
+
+<Info>
+  **Category:** Game
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Multiplayer game networking including client-server architecture, state synchronization, lag compensation, and matchmaking.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Game Networking
+
+Multiplayer game networking including client-server architecture, state synchronization, lag compensation, and matchmaking.
+
+## Overview
+
+Game networking enables real-time multiplayer experiences through efficient state synchronization, prediction, and latency management.
+
+## Core Concepts
+
+### Network Models
+- **Client-Server**: Authoritative server
+- **Peer-to-Peer**: Direct player connections
+- **Relay**: Server-mediated P2P
+- **Hybrid**: Mixed approaches
+
+### Synchronization Methods
+- **Lockstep**: All clients wait for all inputs
+- **State Sync**: Server sends world state
+- **Input Sync**: Server processes inputs
+- **Snapshot Interpolation**: Buffered state replay
+
+## Client-Server Architecture
+
+### Server-Authoritative Model
+```typescript
+// server.ts
+import { Server } from 'socket.io';
+
+interface GameState {
+  players: Map<string, PlayerState>;
+  projectiles: ProjectileState[];
+  tick: number;
+}
+
+interface PlayerState {
+  id: string;
+  position: Vector3;
+  rotation: number;
+  velocity: Vector3;
+  health: number;
+  lastProcessedInput: number;
+}
+
+interface PlayerInput {
+  tick: number;
+  movement: Vector2;
+  rotation: number;
+  actions: string[];
+}
+
+class GameServer {
+  private state: GameState;
+  private tickRate = 60;
+  private inputBuffer: Map<string, PlayerInput[]> = new Map();
+
+  constructor(private io: Server) {
+    this.state = {
+      players: new Map(),
+      projectiles: [],
+      tick: 0
+    };
+
+    this.setupHandlers();
+    this.startGameLoop();
+  }
+
+  private setupHandlers(): void {
+    this.io.on('connection', (socket) => {
+      this.handlePlayerJoin(socket);
+
+      socket.on('input', (input: PlayerInput) => {
+        this.bufferInput(socket.id, input);
+      });
+
+      socket.on('disconnect', () => {
+        this.handlePlayerLeave(socket.id);
+      });
+    });
+  }
+
+  private bufferInput(playerId: string, input: PlayerInput): void {
+    if (!this.inputBuffer.has(playerId)) {
+      this.inputBuffer.set(playerId, []);
+    }
+    this.inputBuffer.get(playerId)!.push(input);
+  }
+
+  private startGameLoop(): void {
+    const tickInterval = 1000 / this.tickRate;
+
+    setInterval(() => {
+      this.processInputs();
+      this.updatePhysics();
+      this.broadcastState();
+      this.state.tick++;
+    }, tickInterval);
+  }
+
+  private processInputs(): void {
+    for (const [playerId, inputs] of this.inputBuffer) {
+      const player = this.state.players.get(playerId);
+      if (!player) continue;
+
+      for (const input of inputs) {
+        this.applyInput(player, input);
+        player.lastProcessedInput = input.tick;
+      }
+    }
+    this.inputBuffer.clear();
+  }
+
+  private applyInput(player: PlayerState, input: PlayerInput): void {
+    // Apply movement
+    const moveDir = normalize(input.movement);
+    player.velocity.x = moveDir.x * MOVE_SPEED;
+    player.velocity.z = moveDir.y * MOVE_SPEED;
+    player.rotation = input.rotation;
+
+    // Process actions
+    for (const action of input.actions) {
+      if (action === 'shoot') {
+        this.spawnProjectile(player);
+      }
+    }
+  }
+
+  private broadcastState(): void {
+    const snapshot = this.createSnapshot();
+    this.io.emit('state', snapshot);
+  }
+
+  private createSnapshot(): GameSnapshot {
+    return {
+      tick: this.state.tick,
+      timestamp: Date.now(),
+      players: Array.from(this.state.players.values()),
+      projectiles: this.state.projectiles
+    };
+  }
+}
+```
+
+### Client Prediction
+```typescript
+// client.ts
+class NetworkClient {
+  private socket: Socket;
+  private localPlayer: LocalPlayer;
+  private pendingInputs: PlayerInput[] = [];
+  private serverTick = 0;
+  private interpolationBuffer: GameSnapshot[] = [];
+
+  constructor(serverUrl: string) {
+    this.socket = io(serverUrl);
+    this.setupHandlers();
+  }
+
+  private setupHandlers(): void {
+    this.socket.on('state', (snapshot: GameSnapshot) => {
+      this.handleServerState(snapshot);
+    });
+  }
+
+  public sendInput(input: PlayerInput): void {
+    // Apply immediately (prediction)
+    this.localPlayer.applyInput(input);
+
+    // Save for reconciliation
+    this.pendingInputs.push(input);
+
+    // Send to server
+    this.socket.emit('input', input);
+  }
+
+  private handleServerState(snapshot: GameSnapshot): void {
+    this.serverTick = snapshot.tick;
+
+    // Find our player in the snapshot
+    const serverPlayer = snapshot.players.find(
+      p => p.id === this.localPlayer.id
+    );
+
+    if (serverPlayer) {
+      this.reconcile(serverPlayer);
+    }
+
+    // Add to interpolation buffer for other players
+    this.interpolationBuffer.push(snapshot);
+    if (this.interpolationBuffer.length > 3) {
+      this.interpolationBuffer.shift();
+    }
+  }
+
+  private reconcile(serverState: PlayerState): void {
+    // Remove acknowledged inputs
+    this.pendingInputs = this.pendingInputs.filter(
+      input => input.tick > serverState.lastProcessedInput
+    );
+
+    // Check if prediction was correct
+    const positionError = distance(
+      this.localPlayer.position,
+      serverState.position
+    );
+
+    if (positionError > RECONCILIATION_THRESHOLD) {
+      // Snap to server position
+      this.localPlayer.position = { ...serverState.position };
+
+      // Re-apply pending inputs
+      for (const input of this.pendingInputs) {
+        this.localPlayer.applyInput(input);
+      }
+    }
+  }
+
+  public update(deltaTime: number): void {
+    // Interpolate other players
+    this.interpolateEntities(deltaTime);
+  }
+
+  private interpolateEntities(deltaTime: number): void {
+    if (this.interpolationBuffer.length < 2) return;
+
+    const renderTime = Date.now() - INTERPOLATION_DELAY;
+    const [older, newer] = this.interpolationBuffer;
+
+    const t = (renderTime - older.timestamp) /
+              (newer.timestamp - older.timestamp);
+
+    for (const newState of newer.players) {
+      if (newState.id === this.localPlayer.id) continue;
+
+      const oldState = older.players.find(p => p.id === newState.id);
+      if (!oldState) continue;
+
+      const entity = this.getEntity(newState.id);
+      if (entity) {
+        entity.position = lerp(oldState.position, newState.position, t);
+        entity.rotation = lerpAngle(oldState.rotation, newState.rotation, t);
+      }
+    }
+  }
+}
+```
+
+## Lag Compensation
+
+### Server-Side Rewind
+```typescript
+class LagCompensation {
+  private historyBuffer: GameSnapshot[] = [];
+  private maxHistoryMs = 1000;
+
+  saveState(snapshot: GameSnapshot): void {
+    this.historyBuffer.push(snapshot);
+
+    // Remove old states
+    const cutoff = Date.now() - this.maxHistoryMs;
+    this.historyBuffer = this.historyBuffer.filter(
+      s => s.timestamp > cutoff
+    );
+  }
+
+  rewindAndCheck(
+    shooterId: string,
+    targetId: string,
+    clientTime: number,
+    shotOrigin: Vector3,
+    shotDirection: Vector3
+  ): HitResult {
+    // Find the state closest to client's time
+    const historicalState = this.findStateAtTime(clientTime);
+    if (!historicalState) return { hit: false };
+
+    // Get historical positions
+    const shooter = historicalState.players.find(p => p.id === shooterId);
+    const target = historicalState.players.find(p => p.id === targetId);
+
+    if (!shooter || !target) return { hit: false };
+
+    // Perform hit detection with historical positions
+    const hitbox = this.getHitbox(target);
+    const hit = this.raycast(shotOrigin, shotDirection, hitbox);
+
+    return hit;
+  }
+
+  private findStateAtTime(targetTime: number): GameSnapshot | null {
+    for (let i = this.historyBuffer.length - 1; i >= 0; i--) {
+      if (this.historyBuffer[i].timestamp <= targetTime) {
+        return this.historyBuffer[i];
+      }
+    }
+    return this.historyBuffer[0] || null;
+  }
+}
+```
+
+## Matchmaking
+
+### Simple Matchmaking Service
+```typescript
+interface MatchRequest {
+  playerId: string;
+  rating: number;
+  queuedAt: number;
+  region: string;
+}
+
+interface Match {
+  id: string;
+  players: string[];
+  serverAddress: string;
+}
+
+class MatchmakingService {
+  private queue: MatchRequest[] = [];
+  private ratingRange = 100;
+  private maxWaitTime = 60000;
+
+  async queuePlayer(request: MatchRequest): Promise<void> {
+    this.queue.push(request);
+    await this.tryMatch();
+  }
+
+  async removePlayer(playerId: string): Promise<void> {
+    this.queue = this.queue.filter(r => r.playerId !== playerId);
+  }
+
+  private async tryMatch(): Promise<void> {
+    const now = Date.now();
+
+    // Sort by queue time
+    this.queue.sort((a, b) => a.queuedAt - b.queuedAt);
+
+    for (const request of this.queue) {
+      const waitTime = now - request.queuedAt;
+      const expandedRange = this.ratingRange + (waitTime / 1000) * 10;
+
+      const candidates = this.queue.filter(
+        r => r.playerId !== request.playerId &&
+             r.region === request.region &&
+             Math.abs(r.rating - request.rating) <= expandedRange
+      );
+
+      if (candidates.length >= 1) { // For 1v1
+        const match = await this.createMatch([request, candidates[0]]);
+        this.removeFromQueue([request.playerId, candidates[0].playerId]);
+        await this.notifyPlayers(match);
+        return;
+      }
+    }
+  }
+
+  private async createMatch(requests: MatchRequest[]): Promise<Match> {
+    const server = await this.allocateServer(requests[0].region);
+
+    return {
+      id: generateId(),
+      players: requests.map(r => r.playerId),
+      serverAddress: server.address
+    };
+  }
+
+  private removeFromQueue(playerIds: string[]): void {
+    this.queue = this.queue.filter(
+      r => !playerIds.includes(r.playerId)
+    );
+  }
+}
+```
+
+## Unity Netcode
+
+### Network Object
+```csharp
+using Unity.Netcode;
+using UnityEngine;
+
+public class NetworkPlayer : NetworkBehaviour
+{
+    private NetworkVariable<Vector3> _position = new(
+        writePerm: NetworkVariableWritePermission.Server
+    );
+
+    private NetworkVariable<float> _health = new(
+        100f,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            // Setup for local player
+        }
+
+        _health.OnValueChanged += OnHealthChanged;
+    }
+
+    private void Update()
+    {
+        if (IsOwner)
+        {
+            HandleInput();
+        }
+        else
+        {
+            // Interpolate position for remote players
+            transform.position = Vector3.Lerp(
+                transform.position,
+                _position.Value,
+                Time.deltaTime * 10f
+            );
+        }
+    }
+
+    private void HandleInput()
+    {
+        var input = new Vector3(
+            Input.GetAxis("Horizontal"),
+            0,
+            Input.GetAxis("Vertical")
+        );
+
+        MoveServerRpc(input);
+    }
+
+    [ServerRpc]
+    private void MoveServerRpc(Vector3 input)
+    {
+        _position.Value += input * 5f * Time.deltaTime;
+    }
+
+    [ServerRpc]
+    public void TakeDamageServerRpc(float damage)
+    {
+        _health.Value -= damage;
+
+        if (_health.Value <= 0)
+        {
+            DieClientRpc();
+        }
+    }
+
+    [ClientRpc]
+    private void DieClientRpc()
+    {
+        // Play death animation on all clients
+    }
+
+    private void OnHealthChanged(float oldValue, float newValue)
+    {
+        // Update UI
+    }
+}
+```
+
+## Best Practices
+
+1. **Server Authority**: Never trust client data
+2. **Input Prediction**: Smooth local experience
+3. **Interpolation**: Smooth remote movement
+4. **Delta Compression**: Minimize bandwidth
+5. **Region Selection**: Match by latency
+
+## Anti-Patterns
+
+- Trusting client physics
+- Sending full state every frame
+- No lag compensation
+- Ignoring packet loss
+- Single global server
+
+## When to Use
+
+- Real-time multiplayer games
+- Competitive games
+- Co-op experiences
+- Persistent online worlds
+
+## When NOT to Use
+
+- Turn-based games (simpler needed)
+- Single-player only
+- Local multiplayer only
+- Asynchronous multiplayer
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  game-networking:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Game" icon="gamepad" href="/skills/overview#game">
+    More game skills
+  </Card>
+</CardGroup>

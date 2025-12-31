@@ -1,0 +1,470 @@
+---
+title: "Godot Patterns"
+description: "Godot 4 architecture patterns including node composition, signals, resources, and GDScript/C# best practices."
+icon: "gamepad"
+---
+
+<Info>
+  **Category:** Game
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Godot 4 architecture patterns including node composition, signals, resources, and GDScript/C# best practices.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Godot Patterns
+
+Godot 4 architecture patterns including node composition, signals, resources, and GDScript/C# best practices.
+
+## Overview
+
+Godot's scene/node architecture enables composition-based game design with powerful signal systems and resource management.
+
+## Core Concepts
+
+### Node Hierarchy
+- **Node**: Base class for everything
+- **Scene**: Reusable node tree
+- **Resource**: Shareable data objects
+- **Autoload**: Global singletons
+
+### Design Philosophy
+- Composition over inheritance
+- Scenes as prefabs
+- Signals for decoupling
+- Resources for data
+
+## Scene Architecture
+
+### Component Pattern
+```gdscript
+# health_component.gd
+class_name HealthComponent
+extends Node
+
+signal health_changed(current: float, maximum: float)
+signal died
+
+@export var max_health: float = 100.0
+var current_health: float:
+    set(value):
+        var old_health = current_health
+        current_health = clampf(value, 0.0, max_health)
+        health_changed.emit(current_health, max_health)
+        if current_health <= 0 and old_health > 0:
+            died.emit()
+
+func _ready() -> void:
+    current_health = max_health
+
+func take_damage(amount: float) -> void:
+    current_health -= amount
+
+func heal(amount: float) -> void:
+    current_health += amount
+
+func is_alive() -> bool:
+    return current_health > 0
+```
+
+```gdscript
+# hitbox_component.gd
+class_name HitboxComponent
+extends Area3D
+
+signal hit(damage: float, source: Node)
+
+@export var damage: float = 10.0
+@export var knockback_force: float = 500.0
+
+func _on_area_entered(area: Area3D) -> void:
+    if area is HurtboxComponent:
+        area.receive_hit(damage, knockback_force, owner)
+        hit.emit(damage, area.owner)
+```
+
+```gdscript
+# hurtbox_component.gd
+class_name HurtboxComponent
+extends Area3D
+
+signal damage_received(amount: float, source: Node)
+
+@export var health_component: HealthComponent
+
+func receive_hit(damage: float, knockback: float, source: Node) -> void:
+    if health_component:
+        health_component.take_damage(damage)
+    damage_received.emit(damage, source)
+```
+
+### Entity Composition
+```gdscript
+# player.gd
+extends CharacterBody3D
+
+@onready var health: HealthComponent = $HealthComponent
+@onready var hurtbox: HurtboxComponent = $HurtboxComponent
+@onready var state_machine: StateMachine = $StateMachine
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+
+func _ready() -> void:
+    health.died.connect(_on_death)
+    hurtbox.damage_received.connect(_on_damage_received)
+
+func _physics_process(delta: float) -> void:
+    state_machine.process_physics(delta)
+
+func _on_death() -> void:
+    state_machine.transition_to("Dead")
+
+func _on_damage_received(amount: float, source: Node) -> void:
+    animation_player.play("hit")
+```
+
+## Signal Patterns
+
+### Event Bus (Autoload)
+```gdscript
+# events.gd (Autoload)
+extends Node
+
+# Game events
+signal game_started
+signal game_paused(is_paused: bool)
+signal game_over(won: bool)
+
+# Player events
+signal player_spawned(player: Node)
+signal player_died(player: Node)
+signal player_scored(points: int)
+
+# UI events
+signal show_dialog(text: String)
+signal update_health(current: float, max: float)
+signal update_score(score: int)
+
+# Combat events
+signal enemy_killed(enemy: Node, killer: Node)
+signal damage_dealt(amount: float, target: Node, source: Node)
+```
+
+```gdscript
+# Usage in player
+func _ready() -> void:
+    Events.player_spawned.emit(self)
+
+func die() -> void:
+    Events.player_died.emit(self)
+```
+
+```gdscript
+# Usage in UI
+extends Control
+
+func _ready() -> void:
+    Events.update_health.connect(_on_health_updated)
+    Events.update_score.connect(_on_score_updated)
+    Events.game_over.connect(_on_game_over)
+
+func _on_health_updated(current: float, max: float) -> void:
+    $HealthBar.value = current / max * 100
+```
+
+## Resource System
+
+### Custom Resources
+```gdscript
+# weapon_resource.gd
+class_name WeaponResource
+extends Resource
+
+@export var weapon_name: String
+@export var icon: Texture2D
+@export var damage: float
+@export var attack_speed: float
+@export var range: float
+@export_enum("Melee", "Ranged", "Magic") var weapon_type: int
+@export var attack_animation: String
+@export var attack_sound: AudioStream
+
+func get_dps() -> float:
+    return damage * attack_speed
+```
+
+```gdscript
+# character_stats.gd
+class_name CharacterStats
+extends Resource
+
+@export var character_name: String
+@export var max_health: float = 100.0
+@export var move_speed: float = 300.0
+@export var jump_force: float = 400.0
+@export var starting_weapon: WeaponResource
+@export_multiline var description: String
+
+func apply_to(character: CharacterBody2D) -> void:
+    character.max_health = max_health
+    character.move_speed = move_speed
+    character.jump_force = jump_force
+```
+
+### Inventory System
+```gdscript
+# inventory.gd
+class_name Inventory
+extends Resource
+
+signal item_added(item: ItemResource, slot: int)
+signal item_removed(item: ItemResource, slot: int)
+signal inventory_changed
+
+@export var slots: Array[ItemResource] = []
+@export var max_slots: int = 20
+
+func _init() -> void:
+    slots.resize(max_slots)
+
+func add_item(item: ItemResource) -> bool:
+    # Try to stack first
+    for i in range(slots.size()):
+        if slots[i] and slots[i].can_stack_with(item):
+            slots[i].quantity += item.quantity
+            inventory_changed.emit()
+            return true
+
+    # Find empty slot
+    for i in range(slots.size()):
+        if slots[i] == null:
+            slots[i] = item.duplicate()
+            item_added.emit(item, i)
+            inventory_changed.emit()
+            return true
+
+    return false
+
+func remove_item(slot: int) -> ItemResource:
+    if slot < 0 or slot >= slots.size():
+        return null
+
+    var item = slots[slot]
+    slots[slot] = null
+    if item:
+        item_removed.emit(item, slot)
+        inventory_changed.emit()
+    return item
+```
+
+## State Machine
+
+### GDScript State Machine
+```gdscript
+# state_machine.gd
+class_name StateMachine
+extends Node
+
+signal state_changed(old_state: State, new_state: State)
+
+@export var initial_state: State
+var current_state: State
+var states: Dictionary = {}
+
+func _ready() -> void:
+    for child in get_children():
+        if child is State:
+            states[child.name.to_lower()] = child
+            child.state_machine = self
+
+    if initial_state:
+        current_state = initial_state
+        current_state.enter()
+
+func process_input(event: InputEvent) -> void:
+    if current_state:
+        current_state.handle_input(event)
+
+func process_frame(delta: float) -> void:
+    if current_state:
+        current_state.update(delta)
+
+func process_physics(delta: float) -> void:
+    if current_state:
+        current_state.physics_update(delta)
+
+func transition_to(state_name: String, params: Dictionary = {}) -> void:
+    var new_state = states.get(state_name.to_lower())
+    if new_state == null:
+        push_error("State not found: " + state_name)
+        return
+
+    if current_state:
+        current_state.exit()
+
+    var old_state = current_state
+    current_state = new_state
+    current_state.enter(params)
+
+    state_changed.emit(old_state, new_state)
+```
+
+```gdscript
+# state.gd
+class_name State
+extends Node
+
+var state_machine: StateMachine
+
+func enter(params: Dictionary = {}) -> void:
+    pass
+
+func exit() -> void:
+    pass
+
+func handle_input(event: InputEvent) -> void:
+    pass
+
+func update(delta: float) -> void:
+    pass
+
+func physics_update(delta: float) -> void:
+    pass
+```
+
+```gdscript
+# player_idle_state.gd
+extends State
+
+@onready var player: CharacterBody2D = owner
+
+func enter(params: Dictionary = {}) -> void:
+    player.animation_player.play("idle")
+
+func physics_update(delta: float) -> void:
+    var input_dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+
+    if input_dir.length() > 0.1:
+        state_machine.transition_to("Move")
+
+    if Input.is_action_just_pressed("jump") and player.is_on_floor():
+        state_machine.transition_to("Jump")
+
+    if Input.is_action_just_pressed("attack"):
+        state_machine.transition_to("Attack")
+```
+
+## C# Patterns
+
+### Component in C#
+```csharp
+using Godot;
+
+public partial class HealthComponent : Node
+{
+    [Signal]
+    public delegate void HealthChangedEventHandler(float current, float max);
+
+    [Signal]
+    public delegate void DiedEventHandler();
+
+    [Export]
+    public float MaxHealth { get; set; } = 100f;
+
+    private float _currentHealth;
+    public float CurrentHealth
+    {
+        get => _currentHealth;
+        set
+        {
+            float oldHealth = _currentHealth;
+            _currentHealth = Mathf.Clamp(value, 0f, MaxHealth);
+            EmitSignal(SignalName.HealthChanged, _currentHealth, MaxHealth);
+
+            if (_currentHealth <= 0 && oldHealth > 0)
+                EmitSignal(SignalName.Died);
+        }
+    }
+
+    public override void _Ready()
+    {
+        CurrentHealth = MaxHealth;
+    }
+
+    public void TakeDamage(float amount) => CurrentHealth -= amount;
+    public void Heal(float amount) => CurrentHealth += amount;
+    public bool IsAlive() => CurrentHealth > 0;
+}
+```
+
+## Best Practices
+
+1. **Use Composition**: Build entities from components
+2. **Leverage Signals**: Decouple systems
+3. **Resources for Data**: Share data between scenes
+4. **Autoloads Sparingly**: Only for truly global systems
+5. **Type Hints**: Use static typing in GDScript
+
+## Anti-Patterns
+
+- Deep inheritance hierarchies
+- Direct node references across scenes
+- Business logic in UI nodes
+- Hardcoded paths
+- Overusing autoloads
+
+## When to Use
+
+- Godot game projects
+- 2D and 3D games
+- Rapid prototyping
+- Open-source game development
+- Cross-platform games
+
+## When NOT to Use
+
+- AAA-scale projects (consider Unity/Unreal)
+- Specialized engines exist (racing, sports)
+- Team heavily invested in other engines
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  godot-patterns:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Game" icon="gamepad" href="/skills/overview#game">
+    More game skills
+  </Card>
+</CardGroup>

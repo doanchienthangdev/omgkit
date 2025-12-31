@@ -1,0 +1,125 @@
+---
+title: "/ml:train"
+description: "Train ML model with experiment tracking and hyperparameter tuning"
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ml
+
+  **Syntax:** `/ml:train <model type or training task>`
+</Info>
+
+## Overview
+
+Train ML model with experiment tracking and hyperparameter tuning
+
+## Quick Start
+
+```bash
+/ml:train "model
+```
+
+
+# 🤖 ML Training: \<model type or training task\>
+
+Train model: **\<model type or training task\>**
+
+## Agent
+Uses **ml-engineer** agent for model training.
+
+## Workflow
+1. **Data Prep** - Load and preprocess data
+2. **Feature Engineering** - Create features
+3. **Model Selection** - Choose architecture
+4. **Training** - Train with tracking
+5. **Tuning** - Hyperparameter optimization
+
+## Experiment Tracking
+- MLflow / Weights & Biases
+- Parameters logged
+- Metrics recorded
+- Artifacts stored
+- Model versioning
+
+## Hyperparameter Tuning
+- Grid search
+- Random search
+- Bayesian optimization
+- Early stopping
+
+## Outputs
+- Trained model artifact
+- Training metrics
+- Learning curves
+- Hyperparameter config
+- Model card
+
+## Progress
+- [ ] Data prepared
+- [ ] Features engineered
+- [ ] Model trained
+- [ ] Hyperparameters tuned
+- [ ] Model registered
+
+Log all experiments to tracking server.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/ml:train "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/ml:train "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Ml Commands" icon="brain" href="/commands/overview#ml">
+    More ml commands
+  </Card>
+</CardGroup>

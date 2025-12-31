@@ -1,0 +1,503 @@
+---
+title: "Game Audio"
+description: "Game audio implementation including FMOD/Wwise integration, spatial audio, adaptive music, and sound design patterns."
+icon: "gamepad"
+---
+
+<Info>
+  **Category:** Game
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Game audio implementation including FMOD/Wwise integration, spatial audio, adaptive music, and sound design patterns.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Game Audio
+
+Game audio implementation including FMOD/Wwise integration, spatial audio, adaptive music, and sound design patterns.
+
+## Overview
+
+Game audio creates immersive experiences through dynamic sound effects, adaptive music, and spatial audio that responds to gameplay.
+
+## Core Concepts
+
+### Audio Types
+- **SFX**: Sound effects (one-shots, loops)
+- **Music**: Background music, adaptive tracks
+- **Ambience**: Environmental sounds
+- **Voice**: Dialog, narration
+
+### Audio Middleware
+- **FMOD**: Industry-standard audio middleware
+- **Wwise**: Advanced audio engine
+- **Unity Audio**: Built-in system
+- **Godot AudioStreamPlayer**: Native audio
+
+## FMOD Integration
+
+### Unity Setup
+```csharp
+using FMODUnity;
+using FMOD.Studio;
+
+public class AudioManager : MonoBehaviour
+{
+    public static AudioManager Instance { get; private set; }
+
+    [Header("Banks")]
+    [SerializeField] private string[] banksToLoad;
+
+    [Header("Events")]
+    [SerializeField] private EventReference musicEvent;
+    [SerializeField] private EventReference ambienceEvent;
+
+    private EventInstance musicInstance;
+    private EventInstance ambienceInstance;
+    private Bus masterBus;
+    private Bus musicBus;
+    private Bus sfxBus;
+
+    private void Awake()
+    {
+        if (Instance != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        InitializeBuses();
+    }
+
+    private void InitializeBuses()
+    {
+        masterBus = RuntimeManager.GetBus("bus:/Master");
+        musicBus = RuntimeManager.GetBus("bus:/Master/Music");
+        sfxBus = RuntimeManager.GetBus("bus:/Master/SFX");
+    }
+
+    public void SetMasterVolume(float volume)
+    {
+        masterBus.setVolume(volume);
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        musicBus.setVolume(volume);
+    }
+
+    public void SetSFXVolume(float volume)
+    {
+        sfxBus.setVolume(volume);
+    }
+
+    // One-shot sound effect
+    public void PlayOneShot(EventReference eventRef, Vector3 position = default)
+    {
+        RuntimeManager.PlayOneShot(eventRef, position);
+    }
+
+    // Persistent sound with instance control
+    public EventInstance CreateInstance(EventReference eventRef)
+    {
+        return RuntimeManager.CreateInstance(eventRef);
+    }
+
+    public void StartMusic()
+    {
+        if (!musicInstance.isValid())
+        {
+            musicInstance = CreateInstance(musicEvent);
+        }
+        musicInstance.start();
+    }
+
+    public void SetMusicParameter(string name, float value)
+    {
+        musicInstance.setParameterByName(name, value);
+    }
+}
+```
+
+### Event Parameters
+```csharp
+public class WeaponAudio : MonoBehaviour
+{
+    [SerializeField] private EventReference fireEvent;
+    [SerializeField] private EventReference reloadEvent;
+
+    private EventInstance fireInstance;
+
+    public void Fire(float intensity, int ammoCount)
+    {
+        fireInstance = RuntimeManager.CreateInstance(fireEvent);
+
+        // Set parameters for dynamic sound
+        fireInstance.setParameterByName("Intensity", intensity);
+        fireInstance.setParameterByName("AmmoCount", ammoCount);
+
+        // Attach to transform for 3D positioning
+        RuntimeManager.AttachInstanceToGameObject(
+            fireInstance,
+            transform,
+            GetComponent<Rigidbody>()
+        );
+
+        fireInstance.start();
+        fireInstance.release(); // Release when done playing
+    }
+
+    public void StartReload()
+    {
+        RuntimeManager.PlayOneShot(reloadEvent, transform.position);
+    }
+}
+```
+
+## Spatial Audio
+
+### 3D Sound Setup
+```csharp
+public class SpatialAudioSource : MonoBehaviour
+{
+    [SerializeField] private EventReference soundEvent;
+    [SerializeField] private float minDistance = 1f;
+    [SerializeField] private float maxDistance = 20f;
+    [SerializeField] private bool playOnStart = false;
+
+    private EventInstance instance;
+    private FMOD.ATTRIBUTES_3D attributes;
+
+    private void Start()
+    {
+        instance = RuntimeManager.CreateInstance(soundEvent);
+
+        // Set 3D attributes
+        attributes = RuntimeUtils.To3DAttributes(transform);
+        instance.set3DAttributes(attributes);
+
+        // Set distance attenuation
+        instance.setProperty(
+            EVENT_PROPERTY.MINIMUM_DISTANCE,
+            minDistance
+        );
+        instance.setProperty(
+            EVENT_PROPERTY.MAXIMUM_DISTANCE,
+            maxDistance
+        );
+
+        if (playOnStart)
+        {
+            instance.start();
+        }
+    }
+
+    private void Update()
+    {
+        // Update position as object moves
+        attributes.position = RuntimeUtils.ToFMODVector(transform.position);
+        attributes.forward = RuntimeUtils.ToFMODVector(transform.forward);
+        attributes.up = RuntimeUtils.ToFMODVector(transform.up);
+        instance.set3DAttributes(attributes);
+    }
+
+    private void OnDestroy()
+    {
+        instance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        instance.release();
+    }
+}
+```
+
+### Occlusion System
+```csharp
+public class AudioOcclusion : MonoBehaviour
+{
+    [SerializeField] private LayerMask occlusionLayers;
+    [SerializeField] private float updateInterval = 0.1f;
+
+    private EventInstance instance;
+    private Transform listener;
+    private float occlusionValue;
+
+    private void Start()
+    {
+        listener = Camera.main.transform;
+        InvokeRepeating(nameof(UpdateOcclusion), 0, updateInterval);
+    }
+
+    private void UpdateOcclusion()
+    {
+        Vector3 direction = listener.position - transform.position;
+        float distance = direction.magnitude;
+
+        // Raycast to check for occlusion
+        if (Physics.Raycast(
+            transform.position,
+            direction.normalized,
+            out RaycastHit hit,
+            distance,
+            occlusionLayers))
+        {
+            // Calculate occlusion based on obstacle thickness
+            float thickness = CalculateThickness(hit);
+            occlusionValue = Mathf.Lerp(
+                occlusionValue,
+                Mathf.Clamp01(thickness / 5f),
+                Time.deltaTime * 5f
+            );
+        }
+        else
+        {
+            occlusionValue = Mathf.Lerp(occlusionValue, 0f, Time.deltaTime * 10f);
+        }
+
+        // Apply to FMOD event
+        instance.setParameterByName("Occlusion", occlusionValue);
+    }
+}
+```
+
+## Adaptive Music
+
+### Layered Music System
+```csharp
+public class AdaptiveMusicSystem : MonoBehaviour
+{
+    [SerializeField] private EventReference musicEvent;
+
+    private EventInstance musicInstance;
+
+    // Music parameters
+    private float intensity;
+    private float danger;
+    private int combatState; // 0: Explore, 1: Combat, 2: Boss
+
+    private void Start()
+    {
+        musicInstance = RuntimeManager.CreateInstance(musicEvent);
+        musicInstance.start();
+    }
+
+    public void SetIntensity(float value)
+    {
+        intensity = Mathf.Clamp01(value);
+        musicInstance.setParameterByName("Intensity", intensity);
+    }
+
+    public void SetDanger(float value)
+    {
+        danger = Mathf.Clamp01(value);
+        musicInstance.setParameterByName("Danger", danger);
+    }
+
+    public void SetCombatState(int state)
+    {
+        combatState = state;
+        musicInstance.setParameterByName("CombatState", combatState);
+    }
+
+    public void TransitionToArea(string areaName)
+    {
+        // Trigger transition marker
+        musicInstance.setParameterByNameWithLabel("Area", areaName);
+    }
+
+    public void TriggerStinger(string stingerName)
+    {
+        // Play musical stinger (victory, death, discovery)
+        musicInstance.triggerCue();
+    }
+}
+```
+
+### Horizontal Resequencing
+```csharp
+public class MusicSequencer : MonoBehaviour
+{
+    [SerializeField] private EventReference[] sections;
+    [SerializeField] private float crossfadeDuration = 2f;
+
+    private int currentSection;
+    private EventInstance currentInstance;
+    private EventInstance nextInstance;
+
+    public void PlaySection(int sectionIndex)
+    {
+        if (sectionIndex == currentSection) return;
+
+        // Prepare next section
+        nextInstance = RuntimeManager.CreateInstance(sections[sectionIndex]);
+
+        // Start crossfade
+        StartCoroutine(Crossfade());
+
+        currentSection = sectionIndex;
+    }
+
+    private IEnumerator Crossfade()
+    {
+        float elapsed = 0;
+
+        // Get current playback position for sync
+        currentInstance.getTimelinePosition(out int position);
+
+        // Start next at same beat
+        nextInstance.setTimelinePosition(position);
+        nextInstance.start();
+
+        while (elapsed < crossfadeDuration)
+        {
+            float t = elapsed / crossfadeDuration;
+
+            currentInstance.setVolume(1 - t);
+            nextInstance.setVolume(t);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        currentInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+        currentInstance.release();
+
+        currentInstance = nextInstance;
+        nextInstance = default;
+    }
+}
+```
+
+## Sound Design Patterns
+
+### Audio Pool
+```csharp
+public class AudioPool : MonoBehaviour
+{
+    [SerializeField] private int poolSize = 20;
+    [SerializeField] private EventReference pooledEvent;
+
+    private Queue<EventInstance> availableInstances;
+    private List<EventInstance> activeInstances;
+
+    private void Awake()
+    {
+        availableInstances = new Queue<EventInstance>();
+        activeInstances = new List<EventInstance>();
+
+        for (int i = 0; i < poolSize; i++)
+        {
+            var instance = RuntimeManager.CreateInstance(pooledEvent);
+            availableInstances.Enqueue(instance);
+        }
+    }
+
+    public void Play(Vector3 position, float parameter = 0)
+    {
+        if (availableInstances.Count == 0)
+        {
+            // Steal oldest active instance
+            var oldest = activeInstances[0];
+            oldest.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+            activeInstances.RemoveAt(0);
+            availableInstances.Enqueue(oldest);
+        }
+
+        var instance = availableInstances.Dequeue();
+        instance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
+        instance.setParameterByName("Variation", parameter);
+        instance.start();
+
+        activeInstances.Add(instance);
+        StartCoroutine(ReturnWhenFinished(instance));
+    }
+
+    private IEnumerator ReturnWhenFinished(EventInstance instance)
+    {
+        PLAYBACK_STATE state;
+        do
+        {
+            instance.getPlaybackState(out state);
+            yield return null;
+        } while (state != PLAYBACK_STATE.STOPPED);
+
+        activeInstances.Remove(instance);
+        availableInstances.Enqueue(instance);
+    }
+}
+```
+
+## Best Practices
+
+1. **Use Middleware**: FMOD/Wwise for complex projects
+2. **Pool Audio**: Pre-instantiate frequently used sounds
+3. **Parameter-Driven**: Use parameters for variation
+4. **Proper 3D Setup**: Configure attenuation curves
+5. **Memory Management**: Load/unload banks properly
+
+## Anti-Patterns
+
+- Playing overlapping identical sounds
+- No audio pooling for frequent sounds
+- Hardcoded volumes
+- Ignoring occlusion
+- No audio mixing/mastering
+
+## When to Use
+
+- Immersive game experiences
+- Dynamic/adaptive audio needs
+- 3D spatial audio requirements
+- Complex music systems
+- Professional audio quality
+
+## When NOT to Use
+
+- Very simple games (built-in sufficient)
+- Prototype phase
+- No audio designer on team
+- Mobile with size constraints
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  game-audio:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Game" icon="gamepad" href="/skills/overview#game">
+    More game skills
+  </Card>
+</CardGroup>

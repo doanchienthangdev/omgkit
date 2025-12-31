@@ -1,0 +1,195 @@
+---
+title: "service-scaffolding"
+description: "Scaffold a new microservice with standard structure and infrastructure"
+icon: "cubes"
+---
+
+<Info>
+  **Category:** Microservices
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:service-scaffolding "your description here"
+```
+
+
+# Service Scaffolding Workflow
+
+Create a production-ready microservice from scratch.
+
+## Prerequisites
+- [ ] Service name and ownership defined
+- [ ] API contract (OpenAPI/AsyncAPI)
+- [ ] Database requirements
+- [ ] Target runtime environment
+
+## Phase 1: Project Structure
+
+### Step 1.1: Initialize Repository
+```yaml
+agent: fullstack-developer
+action: scaffold
+template: microservice
+structure:
+  - src/
+    - domain/       # Business logic
+    - application/  # Use cases
+    - infrastructure/ # External adapters
+    - api/          # HTTP/gRPC handlers
+  - tests/
+    - unit/
+    - integration/
+    - e2e/
+  - docs/
+  - scripts/
+```
+
+### Step 1.2: Configure Build System
+```yaml
+agent: fullstack-developer
+action: configure
+files:
+  - package.json / pom.xml / go.mod
+  - Dockerfile
+  - docker-compose.yml
+  - Makefile
+```
+
+## Phase 2: Core Infrastructure
+
+### Step 2.1: Database Setup
+```yaml
+agent: database-admin
+action: setup
+artifacts:
+  - schema_migrations
+  - seed_data
+  - connection_config
+```
+
+### Step 2.2: Observability Setup
+```yaml
+agent: fullstack-developer
+action: configure
+components:
+  - structured_logging
+  - metrics_endpoint
+  - health_checks
+  - trace_instrumentation
+```
+
+## Phase 3: API Implementation
+
+### Step 3.1: Generate API Stubs
+```yaml
+agent: fullstack-developer
+action: generate
+from: openapi_spec
+outputs:
+  - handlers
+  - request_validators
+  - response_types
+```
+
+### Step 3.2: Implement Business Logic
+```yaml
+agent: fullstack-developer
+action: implement
+patterns:
+  - Clean Architecture
+  - Dependency Injection
+  - Repository Pattern
+```
+
+## Phase 4: CI/CD Pipeline
+
+### Step 4.1: Create Pipeline
+```yaml
+agent: cicd-manager
+action: create
+stages:
+  - lint
+  - test
+  - build
+  - security_scan
+  - deploy_staging
+  - integration_test
+  - deploy_production
+```
+
+### Step 4.2: Configure Deployment
+```yaml
+agent: cicd-manager
+action: configure
+artifacts:
+  - kubernetes_manifests
+  - helm_chart
+  - terraform_module
+```
+
+## Phase 5: Documentation
+
+### Step 5.1: Generate Docs
+```yaml
+agent: fullstack-developer
+action: document
+outputs:
+  - README.md
+  - API_DOCS.md
+  - CONTRIBUTING.md
+  - ADR_TEMPLATE.md
+```
+
+## Outputs
+- [ ] Runnable service codebase
+- [ ] Docker configuration
+- [ ] CI/CD pipeline
+- [ ] Kubernetes manifests
+- [ ] Documentation
+
+## Quality Gates
+- All tests pass
+- Code coverage > 80%
+- No security vulnerabilities
+- API matches contract
+- Health endpoints working
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+- **[@cicd-manager](/agents/cicd-manager)** - Specialized agent for cicd manager tasks
+- **[@database-admin](/agents/database-admin)** - Specialized agent for database admin tasks
+
+
+
+
+
+
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Microservices" icon="cubes" href="/workflows/overview#microservices">
+    More microservices workflows
+  </Card>
+</CardGroup>

@@ -1,0 +1,357 @@
+---
+title: "service-discovery"
+description: "Service discovery patterns with Consul, Kubernetes DNS, Eureka, health checks, and client-side load balancing."
+icon: "cubes"
+---
+
+<Info>
+  **Category:** Microservices
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Service discovery patterns with Consul, Kubernetes DNS, Eureka, health checks, and client-side load balancing.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Service Discovery
+
+Service discovery patterns with Consul, Kubernetes DNS, Eureka, health checks, and client-side load balancing.
+
+## Overview
+
+Service discovery enables services to find and communicate with each other dynamically without hardcoded addresses.
+
+## Discovery Patterns
+
+### Client-Side Discovery
+- Client queries registry
+- Client performs load balancing
+- Examples: Eureka, Consul client
+
+### Server-Side Discovery
+- Load balancer queries registry
+- Load balancer routes requests
+- Examples: Kubernetes Services, AWS ELB
+
+### DNS-Based Discovery
+- Services registered as DNS records
+- Standard DNS resolution
+- Examples: Kubernetes DNS, Consul DNS
+
+## Kubernetes Service Discovery
+
+### ClusterIP Service
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+spec:
+  selector:
+    app: user-service
+  ports:
+    - port: 80
+      targetPort: 8080
+  type: ClusterIP
+```
+
+### Headless Service (Direct Pod Discovery)
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service-headless
+spec:
+  clusterIP: None
+  selector:
+    app: user-service
+  ports:
+    - port: 8080
+```
+
+### DNS Resolution
+```
+# ClusterIP service
+user-service.default.svc.cluster.local
+
+# Headless service returns all pod IPs
+# SRV records for port discovery
+_http._tcp.user-service.default.svc.cluster.local
+```
+
+### EndpointSlices
+```yaml
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: user-service-abc
+  labels:
+    kubernetes.io/service-name: user-service
+addressType: IPv4
+endpoints:
+  - addresses:
+      - "10.0.0.1"
+    conditions:
+      ready: true
+      serving: true
+ports:
+  - port: 8080
+    protocol: TCP
+```
+
+## Consul Service Discovery
+
+### Service Registration
+```json
+{
+  "service": {
+    "name": "user-service",
+    "id": "user-service-1",
+    "port": 8080,
+    "tags": ["v1", "production"],
+    "meta": {
+      "version": "1.0.0"
+    },
+    "check": {
+      "http": "http://localhost:8080/health",
+      "interval": "10s",
+      "timeout": "5s"
+    }
+  }
+}
+```
+
+### Health Checks
+```json
+{
+  "checks": [
+    {
+      "id": "http-check",
+      "name": "HTTP Health Check",
+      "http": "http://localhost:8080/health",
+      "interval": "10s",
+      "timeout": "5s"
+    },
+    {
+      "id": "tcp-check",
+      "name": "TCP Check",
+      "tcp": "localhost:8080",
+      "interval": "10s"
+    },
+    {
+      "id": "script-check",
+      "name": "Script Check",
+      "args": ["/opt/check.sh"],
+      "interval": "30s"
+    }
+  ]
+}
+```
+
+### Service Query
+```bash
+# DNS query
+dig @127.0.0.1 -p 8600 user-service.service.consul
+
+# HTTP API
+curl http://localhost:8500/v1/catalog/service/user-service
+
+# Health-filtered
+curl http://localhost:8500/v1/health/service/user-service?passing=true
+```
+
+## Client-Side Load Balancing
+
+### gRPC with Service Discovery
+```go
+import (
+    "google.golang.org/grpc"
+    "google.golang.org/grpc/resolver"
+)
+
+// Custom resolver for Consul
+type consulResolver struct {
+    consulClient *api.Client
+    serviceName  string
+}
+
+func (r *consulResolver) ResolveNow(options resolver.ResolveNowOptions) {
+    services, _, _ := r.consulClient.Health().Service(
+        r.serviceName, "", true, nil)
+
+    var addrs []resolver.Address
+    for _, s := range services {
+        addrs = append(addrs, resolver.Address{
+            Addr: fmt.Sprintf("%s:%d", s.Service.Address, s.Service.Port),
+        })
+    }
+    r.cc.UpdateState(resolver.State{Addresses: addrs})
+}
+
+// Usage
+conn, _ := grpc.Dial(
+    "consul:///user-service",
+    grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy":"round_robin"}`),
+)
+```
+
+### Node.js with Consul
+```javascript
+const Consul = require('consul');
+const consul = new Consul();
+
+async function discoverService(serviceName) {
+  const services = await consul.health.service({
+    service: serviceName,
+    passing: true
+  });
+
+  return services.map(s => ({
+    address: s.Service.Address,
+    port: s.Service.Port,
+    meta: s.Service.Meta
+  }));
+}
+
+// Client-side load balancing
+class ServiceClient {
+  constructor(serviceName) {
+    this.serviceName = serviceName;
+    this.instances = [];
+    this.currentIndex = 0;
+    this.refresh();
+    setInterval(() => this.refresh(), 30000);
+  }
+
+  async refresh() {
+    this.instances = await discoverService(this.serviceName);
+  }
+
+  getNextInstance() {
+    if (this.instances.length === 0) {
+      throw new Error('No instances available');
+    }
+    const instance = this.instances[this.currentIndex];
+    this.currentIndex = (this.currentIndex + 1) % this.instances.length;
+    return instance;
+  }
+}
+```
+
+## Health Check Patterns
+
+### Liveness vs Readiness
+```yaml
+# Kubernetes probes
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 3
+```
+
+### Health Endpoint Implementation
+```javascript
+app.get('/health/live', (req, res) => {
+  // Basic liveness - can the app respond?
+  res.status(200).json({ status: 'alive' });
+});
+
+app.get('/health/ready', async (req, res) => {
+  // Readiness - can it serve traffic?
+  const checks = {
+    database: await checkDatabase(),
+    cache: await checkCache(),
+    dependencies: await checkDependencies()
+  };
+
+  const allHealthy = Object.values(checks).every(c => c.healthy);
+  res.status(allHealthy ? 200 : 503).json({
+    status: allHealthy ? 'ready' : 'not ready',
+    checks
+  });
+});
+```
+
+## Best Practices
+
+1. **Health Checks**: Always implement meaningful health checks
+2. **Graceful Shutdown**: Deregister before stopping
+3. **Client Caching**: Cache discovery results with TTL
+4. **Fallback**: Handle discovery failures gracefully
+5. **Monitoring**: Track discovery latency and failures
+
+## Anti-Patterns
+
+- Hardcoding service addresses
+- Not implementing health checks
+- Too frequent discovery polling
+- Not handling discovery failures
+- Ignoring service metadata
+
+## When to Use
+
+- Dynamic environments (containers, cloud)
+- Frequently scaling services
+- Multiple instances of services
+- Zero-downtime deployments
+
+## When NOT to Use
+
+- Static infrastructure
+- Single instance services
+- When DNS is sufficient
+- Very simple architectures
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  service-discovery:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Microservices" icon="cubes" href="/skills/overview#microservices">
+    More microservices skills
+  </Card>
+</CardGroup>

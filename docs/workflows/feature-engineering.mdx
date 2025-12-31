@@ -1,0 +1,252 @@
+---
+title: "feature-engineering"
+description: "Systematic feature engineering for ML models"
+icon: "brain-circuit"
+---
+
+<Info>
+  **Category:** Ai Ml
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:feature-engineering "your description here"
+```
+
+
+# Feature Engineering Workflow
+
+Create and manage features for ML models.
+
+## Prerequisites
+- [ ] Raw data available
+- [ ] Problem understanding clear
+- [ ] Feature store (optional)
+
+## Phase 1: Feature Discovery
+
+### Step 1.1: Exploratory Data Analysis
+```yaml
+agent: ml-engineer
+action: analyze
+analysis:
+  - Data distributions
+  - Missing patterns
+  - Correlations
+  - Target relationship
+  - Temporal patterns
+tools:
+  - Pandas profiling
+  - Sweetviz
+  - Custom notebooks
+```
+
+### Step 1.2: Domain Feature Identification
+```yaml
+agent: ml-engineer
+action: identify
+sources:
+  - Domain expertise
+  - Literature review
+  - Competitor analysis
+  - Business logic
+categories:
+  - Identity features
+  - Behavioral features
+  - Temporal features
+  - Aggregation features
+```
+
+## Phase 2: Feature Creation
+
+### Step 2.1: Numerical Features
+```yaml
+agent: ml-engineer
+action: create
+transformations:
+  - Scaling: StandardScaler, MinMaxScaler
+  - Normalization: Log, Box-Cox, Yeo-Johnson
+  - Binning: Equal-width, Equal-frequency, Custom
+  - Interactions: Products, Ratios, Differences
+  - Polynomial: Degree-2, Degree-3
+```
+
+### Step 2.2: Categorical Features
+```yaml
+agent: ml-engineer
+action: create
+encoding:
+  - One-hot: Low cardinality
+  - Target encoding: High cardinality
+  - Frequency encoding: Ordinal relationships
+  - Embedding: Deep learning
+  - Hash encoding: Very high cardinality
+```
+
+### Step 2.3: Temporal Features
+```yaml
+agent: ml-engineer
+action: create
+features:
+  - Time components: Hour, day, month, year
+  - Cyclical encoding: Sin/cos transforms
+  - Lag features: Previous values
+  - Rolling statistics: Mean, std, min, max
+  - Time since event: Days since last purchase
+```
+
+### Step 2.4: Text Features
+```yaml
+agent: ml-engineer
+action: create
+methods:
+  - Bag of words: CountVectorizer
+  - TF-IDF: TfidfVectorizer
+  - Embeddings: Word2Vec, FastText, BERT
+  - Statistics: Length, word count, sentiment
+```
+
+## Phase 3: Feature Selection
+
+### Step 3.1: Filter Methods
+```yaml
+agent: ml-engineer
+action: select
+methods:
+  - Variance threshold
+  - Correlation analysis
+  - Mutual information
+  - Chi-square test
+  - ANOVA F-test
+```
+
+### Step 3.2: Wrapper Methods
+```yaml
+agent: ml-engineer
+action: select
+methods:
+  - Forward selection
+  - Backward elimination
+  - Recursive feature elimination
+  - Exhaustive search (small sets)
+```
+
+### Step 3.3: Embedded Methods
+```yaml
+agent: ml-engineer
+action: select
+methods:
+  - L1 regularization (Lasso)
+  - Tree-based importance
+  - Permutation importance
+  - SHAP values
+```
+
+## Phase 4: Feature Validation
+
+### Step 4.1: Quality Checks
+```yaml
+agent: ml-engineer
+action: validate
+checks:
+  - No data leakage
+  - Point-in-time correctness
+  - Feature stability over time
+  - No target leakage
+  - Reproducibility
+```
+
+### Step 4.2: Performance Impact
+```yaml
+agent: ml-engineer
+action: evaluate
+experiments:
+  - Baseline without feature
+  - Model with feature
+  - Statistical significance
+  - Cross-validation stability
+```
+
+## Phase 5: Feature Documentation
+
+### Step 5.1: Feature Catalog
+```yaml
+agent: ml-engineer
+action: document
+per_feature:
+  - Name and description
+  - Data type
+  - Source data
+  - Transformation logic
+  - Business meaning
+  - Owner
+  - Creation date
+```
+
+### Step 5.2: Feature Store Registration
+```yaml
+agent: data-engineer
+action: register
+feature_store:
+  - Feast
+  - Tecton
+  - Vertex AI
+registration:
+  - Feature definition
+  - Entity mapping
+  - Data source
+  - Freshness requirements
+  - Online/offline availability
+```
+
+## Outputs
+- [ ] Feature transformations
+- [ ] Feature selection results
+- [ ] Feature documentation
+- [ ] Feature store registration
+- [ ] Performance analysis
+
+## Quality Gates
+- No data leakage verified
+- Features improve model
+- Point-in-time correct
+- Documentation complete
+- Reproducible pipeline
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@ml-engineer](/agents/ml-engineer)** - Specialized agent for ml engineer tasks
+- **[@data-engineer](/agents/data-engineer)** - Specialized agent for data engineer tasks
+
+
+
+
+
+
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Ai Ml" icon="brain-circuit" href="/workflows/overview#ai-ml">
+    More ai-ml workflows
+  </Card>
+</CardGroup>

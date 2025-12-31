@@ -1,0 +1,439 @@
+---
+title: "Parallel Computing"
+description: "HPC patterns including MPI, OpenMP, CUDA programming, and distributed computing for scientific simulations."
+icon: "atom"
+---
+
+<Info>
+  **Category:** Simulation
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+HPC patterns including MPI, OpenMP, CUDA programming, and distributed computing for scientific simulations.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Parallel Computing
+
+HPC patterns including MPI, OpenMP, CUDA programming, and distributed computing for scientific simulations.
+
+## Overview
+
+Parallel computing accelerates scientific simulations by distributing work across multiple processors, cores, or machines.
+
+## Core Concepts
+
+### Parallelism Types
+- **Data Parallelism**: Same operation on different data
+- **Task Parallelism**: Different operations concurrently
+- **Pipeline Parallelism**: Stages operating in parallel
+
+### Hardware Levels
+- **SIMD**: Single instruction, multiple data (vectors)
+- **Multi-core**: Shared memory threads
+- **GPU**: Massively parallel processors
+- **Cluster**: Distributed memory (MPI)
+
+## Python Multiprocessing
+
+### Process Pool
+```python
+import numpy as np
+from multiprocessing import Pool, cpu_count, shared_memory
+from functools import partial
+import time
+
+def parallel_map(func, data, n_workers=None):
+    """Parallel map using process pool"""
+    if n_workers is None:
+        n_workers = cpu_count()
+
+    with Pool(n_workers) as pool:
+        results = pool.map(func, data)
+
+    return results
+
+def chunk_array(arr, n_chunks):
+    """Split array into chunks for parallel processing"""
+    chunk_size = len(arr) // n_chunks
+    return [arr[i:i + chunk_size] for i in range(0, len(arr), chunk_size)]
+
+# Example: Parallel numerical integration
+def integrate_chunk(args):
+    func, a, b, n = args
+    x = np.linspace(a, b, n)
+    y = func(x)
+    return np.trapz(y, x)
+
+def parallel_integrate(func, a, b, n_total, n_workers=None):
+    """Parallel numerical integration"""
+    if n_workers is None:
+        n_workers = cpu_count()
+
+    # Split interval
+    chunk_size = (b - a) / n_workers
+    n_per_chunk = n_total // n_workers
+
+    args = [
+        (func, a + i * chunk_size, a + (i + 1) * chunk_size, n_per_chunk)
+        for i in range(n_workers)
+    ]
+
+    with Pool(n_workers) as pool:
+        results = pool.map(integrate_chunk, args)
+
+    return sum(results)
+```
+
+### Shared Memory Arrays
+```python
+from multiprocessing import shared_memory
+import numpy as np
+
+class SharedArray:
+    """Numpy array backed by shared memory"""
+
+    def __init__(self, shape, dtype=np.float64):
+        self.shape = shape
+        self.dtype = np.dtype(dtype)
+        self.size = int(np.prod(shape)) * self.dtype.itemsize
+
+        self.shm = shared_memory.SharedMemory(create=True, size=self.size)
+        self.array = np.ndarray(shape, dtype=dtype, buffer=self.shm.buf)
+
+    @classmethod
+    def from_array(cls, arr):
+        """Create shared array from existing array"""
+        shared = cls(arr.shape, arr.dtype)
+        shared.array[:] = arr
+        return shared
+
+    @classmethod
+    def attach(cls, name, shape, dtype=np.float64):
+        """Attach to existing shared memory"""
+        instance = object.__new__(cls)
+        instance.shape = shape
+        instance.dtype = np.dtype(dtype)
+        instance.shm = shared_memory.SharedMemory(name=name)
+        instance.array = np.ndarray(shape, dtype=dtype, buffer=instance.shm.buf)
+        return instance
+
+    @property
+    def name(self):
+        return self.shm.name
+
+    def close(self):
+        self.shm.close()
+
+    def unlink(self):
+        self.shm.unlink()
+
+# Worker function using shared memory
+def worker_process(shm_name, shape, chunk_start, chunk_end):
+    # Attach to shared memory
+    shared = SharedArray.attach(shm_name, shape)
+
+    # Process chunk
+    shared.array[chunk_start:chunk_end] *= 2
+
+    shared.close()
+```
+
+## MPI (Message Passing Interface)
+
+### MPI4Py Basics
+```python
+from mpi4py import MPI
+import numpy as np
+
+def mpi_parallel_sum():
+    """Parallel sum using MPI"""
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    # Each process generates local data
+    local_data = np.random.rand(1000000)
+    local_sum = np.sum(local_data)
+
+    # Reduce to get global sum
+    global_sum = comm.reduce(local_sum, op=MPI.SUM, root=0)
+
+    if rank == 0:
+        print(f"Global sum: {global_sum}")
+
+def mpi_scatter_gather():
+    """Scatter data, process, gather results"""
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    if rank == 0:
+        # Master creates data
+        data = np.arange(size * 100, dtype=np.float64).reshape(size, 100)
+    else:
+        data = None
+
+    # Scatter data to all processes
+    local_data = np.empty(100, dtype=np.float64)
+    comm.Scatter(data, local_data, root=0)
+
+    # Process locally
+    local_result = local_data ** 2
+
+    # Gather results
+    if rank == 0:
+        results = np.empty((size, 100), dtype=np.float64)
+    else:
+        results = None
+
+    comm.Gather(local_result, results, root=0)
+
+    if rank == 0:
+        print(f"Results shape: {results.shape}")
+
+def mpi_domain_decomposition():
+    """2D domain decomposition for PDE solver"""
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    # Create 2D Cartesian topology
+    dims = MPI.Compute_dims(size, [0, 0])
+    cart_comm = comm.Create_cart(dims, periods=[False, False], reorder=True)
+    coords = cart_comm.Get_coords(rank)
+
+    # Get neighbors
+    left, right = cart_comm.Shift(0, 1)
+    down, up = cart_comm.Shift(1, 1)
+
+    # Local grid (including ghost cells)
+    nx_local, ny_local = 100, 100
+    u = np.zeros((nx_local + 2, ny_local + 2))
+
+    # Exchange ghost cells with neighbors
+    # Send right, receive left
+    sendbuf = np.ascontiguousarray(u[-2, 1:-1])
+    recvbuf = np.empty(ny_local)
+    cart_comm.Sendrecv(sendbuf, right, recvbuf=recvbuf, source=left)
+    if left != MPI.PROC_NULL:
+        u[0, 1:-1] = recvbuf
+
+    # Similar for other directions...
+```
+
+## CUDA/GPU Computing
+
+### CuPy (NumPy-like GPU)
+```python
+import cupy as cp
+import numpy as np
+
+def gpu_matrix_multiply():
+    """GPU-accelerated matrix multiplication"""
+    # Create arrays on GPU
+    a_gpu = cp.random.rand(4096, 4096, dtype=cp.float32)
+    b_gpu = cp.random.rand(4096, 4096, dtype=cp.float32)
+
+    # Matrix multiply on GPU
+    c_gpu = cp.dot(a_gpu, b_gpu)
+
+    # Transfer back to CPU if needed
+    c_cpu = cp.asnumpy(c_gpu)
+
+    return c_cpu
+
+def gpu_fft():
+    """GPU-accelerated FFT"""
+    # Generate signal on GPU
+    x = cp.linspace(0, 2*cp.pi, 1000000)
+    signal = cp.sin(50 * x) + cp.sin(120 * x)
+
+    # FFT on GPU
+    fft_result = cp.fft.fft(signal)
+    freqs = cp.fft.fftfreq(len(signal))
+
+    return cp.asnumpy(freqs), cp.asnumpy(cp.abs(fft_result))
+```
+
+### Numba CUDA
+```python
+from numba import cuda
+import numpy as np
+import math
+
+@cuda.jit
+def gpu_mandelbrot(output, xmin, xmax, ymin, ymax, max_iter):
+    """CUDA kernel for Mandelbrot set"""
+    x, y = cuda.grid(2)
+
+    if x < output.shape[0] and y < output.shape[1]:
+        # Map pixel to complex plane
+        real = xmin + x * (xmax - xmin) / output.shape[0]
+        imag = ymin + y * (ymax - ymin) / output.shape[1]
+
+        c = complex(real, imag)
+        z = complex(0, 0)
+
+        for i in range(max_iter):
+            z = z * z + c
+            if abs(z) > 2:
+                output[x, y] = i
+                return
+
+        output[x, y] = max_iter
+
+def compute_mandelbrot(width, height, max_iter=1000):
+    """Compute Mandelbrot set on GPU"""
+    output = np.zeros((width, height), dtype=np.int32)
+    output_device = cuda.to_device(output)
+
+    # Configure grid
+    threads_per_block = (16, 16)
+    blocks_per_grid_x = math.ceil(width / threads_per_block[0])
+    blocks_per_grid_y = math.ceil(height / threads_per_block[1])
+    blocks_per_grid = (blocks_per_grid_x, blocks_per_grid_y)
+
+    # Launch kernel
+    gpu_mandelbrot[blocks_per_grid, threads_per_block](
+        output_device, -2.5, 1.0, -1.0, 1.0, max_iter
+    )
+
+    return output_device.copy_to_host()
+
+@cuda.jit
+def gpu_vector_add(a, b, c):
+    """Simple vector addition kernel"""
+    i = cuda.grid(1)
+    if i < a.shape[0]:
+        c[i] = a[i] + b[i]
+
+@cuda.reduce
+def gpu_sum(a, b):
+    """GPU reduction for sum"""
+    return a + b
+```
+
+## Dask (Distributed Arrays)
+
+### Dask Arrays
+```python
+import dask.array as da
+from dask.distributed import Client
+
+def dask_computation():
+    """Large-scale computation with Dask"""
+    # Connect to cluster
+    client = Client('scheduler:8786')
+
+    # Create distributed arrays
+    x = da.random.random((100000, 100000), chunks=(10000, 10000))
+    y = da.random.random((100000, 100000), chunks=(10000, 10000))
+
+    # Lazy computation
+    z = (x + y).T @ x
+
+    # Execute
+    result = z.compute()
+
+    return result
+
+def dask_parallel_apply():
+    """Apply function to chunks in parallel"""
+    import dask.dataframe as dd
+
+    # Read large CSV in parallel
+    df = dd.read_csv('large_file_*.csv')
+
+    # Parallel operations
+    result = df.groupby('category').agg({
+        'value': ['mean', 'sum', 'count']
+    }).compute()
+
+    return result
+```
+
+## Best Practices
+
+1. **Load Balance**: Distribute work evenly
+2. **Minimize Communication**: Reduce data transfer
+3. **Overlap Compute/IO**: Hide latency
+4. **Use Native Libraries**: BLAS, cuBLAS
+5. **Profile First**: Find bottlenecks before parallelizing
+
+## Scaling Patterns
+
+```
+Strong Scaling: Fixed problem, more processors
+- Ideal: Time = T0 / P
+- Amdahl's Law limits
+
+Weak Scaling: Problem grows with processors
+- Ideal: Time constant
+- Better for large simulations
+```
+
+## Anti-Patterns
+
+- Parallelizing small problems (overhead)
+- Excessive synchronization
+- Load imbalance
+- False sharing in caches
+- Ignoring memory hierarchy
+
+## When to Use
+
+- Large-scale simulations
+- Embarrassingly parallel problems
+- Matrix computations
+- Monte Carlo methods
+- Parameter sweeps
+
+## When NOT to Use
+
+- Small datasets
+- Sequential algorithms
+- I/O bound problems
+- Simple scripts
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  parallel-computing:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Simulation" icon="atom" href="/skills/overview#simulation">
+    More simulation skills
+  </Card>
+</CardGroup>

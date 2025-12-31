@@ -1,0 +1,374 @@
+# React Native Deep
+
+Advanced React Native patterns including native modules, performance optimization, navigation architecture, and platform-specific code.
+
+## Overview
+
+React Native enables building native mobile applications using React, with deep platform integration and performance optimization capabilities.
+
+## Core Concepts
+
+### Architecture Layers
+- **JavaScript Layer**: React components, business logic
+- **Bridge/JSI**: Communication between JS and Native
+- **Native Layer**: Platform-specific modules
+- **Native UI**: Platform UI components
+
+### New Architecture
+- **JSI (JavaScript Interface)**: Direct native calls
+- **Fabric**: New rendering system
+- **TurboModules**: Lazy-loaded native modules
+- **Codegen**: Type-safe native bindings
+
+## Performance Optimization
+
+### Hermes Engine
+```javascript
+// android/app/build.gradle
+project.ext.react = [
+    enableHermes: true,
+    hermesCommand: "../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"
+]
+
+// Check if Hermes is enabled
+const isHermes = () => !!global.HermesInternal;
+console.log('Using Hermes:', isHermes());
+```
+
+### List Optimization
+```typescript
+import { FlashList } from "@shopify/flash-list";
+import { memo, useCallback } from "react";
+
+interface Item {
+  id: string;
+  title: string;
+  subtitle: string;
+}
+
+// Memoized item component
+const ListItem = memo(({ item, onPress }: { item: Item; onPress: (id: string) => void }) => (
+  <Pressable onPress={() => onPress(item.id)} style={styles.item}>
+    <Text style={styles.title}>{item.title}</Text>
+    <Text style={styles.subtitle}>{item.subtitle}</Text>
+  </Pressable>
+));
+
+// Optimized list
+const OptimizedList = ({ data }: { data: Item[] }) => {
+  const renderItem = useCallback(
+    ({ item }: { item: Item }) => (
+      <ListItem item={item} onPress={handlePress} />
+    ),
+    []
+  );
+
+  const keyExtractor = useCallback((item: Item) => item.id, []);
+
+  return (
+    <FlashList
+      data={data}
+      renderItem={renderItem}
+      keyExtractor={keyExtractor}
+      estimatedItemSize={80}
+      getItemType={(item) => item.type}
+      drawDistance={250}
+    />
+  );
+};
+```
+
+### Image Optimization
+```typescript
+import FastImage from 'react-native-fast-image';
+
+// Preload images
+FastImage.preload([
+  { uri: 'https://example.com/image1.jpg', priority: FastImage.priority.high },
+  { uri: 'https://example.com/image2.jpg', priority: FastImage.priority.normal }
+]);
+
+// Optimized image component
+const OptimizedImage = ({ uri, style }) => (
+  <FastImage
+    style={style}
+    source={{
+      uri,
+      priority: FastImage.priority.normal,
+      cache: FastImage.cacheControl.immutable
+    }}
+    resizeMode={FastImage.resizeMode.cover}
+  />
+);
+```
+
+## Native Modules
+
+### TurboModule (New Architecture)
+```typescript
+// NativeCalculator.ts
+import type { TurboModule } from 'react-native';
+import { TurboModuleRegistry } from 'react-native';
+
+export interface Spec extends TurboModule {
+  add(a: number, b: number): Promise<number>;
+  multiply(a: number, b: number): number; // Sync method
+}
+
+export default TurboModuleRegistry.getEnforcing<Spec>('Calculator');
+```
+
+```objc
+// ios/Calculator.mm
+#import "Calculator.h"
+#import <React/RCTBridge+Private.h>
+
+@implementation Calculator
+
+RCT_EXPORT_MODULE()
+
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
+    (const facebook::react::ObjCTurboModule::InitParams &)params
+{
+    return std::make_shared<facebook::react::NativeCalculatorSpecJSI>(params);
+}
+
+RCT_EXPORT_METHOD(add:(double)a b:(double)b
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    resolve(@(a + b));
+}
+
+RCT_EXPORT_SYNCHRONOUS_TYPED_METHOD(NSNumber *, multiply:(double)a b:(double)b)
+{
+    return @(a * b);
+}
+
+@end
+```
+
+### Legacy Native Module
+```java
+// android/app/src/main/java/com/app/DeviceInfoModule.java
+package com.app;
+
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.Promise;
+
+public class DeviceInfoModule extends ReactContextBaseJavaModule {
+    DeviceInfoModule(ReactApplicationContext context) {
+        super(context);
+    }
+
+    @Override
+    public String getName() {
+        return "DeviceInfo";
+    }
+
+    @ReactMethod
+    public void getDeviceId(Promise promise) {
+        String deviceId = Settings.Secure.getString(
+            getReactApplicationContext().getContentResolver(),
+            Settings.Secure.ANDROID_ID
+        );
+        promise.resolve(deviceId);
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public String getAppVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
+}
+```
+
+## Navigation Architecture
+
+### React Navigation Setup
+```typescript
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+// Type-safe navigation
+type RootStackParamList = {
+  Auth: undefined;
+  Main: undefined;
+};
+
+type MainTabParamList = {
+  Home: undefined;
+  Profile: { userId: string };
+  Settings: undefined;
+};
+
+type HomeStackParamList = {
+  HomeScreen: undefined;
+  Details: { itemId: string };
+};
+
+const RootStack = createNativeStackNavigator<RootStackParamList>();
+const MainTab = createBottomTabNavigator<MainTabParamList>();
+const HomeStack = createNativeStackNavigator<HomeStackParamList>();
+
+// Nested navigation
+const HomeNavigator = () => (
+  <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+    <HomeStack.Screen name="HomeScreen" component={HomeScreen} />
+    <HomeStack.Screen name="Details" component={DetailsScreen} />
+  </HomeStack.Navigator>
+);
+
+const MainNavigator = () => (
+  <MainTab.Navigator>
+    <MainTab.Screen name="Home" component={HomeNavigator} />
+    <MainTab.Screen name="Profile" component={ProfileScreen} />
+    <MainTab.Screen name="Settings" component={SettingsScreen} />
+  </MainTab.Navigator>
+);
+
+const App = () => {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <NavigationContainer>
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <RootStack.Screen name="Main" component={MainNavigator} />
+        ) : (
+          <RootStack.Screen name="Auth" component={AuthNavigator} />
+        )}
+      </RootStack.Navigator>
+    </NavigationContainer>
+  );
+};
+```
+
+### Deep Linking
+```typescript
+const linking = {
+  prefixes: ['myapp://', 'https://myapp.com'],
+  config: {
+    screens: {
+      Main: {
+        screens: {
+          Home: {
+            screens: {
+              Details: 'item/:itemId'
+            }
+          },
+          Profile: 'user/:userId'
+        }
+      },
+      Auth: 'login'
+    }
+  }
+};
+
+<NavigationContainer linking={linking}>
+  {/* ... */}
+</NavigationContainer>
+```
+
+## State Management
+
+### Zustand with Persistence
+```typescript
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface UserState {
+  user: User | null;
+  token: string | null;
+  setUser: (user: User) => void;
+  setToken: (token: string) => void;
+  logout: () => void;
+}
+
+const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      setUser: (user) => set({ user }),
+      setToken: (token) => set({ token }),
+      logout: () => set({ user: null, token: null })
+    }),
+    {
+      name: 'user-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({ token: state.token }) // Only persist token
+    }
+  )
+);
+```
+
+## Platform-Specific Code
+
+### File Extensions
+```
+components/
+├── Button.tsx        # Shared logic
+├── Button.ios.tsx    # iOS-specific
+├── Button.android.tsx # Android-specific
+```
+
+### Platform Module
+```typescript
+import { Platform, StyleSheet } from 'react-native';
+
+const styles = StyleSheet.create({
+  container: {
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84
+      },
+      android: {
+        elevation: 5
+      }
+    })
+  }
+});
+
+// Version-specific
+if (Platform.OS === 'android' && Platform.Version >= 29) {
+  // Android 10+ specific code
+}
+```
+
+## Best Practices
+
+1. **Enable New Architecture**: Use Fabric and TurboModules
+2. **Optimize Re-renders**: memo, useCallback, useMemo
+3. **Use FlashList**: Replace FlatList for large lists
+4. **Image Caching**: FastImage for network images
+5. **Profile Performance**: Use React DevTools Profiler
+
+## Anti-Patterns
+
+- Inline styles in render
+- Anonymous functions in render props
+- Not using memo for list items
+- Blocking JS thread with heavy computation
+- Ignoring platform differences
+
+## When to Use
+
+- Cross-platform mobile apps
+- Shared codebase requirement
+- React/web team background
+- Rapid iteration needed
+- Web + mobile code sharing
+
+## When NOT to Use
+
+- Heavy native integration needs
+- Performance-critical apps (games)
+- Very platform-specific UX
+- Small team with native expertise

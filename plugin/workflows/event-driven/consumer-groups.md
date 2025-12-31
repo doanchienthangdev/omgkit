@@ -1,0 +1,190 @@
+---
+description: Manage Kafka consumer groups for scaling and reliability
+triggers:
+  - manual
+  - kafka:consumers
+agents:
+  - data-engineer
+  - site-reliability-engineer
+---
+
+# Consumer Group Management Workflow
+
+Configure and manage Kafka consumer groups effectively.
+
+## Prerequisites
+- [ ] Kafka cluster available
+- [ ] Topics created
+- [ ] Consumer application ready
+
+## Phase 1: Consumer Group Design
+
+### Step 1.1: Define Consumer Groups
+```yaml
+agent: data-engineer
+action: design
+considerations:
+  - One group per logical consumer
+  - Group ID naming convention
+  - Isolation between environments
+naming: "{app}-{env}-{purpose}"
+examples:
+  - order-service-prod-orders
+  - analytics-prod-clickstream
+```
+
+### Step 1.2: Partition Assignment
+```yaml
+agent: data-engineer
+action: configure
+strategies:
+  - RangeAssignor: Contiguous partitions per consumer
+  - RoundRobinAssignor: Even distribution
+  - StickyAssignor: Minimize rebalances
+  - CooperativeStickyAssignor: Incremental rebalances
+recommendation: CooperativeStickyAssignor
+```
+
+## Phase 2: Consumer Configuration
+
+### Step 2.1: Performance Settings
+```yaml
+agent: data-engineer
+action: configure
+settings:
+  fetch.min.bytes: 1
+  fetch.max.wait.ms: 500
+  max.poll.records: 500
+  max.poll.interval.ms: 300000
+  session.timeout.ms: 45000
+  heartbeat.interval.ms: 15000
+```
+
+### Step 2.2: Offset Management
+```yaml
+agent: data-engineer
+action: configure
+offset_settings:
+  enable.auto.commit: false  # Manual preferred
+  auto.offset.reset: earliest  # or latest
+  isolation.level: read_committed  # For transactions
+commit_strategy:
+  - After processing batch
+  - With idempotency
+  - Track last committed
+```
+
+## Phase 3: Scaling Configuration
+
+### Step 3.1: Consumer Scaling
+```yaml
+agent: site-reliability-engineer
+action: configure
+scaling:
+  min_consumers: 1
+  max_consumers: partition_count
+  scaling_metric: consumer_lag
+  scale_up_threshold: 10000
+  scale_down_threshold: 100
+```
+
+### Step 3.2: Rebalance Optimization
+```yaml
+agent: data-engineer
+action: configure
+rebalance_settings:
+  partition.assignment.strategy: CooperativeStickyAssignor
+  max.poll.interval.ms: 300000  # Allow slow processing
+  session.timeout.ms: 45000
+  heartbeat.interval.ms: 15000
+static_membership:
+  group.instance.id: unique_per_consumer
+  session.timeout.ms: 300000  # Longer for static
+```
+
+## Phase 4: Monitoring Setup
+
+### Step 4.1: Lag Monitoring
+```yaml
+agent: site-reliability-engineer
+action: configure
+metrics:
+  - consumer_lag_per_partition
+  - consumer_lag_per_group
+  - records_consumed_rate
+  - rebalances_per_hour
+tools:
+  - Burrow
+  - Kafka Exporter
+  - Built-in JMX metrics
+```
+
+### Step 4.2: Alerting
+```yaml
+agent: site-reliability-engineer
+action: configure
+alerts:
+  - consumer_lag_critical:
+      threshold: 100000
+      severity: critical
+  - consumer_lag_warning:
+      threshold: 10000
+      severity: warning
+  - rebalance_storm:
+      threshold: 5_per_minute
+      severity: warning
+  - consumer_group_empty:
+      condition: active_members == 0
+      severity: critical
+```
+
+## Phase 5: Operations
+
+### Step 5.1: Offset Management Operations
+```yaml
+agent: site-reliability-engineer
+action: document
+operations:
+  reset_to_earliest:
+    command: kafka-consumer-groups --reset-offsets --to-earliest
+    use_when: Reprocess all events
+  reset_to_timestamp:
+    command: kafka-consumer-groups --reset-offsets --to-datetime
+    use_when: Reprocess from specific time
+  skip_messages:
+    command: kafka-consumer-groups --reset-offsets --shift-by N
+    use_when: Skip poison messages
+```
+
+### Step 5.2: Troubleshooting Runbook
+```yaml
+agent: site-reliability-engineer
+action: document
+scenarios:
+  - lag_increasing:
+      check: Consumer processing speed
+      check: Partition count vs consumers
+      action: Scale consumers or optimize
+  - rebalance_storm:
+      check: Session timeout vs processing time
+      check: Network issues
+      action: Adjust timeouts or use static membership
+  - stuck_consumer:
+      check: max.poll.interval.ms
+      check: Processing exceptions
+      action: Restart or fix code
+```
+
+## Outputs
+- [ ] Consumer group configuration
+- [ ] Scaling configuration
+- [ ] Monitoring dashboards
+- [ ] Alert rules
+- [ ] Operations runbook
+
+## Quality Gates
+- Consumer lag within SLA
+- No rebalance storms
+- Monitoring in place
+- Alerts configured
+- Runbook documented

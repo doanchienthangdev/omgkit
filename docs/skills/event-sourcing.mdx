@@ -1,0 +1,391 @@
+---
+title: "Event Sourcing"
+description: "Event sourcing patterns including event stores, snapshots, projections, event replay, and temporal queries."
+icon: "bolt"
+---
+
+<Info>
+  **Category:** Event-driven
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Event sourcing patterns including event stores, snapshots, projections, event replay, and temporal queries.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Event Sourcing
+
+Event sourcing patterns including event stores, snapshots, projections, event replay, and temporal queries.
+
+## Overview
+
+Event sourcing stores the state of an entity as a sequence of state-changing events rather than just current state.
+
+## Core Concepts
+
+### Event Store
+- **Event**: Immutable fact that happened
+- **Stream**: Ordered sequence of events for an entity
+- **Version**: Position in the stream
+- **Snapshot**: Materialized state at a point in time
+
+### Key Benefits
+- Complete audit trail
+- Temporal queries (time travel)
+- Event replay for debugging
+- Natural fit for CQRS
+- Rebuild state from events
+
+## Event Design
+
+### Event Structure
+```typescript
+interface DomainEvent {
+  // Identity
+  eventId: string;
+  streamId: string;
+  version: number;
+
+  // Metadata
+  eventType: string;
+  timestamp: Date;
+  correlationId?: string;
+  causationId?: string;
+
+  // Payload
+  data: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+}
+
+// Example events
+interface OrderCreated {
+  eventType: 'OrderCreated';
+  data: {
+    orderId: string;
+    customerId: string;
+    items: Array<{ productId: string; quantity: number }>;
+    totalAmount: number;
+  };
+}
+
+interface OrderShipped {
+  eventType: 'OrderShipped';
+  data: {
+    orderId: string;
+    shippingAddress: Address;
+    carrier: string;
+    trackingNumber: string;
+  };
+}
+```
+
+### Event Naming Conventions
+```
+Past tense (something happened):
+- OrderCreated (not CreateOrder)
+- PaymentReceived (not ReceivePayment)
+- ItemAddedToCart (not AddItemToCart)
+
+Domain language:
+- OrderPlaced (not OrderInserted)
+- CustomerRegistered (not UserCreated)
+```
+
+## Aggregate Implementation
+
+### Event-Sourced Aggregate
+```typescript
+abstract class AggregateRoot {
+  private uncommittedEvents: DomainEvent[] = [];
+  protected version: number = 0;
+
+  protected apply(event: DomainEvent): void {
+    this.when(event);
+    this.version++;
+    this.uncommittedEvents.push(event);
+  }
+
+  protected abstract when(event: DomainEvent): void;
+
+  getUncommittedEvents(): DomainEvent[] {
+    return [...this.uncommittedEvents];
+  }
+
+  clearUncommittedEvents(): void {
+    this.uncommittedEvents = [];
+  }
+
+  loadFromHistory(events: DomainEvent[]): void {
+    for (const event of events) {
+      this.when(event);
+      this.version++;
+    }
+  }
+}
+
+class Order extends AggregateRoot {
+  private id: string;
+  private status: OrderStatus;
+  private items: OrderItem[] = [];
+  private totalAmount: number;
+
+  static create(command: CreateOrderCommand): Order {
+    const order = new Order();
+    order.apply({
+      eventType: 'OrderCreated',
+      streamId: command.orderId,
+      data: {
+        orderId: command.orderId,
+        customerId: command.customerId,
+        items: command.items,
+        totalAmount: command.totalAmount
+      }
+    });
+    return order;
+  }
+
+  ship(address: Address, carrier: string): void {
+    if (this.status !== OrderStatus.Confirmed) {
+      throw new Error('Cannot ship unconfirmed order');
+    }
+    this.apply({
+      eventType: 'OrderShipped',
+      streamId: this.id,
+      data: { address, carrier, trackingNumber: generateTracking() }
+    });
+  }
+
+  protected when(event: DomainEvent): void {
+    switch (event.eventType) {
+      case 'OrderCreated':
+        this.id = event.data.orderId;
+        this.status = OrderStatus.Created;
+        this.items = event.data.items;
+        this.totalAmount = event.data.totalAmount;
+        break;
+      case 'OrderShipped':
+        this.status = OrderStatus.Shipped;
+        break;
+    }
+  }
+}
+```
+
+## Event Store Patterns
+
+### PostgreSQL Event Store
+```sql
+CREATE TABLE events (
+  event_id UUID PRIMARY KEY,
+  stream_id VARCHAR(255) NOT NULL,
+  version INT NOT NULL,
+  event_type VARCHAR(255) NOT NULL,
+  data JSONB NOT NULL,
+  metadata JSONB,
+  timestamp TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(stream_id, version)
+);
+
+CREATE INDEX idx_events_stream ON events(stream_id, version);
+CREATE INDEX idx_events_type ON events(event_type);
+CREATE INDEX idx_events_timestamp ON events(timestamp);
+
+-- Append event with optimistic concurrency
+INSERT INTO events (event_id, stream_id, version, event_type, data)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (stream_id, version) DO NOTHING
+RETURNING event_id;
+```
+
+### EventStoreDB
+```typescript
+import { EventStoreDBClient, jsonEvent } from '@eventstore/db-client';
+
+const client = EventStoreDBClient.connectionString(
+  'esdb://localhost:2113?tls=false'
+);
+
+// Append events
+await client.appendToStream(
+  `order-${orderId}`,
+  [
+    jsonEvent({
+      type: 'OrderCreated',
+      data: { orderId, customerId, items }
+    })
+  ],
+  { expectedRevision: 'no_stream' }
+);
+
+// Read events
+const events = client.readStream(`order-${orderId}`);
+for await (const event of events) {
+  console.log(event.event?.type, event.event?.data);
+}
+```
+
+## Snapshots
+
+### Snapshot Strategy
+```typescript
+class OrderRepository {
+  private readonly snapshotInterval = 100;
+
+  async save(order: Order): Promise<void> {
+    const events = order.getUncommittedEvents();
+    await this.eventStore.append(order.id, events, order.version);
+
+    if (order.version % this.snapshotInterval === 0) {
+      await this.snapshotStore.save({
+        streamId: order.id,
+        version: order.version,
+        state: order.toSnapshot(),
+        timestamp: new Date()
+      });
+    }
+
+    order.clearUncommittedEvents();
+  }
+
+  async load(orderId: string): Promise<Order> {
+    // Try to load from snapshot
+    const snapshot = await this.snapshotStore.getLatest(orderId);
+
+    const fromVersion = snapshot?.version ?? 0;
+    const events = await this.eventStore.read(orderId, fromVersion);
+
+    const order = new Order();
+    if (snapshot) {
+      order.restoreFromSnapshot(snapshot.state);
+    }
+    order.loadFromHistory(events);
+
+    return order;
+  }
+}
+```
+
+## Projections
+
+### Read Model Projection
+```typescript
+class OrderSummaryProjection {
+  constructor(private readonly db: Database) {}
+
+  async handle(event: DomainEvent): Promise<void> {
+    switch (event.eventType) {
+      case 'OrderCreated':
+        await this.db.query(`
+          INSERT INTO order_summaries (order_id, customer_id, status, total, created_at)
+          VALUES ($1, $2, 'created', $3, $4)
+        `, [event.data.orderId, event.data.customerId, event.data.totalAmount, event.timestamp]);
+        break;
+
+      case 'OrderShipped':
+        await this.db.query(`
+          UPDATE order_summaries
+          SET status = 'shipped', shipped_at = $2
+          WHERE order_id = $1
+        `, [event.data.orderId, event.timestamp]);
+        break;
+    }
+  }
+}
+```
+
+## Best Practices
+
+1. **Immutable Events**: Never modify past events
+2. **Rich Events**: Include all needed data
+3. **Versioning**: Plan for event schema evolution
+4. **Idempotent Projections**: Handle replays safely
+5. **Snapshot Wisely**: Balance rebuild time vs storage
+
+## Event Versioning
+
+### Upcasting
+```typescript
+class EventUpcaster {
+  upcast(event: StoredEvent): DomainEvent {
+    switch (event.eventType) {
+      case 'OrderCreated':
+        if (event.version === 1) {
+          // v1 -> v2: Add currency field
+          return {
+            ...event,
+            data: {
+              ...event.data,
+              currency: 'USD' // Default for old events
+            }
+          };
+        }
+        break;
+    }
+    return event;
+  }
+}
+```
+
+## Anti-Patterns
+
+- Storing derived data in events
+- Large events (store references instead)
+- Treating events like CRUD operations
+- Skipping event versioning strategy
+- Not planning for projection rebuilds
+
+## When to Use
+
+- Audit trail requirements
+- Complex domain logic
+- Need to understand "why" state changed
+- Temporal query requirements
+
+## When NOT to Use
+
+- Simple CRUD applications
+- No audit requirements
+- Team unfamiliar with patterns
+- Very high write throughput
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  event-sourcing:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Event-driven" icon="bolt" href="/skills/overview#event-driven">
+    More event-driven skills
+  </Card>
+</CardGroup>

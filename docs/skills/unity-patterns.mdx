@@ -1,0 +1,545 @@
+---
+title: "Unity Patterns"
+description: "Unity game architecture patterns including ECS, ScriptableObjects, object pooling, and performance optimization."
+icon: "gamepad"
+---
+
+<Info>
+  **Category:** Game
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Unity game architecture patterns including ECS, ScriptableObjects, object pooling, and performance optimization.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Unity Patterns
+
+Unity game architecture patterns including ECS, ScriptableObjects, object pooling, and performance optimization.
+
+## Overview
+
+Unity development patterns provide scalable, maintainable game architectures that optimize performance and enable team collaboration.
+
+## Core Concepts
+
+### Architecture Approaches
+- **MonoBehaviour**: Traditional Unity component
+- **ScriptableObjects**: Data containers, assets
+- **ECS (DOTS)**: Data-oriented, high performance
+- **Hybrid**: Mix of approaches
+
+### Design Patterns in Unity
+- Singleton (Service Locator)
+- Object Pool
+- State Machine
+- Observer (Events)
+- Command Pattern
+
+## ScriptableObjects Architecture
+
+### Data Definition
+```csharp
+// Weapon data container
+[CreateAssetMenu(fileName = "NewWeapon", menuName = "Game/Weapons/Weapon Data")]
+public class WeaponData : ScriptableObject
+{
+    [Header("Basic Info")]
+    public string weaponName;
+    public Sprite icon;
+    public GameObject prefab;
+
+    [Header("Stats")]
+    public float damage;
+    public float attackSpeed;
+    public float range;
+
+    [Header("Audio")]
+    public AudioClip attackSound;
+    public AudioClip hitSound;
+
+    public float DPS => damage * attackSpeed;
+}
+
+// Character stats
+[CreateAssetMenu(fileName = "NewCharacter", menuName = "Game/Characters/Character Data")]
+public class CharacterData : ScriptableObject
+{
+    public string characterName;
+    public int maxHealth;
+    public float moveSpeed;
+    public WeaponData defaultWeapon;
+
+    [SerializeField] private AnimatorOverrideController animatorOverride;
+
+    public void ApplyTo(Character character)
+    {
+        character.MaxHealth = maxHealth;
+        character.MoveSpeed = moveSpeed;
+        character.EquipWeapon(defaultWeapon);
+        if (animatorOverride != null)
+            character.Animator.runtimeAnimatorController = animatorOverride;
+    }
+}
+```
+
+### Event System with ScriptableObjects
+```csharp
+// Game event (no parameters)
+[CreateAssetMenu(menuName = "Events/Game Event")]
+public class GameEvent : ScriptableObject
+{
+    private readonly List<GameEventListener> listeners = new();
+
+    public void Raise()
+    {
+        for (int i = listeners.Count - 1; i >= 0; i--)
+            listeners[i].OnEventRaised();
+    }
+
+    public void RegisterListener(GameEventListener listener) => listeners.Add(listener);
+    public void UnregisterListener(GameEventListener listener) => listeners.Remove(listener);
+}
+
+// Listener component
+public class GameEventListener : MonoBehaviour
+{
+    public GameEvent gameEvent;
+    public UnityEvent response;
+
+    private void OnEnable() => gameEvent.RegisterListener(this);
+    private void OnDisable() => gameEvent.UnregisterListener(this);
+    public void OnEventRaised() => response.Invoke();
+}
+
+// Generic event with parameter
+[CreateAssetMenu(menuName = "Events/Int Event")]
+public class IntEvent : ScriptableObject
+{
+    private readonly List<IntEventListener> listeners = new();
+
+    public void Raise(int value)
+    {
+        foreach (var listener in listeners)
+            listener.OnEventRaised(value);
+    }
+
+    public void RegisterListener(IntEventListener listener) => listeners.Add(listener);
+    public void UnregisterListener(IntEventListener listener) => listeners.Remove(listener);
+}
+```
+
+## Object Pooling
+
+### Generic Pool System
+```csharp
+public class ObjectPool<T> where T : Component
+{
+    private readonly T prefab;
+    private readonly Transform parent;
+    private readonly Queue<T> pool = new();
+    private readonly HashSet<T> active = new();
+    private readonly int maxSize;
+
+    public ObjectPool(T prefab, Transform parent, int initialSize, int maxSize = 100)
+    {
+        this.prefab = prefab;
+        this.parent = parent;
+        this.maxSize = maxSize;
+
+        for (int i = 0; i < initialSize; i++)
+            CreateInstance();
+    }
+
+    private T CreateInstance()
+    {
+        var instance = Object.Instantiate(prefab, parent);
+        instance.gameObject.SetActive(false);
+        pool.Enqueue(instance);
+        return instance;
+    }
+
+    public T Get()
+    {
+        T instance;
+
+        if (pool.Count > 0)
+        {
+            instance = pool.Dequeue();
+        }
+        else if (active.Count < maxSize)
+        {
+            instance = CreateInstance();
+            pool.Dequeue();
+        }
+        else
+        {
+            Debug.LogWarning($"Pool exhausted for {prefab.name}");
+            return null;
+        }
+
+        instance.gameObject.SetActive(true);
+        active.Add(instance);
+        return instance;
+    }
+
+    public void Return(T instance)
+    {
+        if (!active.Contains(instance)) return;
+
+        instance.gameObject.SetActive(false);
+        active.Remove(instance);
+        pool.Enqueue(instance);
+    }
+
+    public void ReturnAll()
+    {
+        foreach (var instance in active.ToList())
+            Return(instance);
+    }
+}
+
+// Poolable interface
+public interface IPoolable
+{
+    void OnSpawn();
+    void OnDespawn();
+}
+
+// Usage example
+public class BulletPool : MonoBehaviour
+{
+    [SerializeField] private Bullet bulletPrefab;
+    [SerializeField] private int poolSize = 50;
+
+    private ObjectPool<Bullet> pool;
+
+    private void Awake()
+    {
+        pool = new ObjectPool<Bullet>(bulletPrefab, transform, poolSize);
+    }
+
+    public Bullet SpawnBullet(Vector3 position, Quaternion rotation)
+    {
+        var bullet = pool.Get();
+        if (bullet == null) return null;
+
+        bullet.transform.SetPositionAndRotation(position, rotation);
+        bullet.Initialize(this);
+        return bullet;
+    }
+
+    public void ReturnBullet(Bullet bullet) => pool.Return(bullet);
+}
+```
+
+## State Machine
+
+### Hierarchical State Machine
+```csharp
+public interface IState
+{
+    void Enter();
+    void Exit();
+    void Update();
+    void FixedUpdate();
+}
+
+public abstract class State : IState
+{
+    protected StateMachine stateMachine;
+    protected readonly float startTime;
+
+    protected State(StateMachine stateMachine)
+    {
+        this.stateMachine = stateMachine;
+        startTime = Time.time;
+    }
+
+    public virtual void Enter() { }
+    public virtual void Exit() { }
+    public virtual void Update() { }
+    public virtual void FixedUpdate() { }
+}
+
+public class StateMachine
+{
+    public IState CurrentState { get; private set; }
+    private readonly Dictionary<Type, IState> states = new();
+
+    public void AddState(IState state)
+    {
+        states[state.GetType()] = state;
+    }
+
+    public void ChangeState<T>() where T : IState
+    {
+        CurrentState?.Exit();
+        CurrentState = states[typeof(T)];
+        CurrentState.Enter();
+    }
+
+    public void Update() => CurrentState?.Update();
+    public void FixedUpdate() => CurrentState?.FixedUpdate();
+}
+
+// Character states
+public class IdleState : State
+{
+    private readonly CharacterController character;
+
+    public IdleState(StateMachine sm, CharacterController character) : base(sm)
+    {
+        this.character = character;
+    }
+
+    public override void Enter()
+    {
+        character.Animator.Play("Idle");
+    }
+
+    public override void Update()
+    {
+        if (character.Input.Movement.magnitude > 0.1f)
+            stateMachine.ChangeState<MoveState>();
+
+        if (character.Input.Attack)
+            stateMachine.ChangeState<AttackState>();
+    }
+}
+```
+
+## ECS (DOTS) Basics
+
+### Component Definition
+```csharp
+using Unity.Entities;
+using Unity.Mathematics;
+
+// Component data
+public struct Position : IComponentData
+{
+    public float3 Value;
+}
+
+public struct Velocity : IComponentData
+{
+    public float3 Value;
+}
+
+public struct Health : IComponentData
+{
+    public float Current;
+    public float Max;
+}
+
+// Buffer element
+[InternalBufferCapacity(8)]
+public struct DamageBuffer : IBufferElementData
+{
+    public float Amount;
+    public Entity Source;
+}
+```
+
+### System Implementation
+```csharp
+using Unity.Burst;
+using Unity.Entities;
+using Unity.Jobs;
+using Unity.Transforms;
+
+[BurstCompile]
+public partial struct MovementSystem : ISystem
+{
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        float deltaTime = SystemAPI.Time.DeltaTime;
+
+        new MoveJob { DeltaTime = deltaTime }.ScheduleParallel();
+    }
+
+    [BurstCompile]
+    partial struct MoveJob : IJobEntity
+    {
+        public float DeltaTime;
+
+        void Execute(ref LocalTransform transform, in Velocity velocity)
+        {
+            transform.Position += velocity.Value * DeltaTime;
+        }
+    }
+}
+
+[BurstCompile]
+public partial struct DamageSystem : ISystem
+{
+    [BurstCompile]
+    public void OnUpdate(ref SystemState state)
+    {
+        var ecb = new EntityCommandBuffer(Allocator.Temp);
+
+        foreach (var (health, damageBuffer, entity) in
+            SystemAPI.Query<RefRW<Health>, DynamicBuffer<DamageBuffer>>()
+                .WithEntityAccess())
+        {
+            foreach (var damage in damageBuffer)
+            {
+                health.ValueRW.Current -= damage.Amount;
+            }
+
+            damageBuffer.Clear();
+
+            if (health.ValueRO.Current <= 0)
+            {
+                ecb.DestroyEntity(entity);
+            }
+        }
+
+        ecb.Playback(state.EntityManager);
+        ecb.Dispose();
+    }
+}
+```
+
+## Performance Optimization
+
+### Update Optimization
+```csharp
+public class OptimizedUpdater : MonoBehaviour
+{
+    private static readonly List<IUpdatable> updatables = new();
+    private static readonly List<IFixedUpdatable> fixedUpdatables = new();
+
+    public static void Register(IUpdatable updatable) => updatables.Add(updatable);
+    public static void Unregister(IUpdatable updatable) => updatables.Remove(updatable);
+
+    private void Update()
+    {
+        float deltaTime = Time.deltaTime;
+        for (int i = 0; i < updatables.Count; i++)
+            updatables[i].OnUpdate(deltaTime);
+    }
+
+    private void FixedUpdate()
+    {
+        float fixedDeltaTime = Time.fixedDeltaTime;
+        for (int i = 0; i < fixedUpdatables.Count; i++)
+            fixedUpdatables[i].OnFixedUpdate(fixedDeltaTime);
+    }
+}
+
+public interface IUpdatable
+{
+    void OnUpdate(float deltaTime);
+}
+```
+
+### Memory Optimization
+```csharp
+// Avoid allocations in Update
+public class NoAllocExample : MonoBehaviour
+{
+    // Cache references
+    private Transform cachedTransform;
+    private Rigidbody cachedRigidbody;
+
+    // Pre-allocate arrays
+    private readonly Collider[] hitResults = new Collider[32];
+    private readonly RaycastHit[] rayResults = new RaycastHit[16];
+
+    // Use StringBuilder for strings
+    private readonly StringBuilder stringBuilder = new(256);
+
+    private void Awake()
+    {
+        cachedTransform = transform;
+        cachedRigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void Update()
+    {
+        // Non-allocating physics
+        int hitCount = Physics.OverlapSphereNonAlloc(
+            cachedTransform.position, 5f, hitResults);
+
+        for (int i = 0; i < hitCount; i++)
+        {
+            ProcessHit(hitResults[i]);
+        }
+    }
+}
+```
+
+## Best Practices
+
+1. **Use ScriptableObjects**: Data-driven design
+2. **Pool Everything**: Reuse instantiated objects
+3. **Cache Components**: GetComponent is expensive
+4. **Avoid Update**: Use events when possible
+5. **Profile Regularly**: Use Unity Profiler
+
+## Anti-Patterns
+
+- Singleton overuse
+- Find/GetComponent in Update
+- String comparisons for tags
+- Allocations in hot paths
+- Deep inheritance hierarchies
+
+## When to Use
+
+- Any Unity game project
+- Team collaboration needed
+- Performance-critical games
+- Data-driven game design
+- Scalable architecture
+
+## When NOT to Use
+
+- Very simple prototypes
+- Game jams (may be overkill)
+- Learning Unity basics
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  unity-patterns:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Game" icon="gamepad" href="/skills/overview#game">
+    More game skills
+  </Card>
+</CardGroup>

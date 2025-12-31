@@ -1,0 +1,124 @@
+---
+title: "/data:pipeline"
+description: "Design and implement data pipeline with ETL/ELT patterns"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Data
+
+  **Syntax:** `/data:pipeline <pipeline description or data source>`
+</Info>
+
+## Overview
+
+Design and implement data pipeline with ETL/ELT patterns
+
+## Quick Start
+
+```bash
+/data:pipeline "pipeline
+```
+
+
+# 🔄 Data Pipeline: \<pipeline description or data source\>
+
+Create data pipeline: **\<pipeline description or data source\>**
+
+## Agent
+Uses **data-engineer** agent for pipeline implementation.
+
+## Workflow
+1. **Source Analysis** - Understand data sources
+2. **Schema Design** - Define target schema
+3. **Transform Logic** - Design transformations
+4. **Quality Gates** - Add validation
+5. **Orchestration** - Schedule and monitor
+
+## Pipeline Components
+- **Extract**: Source connectors
+- **Transform**: Data transformations
+- **Load**: Destination sinks
+- **Monitor**: Metrics and alerts
+
+## Technologies
+- Apache Airflow / Dagster
+- dbt for transformations
+- Great Expectations for quality
+- Prefect for orchestration
+
+## Outputs
+- Pipeline DAG definition
+- Transformation SQL/code
+- Data quality tests
+- Monitoring dashboard config
+- Documentation
+
+## Progress
+- [ ] Sources analyzed
+- [ ] Schema designed
+- [ ] Transforms implemented
+- [ ] Quality gates added
+- [ ] Pipeline deployed
+
+Include data lineage documentation.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/data:pipeline "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/data:pipeline "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Data Commands" icon="terminal" href="/commands/overview#data">
+    More data commands
+  </Card>
+</CardGroup>

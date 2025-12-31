@@ -1,0 +1,491 @@
+---
+title: "Numerical Methods"
+description: "Scientific computing fundamentals including linear algebra, differential equations, optimization, and numerical integration."
+icon: "atom"
+---
+
+<Info>
+  **Category:** Simulation
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Scientific computing fundamentals including linear algebra, differential equations, optimization, and numerical integration.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+# Numerical Methods
+
+Scientific computing fundamentals including linear algebra, differential equations, optimization, and numerical integration.
+
+## Overview
+
+Numerical methods provide computational algorithms for solving mathematical problems that cannot be solved analytically, forming the foundation of scientific simulations.
+
+## Core Concepts
+
+### Problem Categories
+- **Linear Systems**: Ax = b
+- **Nonlinear Equations**: f(x) = 0
+- **Optimization**: min/max f(x)
+- **Differential Equations**: ODEs, PDEs
+- **Integration**: Numerical quadrature
+
+### Error Analysis
+- **Truncation Error**: From approximation method
+- **Round-off Error**: From finite precision
+- **Condition Number**: Problem sensitivity
+
+## Linear Algebra
+
+### Matrix Operations with NumPy
+```python
+import numpy as np
+from scipy import linalg
+from typing import Tuple
+
+class LinearSolver:
+    @staticmethod
+    def solve_direct(A: np.ndarray, b: np.ndarray) -> np.ndarray:
+        """Solve Ax = b using LU decomposition"""
+        return np.linalg.solve(A, b)
+
+    @staticmethod
+    def lu_decomposition(A: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """LU decomposition with pivoting"""
+        P, L, U = linalg.lu(A)
+        return P, L, U
+
+    @staticmethod
+    def cholesky(A: np.ndarray) -> np.ndarray:
+        """Cholesky decomposition for symmetric positive definite"""
+        return np.linalg.cholesky(A)
+
+    @staticmethod
+    def qr_decomposition(A: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """QR decomposition"""
+        return np.linalg.qr(A)
+
+    @staticmethod
+    def svd(A: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Singular Value Decomposition"""
+        return np.linalg.svd(A)
+
+    @staticmethod
+    def eigenvalues(A: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+        """Compute eigenvalues and eigenvectors"""
+        return np.linalg.eig(A)
+
+    @staticmethod
+    def condition_number(A: np.ndarray) -> float:
+        """Compute condition number"""
+        return np.linalg.cond(A)
+
+# Iterative solvers for large sparse systems
+from scipy.sparse import csr_matrix
+from scipy.sparse.linalg import cg, gmres, splu
+
+class IterativeSolver:
+    @staticmethod
+    def conjugate_gradient(
+        A: csr_matrix,
+        b: np.ndarray,
+        tol: float = 1e-10,
+        maxiter: int = 1000
+    ) -> Tuple[np.ndarray, int]:
+        """Conjugate gradient for symmetric positive definite"""
+        x, info = cg(A, b, tol=tol, maxiter=maxiter)
+        return x, info
+
+    @staticmethod
+    def gmres_solve(
+        A: csr_matrix,
+        b: np.ndarray,
+        tol: float = 1e-10
+    ) -> Tuple[np.ndarray, int]:
+        """GMRES for general systems"""
+        x, info = gmres(A, b, tol=tol)
+        return x, info
+
+    @staticmethod
+    def preconditioned_cg(
+        A: csr_matrix,
+        b: np.ndarray,
+        M: csr_matrix = None
+    ) -> np.ndarray:
+        """PCG with incomplete LU preconditioner"""
+        if M is None:
+            M = splu(A.tocsc())
+            M = lambda x: M.solve(x)
+
+        x, _ = cg(A, b, M=M)
+        return x
+```
+
+## Differential Equations
+
+### ODE Solvers
+```python
+import numpy as np
+from scipy.integrate import solve_ivp, odeint
+from typing import Callable, List
+
+class ODESolver:
+    @staticmethod
+    def solve_ode(
+        f: Callable,
+        y0: np.ndarray,
+        t_span: Tuple[float, float],
+        t_eval: np.ndarray = None,
+        method: str = 'RK45'
+    ) -> 'OdeResult':
+        """
+        Solve ODE: dy/dt = f(t, y)
+
+        Methods:
+        - 'RK45': Runge-Kutta 4(5) (default)
+        - 'RK23': Runge-Kutta 2(3)
+        - 'DOP853': High-order Dormand-Prince
+        - 'Radau': Implicit Runge-Kutta (stiff)
+        - 'BDF': Backward differentiation (stiff)
+        """
+        return solve_ivp(
+            f, t_span, y0,
+            method=method,
+            t_eval=t_eval,
+            dense_output=True
+        )
+
+    @staticmethod
+    def runge_kutta_4(
+        f: Callable,
+        y0: np.ndarray,
+        t: np.ndarray
+    ) -> np.ndarray:
+        """Classic RK4 implementation"""
+        n = len(t)
+        y = np.zeros((n, len(y0)))
+        y[0] = y0
+
+        for i in range(n - 1):
+            h = t[i + 1] - t[i]
+            k1 = f(t[i], y[i])
+            k2 = f(t[i] + h/2, y[i] + h*k1/2)
+            k3 = f(t[i] + h/2, y[i] + h*k2/2)
+            k4 = f(t[i] + h, y[i] + h*k3)
+            y[i + 1] = y[i] + h * (k1 + 2*k2 + 2*k3 + k4) / 6
+
+        return y
+
+# Example: Lorenz system
+def lorenz(t, state, sigma=10, rho=28, beta=8/3):
+    x, y, z = state
+    return [
+        sigma * (y - x),
+        x * (rho - z) - y,
+        x * y - beta * z
+    ]
+
+# Solve
+t_span = (0, 50)
+y0 = [1.0, 1.0, 1.0]
+t_eval = np.linspace(0, 50, 10000)
+
+solution = ODESolver.solve_ode(lorenz, y0, t_span, t_eval)
+```
+
+### PDE Solvers (Finite Difference)
+```python
+import numpy as np
+from scipy.sparse import diags
+from scipy.sparse.linalg import spsolve
+
+class HeatEquationSolver:
+    """
+    Solve 1D heat equation: ∂u/∂t = α ∂²u/∂x²
+    """
+
+    def __init__(
+        self,
+        alpha: float,
+        L: float,
+        nx: int,
+        dt: float
+    ):
+        self.alpha = alpha
+        self.L = L
+        self.nx = nx
+        self.dx = L / (nx - 1)
+        self.dt = dt
+        self.x = np.linspace(0, L, nx)
+
+        # Stability check for explicit method
+        self.r = alpha * dt / self.dx**2
+        if self.r > 0.5:
+            print(f"Warning: r={self.r} > 0.5, explicit method unstable")
+
+    def solve_explicit(
+        self,
+        u0: np.ndarray,
+        nt: int,
+        bc: Tuple[float, float] = (0, 0)
+    ) -> np.ndarray:
+        """FTCS (Forward Time Central Space) explicit method"""
+        u = u0.copy()
+        u_new = np.zeros_like(u)
+
+        for n in range(nt):
+            u_new[1:-1] = u[1:-1] + self.r * (u[2:] - 2*u[1:-1] + u[:-2])
+            u_new[0] = bc[0]
+            u_new[-1] = bc[1]
+            u = u_new.copy()
+
+        return u
+
+    def solve_implicit(
+        self,
+        u0: np.ndarray,
+        nt: int,
+        bc: Tuple[float, float] = (0, 0)
+    ) -> np.ndarray:
+        """Crank-Nicolson implicit method (unconditionally stable)"""
+        n = self.nx
+        r = self.r
+
+        # Tridiagonal matrices
+        main_diag = (1 + r) * np.ones(n - 2)
+        off_diag = -r/2 * np.ones(n - 3)
+        A = diags([off_diag, main_diag, off_diag], [-1, 0, 1], format='csr')
+
+        u = u0.copy()
+
+        for _ in range(nt):
+            # RHS
+            b = np.zeros(n - 2)
+            b[0] = u[1] + r/2 * (u[2] - 2*u[1] + u[0]) + r/2 * bc[0]
+            b[-1] = u[-2] + r/2 * (u[-1] - 2*u[-2] + u[-3]) + r/2 * bc[1]
+            b[1:-1] = u[2:-2] + r/2 * (u[3:-1] - 2*u[2:-2] + u[1:-3])
+
+            # Solve
+            u[1:-1] = spsolve(A, b)
+            u[0] = bc[0]
+            u[-1] = bc[1]
+
+        return u
+```
+
+## Optimization
+
+### Optimization Algorithms
+```python
+from scipy.optimize import minimize, minimize_scalar, least_squares
+import numpy as np
+
+class Optimizer:
+    @staticmethod
+    def gradient_descent(
+        f: Callable,
+        grad_f: Callable,
+        x0: np.ndarray,
+        lr: float = 0.01,
+        tol: float = 1e-6,
+        max_iter: int = 10000
+    ) -> np.ndarray:
+        """Basic gradient descent"""
+        x = x0.copy()
+
+        for _ in range(max_iter):
+            g = grad_f(x)
+            x_new = x - lr * g
+
+            if np.linalg.norm(x_new - x) < tol:
+                break
+
+            x = x_new
+
+        return x
+
+    @staticmethod
+    def newton_method(
+        f: Callable,
+        grad_f: Callable,
+        hess_f: Callable,
+        x0: np.ndarray,
+        tol: float = 1e-6,
+        max_iter: int = 100
+    ) -> np.ndarray:
+        """Newton's method for optimization"""
+        x = x0.copy()
+
+        for _ in range(max_iter):
+            g = grad_f(x)
+            H = hess_f(x)
+
+            # Newton step
+            step = np.linalg.solve(H, -g)
+            x_new = x + step
+
+            if np.linalg.norm(g) < tol:
+                break
+
+            x = x_new
+
+        return x
+
+    @staticmethod
+    def scipy_minimize(
+        f: Callable,
+        x0: np.ndarray,
+        method: str = 'BFGS',
+        bounds: List = None,
+        constraints: dict = None
+    ):
+        """
+        SciPy optimization wrapper
+
+        Methods:
+        - 'BFGS': Quasi-Newton (unconstrained)
+        - 'L-BFGS-B': Limited memory BFGS (box constraints)
+        - 'SLSQP': Sequential least squares (constraints)
+        - 'trust-constr': Trust region (large scale)
+        """
+        return minimize(
+            f, x0,
+            method=method,
+            bounds=bounds,
+            constraints=constraints
+        )
+```
+
+## Numerical Integration
+
+### Quadrature Methods
+```python
+from scipy.integrate import quad, dblquad, nquad, simpson, trapezoid
+import numpy as np
+
+class NumericalIntegration:
+    @staticmethod
+    def integrate_1d(f: Callable, a: float, b: float) -> Tuple[float, float]:
+        """Adaptive quadrature for 1D integration"""
+        result, error = quad(f, a, b)
+        return result, error
+
+    @staticmethod
+    def integrate_2d(
+        f: Callable,
+        x_range: Tuple[float, float],
+        y_range: Callable  # y bounds as function of x
+    ) -> Tuple[float, float]:
+        """Double integration"""
+        result, error = dblquad(
+            f,
+            x_range[0], x_range[1],
+            y_range[0], y_range[1]
+        )
+        return result, error
+
+    @staticmethod
+    def simpson_rule(y: np.ndarray, dx: float) -> float:
+        """Simpson's rule for evenly spaced data"""
+        return simpson(y, dx=dx)
+
+    @staticmethod
+    def trapezoidal_rule(y: np.ndarray, x: np.ndarray) -> float:
+        """Trapezoidal rule"""
+        return trapezoid(y, x)
+
+    @staticmethod
+    def monte_carlo(
+        f: Callable,
+        bounds: List[Tuple[float, float]],
+        n_samples: int = 100000
+    ) -> Tuple[float, float]:
+        """Monte Carlo integration"""
+        dim = len(bounds)
+        volume = np.prod([b[1] - b[0] for b in bounds])
+
+        # Random samples
+        samples = np.random.uniform(
+            low=[b[0] for b in bounds],
+            high=[b[1] for b in bounds],
+            size=(n_samples, dim)
+        )
+
+        values = np.array([f(*s) for s in samples])
+        estimate = volume * np.mean(values)
+        std_error = volume * np.std(values) / np.sqrt(n_samples)
+
+        return estimate, std_error
+```
+
+## Best Practices
+
+1. **Validate Against Analytical**: When possible
+2. **Check Convergence**: Refine mesh/timestep
+3. **Monitor Condition Number**: Avoid ill-conditioned problems
+4. **Use Sparse Matrices**: For large systems
+5. **Choose Appropriate Method**: Based on problem type
+
+## Anti-Patterns
+
+- Ignoring numerical stability
+- Using wrong solver for problem type
+- Not checking convergence
+- Dense matrices for sparse problems
+- Ignoring round-off error
+
+## When to Use
+
+- Scientific simulations
+- Engineering calculations
+- Data fitting/regression
+- Control systems
+- Financial modeling
+
+## When NOT to Use
+
+- Analytical solution exists
+- Problem too simple
+- Extreme precision needed (use symbolic)
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  numerical-methods:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Simulation" icon="atom" href="/skills/overview#simulation">
+    More simulation skills
+  </Card>
+</CardGroup>

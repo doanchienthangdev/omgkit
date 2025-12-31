@@ -1,0 +1,181 @@
+---
+name: service-mesh
+description: Advanced service mesh implementation with Istio, Linkerd, traffic management, mTLS, and observability.
+---
+
+# Service Mesh
+
+Advanced service mesh implementation with Istio, Linkerd, traffic management, mTLS, and observability.
+
+## Overview
+
+Service mesh provides infrastructure-level features for service-to-service communication including traffic management, security, and observability without changing application code.
+
+## Key Concepts
+
+### Traffic Management
+- **Virtual Services**: Route traffic based on rules
+- **Destination Rules**: Configure load balancing, connection pools
+- **Gateways**: Manage ingress/egress traffic
+- **Service Entries**: Add external services to mesh
+
+### Security
+- **mTLS**: Mutual TLS between services
+- **Authorization Policies**: Fine-grained access control
+- **Peer Authentication**: Identity verification
+- **Request Authentication**: JWT validation
+
+### Observability
+- **Distributed Tracing**: Automatic trace propagation
+- **Metrics**: Automatic metric collection
+- **Access Logging**: Request/response logging
+- **Service Graph**: Visualization of dependencies
+
+## Istio Patterns
+
+### Traffic Routing
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: reviews-route
+spec:
+  hosts:
+    - reviews
+  http:
+    - match:
+        - headers:
+            end-user:
+              exact: jason
+      route:
+        - destination:
+            host: reviews
+            subset: v2
+    - route:
+        - destination:
+            host: reviews
+            subset: v1
+```
+
+### Canary Deployment
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: my-service
+spec:
+  hosts:
+    - my-service
+  http:
+    - route:
+        - destination:
+            host: my-service
+            subset: v1
+          weight: 90
+        - destination:
+            host: my-service
+            subset: v2
+          weight: 10
+```
+
+### Circuit Breaker
+```yaml
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: my-service
+spec:
+  host: my-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+```
+
+### mTLS Configuration
+```yaml
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  mtls:
+    mode: STRICT
+```
+
+## Linkerd Patterns
+
+### Service Profile
+```yaml
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  name: my-service.default.svc.cluster.local
+spec:
+  routes:
+    - name: GET /api/users
+      condition:
+        method: GET
+        pathRegex: /api/users
+      responseClasses:
+        - condition:
+            status:
+              min: 500
+              max: 599
+          isFailure: true
+```
+
+### Traffic Split
+```yaml
+apiVersion: split.smi-spec.io/v1alpha1
+kind: TrafficSplit
+metadata:
+  name: my-service-split
+spec:
+  service: my-service
+  backends:
+    - service: my-service-v1
+      weight: 900m
+    - service: my-service-v2
+      weight: 100m
+```
+
+## Best Practices
+
+1. **Start with Observability**: Enable tracing before traffic management
+2. **Gradual mTLS Rollout**: Use permissive mode first
+3. **Circuit Breaker Tuning**: Start conservative, adjust based on data
+4. **Avoid Mesh Complexity**: Don't over-engineer routing rules
+5. **Resource Limits**: Set appropriate proxy resource limits
+
+## Anti-Patterns
+
+- Putting business logic in routing rules
+- Ignoring sidecar resource consumption
+- Not monitoring mesh control plane
+- Over-complicating traffic policies
+- Skipping gradual rollout of mesh features
+
+## When to Use
+
+- Multiple services needing consistent traffic management
+- Zero-trust security requirements
+- Need for advanced observability without code changes
+- Complex deployment strategies (canary, blue-green)
+
+## When NOT to Use
+
+- Simple applications with few services
+- When latency is extremely critical (adds ~1ms)
+- Teams without Kubernetes expertise
+- Tight resource constraints

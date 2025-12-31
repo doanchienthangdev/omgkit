@@ -1,0 +1,494 @@
+# Push Notifications
+
+FCM/APNs integration, notification handling, rich notifications, and notification scheduling.
+
+## Overview
+
+Push notifications enable real-time communication with users through platform-native notification systems (APNs for iOS, FCM for Android).
+
+## Core Concepts
+
+### Notification Types
+- **Alert**: Visual/audio notification
+- **Silent**: Background data update
+- **Rich**: Images, buttons, custom UI
+- **Scheduled**: Time-based local notifications
+
+### Delivery Flow
+```
+Server → FCM/APNs → Device → App
+         ↓
+    Token Registration
+```
+
+## React Native Setup
+
+### Firebase Messaging
+```typescript
+import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+
+class PushNotificationService {
+  async initialize(): Promise<void> {
+    // Request permission (iOS)
+    const authStatus = await messaging().requestPermission();
+    const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+                    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (!enabled) {
+      console.log('Notification permission denied');
+      return;
+    }
+
+    // Get FCM token
+    const token = await messaging().getToken();
+    await this.registerToken(token);
+
+    // Listen for token refresh
+    messaging().onTokenRefresh(async newToken => {
+      await this.registerToken(newToken);
+    });
+
+    // Create Android channel
+    await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH,
+      sound: 'default',
+      vibration: true
+    });
+  }
+
+  private async registerToken(token: string): Promise<void> {
+    await api.post('/notifications/register', {
+      token,
+      platform: Platform.OS,
+      deviceId: getDeviceId()
+    });
+  }
+
+  // Foreground message handler
+  setupForegroundHandler(): () => void {
+    return messaging().onMessage(async remoteMessage => {
+      await this.displayNotification(remoteMessage);
+    });
+  }
+
+  // Background/quit message handler
+  static setupBackgroundHandler(): void {
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('Background message:', remoteMessage);
+      // Handle background message
+    });
+  }
+
+  private async displayNotification(
+    message: FirebaseMessagingTypes.RemoteMessage
+  ): Promise<void> {
+    await notifee.displayNotification({
+      title: message.notification?.title,
+      body: message.notification?.body,
+      data: message.data,
+      android: {
+        channelId: 'default',
+        pressAction: { id: 'default' },
+        smallIcon: 'ic_notification',
+        largeIcon: message.data?.imageUrl
+      },
+      ios: {
+        sound: 'default',
+        foregroundPresentationOptions: {
+          badge: true,
+          sound: true,
+          banner: true,
+          list: true
+        }
+      }
+    });
+  }
+}
+```
+
+### Notification Actions
+```typescript
+import notifee, { EventType } from '@notifee/react-native';
+
+class NotificationActionHandler {
+  setupActionHandlers(): void {
+    // Foreground event handler
+    notifee.onForegroundEvent(({ type, detail }) => {
+      this.handleNotificationEvent(type, detail);
+    });
+
+    // Background event handler
+    notifee.onBackgroundEvent(async ({ type, detail }) => {
+      await this.handleNotificationEvent(type, detail);
+    });
+  }
+
+  private async handleNotificationEvent(
+    type: EventType,
+    detail: any
+  ): Promise<void> {
+    const { notification, pressAction } = detail;
+
+    switch (type) {
+      case EventType.DISMISSED:
+        console.log('Notification dismissed:', notification?.id);
+        break;
+
+      case EventType.PRESS:
+        // Navigate to relevant screen
+        await this.handleNotificationPress(notification);
+        break;
+
+      case EventType.ACTION_PRESS:
+        // Handle action button press
+        await this.handleActionPress(pressAction?.id, notification);
+        break;
+    }
+  }
+
+  private async handleNotificationPress(notification: any): Promise<void> {
+    const { data } = notification;
+
+    switch (data?.type) {
+      case 'message':
+        navigation.navigate('Chat', { conversationId: data.conversationId });
+        break;
+      case 'order':
+        navigation.navigate('OrderDetails', { orderId: data.orderId });
+        break;
+      default:
+        navigation.navigate('Home');
+    }
+  }
+
+  private async handleActionPress(
+    actionId: string | undefined,
+    notification: any
+  ): Promise<void> {
+    switch (actionId) {
+      case 'reply':
+        // Open quick reply
+        break;
+      case 'mark-read':
+        await api.post(`/messages/${notification.data?.messageId}/read`);
+        break;
+      case 'dismiss':
+        await notifee.cancelNotification(notification.id);
+        break;
+    }
+  }
+}
+```
+
+## Rich Notifications
+
+### Image Notifications
+```typescript
+async function displayImageNotification(
+  title: string,
+  body: string,
+  imageUrl: string
+): Promise<void> {
+  await notifee.displayNotification({
+    title,
+    body,
+    android: {
+      channelId: 'default',
+      largeIcon: imageUrl,
+      style: {
+        type: AndroidStyle.BIGPICTURE,
+        picture: imageUrl
+      }
+    },
+    ios: {
+      attachments: [{ url: imageUrl }]
+    }
+  });
+}
+```
+
+### Action Buttons
+```typescript
+async function displayActionableNotification(
+  title: string,
+  body: string,
+  data: Record<string, string>
+): Promise<void> {
+  await notifee.displayNotification({
+    title,
+    body,
+    data,
+    android: {
+      channelId: 'default',
+      actions: [
+        {
+          title: 'Reply',
+          pressAction: { id: 'reply' },
+          input: {
+            placeholder: 'Type your reply...',
+            allowFreeFormInput: true
+          }
+        },
+        {
+          title: 'Mark as Read',
+          pressAction: { id: 'mark-read' }
+        }
+      ]
+    },
+    ios: {
+      categoryId: 'message',
+    }
+  });
+}
+
+// iOS category setup (in AppDelegate)
+async function setupIOSCategories(): Promise<void> {
+  await notifee.setNotificationCategories([
+    {
+      id: 'message',
+      actions: [
+        {
+          id: 'reply',
+          title: 'Reply',
+          input: true
+        },
+        {
+          id: 'mark-read',
+          title: 'Mark as Read'
+        }
+      ]
+    }
+  ]);
+}
+```
+
+## Server-Side (Node.js)
+
+### Firebase Admin SDK
+```typescript
+import * as admin from 'firebase-admin';
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+interface NotificationPayload {
+  title: string;
+  body: string;
+  data?: Record<string, string>;
+  imageUrl?: string;
+}
+
+class NotificationService {
+  async sendToDevice(
+    token: string,
+    payload: NotificationPayload
+  ): Promise<string> {
+    const message: admin.messaging.Message = {
+      token,
+      notification: {
+        title: payload.title,
+        body: payload.body,
+        imageUrl: payload.imageUrl
+      },
+      data: payload.data,
+      android: {
+        priority: 'high',
+        notification: {
+          channelId: 'default',
+          sound: 'default',
+          clickAction: 'FLUTTER_NOTIFICATION_CLICK'
+        }
+      },
+      apns: {
+        payload: {
+          aps: {
+            sound: 'default',
+            badge: 1,
+            'mutable-content': 1
+          }
+        }
+      }
+    };
+
+    return await admin.messaging().send(message);
+  }
+
+  async sendToTopic(
+    topic: string,
+    payload: NotificationPayload
+  ): Promise<string> {
+    const message: admin.messaging.Message = {
+      topic,
+      notification: {
+        title: payload.title,
+        body: payload.body
+      },
+      data: payload.data
+    };
+
+    return await admin.messaging().send(message);
+  }
+
+  async sendToMultiple(
+    tokens: string[],
+    payload: NotificationPayload
+  ): Promise<admin.messaging.BatchResponse> {
+    const message: admin.messaging.MulticastMessage = {
+      tokens,
+      notification: {
+        title: payload.title,
+        body: payload.body
+      },
+      data: payload.data
+    };
+
+    const response = await admin.messaging().sendEachForMulticast(message);
+
+    // Handle failed tokens
+    if (response.failureCount > 0) {
+      const failedTokens: string[] = [];
+      response.responses.forEach((resp, idx) => {
+        if (!resp.success) {
+          failedTokens.push(tokens[idx]);
+        }
+      });
+      await this.removeInvalidTokens(failedTokens);
+    }
+
+    return response;
+  }
+
+  async subscribeToTopic(tokens: string[], topic: string): Promise<void> {
+    await admin.messaging().subscribeToTopic(tokens, topic);
+  }
+
+  async unsubscribeFromTopic(tokens: string[], topic: string): Promise<void> {
+    await admin.messaging().unsubscribeFromTopic(tokens, topic);
+  }
+}
+```
+
+## Local Notifications
+
+### Scheduled Notifications
+```typescript
+import notifee, { TimestampTrigger, TriggerType } from '@notifee/react-native';
+
+async function scheduleReminder(
+  title: string,
+  body: string,
+  date: Date
+): Promise<string> {
+  const trigger: TimestampTrigger = {
+    type: TriggerType.TIMESTAMP,
+    timestamp: date.getTime()
+  };
+
+  return await notifee.createTriggerNotification(
+    {
+      title,
+      body,
+      android: { channelId: 'reminders' },
+      ios: { sound: 'default' }
+    },
+    trigger
+  );
+}
+
+async function scheduleRepeating(
+  title: string,
+  body: string,
+  hour: number,
+  minute: number
+): Promise<string> {
+  const trigger: TimestampTrigger = {
+    type: TriggerType.TIMESTAMP,
+    timestamp: getNextOccurrence(hour, minute),
+    repeatFrequency: RepeatFrequency.DAILY
+  };
+
+  return await notifee.createTriggerNotification(
+    { title, body, android: { channelId: 'reminders' } },
+    trigger
+  );
+}
+
+async function cancelScheduled(notificationId: string): Promise<void> {
+  await notifee.cancelTriggerNotification(notificationId);
+}
+
+async function getScheduledNotifications(): Promise<TriggerNotification[]> {
+  return await notifee.getTriggerNotifications();
+}
+```
+
+## Badge Management
+
+```typescript
+import notifee from '@notifee/react-native';
+
+class BadgeManager {
+  async setBadgeCount(count: number): Promise<void> {
+    await notifee.setBadgeCount(count);
+  }
+
+  async incrementBadge(): Promise<void> {
+    const current = await notifee.getBadgeCount();
+    await notifee.setBadgeCount(current + 1);
+  }
+
+  async clearBadge(): Promise<void> {
+    await notifee.setBadgeCount(0);
+  }
+}
+```
+
+## Best Practices
+
+1. **Request Permission Wisely**: Explain value before asking
+2. **Personalize Content**: Use user's name, relevant data
+3. **Respect Quiet Hours**: Don't notify at night
+4. **Group Notifications**: Consolidate similar notifications
+5. **Handle Token Refresh**: Always update server tokens
+
+## Notification Checklist
+
+```
+□ Permission request with context
+□ FCM/APNs token registration
+□ Token refresh handling
+□ Foreground notification display
+□ Background message handling
+□ Deep linking from notifications
+□ Action button handlers
+□ Badge count management
+□ Invalid token cleanup
+□ Analytics tracking
+```
+
+## Anti-Patterns
+
+- Sending too many notifications
+- Generic, non-personalized messages
+- Not handling notification tap
+- Ignoring token refresh
+- No unsubscribe option
+
+## When to Use
+
+- Real-time updates needed
+- Time-sensitive information
+- Re-engagement campaigns
+- Transaction confirmations
+- Chat/messaging apps
+
+## When NOT to Use
+
+- Excessive marketing
+- Non-urgent updates
+- Information available in-app
+- Users opted out
