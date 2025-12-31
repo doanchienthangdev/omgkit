@@ -23,35 +23,35 @@ const AGENT_METADATA = {
     icon: 'map',
     category: 'Core Development',
     worksWellWith: ['scout', 'researcher', 'architect'],
-    triggersCommands: ['/plan', '/plan:detailed', '/plan:parallel'],
+    triggersCommands: ['/planning:plan', '/planning:plan-detailed', '/planning:plan-parallel'],
     bestFor: 'Feature planning, task decomposition, implementation roadmaps'
   },
   'researcher': {
     icon: 'magnifying-glass',
     category: 'Core Development',
     worksWellWith: ['planner', 'architect', 'oracle'],
-    triggersCommands: ['/research'],
+    triggersCommands: ['/planning:research'],
     bestFor: 'Technology research, best practices discovery, documentation lookup'
   },
   'debugger': {
     icon: 'bug',
     category: 'Core Development',
     worksWellWith: ['tester', 'scout', 'code-reviewer'],
-    triggersCommands: ['/fix', '/fix-fast', '/fix-hard'],
+    triggersCommands: ['/dev:fix', '/dev:fix-fast', '/dev:fix-hard'],
     bestFor: 'Bug investigation, root cause analysis, error resolution'
   },
   'tester': {
     icon: 'flask-vial',
     category: 'Core Development',
     worksWellWith: ['debugger', 'code-reviewer', 'fullstack-developer'],
-    triggersCommands: ['/test', '/tdd', '/fix-test'],
+    triggersCommands: ['/dev:test', '/dev:tdd', '/dev:fix-test'],
     bestFor: 'Test creation, coverage improvement, quality assurance'
   },
   'code-reviewer': {
     icon: 'magnifying-glass-chart',
     category: 'Core Development',
     worksWellWith: ['security-auditor', 'tester', 'architect'],
-    triggersCommands: ['/review'],
+    triggersCommands: ['/dev:review'],
     bestFor: 'Code quality review, security analysis, best practices enforcement'
   },
   'scout': {
@@ -65,14 +65,14 @@ const AGENT_METADATA = {
     icon: 'code-branch',
     category: 'Operations',
     worksWellWith: ['fullstack-developer', 'code-reviewer'],
-    triggersCommands: ['/commit', '/pr', '/ship', '/cm', '/cp'],
+    triggersCommands: ['/git:commit', '/git:pr', '/git:ship', '/git:cm', '/git:cp'],
     bestFor: 'Version control, commit management, PR automation'
   },
   'docs-manager': {
     icon: 'book',
     category: 'Operations',
     worksWellWith: ['api-designer', 'architect', 'copywriter'],
-    triggersCommands: ['/doc'],
+    triggersCommands: ['/planning:doc'],
     bestFor: 'Documentation generation, API docs, architecture guides'
   },
   'project-manager': {
@@ -93,42 +93,42 @@ const AGENT_METADATA = {
     icon: 'palette',
     category: 'Operations',
     worksWellWith: ['fullstack-developer', 'copywriter'],
-    triggersCommands: ['/screenshot', '/cro'],
+    triggersCommands: ['/design:screenshot', '/design:cro'],
     bestFor: 'UI components, responsive design, accessibility'
   },
   'fullstack-developer': {
     icon: 'code',
     category: 'Extended',
     worksWellWith: ['planner', 'tester', 'code-reviewer'],
-    triggersCommands: ['/feature', '/fix', '/refactor'],
+    triggersCommands: ['/dev:feature', '/dev:fix', '/quality:refactor'],
     bestFor: 'Full implementation, code writing, feature development'
   },
   'cicd-manager': {
     icon: 'circle-nodes',
     category: 'Extended',
     worksWellWith: ['pipeline-architect', 'tester'],
-    triggersCommands: ['/deploy', '/fix-ci'],
+    triggersCommands: ['/git:deploy', '/dev:fix-ci'],
     bestFor: 'CI/CD pipelines, GitHub Actions, deployment automation'
   },
   'security-auditor': {
     icon: 'shield-halved',
     category: 'Extended',
     worksWellWith: ['code-reviewer', 'vulnerability-scanner'],
-    triggersCommands: ['/security-scan'],
+    triggersCommands: ['/quality:security-scan'],
     bestFor: 'Security reviews, vulnerability assessment, compliance'
   },
   'api-designer': {
     icon: 'plug',
     category: 'Extended',
     worksWellWith: ['docs-manager', 'fullstack-developer'],
-    triggersCommands: ['/api-gen'],
+    triggersCommands: ['/quality:api-gen'],
     bestFor: 'API design, OpenAPI specs, REST best practices'
   },
   'vulnerability-scanner': {
     icon: 'shield-virus',
     category: 'Extended',
     worksWellWith: ['security-auditor', 'cicd-manager'],
-    triggersCommands: ['/security-scan'],
+    triggersCommands: ['/quality:security-scan'],
     bestFor: 'Security scanning, dependency audit, code analysis'
   },
   'pipeline-architect': {
@@ -149,7 +149,7 @@ const AGENT_METADATA = {
     icon: 'lightbulb',
     category: 'Creative',
     worksWellWith: ['oracle', 'planner', 'researcher'],
-    triggersCommands: ['/brainstorm'],
+    triggersCommands: ['/planning:brainstorm'],
     bestFor: 'Creative exploration, ideation, option generation'
   },
   'journal-writer': {
@@ -163,7 +163,7 @@ const AGENT_METADATA = {
     icon: 'wand-magic-sparkles',
     category: 'Omega Exclusive',
     worksWellWith: ['architect', 'planner', 'brainstormer'],
-    triggersCommands: ['/10x', '/100x', '/1000x', '/principles'],
+    triggersCommands: ['/omega:10x', '/omega:100x', '/omega:1000x', '/omega:principles'],
     bestFor: 'Strategic thinking, 10x/100x/1000x opportunities, Omega modes'
   },
   'architect': {
@@ -609,8 +609,10 @@ async function generateCommandDocs() {
           .replace(/\$\{ARGUMENTS\}/g, argumentHint);
 
         // Generate individual command page with enhanced structure
+        // Use colon separator for command naming: category:command
+        const fullCommandName = `${category}:${slug}`;
         const commandDoc = `---
-title: "/${slug}"
+title: "/${fullCommandName}"
 description: "${frontmatter.description || ''}"
 icon: "${catMeta.icon}"
 ---
@@ -618,7 +620,7 @@ icon: "${catMeta.icon}"
 <Info>
   **Category:** ${category.charAt(0).toUpperCase() + category.slice(1)}
 
-  **Syntax:** \`/${slug}${frontmatter['argument-hint'] ? ' ' + frontmatter['argument-hint'] : ''}\`
+  **Syntax:** \`/${fullCommandName}${frontmatter['argument-hint'] ? ' ' + frontmatter['argument-hint'] : ''}\`
 </Info>
 
 ## Overview
@@ -628,7 +630,7 @@ ${frontmatter.description || 'No description available.'}
 ## Quick Start
 
 \`\`\`bash
-/${slug}${frontmatter['argument-hint'] ? ' ' + frontmatter['argument-hint'].split(' ')[0].replace('<', '"').replace('>', '"') : ''}
+/${fullCommandName}${frontmatter['argument-hint'] ? ' ' + frontmatter['argument-hint'].split(' ')[0].replace('<', '"').replace('>', '"') : ''}
 \`\`\`
 
 ${processedBody}
@@ -646,17 +648,17 @@ ${tools.map(t => `- **${t}** - Enables ${t.toLowerCase()} capabilities`).join('\
 ### Basic Usage
 
 \`\`\`bash
-/${slug}${frontmatter['argument-hint'] ? ' "your input here"' : ''}
+/${fullCommandName}${frontmatter['argument-hint'] ? ' "your input here"' : ''}
 \`\`\`
 
 ### With Context
 
 \`\`\`bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/${slug}${frontmatter['argument-hint'] ? ' "detailed description"' : ''}
+/${fullCommandName}${frontmatter['argument-hint'] ? ' "detailed description"' : ''}
 \`\`\`
 
 ## Tips
@@ -680,7 +682,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="${category.charAt(0).toUpperCase() + category.slice(1)} Commands" icon="${catMeta.icon}" href="/commands/overview#${category}">
     More ${category} commands
@@ -718,16 +720,16 @@ For best results, be specific in your descriptions and include relevant file pat
 
   const overviewDoc = `---
 title: "Commands Overview"
-description: "54 slash commands for every development task"
+description: "58 slash commands for every development task"
 icon: "terminal"
 ---
 
-OMGKIT provides **54 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
+OMGKIT provides **58 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
 
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="54" icon="terminal">
+  <Card title="58" icon="terminal">
     Total Commands
   </Card>
   <Card title="8" icon="folder">
@@ -757,14 +759,14 @@ ${categoryOrder.map(cat => {
 
 | Task | Command | Example |
 |------|---------|---------|
-| Plan a feature | \`/plan\` | \`/plan "user authentication"\` |
-| Implement feature | \`/feature\` | \`/feature "add login form"\` |
-| Fix a bug | \`/fix\` | \`/fix "button not clickable"\` |
-| Write tests | \`/test\` | \`/test "AuthService"\` |
-| Code review | \`/review\` | \`/review src/components/\` |
-| Commit changes | \`/commit\` | \`/commit\` |
-| Create PR | \`/pr\` | \`/pr\` |
-| Research tech | \`/research\` | \`/research "GraphQL best practices"\` |
+| Plan a feature | \`/planning:plan\` | \`/planning:plan "user authentication"\` |
+| Implement feature | \`/dev:feature\` | \`/dev:feature "add login form"\` |
+| Fix a bug | \`/dev:fix\` | \`/dev:fix "button not clickable"\` |
+| Write tests | \`/dev:test\` | \`/dev:test "AuthService"\` |
+| Code review | \`/dev:review\` | \`/dev:review src/components/\` |
+| Commit changes | \`/git:commit\` | \`/git:commit\` |
+| Create PR | \`/git:pr\` | \`/git:pr\` |
+| Research tech | \`/planning:research\` | \`/planning:research "GraphQL best practices"\` |
 
 ---
 
@@ -779,7 +781,7 @@ ${catMeta.description}
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-${cmds.map(c => `| [\`/${c.slug}\`](/commands/${c.slug}) | ${c.description.slice(0, 40)}${c.description.length > 40 ? '...' : ''} | \`/${c.slug}${c.argumentHint ? ' ' + c.argumentHint : ''}\` |`).join('\n')}
+${cmds.map(c => `| [\`/${cat}:${c.slug}\`](/commands/${c.slug}) | ${c.description.slice(0, 40)}${c.description.length > 40 ? '...' : ''} | \`/${cat}:${c.slug}${c.argumentHint ? ' ' + c.argumentHint : ''}\` |`).join('\n')}
 `;
 }).join('\n')}
 
@@ -809,49 +811,49 @@ ${cmds.map(c => `| [\`/${c.slug}\`](/commands/${c.slug}) | ${c.description.slice
   <Tab title="Feature Development">
 \`\`\`bash
 # 1. Plan the feature
-/plan "user profile page"
+/planning:plan "user profile page"
 
 # 2. Execute the plan
-/execute-plan
+/planning:execute-plan
 
 # 3. Write tests
-/test "ProfilePage"
+/dev:test "ProfilePage"
 
 # 4. Review code
-/review src/pages/Profile.tsx
+/dev:review src/pages/Profile.tsx
 
 # 5. Commit and PR
-/commit && /pr
+/git:commit && /git:pr
 \`\`\`
   </Tab>
   <Tab title="Bug Fixing">
 \`\`\`bash
 # 1. Quick fix
-/fix "login fails on mobile"
+/dev:fix "login fails on mobile"
 
 # 2. Or detailed investigation
-/fix-hard "login fails on mobile"
+/dev:fix-hard "login fails on mobile"
 
 # 3. Run tests
-/test
+/dev:test
 
 # 4. Commit
-/commit
+/git:commit
 \`\`\`
   </Tab>
   <Tab title="Strategic Thinking">
 \`\`\`bash
 # 1. Activate Omega mode
-/mode omega
+/mode:omega
 
 # 2. Find 10x opportunities
-/10x "our checkout flow"
+/omega:10x "our checkout flow"
 
 # 3. Or 100x moonshots
-/100x "our entire product"
+/omega:100x "our entire product"
 
 # 4. Get principles
-/principles
+/omega:principles
 \`\`\`
   </Tab>
 </Tabs>
@@ -862,10 +864,10 @@ Commands can be chained for complex workflows:
 
 \`\`\`bash
 # Plan, implement, test, commit in sequence
-/plan "feature" && /execute-plan && /test && /commit
+/planning:plan "feature" && /planning:execute-plan && /dev:test && /git:commit
 
 # Research before planning
-/research "best practices" && /plan "implement findings"
+/planning:research "best practices" && /planning:plan "implement findings"
 \`\`\`
 
 ## Command Modes
@@ -879,7 +881,7 @@ Commands behave differently based on the active mode:
 | **Token Efficient** | Minimal context, faster responses |
 | **Autonomous** | Less confirmation prompts |
 
-Switch modes with \`/mode <mode-name>\`.
+Switch modes with \`/context:mode <mode-name>\` or use the shorthand \`/mode:<mode-name>\`.
 
 ## Next Steps
 
@@ -891,7 +893,7 @@ Switch modes with \`/mode <mode-name>\`.
     10 behavioral modes
   </Card>
   <Card title="Skills" icon="brain" href="/skills/overview">
-    43 domain expertise modules
+    88 domain expertise modules
   </Card>
   <Card title="Quick Start" icon="rocket" href="/getting-started/quickstart">
     Get started in 5 minutes

@@ -1,5 +1,5 @@
 ---
-title: "/ask"
+title: "/planning:ask"
 description: "Quick question with codebase context"
 icon: "map"
 ---
@@ -7,7 +7,7 @@ icon: "map"
 <Info>
   **Category:** Planning
 
-  **Syntax:** `/ask <question>`
+  **Syntax:** `/planning:ask <question>`
 </Info>
 
 ## Overview
@@ -17,7 +17,7 @@ Quick question with codebase context
 ## Quick Start
 
 ```bash
-/ask "question"
+/planning:ask "question"
 ```
 
 
@@ -53,17 +53,17 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/ask "your input here"
+/planning:ask "your input here"
 ```
 
 ### With Context
 
 ```bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/ask "detailed description"
+/planning:ask "detailed description"
 ```
 
 ## Tips
@@ -87,7 +87,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="Planning Commands" icon="map" href="/commands/overview#planning">
     More planning commands

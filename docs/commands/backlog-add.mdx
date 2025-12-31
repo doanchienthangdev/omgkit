@@ -1,5 +1,5 @@
 ---
-title: "/backlog-add"
+title: "/sprint:backlog-add"
 description: "Add task to backlog"
 icon: "calendar-days"
 ---
@@ -7,7 +7,7 @@ icon: "calendar-days"
 <Info>
   **Category:** Sprint
 
-  **Syntax:** `/backlog-add <task> [--type TYPE] [--priority N]`
+  **Syntax:** `/sprint:backlog-add <task> [--type TYPE] [--priority N]`
 </Info>
 
 ## Overview
@@ -17,7 +17,7 @@ Add task to backlog
 ## Quick Start
 
 ```bash
-/backlog-add "task"
+/sprint:backlog-add "task"
 ```
 
 
@@ -52,17 +52,17 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/backlog-add "your input here"
+/sprint:backlog-add "your input here"
 ```
 
 ### With Context
 
 ```bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/backlog-add "detailed description"
+/sprint:backlog-add "detailed description"
 ```
 
 ## Tips
@@ -86,7 +86,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="Sprint Commands" icon="calendar-days" href="/commands/overview#sprint">
     More sprint commands

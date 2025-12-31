@@ -1,5 +1,5 @@
 ---
-title: "/fix-ci"
+title: "/dev:fix-ci"
 description: "Fix CI/CD pipeline issues"
 icon: "code"
 ---
@@ -7,7 +7,7 @@ icon: "code"
 <Info>
   **Category:** Dev
 
-  **Syntax:** `/fix-ci <github-action-url>`
+  **Syntax:** `/dev:fix-ci <github-action-url>`
 </Info>
 
 ## Overview
@@ -17,7 +17,7 @@ Fix CI/CD pipeline issues
 ## Quick Start
 
 ```bash
-/fix-ci "github-action-url"
+/dev:fix-ci "github-action-url"
 ```
 
 
@@ -57,17 +57,17 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/fix-ci "your input here"
+/dev:fix-ci "your input here"
 ```
 
 ### With Context
 
 ```bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/fix-ci "detailed description"
+/dev:fix-ci "detailed description"
 ```
 
 ## Tips
@@ -91,7 +91,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="Dev Commands" icon="code" href="/commands/overview#dev">
     More dev commands

@@ -1,5 +1,5 @@
 ---
-title: "/spawn"
+title: "/context:spawn"
 description: "Launch parallel background task"
 icon: "layer-group"
 ---
@@ -7,7 +7,7 @@ icon: "layer-group"
 <Info>
   **Category:** Context
 
-  **Syntax:** `/spawn <task description>`
+  **Syntax:** `/context:spawn <task description>`
 </Info>
 
 ## Overview
@@ -17,7 +17,7 @@ Launch parallel background task
 ## Quick Start
 
 ```bash
-/spawn "task
+/context:spawn "task
 ```
 
 
@@ -50,17 +50,17 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/spawn "your input here"
+/context:spawn "your input here"
 ```
 
 ### With Context
 
 ```bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/spawn "detailed description"
+/context:spawn "detailed description"
 ```
 
 ## Tips
@@ -84,7 +84,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="Context Commands" icon="layer-group" href="/commands/overview#context">
     More context commands

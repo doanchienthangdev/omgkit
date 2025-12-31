@@ -1,5 +1,5 @@
 ---
-title: "/pr"
+title: "/git:pr"
 description: "Create pull request"
 icon: "code-branch"
 ---
@@ -7,7 +7,7 @@ icon: "code-branch"
 <Info>
   **Category:** Git
 
-  **Syntax:** `/pr [title]`
+  **Syntax:** `/git:pr [title]`
 </Info>
 
 ## Overview
@@ -17,7 +17,7 @@ Create pull request
 ## Quick Start
 
 ```bash
-/pr [title]
+/git:pr [title]
 ```
 
 
@@ -51,17 +51,17 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/pr "your input here"
+/git:pr "your input here"
 ```
 
 ### With Context
 
 ```bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/pr "detailed description"
+/git:pr "detailed description"
 ```
 
 ## Tips
@@ -85,7 +85,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="Git Commands" icon="code-branch" href="/commands/overview#git">
     More git commands

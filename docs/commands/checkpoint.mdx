@@ -1,5 +1,5 @@
 ---
-title: "/checkpoint"
+title: "/context:checkpoint"
 description: "Save or restore session state"
 icon: "layer-group"
 ---
@@ -7,7 +7,7 @@ icon: "layer-group"
 <Info>
   **Category:** Context
 
-  **Syntax:** `/checkpoint <save|restore|list>`
+  **Syntax:** `/context:checkpoint <save|restore|list>`
 </Info>
 
 ## Overview
@@ -17,7 +17,7 @@ Save or restore session state
 ## Quick Start
 
 ```bash
-/checkpoint "save|restore|list"
+/context:checkpoint "save|restore|list"
 ```
 
 
@@ -51,17 +51,17 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/checkpoint "your input here"
+/context:checkpoint "your input here"
 ```
 
 ### With Context
 
 ```bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/checkpoint "detailed description"
+/context:checkpoint "detailed description"
 ```
 
 ## Tips
@@ -85,7 +85,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="Context Commands" icon="layer-group" href="/commands/overview#context">
     More context commands

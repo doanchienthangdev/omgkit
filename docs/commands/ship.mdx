@@ -1,5 +1,5 @@
 ---
-title: "/ship"
+title: "/git:ship"
 description: "Commit and create PR"
 icon: "code-branch"
 ---
@@ -7,7 +7,7 @@ icon: "code-branch"
 <Info>
   **Category:** Git
 
-  **Syntax:** `/ship [message]`
+  **Syntax:** `/git:ship [message]`
 </Info>
 
 ## Overview
@@ -17,7 +17,7 @@ Commit and create PR
 ## Quick Start
 
 ```bash
-/ship [message]
+/git:ship [message]
 ```
 
 
@@ -61,17 +61,17 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/ship "your input here"
+/git:ship "your input here"
 ```
 
 ### With Context
 
 ```bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/ship "detailed description"
+/git:ship "detailed description"
 ```
 
 ## Tips
@@ -95,7 +95,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="Git Commands" icon="code-branch" href="/commands/overview#git">
     More git commands

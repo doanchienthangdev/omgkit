@@ -1,5 +1,5 @@
 ---
-title: "/test"
+title: "/dev:test"
 description: "Generate and run tests"
 icon: "code"
 ---
@@ -7,7 +7,7 @@ icon: "code"
 <Info>
   **Category:** Dev
 
-  **Syntax:** `/test <scope>`
+  **Syntax:** `/dev:test <scope>`
 </Info>
 
 ## Overview
@@ -17,7 +17,7 @@ Generate and run tests
 ## Quick Start
 
 ```bash
-/test "scope"
+/dev:test "scope"
 ```
 
 
@@ -59,17 +59,17 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/test "your input here"
+/dev:test "your input here"
 ```
 
 ### With Context
 
 ```bash
 # First, ensure context is loaded
-/index
+/context:index
 
 # Then run the command
-/test "detailed description"
+/dev:test "detailed description"
 ```
 
 ## Tips
@@ -93,7 +93,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 54 commands
+    See all 58 commands
   </Card>
   <Card title="Dev Commands" icon="code" href="/commands/overview#dev">
     More dev commands

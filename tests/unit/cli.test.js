@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -141,6 +141,34 @@ describe('CLI Core Functions', () => {
       const modesDir = join(getPluginDir(TEST_HOME), 'modes');
       const count = countFiles(modesDir);
       expect(count).toBe(10);
+    });
+
+    it('should use colon separator for command naming', () => {
+      installPlugin({ homeDir: TEST_HOME, silent: true });
+      const commandsDir = join(TEST_HOME, '.claude', 'commands');
+      const files = readdirSync(commandsDir);
+
+      // Check that commands use colon separator (e.g., dev:fix.md, git:commit.md)
+      const colonSeparatedCommands = files.filter(f => f.includes(':'));
+      expect(colonSeparatedCommands.length).toBeGreaterThan(0);
+
+      // Verify specific commands exist with colon format
+      expect(files.some(f => f.startsWith('dev:'))).toBe(true);
+      expect(files.some(f => f.startsWith('git:'))).toBe(true);
+      expect(files.some(f => f.startsWith('planning:'))).toBe(true);
+      expect(files.some(f => f.startsWith('mode:'))).toBe(true);
+    });
+
+    it('should not use hyphen separator for command naming', () => {
+      installPlugin({ homeDir: TEST_HOME, silent: true });
+      const commandsDir = join(TEST_HOME, '.claude', 'commands');
+      const files = readdirSync(commandsDir);
+
+      // Check that no commands use old hyphen separator as category prefix
+      const hyphenPrefixedCommands = files.filter(f =>
+        f.startsWith('dev-') || f.startsWith('git-') || f.startsWith('planning-') || f.startsWith('mode-')
+      );
+      expect(hyphenPrefixedCommands.length).toBe(0);
     });
   });
 

@@ -1,15 +1,15 @@
 ---
 title: "Commands Overview"
-description: "54 slash commands for every development task"
+description: "58 slash commands for every development task"
 icon: "terminal"
 ---
 
-OMGKIT provides **54 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
+OMGKIT provides **58 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
 
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="54" icon="terminal">
+  <Card title="58" icon="terminal">
     Total Commands
   </Card>
   <Card title="8" icon="folder">
@@ -56,14 +56,14 @@ OMGKIT provides **54 slash commands** covering the entire development lifecycle.
 
 | Task | Command | Example |
 |------|---------|---------|
-| Plan a feature | `/plan` | `/plan "user authentication"` |
-| Implement feature | `/feature` | `/feature "add login form"` |
-| Fix a bug | `/fix` | `/fix "button not clickable"` |
-| Write tests | `/test` | `/test "AuthService"` |
-| Code review | `/review` | `/review src/components/` |
-| Commit changes | `/commit` | `/commit` |
-| Create PR | `/pr` | `/pr` |
-| Research tech | `/research` | `/research "GraphQL best practices"` |
+| Plan a feature | `/planning:plan` | `/planning:plan "user authentication"` |
+| Implement feature | `/dev:feature` | `/dev:feature "add login form"` |
+| Fix a bug | `/dev:fix` | `/dev:fix "button not clickable"` |
+| Write tests | `/dev:test` | `/dev:test "AuthService"` |
+| Code review | `/dev:review` | `/dev:review src/components/` |
+| Commit changes | `/git:commit` | `/git:commit` |
+| Create PR | `/git:pr` | `/git:pr` |
+| Research tech | `/planning:research` | `/planning:research "GraphQL best practices"` |
 
 ---
 
@@ -74,16 +74,16 @@ Development commands for building features and fixing bugs
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/feature`](/commands/feature) | Full feature development with planning, ... | `/feature <feature description>` |
-| [`/fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/fix-ci <github-action-url>` |
-| [`/fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/fix-fast <bug>` |
-| [`/fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation | `/fix-hard <complex bug>` |
-| [`/fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues | `/fix-logs` |
-| [`/fix-test`](/commands/fix-test) | Fix failing tests | `/fix-test` |
-| [`/fix`](/commands/fix) | Debug and fix bugs | `/fix <error or issue>` |
-| [`/review`](/commands/review) | Code review with security and quality fo... | `/review [file or directory]` |
-| [`/tdd`](/commands/tdd) | Test-driven development workflow | `/tdd <feature>` |
-| [`/test`](/commands/test) | Generate and run tests | `/test <scope>` |
+| [`/dev:feature`](/commands/feature) | Full feature development with planning, ... | `/dev:feature <feature description>` |
+| [`/dev:fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/dev:fix-ci <github-action-url>` |
+| [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/dev:fix-fast <bug>` |
+| [`/dev:fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation | `/dev:fix-hard <complex bug>` |
+| [`/dev:fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues | `/dev:fix-logs` |
+| [`/dev:fix-test`](/commands/fix-test) | Fix failing tests | `/dev:fix-test` |
+| [`/dev:fix`](/commands/fix) | Debug and fix bugs | `/dev:fix <error or issue>` |
+| [`/dev:review`](/commands/review) | Code review with security and quality fo... | `/dev:review [file or directory]` |
+| [`/dev:tdd`](/commands/tdd) | Test-driven development workflow | `/dev:tdd <feature>` |
+| [`/dev:test`](/commands/test) | Generate and run tests | `/dev:test <scope>` |
 
 
 ## Planning
@@ -92,14 +92,14 @@ Planning and research commands for strategic work
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/ask`](/commands/ask) | Quick question with codebase context | `/ask <question>` |
-| [`/brainstorm`](/commands/brainstorm) | Interactive brainstorming session | `/brainstorm <topic>` |
-| [`/doc`](/commands/doc) | Generate documentation | `/doc <target>` |
-| [`/execute-plan`](/commands/execute-plan) | Execute existing plan with subagents | `/execute-plan <plan-file>` |
-| [`/plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks | `/plan-detailed <task>` |
-| [`/plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy | `/plan-parallel <task>` |
-| [`/plan`](/commands/plan) | Create implementation plan | `/plan <task>` |
-| [`/research`](/commands/research) | Research technology or topic | `/research <topic>` |
+| [`/planning:ask`](/commands/ask) | Quick question with codebase context | `/planning:ask <question>` |
+| [`/planning:brainstorm`](/commands/brainstorm) | Interactive brainstorming session | `/planning:brainstorm <topic>` |
+| [`/planning:doc`](/commands/doc) | Generate documentation | `/planning:doc <target>` |
+| [`/planning:execute-plan`](/commands/execute-plan) | Execute existing plan with subagents | `/planning:execute-plan <plan-file>` |
+| [`/planning:plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks | `/planning:plan-detailed <task>` |
+| [`/planning:plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy | `/planning:plan-parallel <task>` |
+| [`/planning:plan`](/commands/plan) | Create implementation plan | `/planning:plan <task>` |
+| [`/planning:research`](/commands/research) | Research technology or topic | `/planning:research <topic>` |
 
 
 ## Git
@@ -108,12 +108,12 @@ Git and deployment commands for version control
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/cm`](/commands/cm) | Quick conventional commit | `/cm` |
-| [`/commit`](/commands/commit) | Smart commit with conventional message | `/commit [message]` |
-| [`/cp`](/commands/cp) | Commit and push | `/cp` |
-| [`/deploy`](/commands/deploy) | Deploy to environment | `/deploy [env]` |
-| [`/pr`](/commands/pr) | Create pull request | `/pr [title]` |
-| [`/ship`](/commands/ship) | Commit and create PR | `/ship [message]` |
+| [`/git:cm`](/commands/cm) | Quick conventional commit | `/git:cm` |
+| [`/git:commit`](/commands/commit) | Smart commit with conventional message | `/git:commit [message]` |
+| [`/git:cp`](/commands/cp) | Commit and push | `/git:cp` |
+| [`/git:deploy`](/commands/deploy) | Deploy to environment | `/git:deploy [env]` |
+| [`/git:pr`](/commands/pr) | Create pull request | `/git:pr [title]` |
+| [`/git:ship`](/commands/ship) | Commit and create PR | `/git:ship [message]` |
 
 
 ## Quality
@@ -122,11 +122,11 @@ Quality and security commands for code health
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/api-gen`](/commands/api-gen) | Generate API code from spec | `/api-gen <resource>` |
-| [`/lint`](/commands/lint) | Run linting | `/lint` |
-| [`/optimize`](/commands/optimize) | Performance optimization | `/optimize <file>` |
-| [`/refactor`](/commands/refactor) | Improve code structure | `/refactor <file or directory>` |
-| [`/security-scan`](/commands/security-scan) | Scan for security vulnerabilities | `/security-scan` |
+| [`/quality:api-gen`](/commands/api-gen) | Generate API code from spec | `/quality:api-gen <resource>` |
+| [`/quality:lint`](/commands/lint) | Run linting | `/quality:lint` |
+| [`/quality:optimize`](/commands/optimize) | Performance optimization | `/quality:optimize <file>` |
+| [`/quality:refactor`](/commands/refactor) | Improve code structure | `/quality:refactor <file or directory>` |
+| [`/quality:security-scan`](/commands/security-scan) | Scan for security vulnerabilities | `/quality:security-scan` |
 
 
 ## Context
@@ -135,12 +135,12 @@ Context and session management commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/checkpoint`](/commands/checkpoint) | Save or restore session state | `/checkpoint <save|restore|list>` |
-| [`/index`](/commands/index) | Generate project index | `/index` |
-| [`/load`](/commands/load) | Load project context | `/load <component>` |
-| [`/mode`](/commands/mode) | Switch behavioral mode | `/mode <mode-name>` |
-| [`/spawn-collect`](/commands/spawn-collect) | Collect results from parallel tasks | `/spawn-collect` |
-| [`/spawn`](/commands/spawn) | Launch parallel background task | `/spawn <task description>` |
+| [`/context:checkpoint`](/commands/checkpoint) | Save or restore session state | `/context:checkpoint <save|restore|list>` |
+| [`/context:index`](/commands/index) | Generate project index | `/context:index` |
+| [`/context:load`](/commands/load) | Load project context | `/context:load <component>` |
+| [`/context:mode`](/commands/mode) | Switch behavioral mode | `/context:mode <mode-name>` |
+| [`/context:spawn-collect`](/commands/spawn-collect) | Collect results from parallel tasks | `/context:spawn-collect` |
+| [`/context:spawn`](/commands/spawn) | Launch parallel background task | `/context:spawn <task description>` |
 
 
 ## Design
@@ -149,11 +149,11 @@ Design and UI/UX commands for visual work
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/cro`](/commands/cro) | CRO-focused content/design | `/cro <page>` |
-| [`/enhance`](/commands/enhance) | Enhance existing content/design | `/enhance <target>` |
-| [`/fast`](/commands/fast) | Quick UI implementation | `/fast <UI description>` |
-| [`/good`](/commands/good) | High-quality UI with polish | `/good <UI description>` |
-| [`/screenshot`](/commands/screenshot) | Implement UI from screenshot | `/screenshot <screenshot reference>` |
+| [`/design:cro`](/commands/cro) | CRO-focused content/design | `/design:cro <page>` |
+| [`/design:enhance`](/commands/enhance) | Enhance existing content/design | `/design:enhance <target>` |
+| [`/design:fast`](/commands/fast) | Quick UI implementation | `/design:fast <UI description>` |
+| [`/design:good`](/commands/good) | High-quality UI with polish | `/design:good <UI description>` |
+| [`/design:screenshot`](/commands/screenshot) | Implement UI from screenshot | `/design:screenshot <screenshot reference>` |
 
 
 ## Omega
@@ -162,11 +162,11 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/1000x`](/commands/1000x) | Find 1000x moonshot path | `/1000x <topic>` |
-| [`/100x`](/commands/100x) | Find 100x paradigm shift | `/100x <topic>` |
-| [`/10x`](/commands/10x) | Find 10x improvement path | `/10x <topic>` |
-| [`/dimensions`](/commands/dimensions) | Display 10 Omega Dimensions | `/dimensions` |
-| [`/principles`](/commands/principles) | Display 7 Omega Principles | `/principles` |
+| [`/omega:1000x`](/commands/1000x) | Find 1000x moonshot path | `/omega:1000x <topic>` |
+| [`/omega:100x`](/commands/100x) | Find 100x paradigm shift | `/omega:100x <topic>` |
+| [`/omega:10x`](/commands/10x) | Find 10x improvement path | `/omega:10x <topic>` |
+| [`/omega:dimensions`](/commands/dimensions) | Display 10 Omega Dimensions | `/omega:dimensions` |
+| [`/omega:principles`](/commands/principles) | Display 7 Omega Principles | `/omega:principles` |
 
 
 ## Sprint
@@ -175,19 +175,19 @@ Sprint and team management commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/backlog-add`](/commands/backlog-add) | Add task to backlog | `/backlog-add <task> [--type TYPE] [--priority N]` |
-| [`/backlog-prioritize`](/commands/backlog-prioritize) | AI-powered backlog prioritization | `/backlog-prioritize` |
-| [`/backlog-show`](/commands/backlog-show) | Display backlog | `/backlog-show` |
-| [`/init`](/commands/init) | Initialize OMGKIT in project | `/init` |
-| [`/sprint-current`](/commands/sprint-current) | Show sprint progress | `/sprint-current` |
-| [`/sprint-end`](/commands/sprint-end) | End sprint with retrospective | `/sprint-end` |
-| [`/sprint-new`](/commands/sprint-new) | Create new sprint | `/sprint-new [name] [--propose]` |
-| [`/sprint-start`](/commands/sprint-start) | Start current sprint | `/sprint-start` |
-| [`/team-ask`](/commands/team-ask) | Ask the AI team a question | `/team-ask <question>` |
-| [`/team-run`](/commands/team-run) | Run AI team on sprint tasks | `/team-run [--mode MODE]` |
-| [`/team-status`](/commands/team-status) | Show AI team activity | `/team-status` |
-| [`/vision-set`](/commands/vision-set) | Set product vision interactively | `/vision-set` |
-| [`/vision-show`](/commands/vision-show) | Display current vision | `/vision-show` |
+| [`/sprint:backlog-add`](/commands/backlog-add) | Add task to backlog | `/sprint:backlog-add <task> [--type TYPE] [--priority N]` |
+| [`/sprint:backlog-prioritize`](/commands/backlog-prioritize) | AI-powered backlog prioritization | `/sprint:backlog-prioritize` |
+| [`/sprint:backlog-show`](/commands/backlog-show) | Display backlog | `/sprint:backlog-show` |
+| [`/sprint:init`](/commands/init) | Initialize OMGKIT in project | `/sprint:init` |
+| [`/sprint:sprint-current`](/commands/sprint-current) | Show sprint progress | `/sprint:sprint-current` |
+| [`/sprint:sprint-end`](/commands/sprint-end) | End sprint with retrospective | `/sprint:sprint-end` |
+| [`/sprint:sprint-new`](/commands/sprint-new) | Create new sprint | `/sprint:sprint-new [name] [--propose]` |
+| [`/sprint:sprint-start`](/commands/sprint-start) | Start current sprint | `/sprint:sprint-start` |
+| [`/sprint:team-ask`](/commands/team-ask) | Ask the AI team a question | `/sprint:team-ask <question>` |
+| [`/sprint:team-run`](/commands/team-run) | Run AI team on sprint tasks | `/sprint:team-run [--mode MODE]` |
+| [`/sprint:team-status`](/commands/team-status) | Show AI team activity | `/sprint:team-status` |
+| [`/sprint:vision-set`](/commands/vision-set) | Set product vision interactively | `/sprint:vision-set` |
+| [`/sprint:vision-show`](/commands/vision-show) | Display current vision | `/sprint:vision-show` |
 
 
 ---
@@ -216,49 +216,49 @@ Sprint and team management commands
   <Tab title="Feature Development">
 ```bash
 # 1. Plan the feature
-/plan "user profile page"
+/planning:plan "user profile page"
 
 # 2. Execute the plan
-/execute-plan
+/planning:execute-plan
 
 # 3. Write tests
-/test "ProfilePage"
+/dev:test "ProfilePage"
 
 # 4. Review code
-/review src/pages/Profile.tsx
+/dev:review src/pages/Profile.tsx
 
 # 5. Commit and PR
-/commit && /pr
+/git:commit && /git:pr
 ```
   </Tab>
   <Tab title="Bug Fixing">
 ```bash
 # 1. Quick fix
-/fix "login fails on mobile"
+/dev:fix "login fails on mobile"
 
 # 2. Or detailed investigation
-/fix-hard "login fails on mobile"
+/dev:fix-hard "login fails on mobile"
 
 # 3. Run tests
-/test
+/dev:test
 
 # 4. Commit
-/commit
+/git:commit
 ```
   </Tab>
   <Tab title="Strategic Thinking">
 ```bash
 # 1. Activate Omega mode
-/mode omega
+/mode:omega
 
 # 2. Find 10x opportunities
-/10x "our checkout flow"
+/omega:10x "our checkout flow"
 
 # 3. Or 100x moonshots
-/100x "our entire product"
+/omega:100x "our entire product"
 
 # 4. Get principles
-/principles
+/omega:principles
 ```
   </Tab>
 </Tabs>
@@ -269,10 +269,10 @@ Commands can be chained for complex workflows:
 
 ```bash
 # Plan, implement, test, commit in sequence
-/plan "feature" && /execute-plan && /test && /commit
+/planning:plan "feature" && /planning:execute-plan && /dev:test && /git:commit
 
 # Research before planning
-/research "best practices" && /plan "implement findings"
+/planning:research "best practices" && /planning:plan "implement findings"
 ```
 
 ## Command Modes
@@ -286,7 +286,7 @@ Commands behave differently based on the active mode:
 | **Token Efficient** | Minimal context, faster responses |
 | **Autonomous** | Less confirmation prompts |
 
-Switch modes with `/mode <mode-name>`.
+Switch modes with `/context:mode <mode-name>` or use the shorthand `/mode:<mode-name>`.
 
 ## Next Steps
 
@@ -298,7 +298,7 @@ Switch modes with `/mode <mode-name>`.
     10 behavioral modes
   </Card>
   <Card title="Skills" icon="brain" href="/skills/overview">
-    43 domain expertise modules
+    88 domain expertise modules
   </Card>
   <Card title="Quick Start" icon="rocket" href="/getting-started/quickstart">
     Get started in 5 minutes
