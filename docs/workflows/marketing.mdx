@@ -1,0 +1,164 @@
+---
+title: "marketing"
+description: "Create marketing content and materials"
+icon: "file-lines"
+---
+
+<Info>
+  **Category:** Content
+
+  **Complexity:** 🟢 Low
+
+  **Estimated Time:** 1-4 hours
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:marketing "your description here"
+```
+
+
+# Marketing Content Workflow
+
+## Overview
+
+The Marketing Content workflow helps create compelling marketing materials including landing page copy, product descriptions, and promotional content.
+
+## When to Use
+
+- Launching new products
+- Creating landing pages
+- Writing promotional content
+- Developing messaging
+
+## Steps
+
+### Step 1: Research
+**Agent:** researcher
+**Command:** `/planning:research`
+**Duration:** 30-60 minutes
+
+Research phase:
+- Target audience
+- Competitor analysis
+- Market positioning
+- Key messages
+
+**Output:** Research findings
+
+### Step 2: Ideation
+**Agent:** brainstormer
+**Command:** `/planning:brainstorm`
+**Duration:** 30-60 minutes
+
+Generate ideas:
+- Messaging angles
+- Headlines options
+- Value propositions
+- Call-to-actions
+
+**Output:** Content ideas
+
+### Step 3: Copy Writing
+**Agent:** copywriter
+**Duration:** 1-2 hours
+
+Write copy:
+- Headlines
+- Body copy
+- Features/benefits
+- CTAs
+
+**Output:** Marketing copy
+
+### Step 4: Review
+**Agent:** copywriter
+**Duration:** 30-60 minutes
+
+Review and refine:
+- Tone consistency
+- Clarity
+- Persuasiveness
+- Grammar
+
+**Output:** Refined copy
+
+## Quality Gates
+
+- [ ] Audience researched
+- [ ] Ideas generated
+- [ ] Copy written
+- [ ] Copy reviewed
+
+## Copy Frameworks
+
+```
+Marketing Copy Frameworks
+=========================
+AIDA:
+- Attention: Hook
+- Interest: Benefits
+- Desire: Value
+- Action: CTA
+
+PAS:
+- Problem: Pain point
+- Agitate: Emphasize
+- Solution: Your product
+```
+
+## Example Usage
+
+```bash
+/workflow:marketing "product launch landing page"
+/workflow:marketing "feature announcement email"
+```
+
+## Related Workflows
+
+- `technical-docs` - For documentation
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@copywriter](/agents/copywriter)** - Specialized agent for copywriter tasks
+- **[@brainstormer](/agents/brainstormer)** - Specialized agent for brainstormer tasks
+- **[@researcher](/agents/researcher)** - Specialized agent for researcher tasks
+
+
+
+
+
+## Commands Triggered
+
+- `/planning:brainstorm`
+- `/planning:research`
+
+
+
+## Prerequisites
+
+- Product/feature defined
+- Target audience known
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Content" icon="file-lines" href="/workflows/overview#content">
+    More content workflows
+  </Card>
+</CardGroup>

@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **AI Team System for Claude Code**
-> 23 Agents • 58 Commands • 88 Skills • 10 Modes
+> 23 Agents • 58 Commands • 29 Workflows • 88 Skills • 10 Modes
 > *"Think Omega. Build Omega. Be Omega."*
 
 OMGKIT transforms Claude Code into an autonomous AI development team with sprint management, specialized agents, and Omega-level thinking for 10x-1000x productivity improvements.
@@ -18,6 +18,7 @@ OMGKIT transforms Claude Code into an autonomous AI development team with sprint
 |-----------|-------|-------------|
 | **Agents** | 23 | Specialized AI team members |
 | **Commands** | 58 | Slash commands for every task |
+| **Workflows** | 29 | Complete development processes |
 | **Skills** | 88 | Domain expertise modules |
 | **Modes** | 10 | Behavioral configurations |
 | **Sprint Management** | ✅ | Vision, backlog, team autonomy |
@@ -162,6 +163,52 @@ After installation, use these commands in Claude Code:
 /team:run [--mode]  # Run AI team (full-auto|semi-auto|manual)
 /team:status        # Show team activity
 ```
+
+## 📋 Workflows (29)
+
+Workflows are orchestrated sequences of agents, commands, and skills that guide complete development processes.
+
+### Development
+| Workflow | Description |
+|----------|-------------|
+| `feature` | Complete feature development from planning to PR |
+| `bug-fix` | Systematic debugging and resolution |
+| `refactor` | Code improvement and restructuring |
+| `code-review` | Comprehensive code review |
+
+### AI Engineering
+| Workflow | Description |
+|----------|-------------|
+| `rag-development` | Build complete RAG systems |
+| `model-evaluation` | AI model evaluation pipeline |
+| `prompt-engineering` | Systematic prompt optimization |
+| `agent-development` | Build AI agents |
+| `fine-tuning` | Model fine-tuning workflow |
+
+### Omega ⭐
+| Workflow | Description |
+|----------|-------------|
+| `10x-improvement` | Tactical enhancements |
+| `100x-architecture` | System redesign |
+| `1000x-innovation` | Industry transformation |
+
+### Sprint Management
+| Workflow | Description |
+|----------|-------------|
+| `sprint-setup` | Initialize and plan sprints |
+| `sprint-execution` | Execute sprint tasks |
+| `sprint-retrospective` | Review and improve |
+
+### Other Categories
+- **Security**: `security-audit`, `penetration-testing`
+- **Database**: `schema-design`, `migration`, `optimization`
+- **API**: `api-design`, `api-testing`
+- **Full Stack**: `full-feature`, `authentication`
+- **Content**: `technical-docs`, `marketing`
+- **Research**: `technology-research`, `best-practices`
+- **Quality**: `performance-optimization`
+
+Use workflows with: `/workflow:<name> "description"`
 
 ## 🎭 Modes (10)
 

@@ -176,7 +176,7 @@ describe('Documentation Generator', () => {
       expect(skillsOverview).toContain('Frameworks');
       expect(skillsOverview).toContain('Databases');
       expect(skillsOverview).toContain('Frontend');
-      expect(skillsOverview).toContain('Devops');
+      expect(skillsOverview).toContain('DevOps');
       expect(skillsOverview).toContain('Security');
       expect(skillsOverview).toContain('Testing');
       expect(skillsOverview).toContain('Methodology');

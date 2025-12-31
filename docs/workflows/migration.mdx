@@ -1,0 +1,202 @@
+---
+title: "migration"
+description: "Safe database migrations with rollback"
+icon: "database"
+---
+
+<Info>
+  **Category:** Database
+
+  **Complexity:** 🟠 High
+
+  **Estimated Time:** 1-4 hours
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:migration "your description here"
+```
+
+
+# Database Migration Workflow
+
+## Overview
+
+The Database Migration workflow ensures safe, zero-downtime database migrations with proper rollback capabilities.
+
+## When to Use
+
+- Schema changes required
+- Data transformations
+- Index modifications
+- Constraint updates
+
+## Steps
+
+### Step 1: Migration Planning
+**Agent:** planner
+**Command:** `/planning:plan "migration"`
+**Duration:** 30-60 minutes
+
+Plan migration:
+- Identify changes
+- Assess impact
+- Plan rollback
+- Schedule execution
+
+**Output:** Migration plan
+
+### Step 2: Backup
+**Agent:** database-admin
+**Duration:** 15-30 minutes
+
+Create backup:
+- Full backup
+- Verify backup
+- Document state
+- Test restore
+
+**Output:** Backup completed
+
+### Step 3: Migration Script
+**Agent:** database-admin
+**Duration:** 30-60 minutes
+
+Write migration:
+- Create migration file
+- Write up migration
+- Write down migration
+- Add validation
+
+**Output:** Migration script
+
+### Step 4: Staging Test
+**Agent:** tester
+**Duration:** 30-60 minutes
+
+Test in staging:
+- Run migration
+- Test application
+- Verify data
+- Test rollback
+
+**Output:** Staging verified
+
+### Step 5: Production Migration
+**Agent:** database-admin
+**Duration:** 15-60 minutes
+
+Execute migration:
+- Run migration
+- Monitor progress
+- Verify completion
+- Update status
+
+**Output:** Migration complete
+
+### Step 6: Verification
+**Agent:** tester
+**Command:** `/dev:test`
+**Duration:** 30-60 minutes
+
+Verify migration:
+- Application testing
+- Data integrity
+- Performance check
+- Document completion
+
+**Output:** Verification report
+
+## Quality Gates
+
+- [ ] Migration planned
+- [ ] Backup verified
+- [ ] Rollback tested
+- [ ] Staging validated
+- [ ] Production migrated
+- [ ] Verification passed
+
+## Migration Checklist
+
+```
+Migration Checklist
+===================
+PRE-MIGRATION:
+[ ] Backup created and verified
+[ ] Rollback script ready
+[ ] Stakeholders notified
+[ ] Maintenance window scheduled
+
+MIGRATION:
+[ ] Migration executed
+[ ] Progress monitored
+[ ] Errors handled
+[ ] Completion verified
+
+POST-MIGRATION:
+[ ] Application tested
+[ ] Data verified
+[ ] Performance checked
+[ ] Documentation updated
+```
+
+## Example Usage
+
+```bash
+/workflow:migration "add user preferences table"
+/workflow:migration "split orders table for sharding"
+```
+
+## Related Workflows
+
+- `schema-design` - For initial design
+- `database-optimization` - For performance
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@database-admin](/agents/database-admin)** - Specialized agent for database admin tasks
+- **[@planner](/agents/planner)** - Specialized agent for planner tasks
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+
+
+
+## Skills Applied
+
+- **[database-migration](/skills/database-migration)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/planning:plan`
+- `/dev:test`
+
+
+
+## Prerequisites
+
+- Schema changes defined
+- Backup strategy ready
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Database" icon="database" href="/workflows/overview#database">
+    More database workflows
+  </Card>
+</CardGroup>

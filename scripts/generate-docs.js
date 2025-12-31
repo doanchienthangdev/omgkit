@@ -1190,6 +1190,23 @@ skills:
 }
 
 /**
+ * Workflow category metadata
+ */
+const WORKFLOW_CATEGORIES = {
+  development: { icon: 'code', description: 'Core development workflows for features, bugs, and reviews' },
+  'ai-engineering': { icon: 'microchip', description: 'AI/ML system development workflows' },
+  omega: { icon: 'wand-magic-sparkles', description: 'Strategic thinking and improvement workflows' },
+  sprint: { icon: 'calendar-days', description: 'Sprint management and team coordination' },
+  security: { icon: 'shield-halved', description: 'Security auditing and penetration testing' },
+  database: { icon: 'database', description: 'Database design, migration, and optimization' },
+  api: { icon: 'plug', description: 'API design and testing workflows' },
+  fullstack: { icon: 'layer-group', description: 'Full-stack feature development' },
+  content: { icon: 'file-lines', description: 'Documentation and content creation' },
+  research: { icon: 'magnifying-glass', description: 'Technology research and best practices' },
+  quality: { icon: 'gauge-high', description: 'Performance and quality optimization' }
+};
+
+/**
  * Mode metadata
  */
 const MODE_METADATA = {
@@ -1455,6 +1472,362 @@ mode: omega  # Your preferred default mode
 }
 
 /**
+ * Parse YAML array from frontmatter
+ */
+function parseYamlArray(content, key) {
+  const lines = content.split('\n');
+  const result = [];
+  let inArray = false;
+
+  for (const line of lines) {
+    if (line.trim().startsWith(`${key}:`)) {
+      inArray = true;
+      continue;
+    }
+    if (inArray) {
+      if (line.trim().startsWith('- ')) {
+        result.push(line.trim().slice(2).trim());
+      } else if (!line.trim().startsWith('-') && line.trim() !== '') {
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * Generate workflow category tables for overview
+ */
+function generateWorkflowCategoryTables(categoryOrder, workflowsByCategory) {
+  return categoryOrder.map(cat => {
+    const wfs = workflowsByCategory[cat] || [];
+    if (wfs.length === 0) return '';
+    const catMeta = WORKFLOW_CATEGORIES[cat] || { icon: 'diagram-project', description: '' };
+    const rows = wfs.map(w => {
+      const desc = w.description.length > 40 ? w.description.slice(0, 40) + '...' : w.description;
+      return `| [**${w.name}**](/workflows/${w.slug}) | ${desc} | ${w.complexity} | ${w.estimatedTime || '-'} |`;
+    }).join('\n');
+    return `
+## ${formatCategoryName(cat)}
+
+${catMeta.description}
+
+| Workflow | Description | Complexity | Time |
+|----------|-------------|------------|------|
+${rows}
+`;
+  }).join('\n');
+}
+
+/**
+ * Generate workflow documentation with enhanced structure
+ */
+async function generateWorkflowDocs() {
+  const workflowsDir = join(PLUGIN_DIR, 'workflows');
+  const outputDir = join(DOCS_DIR, 'workflows');
+  await mkdir(outputDir, { recursive: true });
+
+  const categories = await readdir(workflowsDir);
+  const allWorkflows = [];
+
+  for (const category of categories) {
+    const categoryPath = join(workflowsDir, category);
+
+    try {
+      const files = await readdir(categoryPath);
+      const mdFiles = files.filter(f => f.endsWith('.md'));
+
+      for (const file of mdFiles) {
+        const content = await readFile(join(categoryPath, file), 'utf-8');
+        const { frontmatter, body } = parseFrontmatter(content);
+        const slug = basename(file, '.md');
+        const catMeta = WORKFLOW_CATEGORIES[category] || { icon: 'diagram-project', description: '' };
+
+        // Parse array fields from content
+        const agents = parseYamlArray(content, 'agents');
+        const skills = parseYamlArray(content, 'skills');
+        const commands = parseYamlArray(content, 'commands');
+        const prerequisites = parseYamlArray(content, 'prerequisites');
+
+        allWorkflows.push({
+          name: frontmatter.name || slug,
+          description: frontmatter.description || '',
+          category,
+          slug,
+          complexity: frontmatter.complexity || 'medium',
+          estimatedTime: frontmatter['estimated-time'] || '',
+          agents,
+          skills,
+          commands,
+          prerequisites,
+          icon: catMeta.icon
+        });
+
+        // Generate complexity badge
+        const complexityBadge = {
+          low: '🟢 Low',
+          medium: '🟡 Medium',
+          high: '🟠 High',
+          'very-high': '🔴 Very High'
+        }[frontmatter.complexity] || '🟡 Medium';
+
+        // Generate individual workflow page with enhanced structure
+        const workflowDoc = `---
+title: "${frontmatter.name || slug}"
+description: "${frontmatter.description || ''}"
+icon: "${catMeta.icon}"
+---
+
+<Info>
+  **Category:** ${formatCategoryName(category)}
+
+  **Complexity:** ${complexityBadge}
+
+  **Estimated Time:** ${frontmatter['estimated-time'] || 'Varies'}
+</Info>
+
+## Quick Start
+
+\`\`\`bash
+/workflow:${slug} "your description here"
+\`\`\`
+
+${body}
+
+${agents.length > 0 ? `
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+${agents.map(a => `- **[@${a}](/agents/${a})** - Specialized agent for ${a.replace(/-/g, ' ')} tasks`).join('\n')}
+` : ''}
+
+${skills.length > 0 ? `
+## Skills Applied
+
+${skills.map(s => `- **[${s}](/skills/${s})** - Domain expertise`).join('\n')}
+` : ''}
+
+${commands.length > 0 ? `
+## Commands Triggered
+
+${commands.map(c => `- \`${c}\``).join('\n')}
+` : ''}
+
+${prerequisites.length > 0 ? `
+## Prerequisites
+
+${prerequisites.map(p => `- ${p}`).join('\n')}
+` : ''}
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="${formatCategoryName(category)}" icon="${catMeta.icon}" href="/workflows/overview#${category}">
+    More ${category} workflows
+  </Card>
+</CardGroup>
+`;
+
+        await writeFile(join(outputDir, `${slug}.mdx`), workflowDoc);
+      }
+    } catch (e) {
+      // Not a directory or error
+    }
+  }
+
+  // Group workflows by category
+  const workflowsByCategory = {};
+  for (const wf of allWorkflows) {
+    if (!workflowsByCategory[wf.category]) {
+      workflowsByCategory[wf.category] = [];
+    }
+    workflowsByCategory[wf.category].push(wf);
+  }
+
+  const categoryOrder = ['development', 'ai-engineering', 'omega', 'sprint', 'security', 'database', 'api', 'fullstack', 'content', 'research', 'quality'];
+
+  // Generate overview page with comprehensive structure
+  const overviewDoc = `---
+title: "Workflows Overview"
+description: "29 orchestrated workflows for complete development processes"
+icon: "diagram-project"
+---
+
+Workflows are **orchestrated sequences** of agents, commands, and skills that guide you through complete development processes. Each workflow ensures consistent, high-quality outcomes.
+
+## At a Glance
+
+<CardGroup cols={4}>
+  <Card title="29" icon="diagram-project">
+    Total Workflows
+  </Card>
+  <Card title="11" icon="folder">
+    Categories
+  </Card>
+  <Card title="23" icon="robot">
+    Agents Used
+  </Card>
+  <Card title="100%" icon="check">
+    Quality Gates
+  </Card>
+</CardGroup>
+
+## Workflow Categories
+
+<CardGroup cols={2}>
+${categoryOrder.map(cat => {
+  const wfs = workflowsByCategory[cat] || [];
+  const catMeta = WORKFLOW_CATEGORIES[cat] || { icon: 'diagram-project', description: '' };
+  return `  <Card title="${formatCategoryName(cat)}" icon="${catMeta.icon}" href="#${cat}">
+    **${wfs.length} workflows** - ${catMeta.description}
+  </Card>`;
+}).join('\n')}
+</CardGroup>
+
+## Choosing the Right Workflow
+
+<AccordionGroup>
+  <Accordion title="I need to build a new feature">
+    Use **[Feature Development](/workflows/feature)** for complete feature implementation from planning to PR.
+  </Accordion>
+  <Accordion title="I need to fix a bug">
+    Use **[Bug Fix](/workflows/bug-fix)** for systematic debugging and resolution.
+  </Accordion>
+  <Accordion title="I need to build a RAG system">
+    Use **[RAG Development](/workflows/rag-development)** for complete RAG implementation with evaluation.
+  </Accordion>
+  <Accordion title="I need strategic improvements">
+    Use **[10x Improvement](/workflows/10x-improvement)** for tactical enhancements or **[100x Architecture](/workflows/100x-architecture)** for system redesign.
+  </Accordion>
+  <Accordion title="I need to run a sprint">
+    Use **[Sprint Setup](/workflows/sprint-setup)** → **[Sprint Execution](/workflows/sprint-execution)** → **[Sprint Retrospective](/workflows/sprint-retrospective)**.
+  </Accordion>
+  <Accordion title="I need a security audit">
+    Use **[Security Audit](/workflows/security-audit)** for comprehensive security review.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+${generateWorkflowCategoryTables(categoryOrder, workflowsByCategory)}
+
+---
+
+## How Workflows Work
+
+<Steps>
+  <Step title="Invoke Workflow">
+    Run a workflow with \`/workflow:<name> "description"\`
+  </Step>
+  <Step title="Agent Orchestration">
+    The workflow coordinates multiple specialized agents
+  </Step>
+  <Step title="Quality Gates">
+    Each step has quality checkpoints to ensure standards
+  </Step>
+  <Step title="Completion">
+    Workflow completes with documented outcomes
+  </Step>
+</Steps>
+
+### Example: Feature Development
+
+\`\`\`bash
+# Start the feature workflow
+/workflow:feature "user authentication with OAuth2"
+
+# The workflow will:
+# 1. Planning (planner agent)
+# 2. Implementation (fullstack-developer agent)
+# 3. Testing (tester agent)
+# 4. Code Review (code-reviewer agent)
+# 5. Commit & PR (git-manager agent)
+\`\`\`
+
+## Workflow Patterns
+
+### Sequential Workflows
+
+Run workflows one after another for comprehensive processes:
+
+\`\`\`bash
+# Research → Plan → Build
+/workflow:best-practices "authentication patterns"
+/workflow:feature "implement auth based on research"
+\`\`\`
+
+### Category-Specific Patterns
+
+<Tabs>
+  <Tab title="Development">
+\`\`\`bash
+# Feature lifecycle
+/workflow:feature "new dashboard"
+/workflow:refactor "optimize dashboard queries"
+/workflow:code-review "dashboard components"
+\`\`\`
+  </Tab>
+  <Tab title="AI Engineering">
+\`\`\`bash
+# RAG development lifecycle
+/workflow:rag-development "knowledge base Q&A"
+/workflow:model-evaluation "evaluate RAG performance"
+/workflow:prompt-engineering "optimize retrieval prompts"
+\`\`\`
+  </Tab>
+  <Tab title="Sprint">
+\`\`\`bash
+# Sprint lifecycle
+/workflow:sprint-setup "Q1 Sprint 1"
+/workflow:sprint-execution
+/workflow:sprint-retrospective
+\`\`\`
+  </Tab>
+</Tabs>
+
+## Quality Gates
+
+Every workflow includes quality gates that ensure:
+
+<Check>Code meets project standards</Check>
+<Check>Tests pass with adequate coverage</Check>
+<Check>Security vulnerabilities addressed</Check>
+<Check>Documentation updated</Check>
+<Check>Review completed</Check>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Agents" icon="robot" href="/agents/overview">
+    23 agents that power workflows
+  </Card>
+  <Card title="Commands" icon="terminal" href="/commands/overview">
+    58 commands used in workflows
+  </Card>
+  <Card title="Skills" icon="brain" href="/skills/overview">
+    88 skills applied in workflows
+  </Card>
+  <Card title="Sprint Management" icon="calendar-days" href="/concepts/sprint-management">
+    Manage workflows across sprints
+  </Card>
+</CardGroup>
+`;
+
+  await writeFile(join(outputDir, 'overview.mdx'), overviewDoc);
+  console.log(`Generated ${allWorkflows.length} workflow docs with enhanced structure`);
+}
+
+/**
  * Main
  */
 async function main() {
@@ -1466,6 +1839,7 @@ async function main() {
     await generateCommandDocs();
     await generateSkillDocs();
     await generateModeDocs();
+    await generateWorkflowDocs();
 
     console.log('\n✓ Documentation generated successfully!');
     console.log(`  Output: ${DOCS_DIR}`);

@@ -1,0 +1,153 @@
+---
+name: sprint-setup
+description: Initialize and configure a new sprint
+category: sprint
+complexity: low
+estimated-time: 30min-2 hours
+agents:
+  - sprint-master
+  - planner
+  - project-manager
+skills:
+  - omega-sprint
+commands:
+  - /sprint:vision-set
+  - /sprint:backlog-add
+  - /sprint:backlog-prioritize
+  - /sprint:sprint-new
+  - /sprint:sprint-start
+prerequisites:
+  - Project initialized with omgkit
+  - Product vision defined
+---
+
+# Sprint Setup Workflow
+
+## Overview
+
+The Sprint Setup workflow guides you through initializing and configuring a new sprint. It covers vision setting, backlog population, prioritization, and sprint creation.
+
+## When to Use
+
+- Starting a new project
+- Beginning a new development cycle
+- Organizing work for the team
+- Planning iterations
+
+## Steps
+
+### Step 1: Vision Setting
+**Agent:** sprint-master
+**Command:** `/sprint:vision-set`
+**Duration:** 15-30 minutes
+
+Define or review vision:
+- Set product vision
+- Define sprint goals
+- Identify key outcomes
+- Align team direction
+
+**Output:** Vision documented
+
+### Step 2: Backlog Population
+**Agent:** planner
+**Command:** `/sprint:backlog-add`
+**Duration:** 30-60 minutes
+
+Add backlog items:
+- Create user stories
+- Define tasks
+- Estimate effort
+- Set acceptance criteria
+
+**Output:** Populated backlog
+
+### Step 3: Prioritization
+**Agent:** sprint-master
+**Command:** `/sprint:backlog-prioritize`
+**Duration:** 15-30 minutes
+
+Prioritize items:
+- Apply prioritization framework
+- Balance value vs effort
+- Consider dependencies
+- Assign priorities
+
+**Output:** Prioritized backlog
+
+### Step 4: Sprint Creation
+**Agent:** sprint-master
+**Command:** `/sprint:sprint-new`
+**Duration:** 10-15 minutes
+
+Create sprint:
+- Set sprint duration
+- Define sprint goal
+- Select items for sprint
+- Assign capacity
+
+**Output:** Sprint created
+
+### Step 5: Sprint Start
+**Agent:** sprint-master
+**Command:** `/sprint:sprint-start`
+**Duration:** 5-10 minutes
+
+Start sprint:
+- Kick off sprint
+- Assign initial tasks
+- Set up tracking
+- Communicate start
+
+**Output:** Sprint started
+
+## Quality Gates
+
+- [ ] Vision documented and clear
+- [ ] Backlog items have estimates
+- [ ] Priorities assigned
+- [ ] Sprint created with goal
+- [ ] Team notified
+
+## Sprint Structure
+
+```
+Sprint Setup Structure
+======================
+
+.omgkit/sprints/
+├── vision.yaml        # Product vision
+├── backlog.yaml       # Product backlog
+└── sprint-001.yaml    # Current sprint
+
+Sprint Item Format:
+- id: unique identifier
+- title: brief description
+- type: feature|bugfix|task
+- priority: high|medium|low
+- estimate: story points
+- status: todo|in-progress|done
+```
+
+## Tips
+
+- Keep sprints short (1-2 weeks)
+- Don't over-commit capacity
+- Include buffer for unknowns
+- Review vision regularly
+- Document decisions
+
+## Example Usage
+
+```bash
+# Set up initial sprint
+/workflow:sprint-setup
+
+# After vision and backlog exist
+/sprint:sprint-new "Sprint 1: Core Features"
+```
+
+## Related Workflows
+
+- `sprint-execution` - For running sprints
+- `sprint-retrospective` - For reviewing sprints

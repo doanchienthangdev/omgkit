@@ -1,0 +1,189 @@
+---
+title: "best-practices"
+description: "Discover and adopt best practices"
+icon: "magnifying-glass"
+---
+
+<Info>
+  **Category:** Research
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** 2-6 hours
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:best-practices "your description here"
+```
+
+
+# Best Practices Discovery Workflow
+
+## Overview
+
+The Best Practices workflow helps discover, evaluate, and adopt industry best practices for specific areas of development.
+
+## When to Use
+
+- Improving code quality
+- Adopting industry standards
+- Team skill development
+- Process improvement
+
+## Steps
+
+### Step 1: Area Definition
+**Agent:** researcher
+**Duration:** 15-30 minutes
+
+Define area:
+- Specific domain
+- Current state
+- Improvement goals
+- Success criteria
+
+**Output:** Focus area
+
+### Step 2: Research
+**Agent:** researcher
+**Command:** `/planning:research`
+**Duration:** 1-2 hours
+
+Research practices:
+- Industry standards
+- Expert opinions
+- Case studies
+- Framework guidelines
+
+**Output:** Best practices list
+
+### Step 3: Gap Analysis
+**Agent:** researcher
+**Duration:** 30-60 minutes
+
+Analyze gaps:
+- Current vs ideal
+- Priority areas
+- Quick wins
+- Long-term goals
+
+**Output:** Gap analysis
+
+### Step 4: Adoption Plan
+**Agent:** planner
+**Command:** `/planning:plan`
+**Duration:** 30-60 minutes
+
+Plan adoption:
+- Prioritized changes
+- Implementation steps
+- Training needs
+- Timeline
+
+**Output:** Adoption plan
+
+### Step 5: Implementation
+**Agent:** fullstack-developer
+**Duration:** 1-4 hours
+
+Implement changes:
+- Apply practices
+- Update code
+- Add tooling
+- Document changes
+
+**Output:** Practices adopted
+
+## Quality Gates
+
+- [ ] Area clearly defined
+- [ ] Practices researched
+- [ ] Gaps identified
+- [ ] Plan created
+- [ ] Changes implemented
+
+## Best Practice Categories
+
+```
+Development Best Practices
+==========================
+CODE:
+- Naming conventions
+- Code organization
+- Error handling
+- Testing patterns
+
+PROCESS:
+- Code review
+- CI/CD pipeline
+- Documentation
+- Monitoring
+
+ARCHITECTURE:
+- Design patterns
+- Security practices
+- Performance
+- Scalability
+```
+
+## Example Usage
+
+```bash
+/workflow:best-practices "React component patterns"
+/workflow:best-practices "API security practices"
+```
+
+## Related Workflows
+
+- `technology-research` - For tech evaluation
+- `refactor` - For implementation
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@researcher](/agents/researcher)** - Specialized agent for researcher tasks
+- **[@planner](/agents/planner)** - Specialized agent for planner tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+
+
+
+## Skills Applied
+
+- **[research-validation](/skills/research-validation)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/planning:research`
+- `/planning:plan`
+- `/dev:feature`
+
+
+
+## Prerequisites
+
+- Area of interest defined
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Research" icon="magnifying-glass" href="/workflows/overview#research">
+    More research workflows
+  </Card>
+</CardGroup>

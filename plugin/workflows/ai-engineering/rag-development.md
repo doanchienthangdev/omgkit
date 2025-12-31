@@ -1,0 +1,203 @@
+---
+name: rag-development
+description: Build Retrieval-Augmented Generation systems
+category: ai-engineering
+complexity: high
+estimated-time: 4-16 hours
+agents:
+  - researcher
+  - planner
+  - architect
+  - fullstack-developer
+  - tester
+skills:
+  - rag-systems
+  - dataset-engineering
+  - evaluation-methodology
+  - ai-architecture
+commands:
+  - /planning:research
+  - /planning:plan
+  - /dev:feature
+  - /dev:test
+prerequisites:
+  - Document corpus available
+  - Vector database selected
+  - LLM API access configured
+---
+
+# RAG Development Workflow
+
+## Overview
+
+The RAG Development workflow guides you through building a complete Retrieval-Augmented Generation system. It covers document processing, embedding, retrieval, and generation with evaluation at each stage.
+
+## When to Use
+
+- Building knowledge-based chatbots
+- Creating document Q&A systems
+- Implementing semantic search
+- Building AI assistants with domain knowledge
+- Creating enterprise search solutions
+
+## Steps
+
+### Step 1: Research
+**Agent:** researcher
+**Command:** `/planning:research "RAG best practices for $DOMAIN"`
+**Duration:** 30-60 minutes
+
+Research phase:
+- Study RAG architectures
+- Evaluate chunking strategies
+- Compare embedding models
+- Review retrieval methods
+
+**Output:** Research findings and recommendations
+
+### Step 2: Architecture Design
+**Agent:** architect
+**Command:** `/planning:plan "RAG system architecture"`
+**Duration:** 30-60 minutes
+
+Design the system:
+- Define system architecture
+- Select components (vector DB, embeddings, LLM)
+- Plan data pipeline
+- Design API interface
+
+**Output:** Architecture document
+
+### Step 3: Data Preparation
+**Agent:** fullstack-developer
+**Duration:** 1-4 hours
+
+Prepare documents:
+- Implement document loaders
+- Create chunking pipeline
+- Handle different formats (PDF, HTML, etc.)
+- Clean and normalize text
+
+**Output:** Document processing pipeline
+
+### Step 4: Embedding Pipeline
+**Agent:** fullstack-developer
+**Duration:** 1-2 hours
+
+Build embedding system:
+- Integrate embedding model
+- Create batch processing
+- Store in vector database
+- Index optimization
+
+**Output:** Embedding pipeline
+
+### Step 5: Retrieval System
+**Agent:** fullstack-developer
+**Duration:** 1-2 hours
+
+Implement retrieval:
+- Semantic search queries
+- Hybrid retrieval (BM25 + vector)
+- Reranking pipeline
+- Context assembly
+
+**Output:** Retrieval system
+
+### Step 6: Generation Pipeline
+**Agent:** fullstack-developer
+**Duration:** 1-2 hours
+
+Build generation:
+- Prompt templates
+- Context injection
+- LLM integration
+- Response formatting
+
+**Output:** Generation pipeline
+
+### Step 7: Evaluation
+**Agent:** tester
+**Command:** `/dev:test`
+**Duration:** 1-2 hours
+
+Evaluate system:
+- Retrieval accuracy (Recall@K, MRR)
+- Answer quality metrics
+- Latency benchmarks
+- Cost analysis
+
+**Output:** Evaluation report
+
+### Step 8: Optimization
+**Agent:** fullstack-developer
+**Command:** `/quality:optimize`
+**Duration:** 1-2 hours
+
+Optimize performance:
+- Chunk size tuning
+- Retrieval parameters
+- Caching strategies
+- Prompt optimization
+
+**Output:** Optimized system
+
+## Quality Gates
+
+- [ ] Research complete with clear recommendations
+- [ ] Architecture documented and approved
+- [ ] Document processing handles all formats
+- [ ] Embeddings stored correctly
+- [ ] Retrieval accuracy meets targets
+- [ ] Generation quality acceptable
+- [ ] Latency within requirements
+- [ ] Evaluation metrics documented
+
+## RAG Architecture
+
+```
+RAG System Architecture
+=======================
+
+[Documents] → [Chunking] → [Embedding] → [Vector DB]
+                                              ↓
+[User Query] → [Query Embedding] → [Retrieval] → [Reranking]
+                                                      ↓
+                               [Context Assembly] → [LLM] → [Response]
+```
+
+## Key Metrics
+
+| Metric | Target | Description |
+|--------|--------|-------------|
+| Recall@5 | >85% | Relevant docs in top 5 |
+| MRR | >0.7 | Mean Reciprocal Rank |
+| Answer Accuracy | >80% | Correct answers |
+| Latency P95 | <2s | 95th percentile response time |
+
+## Tips
+
+- Start with small document set for testing
+- Experiment with chunk sizes (500-1000 tokens)
+- Use hybrid retrieval for better results
+- Implement caching for common queries
+- Monitor costs carefully
+
+## Example Usage
+
+```bash
+# Build customer support RAG
+/workflow:rag-development "customer support knowledge base with FAQ and docs"
+
+# Build code documentation RAG
+/workflow:rag-development "codebase documentation search with GitHub repos"
+
+# Build legal document RAG
+/workflow:rag-development "legal contract analysis with clause extraction"
+```
+
+## Related Workflows
+
+- `model-evaluation` - For evaluating model performance
+- `prompt-engineering` - For optimizing prompts
+- `agent-development` - For building AI agents

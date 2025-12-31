@@ -38,6 +38,10 @@
     {
       "name": "Skills",
       "url": "skills"
+    },
+    {
+      "name": "Workflows",
+      "url": "workflows"
     }
   ],
   "anchors": [
@@ -417,6 +421,96 @@
         "skills/guardrails-safety",
         "skills/user-feedback"
       ]
+    },
+    {
+      "group": "Workflows Overview",
+      "pages": [
+        "workflows/overview"
+      ]
+    },
+    {
+      "group": "Development",
+      "pages": [
+        "workflows/feature",
+        "workflows/bug-fix",
+        "workflows/refactor",
+        "workflows/code-review"
+      ]
+    },
+    {
+      "group": "AI Engineering",
+      "pages": [
+        "workflows/rag-development",
+        "workflows/model-evaluation",
+        "workflows/prompt-engineering",
+        "workflows/agent-development",
+        "workflows/fine-tuning"
+      ]
+    },
+    {
+      "group": "Omega",
+      "pages": [
+        "workflows/10x-improvement",
+        "workflows/100x-architecture",
+        "workflows/1000x-innovation"
+      ]
+    },
+    {
+      "group": "Sprint",
+      "pages": [
+        "workflows/sprint-setup",
+        "workflows/sprint-execution",
+        "workflows/sprint-retrospective"
+      ]
+    },
+    {
+      "group": "Security",
+      "pages": [
+        "workflows/security-audit",
+        "workflows/penetration-testing"
+      ]
+    },
+    {
+      "group": "Database",
+      "pages": [
+        "workflows/schema-design",
+        "workflows/migration",
+        "workflows/optimization"
+      ]
+    },
+    {
+      "group": "API",
+      "pages": [
+        "workflows/api-design",
+        "workflows/api-testing"
+      ]
+    },
+    {
+      "group": "Full Stack",
+      "pages": [
+        "workflows/full-feature",
+        "workflows/authentication"
+      ]
+    },
+    {
+      "group": "Content",
+      "pages": [
+        "workflows/technical-docs",
+        "workflows/marketing"
+      ]
+    },
+    {
+      "group": "Research",
+      "pages": [
+        "workflows/technology-research",
+        "workflows/best-practices"
+      ]
+    },
+    {
+      "group": "Quality",
+      "pages": [
+        "workflows/performance-optimization"
+      ]
     }
   ],
   "footerSocials": {
@@ -435,6 +529,10 @@
     {
       "source": "/skills/all",
       "destination": "/skills/overview"
+    },
+    {
+      "source": "/workflows",
+      "destination": "/workflows/overview"
     }
   ]
 }

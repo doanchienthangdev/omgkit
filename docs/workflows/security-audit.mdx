@@ -1,0 +1,225 @@
+---
+title: "security-audit"
+description: "Comprehensive security review"
+icon: "shield-halved"
+---
+
+<Info>
+  **Category:** Security
+
+  **Complexity:** 🟠 High
+
+  **Estimated Time:** 4-8 hours
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:security-audit "your description here"
+```
+
+
+# Security Audit Workflow
+
+## Overview
+
+The Security Audit workflow provides comprehensive security review including automated scanning, manual review, vulnerability remediation, and documentation.
+
+## When to Use
+
+- Before major releases
+- After adding sensitive features
+- Regular security checkups
+- Compliance requirements
+- After security incidents
+
+## Steps
+
+### Step 1: Automated Scanning
+**Agent:** vulnerability-scanner
+**Command:** `/quality:security-scan`
+**Duration:** 30-60 minutes
+
+Run automated scans:
+- Dependency vulnerabilities
+- Static code analysis
+- Secret detection
+- Configuration audit
+
+**Output:** Scan results
+
+### Step 2: Manual Review
+**Agent:** security-auditor
+**Duration:** 2-4 hours
+
+Manual security review:
+- OWASP Top 10 checklist
+- Authentication review
+- Authorization audit
+- Data handling review
+- API security check
+
+**Output:** Manual review findings
+
+### Step 3: Risk Assessment
+**Agent:** security-auditor
+**Duration:** 30-60 minutes
+
+Assess risks:
+- Prioritize findings
+- Assess impact
+- Rate severity
+- Create remediation plan
+
+**Output:** Risk assessment
+
+### Step 4: Remediation
+**Agent:** fullstack-developer
+**Command:** `/dev:fix`
+**Duration:** 1-4 hours
+
+Fix vulnerabilities:
+- Address critical issues
+- Implement fixes
+- Update configurations
+- Add security controls
+
+**Output:** Fixes implemented
+
+### Step 5: Verification
+**Agent:** security-auditor
+**Duration:** 30-60 minutes
+
+Verify fixes:
+- Re-run scans
+- Verify remediations
+- Confirm no regressions
+- Update status
+
+**Output:** Verification report
+
+### Step 6: Report Generation
+**Agent:** docs-manager
+**Command:** `/planning:doc`
+**Duration:** 30-60 minutes
+
+Generate report:
+- Executive summary
+- Detailed findings
+- Remediation status
+- Recommendations
+
+**Output:** Security report
+
+## Quality Gates
+
+- [ ] All scans completed
+- [ ] OWASP checklist reviewed
+- [ ] Critical vulnerabilities fixed
+- [ ] Fixes verified
+- [ ] Report generated
+- [ ] Stakeholders notified
+
+## OWASP Top 10 Checklist
+
+```
+OWASP Top 10 (2021)
+===================
+[ ] A01: Broken Access Control
+[ ] A02: Cryptographic Failures
+[ ] A03: Injection
+[ ] A04: Insecure Design
+[ ] A05: Security Misconfiguration
+[ ] A06: Vulnerable Components
+[ ] A07: Authentication Failures
+[ ] A08: Data Integrity Failures
+[ ] A09: Logging/Monitoring Failures
+[ ] A10: Server-Side Request Forgery
+```
+
+## Severity Levels
+
+| Level | Description | SLA |
+|-------|-------------|-----|
+| Critical | Active exploit possible | 24 hours |
+| High | Significant risk | 7 days |
+| Medium | Moderate risk | 30 days |
+| Low | Minor risk | 90 days |
+
+## Tips
+
+- Scan dependencies regularly
+- Keep secrets out of code
+- Use parameterized queries
+- Implement proper auth
+- Log security events
+- Update dependencies
+
+## Example Usage
+
+```bash
+# Full security audit
+/workflow:security-audit
+
+# Quick scan only
+/quality:security-scan
+```
+
+## Related Workflows
+
+- `penetration-testing` - For active testing
+- `code-review` - For code quality
+- `authentication` - For auth setup
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@security-auditor](/agents/security-auditor)** - Specialized agent for security auditor tasks
+- **[@vulnerability-scanner](/agents/vulnerability-scanner)** - Specialized agent for vulnerability scanner tasks
+- **[@code-reviewer](/agents/code-reviewer)** - Specialized agent for code reviewer tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+- **[@docs-manager](/agents/docs-manager)** - Specialized agent for docs manager tasks
+
+
+
+## Skills Applied
+
+- **[owasp](/skills/owasp)** - Domain expertise
+- **[security-hardening](/skills/security-hardening)** - Domain expertise
+- **[defense-in-depth](/skills/defense-in-depth)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/quality:security-scan`
+- `/dev:fix`
+- `/planning:doc`
+
+
+
+## Prerequisites
+
+- Codebase accessible
+- Dependencies listed
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Security" icon="shield-halved" href="/workflows/overview#security">
+    More security workflows
+  </Card>
+</CardGroup>

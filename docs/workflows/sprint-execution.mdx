@@ -1,0 +1,217 @@
+---
+title: "sprint-execution"
+description: "Execute sprint with AI team"
+icon: "calendar-days"
+---
+
+<Info>
+  **Category:** Sprint
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** sprint duration
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:sprint-execution "your description here"
+```
+
+
+# Sprint Execution Workflow
+
+## Overview
+
+The Sprint Execution workflow manages the day-to-day running of a sprint using the AI team. It covers task execution, progress monitoring, blocker resolution, and sprint completion.
+
+## When to Use
+
+- Running an active sprint
+- Managing development work
+- Coordinating AI agents
+- Tracking progress
+
+## Steps
+
+### Step 1: Sprint Review
+**Agent:** sprint-master
+**Command:** `/sprint:sprint-current`
+**Duration:** 10-15 minutes
+
+Review current sprint:
+- Check sprint status
+- Review pending tasks
+- Identify priorities
+- Check blockers
+
+**Output:** Sprint status
+
+### Step 2: Team Execution
+**Agent:** AI Team
+**Command:** `/sprint:team-run`
+**Duration:** Ongoing
+
+Run AI team:
+- Execute tasks by priority
+- Use appropriate agents
+- Report progress
+- Flag blockers
+
+**Modes:**
+- `--mode full-auto` - No intervention
+- `--mode semi-auto` - Review at checkpoints
+- `--mode manual` - Approve each step
+
+**Output:** Task progress
+
+### Step 3: Progress Monitoring
+**Agent:** project-manager
+**Command:** `/sprint:team-status`
+**Duration:** Ongoing
+
+Monitor progress:
+- Track velocity
+- Update burndown
+- Identify delays
+- Report status
+
+**Output:** Progress report
+
+### Step 4: Blocker Resolution
+**Agent:** debugger
+**Command:** `/dev:fix`
+**Duration:** As needed
+
+Resolve blockers:
+- Investigate issues
+- Implement fixes
+- Unblock tasks
+- Update status
+
+**Output:** Blockers resolved
+
+### Step 5: Sprint Completion
+**Agent:** sprint-master
+**Command:** `/sprint:sprint-end`
+**Duration:** 15-30 minutes
+
+Complete sprint:
+- Review completed work
+- Update sprint status
+- Calculate velocity
+- Prepare for review
+
+**Output:** Sprint completed
+
+## Quality Gates
+
+- [ ] All high-priority tasks complete
+- [ ] Tests passing
+- [ ] Documentation updated
+- [ ] No critical blockers
+- [ ] Sprint reviewed
+
+## Execution Modes
+
+```
+AI Team Execution Modes
+=======================
+
+FULL-AUTO:
+- Agents work independently
+- Progress reported automatically
+- Minimal human intervention
+- Best for routine tasks
+
+SEMI-AUTO (Default):
+- Review at checkpoints
+- Approve major decisions
+- Human oversight maintained
+- Balanced approach
+
+MANUAL:
+- Approve each action
+- Maximum control
+- Slower execution
+- Best for critical work
+```
+
+## Tips
+
+- Start with semi-auto mode
+- Check status regularly
+- Address blockers quickly
+- Keep tasks focused
+- Celebrate completions
+
+## Example Usage
+
+```bash
+# Run AI team in semi-auto mode
+/workflow:sprint-execution
+
+# Or step by step
+/sprint:team-run --mode semi-auto
+/sprint:team-status
+```
+
+## Related Workflows
+
+- `sprint-setup` - For creating sprints
+- `sprint-retrospective` - For reviewing sprints
+- `feature` - For individual features
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@sprint-master](/agents/sprint-master)** - Specialized agent for sprint master tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+- **[@debugger](/agents/debugger)** - Specialized agent for debugger tasks
+- **[@project-manager](/agents/project-manager)** - Specialized agent for project manager tasks
+
+
+
+## Skills Applied
+
+- **[omega-sprint](/skills/omega-sprint)** - Domain expertise
+- **[executing-plans](/skills/executing-plans)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/sprint:sprint-current`
+- `/sprint:team-run`
+- `/sprint:team-status`
+- `/dev:fix`
+- `/sprint:sprint-end`
+
+
+
+## Prerequisites
+
+- Sprint created and started
+- Tasks assigned
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Sprint" icon="calendar-days" href="/workflows/overview#sprint">
+    More sprint workflows
+  </Card>
+</CardGroup>

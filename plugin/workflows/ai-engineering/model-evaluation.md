@@ -1,0 +1,203 @@
+---
+name: model-evaluation
+description: Comprehensive AI model evaluation
+category: ai-engineering
+complexity: medium
+estimated-time: 2-8 hours
+agents:
+  - researcher
+  - planner
+  - tester
+skills:
+  - ai-system-evaluation
+  - evaluation-methodology
+  - dataset-engineering
+commands:
+  - /planning:plan
+  - /dev:test
+prerequisites:
+  - Model to evaluate available
+  - Evaluation criteria defined
+---
+
+# Model Evaluation Workflow
+
+## Overview
+
+The Model Evaluation workflow provides a systematic approach to evaluating AI model performance. It covers defining metrics, creating evaluation datasets, running evaluations, and generating comprehensive reports.
+
+## When to Use
+
+- Comparing model options
+- Validating model performance
+- Regression testing after changes
+- A/B testing model versions
+- Compliance and audit requirements
+
+## Steps
+
+### Step 1: Strategy Definition
+**Agent:** planner
+**Command:** `/planning:plan "evaluation strategy"`
+**Duration:** 30-60 minutes
+
+Define strategy:
+- Identify evaluation goals
+- Select evaluation dimensions
+- Define success criteria
+- Plan evaluation scope
+
+**Output:** Evaluation strategy document
+
+### Step 2: Metrics Selection
+**Agent:** researcher
+**Duration:** 30-60 minutes
+
+Select metrics:
+- Task-specific metrics (accuracy, F1, BLEU, etc.)
+- Quality metrics (coherence, relevance)
+- Safety metrics (toxicity, bias)
+- Performance metrics (latency, cost)
+
+**Output:** Metrics specification
+
+### Step 3: Dataset Creation
+**Agent:** fullstack-developer
+**Duration:** 1-4 hours
+
+Create evaluation dataset:
+- Collect/generate test cases
+- Create golden answers
+- Include edge cases
+- Balance dataset distribution
+
+**Output:** Evaluation dataset
+
+### Step 4: Evaluation Execution
+**Agent:** tester
+**Command:** `/dev:test`
+**Duration:** 1-4 hours
+
+Run evaluations:
+- Execute test suite
+- Collect results
+- Handle errors gracefully
+- Track all metrics
+
+**Output:** Raw evaluation results
+
+### Step 5: Analysis
+**Agent:** researcher
+**Duration:** 30-60 minutes
+
+Analyze results:
+- Statistical analysis
+- Error analysis
+- Performance breakdown
+- Comparison with baselines
+
+**Output:** Analysis report
+
+### Step 6: Report Generation
+**Agent:** researcher
+**Duration:** 30-60 minutes
+
+Generate report:
+- Executive summary
+- Detailed metrics
+- Recommendations
+- Visual dashboards
+
+**Output:** Evaluation report
+
+## Quality Gates
+
+- [ ] Evaluation strategy approved
+- [ ] Metrics align with goals
+- [ ] Dataset is representative
+- [ ] All evaluations completed
+- [ ] Results statistically significant
+- [ ] Report is comprehensive
+
+## Evaluation Metrics
+
+```
+Common AI Evaluation Metrics
+============================
+
+ACCURACY METRICS:
+- Exact Match: Perfect answer match
+- F1 Score: Balance of precision/recall
+- BLEU/ROUGE: Text similarity
+- BERTScore: Semantic similarity
+
+QUALITY METRICS:
+- Coherence: Logical consistency
+- Relevance: Answer pertinence
+- Completeness: Coverage of topic
+- Factuality: Correctness of facts
+
+SAFETY METRICS:
+- Toxicity: Harmful content
+- Bias: Unfair outputs
+- Hallucination: Made-up facts
+- Prompt Injection: Security
+
+PERFORMANCE METRICS:
+- Latency: Response time
+- Throughput: Requests/second
+- Cost: $ per request
+- Token Usage: Efficiency
+```
+
+## Report Template
+
+```markdown
+# Model Evaluation Report
+
+## Executive Summary
+- Model: [name]
+- Evaluation Date: [date]
+- Overall Score: [X/100]
+- Recommendation: [Pass/Fail/Conditional]
+
+## Metrics Summary
+| Metric | Score | Target | Status |
+|--------|-------|--------|--------|
+| Accuracy | X% | Y% | Pass |
+| Latency | Xms | Yms | Pass |
+
+## Detailed Analysis
+[Analysis details...]
+
+## Recommendations
+1. [Recommendation 1]
+2. [Recommendation 2]
+```
+
+## Tips
+
+- Use diverse test cases
+- Include adversarial examples
+- Compare with baselines
+- Document methodology
+- Version control datasets
+
+## Example Usage
+
+```bash
+# Evaluate chat model
+/workflow:model-evaluation "GPT-4 for customer support with accuracy and safety metrics"
+
+# Compare models
+/workflow:model-evaluation "Claude vs GPT-4 for code generation tasks"
+
+# Regression testing
+/workflow:model-evaluation "fine-tuned model v2 vs v1 performance comparison"
+```
+
+## Related Workflows
+
+- `rag-development` - For RAG system evaluation
+- `prompt-engineering` - For prompt optimization
+- `fine-tuning` - For model improvement

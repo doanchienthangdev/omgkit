@@ -1,0 +1,266 @@
+---
+title: "full-feature"
+description: "End-to-end feature with frontend and backend"
+icon: "layer-group"
+---
+
+<Info>
+  **Category:** Fullstack
+
+  **Complexity:** 🔴 Very High
+
+  **Estimated Time:** 8-24 hours
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:full-feature "your description here"
+```
+
+
+# Full Feature Workflow
+
+## Overview
+
+The Full Feature workflow orchestrates development of complete features spanning database, backend API, and frontend UI with comprehensive testing.
+
+## When to Use
+
+- Building major features
+- Creating new modules
+- Full-stack user stories
+- Complex integrations
+
+## Steps
+
+### Step 1: Detailed Planning
+**Agent:** planner
+**Command:** `/planning:plan-detailed "$ARGUMENTS"`
+**Duration:** 1-2 hours
+
+Create detailed plan:
+- Break down into tasks
+- Define database changes
+- Plan API endpoints
+- Design UI components
+
+**Output:** Detailed plan
+
+### Step 2: Database Design
+**Agent:** database-admin
+**Duration:** 1-2 hours
+
+Database work:
+- Schema design
+- Create migrations
+- Add indexes
+- Test migrations
+
+**Output:** Database changes
+
+### Step 3: Backend Development
+**Agent:** fullstack-developer
+**Duration:** 2-4 hours
+
+Build backend:
+- Implement API endpoints
+- Business logic
+- Validation
+- Error handling
+
+**Output:** Backend implementation
+
+### Step 4: Frontend Design
+**Agent:** ui-ux-designer
+**Duration:** 1-2 hours
+
+Design UI:
+- Component design
+- User flows
+- Responsive layout
+- Accessibility
+
+**Output:** UI designs
+
+### Step 5: Frontend Development
+**Agent:** fullstack-developer
+**Duration:** 2-4 hours
+
+Build frontend:
+- Implement components
+- State management
+- API integration
+- Loading/error states
+
+**Output:** Frontend implementation
+
+### Step 6: Integration
+**Agent:** fullstack-developer
+**Duration:** 1-2 hours
+
+Integrate:
+- Connect frontend to backend
+- End-to-end flows
+- Error handling
+- Optimizations
+
+**Output:** Integrated feature
+
+### Step 7: Testing
+**Agent:** tester
+**Command:** `/dev:test`
+**Duration:** 2-4 hours
+
+Comprehensive testing:
+- Unit tests
+- Integration tests
+- E2E tests
+- Visual tests
+
+**Output:** Test suite
+
+### Step 8: Review
+**Agent:** code-reviewer
+**Command:** `/dev:review`
+**Duration:** 1-2 hours
+
+Code review:
+- Architecture review
+- Security check
+- Performance review
+- Best practices
+
+**Output:** Review approval
+
+### Step 9: Deployment
+**Agent:** git-manager
+**Command:** `/git:pr`
+**Duration:** 30-60 minutes
+
+Create PR:
+- Create branch
+- Commit changes
+- Create PR
+- Request review
+
+**Output:** PR ready
+
+## Quality Gates
+
+- [ ] Plan approved
+- [ ] Database migrated successfully
+- [ ] Backend API complete
+- [ ] Frontend UI complete
+- [ ] Integration working
+- [ ] All tests passing
+- [ ] Review approved
+- [ ] PR created
+
+## Full Feature Checklist
+
+```
+Full Feature Checklist
+======================
+PLANNING:
+[ ] Requirements documented
+[ ] Tasks broken down
+[ ] Estimates provided
+
+DATABASE:
+[ ] Schema designed
+[ ] Migrations created
+[ ] Indexes added
+
+BACKEND:
+[ ] Endpoints implemented
+[ ] Validation complete
+[ ] Error handling done
+
+FRONTEND:
+[ ] Components built
+[ ] State managed
+[ ] API connected
+
+TESTING:
+[ ] Unit tests written
+[ ] Integration tests done
+[ ] E2E tests passing
+
+REVIEW:
+[ ] Code reviewed
+[ ] Security checked
+[ ] Performance ok
+```
+
+## Example Usage
+
+```bash
+/workflow:full-feature "user profile with avatar upload and preferences"
+/workflow:full-feature "shopping cart with checkout and payment"
+```
+
+## Related Workflows
+
+- `feature` - For simpler features
+- `authentication` - For auth features
+- `api-design` - For API focus
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@planner](/agents/planner)** - Specialized agent for planner tasks
+- **[@database-admin](/agents/database-admin)** - Specialized agent for database admin tasks
+- **[@api-designer](/agents/api-designer)** - Specialized agent for api designer tasks
+- **[@ui-ux-designer](/agents/ui-ux-designer)** - Specialized agent for ui ux designer tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+- **[@code-reviewer](/agents/code-reviewer)** - Specialized agent for code reviewer tasks
+- **[@git-manager](/agents/git-manager)** - Specialized agent for git manager tasks
+
+
+
+## Skills Applied
+
+- **[writing-plans](/skills/writing-plans)** - Domain expertise
+- **[database-schema-design](/skills/database-schema-design)** - Domain expertise
+- **[api-architecture](/skills/api-architecture)** - Domain expertise
+- **[frontend-design](/skills/frontend-design)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/planning:plan-detailed`
+- `/dev:feature`
+- `/dev:test`
+- `/dev:review`
+- `/git:pr`
+
+
+
+## Prerequisites
+
+- Feature requirements clear
+- Technology stack defined
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Fullstack" icon="layer-group" href="/workflows/overview#fullstack">
+    More fullstack workflows
+  </Card>
+</CardGroup>

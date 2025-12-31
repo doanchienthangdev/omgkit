@@ -1,0 +1,208 @@
+---
+title: "bug-fix"
+description: "Systematic debugging and issue resolution"
+icon: "code"
+---
+
+<Info>
+  **Category:** Development
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** 30min-4 hours
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:bug-fix "your description here"
+```
+
+
+# Bug Fix Workflow
+
+## Overview
+
+The Bug Fix workflow provides a systematic approach to debugging and resolving issues. It ensures that bugs are properly investigated, fixed with minimal changes, and verified with regression tests.
+
+## When to Use
+
+- Fixing reported bugs
+- Resolving error messages
+- Addressing unexpected behavior
+- Fixing failing tests
+- Resolving production issues
+
+## Steps
+
+### Step 1: Investigation
+**Agent:** debugger
+**Command:** `/dev:fix "$ARGUMENTS"`
+**Duration:** 15-60 minutes
+
+The debugger agent will:
+- Reproduce the issue
+- Analyze error messages and stack traces
+- Form hypotheses about root cause
+- Test each hypothesis systematically
+- Identify the actual root cause
+
+**Output:** Root cause analysis
+
+### Step 2: Implementation
+**Agent:** fullstack-developer
+**Command:** `/dev:fix-hard` (if needed)
+**Duration:** 15-120 minutes
+
+The fullstack developer will:
+- Implement minimal fix
+- Avoid introducing regressions
+- Update related code if necessary
+- Add defensive coding where appropriate
+
+**Output:** Bug fix implementation
+
+### Step 3: Verification
+**Agent:** tester
+**Command:** `/dev:fix-test`
+**Duration:** 15-30 minutes
+
+The tester agent will:
+- Write regression test for the bug
+- Run existing test suite
+- Verify fix works in all scenarios
+- Check for side effects
+
+**Output:** Regression test and verification
+
+### Step 4: Commit
+**Agent:** git-manager
+**Command:** `/git:cm`
+**Duration:** 5-10 minutes
+
+The git manager will:
+- Commit fix with descriptive message
+- Reference issue number
+- Update changelog if needed
+
+**Output:** Committed fix
+
+## Quality Gates
+
+- [ ] Root cause clearly identified and documented
+- [ ] Fix is minimal and focused
+- [ ] Regression test added
+- [ ] All existing tests still pass
+- [ ] No new issues introduced
+- [ ] Fix committed with proper message
+
+## Debug Process
+
+```
+Bug Fix Debug Process
+=====================
+1. REPRODUCE
+   - Get exact steps to reproduce
+   - Identify environment/conditions
+   - Confirm bug is consistent
+
+2. HYPOTHESIZE
+   - Form 3-5 possible causes
+   - Rank by likelihood
+   - Plan how to test each
+
+3. INVESTIGATE
+   - Test most likely hypothesis first
+   - Use debugging tools/logs
+   - Narrow down to specific code
+
+4. FIX
+   - Implement minimal change
+   - Consider edge cases
+   - Document the fix
+
+5. VERIFY
+   - Test the fix works
+   - Run regression tests
+   - Check related functionality
+```
+
+## Tips
+
+- Include the exact error message when describing the bug
+- Provide steps to reproduce if known
+- Include relevant log output
+- Specify the environment (browser, OS, version)
+- Link to related issues or discussions
+
+## Example Usage
+
+```bash
+# Fix with error description
+/workflow:bug-fix "TypeError: Cannot read property 'id' of undefined in UserService"
+
+# Fix with context
+/workflow:bug-fix "Login button not responding after page refresh"
+
+# Fix with issue reference
+/workflow:bug-fix "Issue #123: Payment processing fails for amounts > $1000"
+```
+
+## Related Workflows
+
+- `feature` - For adding new functionality
+- `refactor` - For code improvements
+- `security-audit` - For security-related bugs
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@debugger](/agents/debugger)** - Specialized agent for debugger tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+- **[@git-manager](/agents/git-manager)** - Specialized agent for git manager tasks
+
+
+
+## Skills Applied
+
+- **[systematic-debugging](/skills/systematic-debugging)** - Domain expertise
+- **[root-cause-tracing](/skills/root-cause-tracing)** - Domain expertise
+- **[test-driven-development](/skills/test-driven-development)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/dev:fix`
+- `/dev:fix-hard`
+- `/dev:fix-test`
+- `/git:cm`
+
+
+
+## Prerequisites
+
+- Issue identified and reproducible
+- Access to relevant logs/errors
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Development" icon="code" href="/workflows/overview#development">
+    More development workflows
+  </Card>
+</CardGroup>

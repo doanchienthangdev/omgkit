@@ -1,0 +1,199 @@
+---
+title: "penetration-testing"
+description: "Test security through attack simulation"
+icon: "shield-halved"
+---
+
+<Info>
+  **Category:** Security
+
+  **Complexity:** 🔴 Very High
+
+  **Estimated Time:** 8-24 hours
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:penetration-testing "your description here"
+```
+
+
+# Penetration Testing Workflow
+
+## Overview
+
+The Penetration Testing workflow simulates attacks to identify security weaknesses. It follows ethical hacking methodology with proper authorization.
+
+## When to Use
+
+- Compliance requirements
+- Pre-production security validation
+- Third-party security assessment
+- After major architecture changes
+
+## Steps
+
+### Step 1: Scope Definition
+**Agent:** security-auditor
+**Duration:** 30-60 minutes
+
+Define scope:
+- Target systems
+- Test boundaries
+- Excluded areas
+- Rules of engagement
+
+**Output:** Scope document
+
+### Step 2: Reconnaissance
+**Agent:** vulnerability-scanner
+**Duration:** 1-2 hours
+
+Information gathering:
+- Network mapping
+- Service enumeration
+- Technology fingerprinting
+- Exposed endpoints
+
+**Output:** Reconnaissance report
+
+### Step 3: Vulnerability Analysis
+**Agent:** vulnerability-scanner
+**Command:** `/quality:security-scan`
+**Duration:** 1-2 hours
+
+Identify vulnerabilities:
+- Automated scanning
+- Manual probing
+- Configuration review
+- Authentication testing
+
+**Output:** Vulnerability list
+
+### Step 4: Exploitation
+**Agent:** security-auditor
+**Duration:** 2-4 hours
+
+Attempt exploitation:
+- Proof of concept attacks
+- Privilege escalation
+- Data access attempts
+- Chained exploits
+
+**Output:** Exploitation results
+
+### Step 5: Post-Exploitation
+**Agent:** security-auditor
+**Duration:** 1-2 hours
+
+Assess impact:
+- Access level achieved
+- Data exposure potential
+- Lateral movement
+- Persistence options
+
+**Output:** Impact assessment
+
+### Step 6: Reporting
+**Agent:** security-auditor
+**Duration:** 1-2 hours
+
+Generate report:
+- Executive summary
+- Technical details
+- Risk ratings
+- Remediation guidance
+
+**Output:** Penetration test report
+
+## Quality Gates
+
+- [ ] Authorization documented
+- [ ] Scope clearly defined
+- [ ] All tests completed
+- [ ] Findings documented
+- [ ] Remediation planned
+- [ ] Report delivered
+
+## Test Categories
+
+```
+Penetration Test Categories
+===========================
+- Network testing
+- Web application testing
+- API security testing
+- Authentication testing
+- Authorization testing
+- Session management
+- Input validation
+- Business logic
+- Client-side attacks
+```
+
+## Example Usage
+
+```bash
+# Full penetration test
+/workflow:penetration-testing "web application scope"
+
+# Focused test
+/workflow:penetration-testing "API endpoints only"
+```
+
+## Related Workflows
+
+- `security-audit` - For compliance audits
+- `api-testing` - For API security
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@security-auditor](/agents/security-auditor)** - Specialized agent for security auditor tasks
+- **[@vulnerability-scanner](/agents/vulnerability-scanner)** - Specialized agent for vulnerability scanner tasks
+- **[@researcher](/agents/researcher)** - Specialized agent for researcher tasks
+
+
+
+## Skills Applied
+
+- **[owasp](/skills/owasp)** - Domain expertise
+- **[defense-in-depth](/skills/defense-in-depth)** - Domain expertise
+- **[security-hardening](/skills/security-hardening)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/quality:security-scan`
+- `/planning:research`
+
+
+
+## Prerequisites
+
+- Authorization obtained
+- Scope defined
+- Test environment ready
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Security" icon="shield-halved" href="/workflows/overview#security">
+    More security workflows
+  </Card>
+</CardGroup>
