@@ -1,0 +1,356 @@
+name: "Mobile Application"
+id: mobile-app
+description: "Cross-platform mobile app with native features, offline support, and app store deployment"
+estimated_duration: "3-6 weeks"
+icon: "mobile"
+
+# Default technology recommendations
+defaults:
+  framework: react_native_expo
+  state: zustand
+  navigation: react_navigation
+  storage: async_storage
+  api: axios
+  testing: jest_detox
+  ci: eas_build
+
+# Alternative technology stacks
+alternatives:
+  framework:
+    - id: react_native_expo
+      name: "React Native (Expo)"
+      description: "Cross-platform with managed workflow, fast development"
+    - id: react_native_bare
+      name: "React Native (Bare)"
+      description: "More control over native code"
+    - id: flutter
+      name: "Flutter"
+      description: "Dart-based, excellent performance, single codebase"
+    - id: native_ios
+      name: "Native iOS (Swift)"
+      description: "Best iOS performance and native feel"
+    - id: native_android
+      name: "Native Android (Kotlin)"
+      description: "Best Android performance and integration"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "Discovery & App Concept"
+    description: "Define app concept, target platforms, and core features"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      App discovery is complete. Please review:
+      - App concept and value proposition
+      - Target platforms (iOS, Android, or both)
+      - Offline requirements
+      - Native features needed
+
+      Approve to proceed with design.
+
+    steps:
+      - id: app_concept
+        name: "App Concept Definition"
+        agent: planner
+        description: "Define the app's core purpose and target users"
+
+      - id: platform_selection
+        name: "Platform Selection"
+        agent: architect
+        description: "Determine target platforms and framework"
+
+      - id: feature_mapping
+        name: "Feature Mapping"
+        agent: planner
+        description: "Map features to development phases"
+
+      - id: offline_strategy
+        name: "Offline Strategy"
+        agent: architect
+        description: "Define offline-first architecture if needed"
+
+    outputs:
+      - ".omgkit/generated/app-concept.md"
+      - ".omgkit/generated/platform-decision.md"
+
+  - id: design
+    name: "UI/UX Design"
+    description: "Design app interface, navigation, and user flows"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Design phase complete. Review:
+      - Navigation structure
+      - Screen layouts
+      - Component library selection
+
+      Approve to start foundation.
+
+    steps:
+      - id: navigation_design
+        name: "Navigation Structure"
+        agent: ui-ux-designer
+        description: "Design app navigation and screen hierarchy"
+
+      - id: screen_design
+        name: "Screen Design"
+        agent: ui-ux-designer
+        description: "Design key screens and layouts"
+
+      - id: component_selection
+        name: "Component Library"
+        agent: architect
+        description: "Select UI component library"
+
+      - id: theming
+        name: "Theme System"
+        agent: ui-ux-designer
+        description: "Define colors, typography, and spacing"
+
+    outputs:
+      - ".omgkit/generated/navigation-map.md"
+      - ".omgkit/generated/design-system.md"
+
+  - id: foundation
+    name: "Project Foundation"
+    description: "Set up project, navigation, and base architecture"
+    order: 3
+    checkpoint: false
+
+    steps:
+      - id: project_setup
+        name: "Project Initialization"
+        agent: fullstack-developer
+        description: "Initialize mobile project with selected framework"
+
+      - id: navigation_setup
+        name: "Navigation Setup"
+        agent: fullstack-developer
+        description: "Implement navigation structure"
+
+      - id: state_management
+        name: "State Management"
+        agent: fullstack-developer
+        description: "Set up state management solution"
+
+      - id: api_layer
+        name: "API Layer"
+        agent: fullstack-developer
+        description: "Create API client and data fetching"
+
+      - id: storage_setup
+        name: "Local Storage"
+        agent: fullstack-developer
+        description: "Set up local storage for offline data"
+
+    outputs:
+      - "app/"
+      - "src/navigation/"
+      - "src/store/"
+      - "src/api/"
+
+  - id: core_features
+    name: "Core Features"
+    description: "Implement main app functionality"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Core features implemented. Review:
+      - Main screens functionality
+      - API integration
+      - Data flow
+
+      Approve to add native features.
+
+    steps:
+      - id: screens
+        name: "Main Screens"
+        agent: fullstack-developer
+        description: "Implement main app screens"
+
+      - id: api_integration
+        name: "API Integration"
+        agent: fullstack-developer
+        description: "Connect screens to backend APIs"
+
+      - id: offline_sync
+        name: "Offline Sync"
+        agent: fullstack-developer
+        description: "Implement offline data sync if required"
+
+    outputs:
+      - "src/screens/"
+      - "src/components/"
+
+  - id: native_features
+    name: "Native Features"
+    description: "Implement platform-specific native functionality"
+    order: 5
+    checkpoint: false
+
+    steps:
+      - id: push_notifications
+        name: "Push Notifications"
+        agent: fullstack-developer
+        description: "Set up push notification handling"
+
+      - id: camera_media
+        name: "Camera & Media"
+        agent: fullstack-developer
+        description: "Implement camera and media access"
+
+      - id: biometrics
+        name: "Biometric Auth"
+        agent: fullstack-developer
+        description: "Add fingerprint/face ID authentication"
+
+      - id: deep_linking
+        name: "Deep Linking"
+        agent: fullstack-developer
+        description: "Configure deep linking and universal links"
+
+      - id: native_permissions
+        name: "Permissions"
+        agent: fullstack-developer
+        description: "Handle native permissions properly"
+
+    outputs:
+      - "src/services/notifications.ts"
+      - "src/services/camera.ts"
+      - "src/services/biometrics.ts"
+
+  - id: testing
+    name: "Testing"
+    description: "Comprehensive testing on simulators and devices"
+    order: 6
+    checkpoint: true
+    checkpoint_message: |
+      Testing phase complete. Review:
+      - Unit test coverage
+      - Integration test results
+      - E2E test on simulators
+
+      Approve to proceed with deployment.
+
+    steps:
+      - id: unit_tests
+        name: "Unit Tests"
+        agent: tester
+        description: "Write unit tests for components and logic"
+
+      - id: integration_tests
+        name: "Integration Tests"
+        agent: tester
+        description: "Test API integration and data flow"
+
+      - id: e2e_tests
+        name: "E2E Tests"
+        agent: tester
+        description: "End-to-end tests on simulators"
+
+      - id: performance
+        name: "Performance Testing"
+        agent: tester
+        description: "Test app performance on low-end devices"
+
+    outputs:
+      - "__tests__/"
+      - "e2e/"
+
+  - id: deployment
+    name: "App Store Deployment"
+    description: "Prepare and submit to app stores"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      Deployment preparation complete. Ready for:
+      - iOS App Store submission
+      - Google Play Store submission
+
+      This is the final checkpoint before release.
+
+    steps:
+      - id: app_icons
+        name: "App Icons & Splash"
+        agent: ui-ux-designer
+        description: "Generate app icons and splash screens"
+
+      - id: store_assets
+        name: "Store Assets"
+        agent: copywriter
+        description: "Create app store screenshots and descriptions"
+
+      - id: build_config
+        name: "Build Configuration"
+        agent: cicd-manager
+        description: "Configure release builds"
+
+      - id: store_submission
+        name: "Store Submission"
+        agent: cicd-manager
+        description: "Submit to app stores"
+
+    outputs:
+      - "assets/icons/"
+      - "fastlane/"
+      - "eas.json"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/components/**"
+    level: 1
+    reason: "UI components can be auto-generated with notification"
+  - pattern: "**/screens/**"
+    level: 2
+    reason: "Screens need quick review"
+  - pattern: "**/native/**"
+    level: 3
+    reason: "Native code needs full review"
+  - pattern: "**/store/**"
+    level: 2
+    reason: "State management needs review"
+  - pattern: "app.json"
+    level: 3
+    reason: "App configuration needs review"
+  - pattern: "eas.json"
+    level: 3
+    reason: "Build configuration is critical"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "npm test"
+    - "npm run lint"
+    - "npm run type-check"
+  before_checkpoint:
+    - "npm run test:coverage"
+    - "coverage >= 70%"
+  before_deploy:
+    - "npm run build:ios"
+    - "npm run build:android"
+    - "e2e tests pass"
+
+# Mobile-specific discovery questions
+discovery_additions:
+  - category: "Platform Strategy"
+    questions:
+      - "Which platforms do you need to support? (iOS, Android, or both)"
+      - "Do you need tablet support?"
+      - "What's the minimum OS version to support?"
+      - "Is a web version also needed?"
+
+  - category: "Native Features"
+    questions:
+      - "Do you need push notifications?"
+      - "Camera or media access required?"
+      - "GPS/location features needed?"
+      - "Biometric authentication (Face ID, fingerprint)?"
+      - "Offline functionality required?"
+      - "Background processing needs?"
+
+  - category: "App Store"
+    questions:
+      - "Do you have Apple Developer and Google Play accounts?"
+      - "Any in-app purchases or subscriptions?"
+      - "Target age rating?"

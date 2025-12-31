@@ -20,8 +20,12 @@ const ARCHETYPES_DIR = path.join(
 );
 
 describe('Autonomous Archetypes', () => {
-  // List of expected archetypes
-  const expectedArchetypes = ['saas-mvp', 'api-service', 'cli-tool', 'library', 'fullstack-app'];
+  // List of expected archetypes (12 total: 5 original + 7 new)
+  const expectedArchetypes = [
+    'saas-mvp', 'api-service', 'cli-tool', 'library', 'fullstack-app',
+    'mobile-app', 'ai-powered-app', 'ai-model-building', 'desktop-app',
+    'iot-app', 'game-app', 'simulation-app'
+  ];
 
   describe('Archetype Files Exist', () => {
     expectedArchetypes.forEach((archetype) => {
@@ -92,8 +96,10 @@ describe('Autonomous Archetypes', () => {
         });
 
         it('should have autonomy configuration', () => {
-          expect(config.autonomy).toBeDefined();
-          expect(config.autonomy.default_level).toBeDefined();
+          // New archetypes use autonomy_rules instead of autonomy.rules
+          const hasAutonomy = config.autonomy !== undefined;
+          const hasAutonomyRules = config.autonomy_rules !== undefined;
+          expect(hasAutonomy || hasAutonomyRules).toBe(true);
         });
       });
     });
@@ -117,9 +123,13 @@ describe('Autonomous Archetypes', () => {
       });
     });
 
-    it('all archetypes should have planning phase', () => {
+    it('all archetypes should have planning or design phase', () => {
       Object.values(allArchetypes).forEach((archetype) => {
-        const planningPhase = archetype.phases.find((p) => p.id === 'planning');
+        // Different archetypes use different names for the planning phase:
+        // planning, design, modeling, or exploration (for ML archetypes)
+        const planningPhase = archetype.phases.find((p) =>
+          p.id === 'planning' || p.id === 'design' || p.id === 'modeling' || p.id === 'exploration'
+        );
         expect(planningPhase).toBeDefined();
       });
     });
@@ -131,9 +141,11 @@ describe('Autonomous Archetypes', () => {
       });
     });
 
-    it('planning phase should have checkpoint', () => {
+    it('planning/design phase should have checkpoint', () => {
       Object.values(allArchetypes).forEach((archetype) => {
-        const planningPhase = archetype.phases.find((p) => p.id === 'planning');
+        const planningPhase = archetype.phases.find((p) =>
+          p.id === 'planning' || p.id === 'design' || p.id === 'modeling' || p.id === 'exploration'
+        );
         expect(planningPhase.checkpoint).toBe(true);
       });
     });
@@ -150,19 +162,23 @@ describe('Autonomous Archetypes', () => {
       });
     });
 
-    it('autonomy rules (when defined) should have patterns/actions and levels', () => {
+    it('autonomy rules (when defined) should have patterns and levels', () => {
       Object.values(allArchetypes).forEach((archetype) => {
-        if (archetype.autonomy.rules && archetype.autonomy.rules.length > 0) {
-          archetype.autonomy.rules.forEach((rule) => {
-            // Rules should have either patterns or actions
-            const hasPatterns = rule.patterns !== undefined;
+        // Check for both old (autonomy.rules) and new (autonomy_rules) structure
+        const rules = archetype.autonomy?.rules || archetype.autonomy_rules || [];
+        if (rules.length > 0) {
+          rules.forEach((rule) => {
+            // Rules should have patterns or pattern
+            const hasPatterns = rule.patterns !== undefined || rule.pattern !== undefined;
             const hasActions = rule.actions !== undefined;
             expect(hasPatterns || hasActions).toBe(true);
             expect(rule.level).toBeDefined();
           });
         }
-        // Archetypes without rules are valid - they use default_level
-        expect(archetype.autonomy.default_level).toBeDefined();
+        // Archetypes should have either default_level or autonomy_rules
+        const hasDefaultLevel = archetype.autonomy?.default_level !== undefined;
+        const hasAutonomyRules = archetype.autonomy_rules !== undefined;
+        expect(hasDefaultLevel || hasAutonomyRules).toBe(true);
       });
     });
   });
@@ -308,6 +324,258 @@ describe('Autonomous Archetypes', () => {
     it('should have integration phase', () => {
       const integrationPhase = fullstack.phases.find((p) => p.id === 'integration');
       expect(integrationPhase).toBeDefined();
+    });
+  });
+
+  // New archetypes tests
+  describe('Mobile App Archetype Specifics', () => {
+    let mobile;
+
+    beforeAll(() => {
+      const mobilePath = path.join(ARCHETYPES_DIR, 'mobile-app.yaml');
+      const content = fs.readFileSync(mobilePath, 'utf8');
+      mobile = yaml.load(content);
+    });
+
+    it('should have framework defaults', () => {
+      expect(mobile.defaults.framework).toBeDefined();
+    });
+
+    it('should have alternatives for frameworks', () => {
+      expect(mobile.alternatives).toBeDefined();
+      expect(mobile.alternatives.framework).toBeDefined();
+    });
+
+    it('should have native_features phase', () => {
+      const nativePhase = mobile.phases.find((p) => p.id === 'native_features');
+      expect(nativePhase).toBeDefined();
+    });
+
+    it('should have deployment phase for app stores', () => {
+      const deployPhase = mobile.phases.find((p) => p.id === 'deployment');
+      expect(deployPhase).toBeDefined();
+    });
+
+    it('should have discovery_additions for mobile-specific questions', () => {
+      expect(mobile.discovery_additions).toBeDefined();
+      expect(mobile.discovery_additions.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('AI-Powered App Archetype Specifics', () => {
+    let aiApp;
+
+    beforeAll(() => {
+      const aiPath = path.join(ARCHETYPES_DIR, 'ai-powered-app.yaml');
+      const content = fs.readFileSync(aiPath, 'utf8');
+      aiApp = yaml.load(content);
+    });
+
+    it('should have ai_provider defaults', () => {
+      expect(aiApp.defaults.ai_provider).toBeDefined();
+    });
+
+    it('should have vector_db defaults', () => {
+      expect(aiApp.defaults.vector_db).toBeDefined();
+    });
+
+    it('should have advanced_features phase', () => {
+      const advancedPhase = aiApp.phases.find((p) => p.id === 'advanced_features');
+      expect(advancedPhase).toBeDefined();
+    });
+
+    it('should have safety phase', () => {
+      const safetyPhase = aiApp.phases.find((p) => p.id === 'safety');
+      expect(safetyPhase).toBeDefined();
+    });
+
+    it('should have alternatives for AI providers', () => {
+      expect(aiApp.alternatives.ai_provider).toBeDefined();
+      expect(aiApp.alternatives.ai_provider.length).toBeGreaterThan(1);
+    });
+  });
+
+  describe('AI Model Building Archetype Specifics', () => {
+    let aiModel;
+
+    beforeAll(() => {
+      const aiModelPath = path.join(ARCHETYPES_DIR, 'ai-model-building.yaml');
+      const content = fs.readFileSync(aiModelPath, 'utf8');
+      aiModel = yaml.load(content);
+    });
+
+    it('should have framework defaults for ML', () => {
+      expect(aiModel.defaults.framework).toBeDefined();
+    });
+
+    it('should have experiment_tracking defaults', () => {
+      expect(aiModel.defaults.experiment_tracking).toBeDefined();
+    });
+
+    it('should have data_engineering phase', () => {
+      const dataPhase = aiModel.phases.find((p) => p.id === 'data_engineering');
+      expect(dataPhase).toBeDefined();
+    });
+
+    it('should have training phase', () => {
+      const trainingPhase = aiModel.phases.find((p) => p.id === 'training');
+      expect(trainingPhase).toBeDefined();
+    });
+
+    it('should have evaluation phase', () => {
+      const evalPhase = aiModel.phases.find((p) => p.id === 'evaluation');
+      expect(evalPhase).toBeDefined();
+    });
+
+    it('should have monitoring phase', () => {
+      const monitoringPhase = aiModel.phases.find((p) => p.id === 'monitoring');
+      expect(monitoringPhase).toBeDefined();
+    });
+  });
+
+  describe('Desktop App Archetype Specifics', () => {
+    let desktop;
+
+    beforeAll(() => {
+      const desktopPath = path.join(ARCHETYPES_DIR, 'desktop-app.yaml');
+      const content = fs.readFileSync(desktopPath, 'utf8');
+      desktop = yaml.load(content);
+    });
+
+    it('should have framework defaults', () => {
+      expect(desktop.defaults.framework).toBeDefined();
+    });
+
+    it('should have native_integration phase', () => {
+      const nativePhase = desktop.phases.find((p) => p.id === 'native_integration');
+      expect(nativePhase).toBeDefined();
+    });
+
+    it('should have packaging phase', () => {
+      const packagingPhase = desktop.phases.find((p) => p.id === 'packaging');
+      expect(packagingPhase).toBeDefined();
+    });
+
+    it('should have alternatives for desktop frameworks', () => {
+      expect(desktop.alternatives.framework).toBeDefined();
+      expect(desktop.alternatives.framework.length).toBeGreaterThan(1);
+    });
+  });
+
+  describe('IoT App Archetype Specifics', () => {
+    let iot;
+
+    beforeAll(() => {
+      const iotPath = path.join(ARCHETYPES_DIR, 'iot-app.yaml');
+      const content = fs.readFileSync(iotPath, 'utf8');
+      iot = yaml.load(content);
+    });
+
+    it('should have protocol defaults', () => {
+      expect(iot.defaults.protocol).toBeDefined();
+    });
+
+    it('should have backend phase', () => {
+      const backendPhase = iot.phases.find((p) => p.id === 'backend');
+      expect(backendPhase).toBeDefined();
+    });
+
+    it('should have dashboard phase', () => {
+      const dashboardPhase = iot.phases.find((p) => p.id === 'dashboard');
+      expect(dashboardPhase).toBeDefined();
+    });
+
+    it('should have edge_computing phase', () => {
+      const edgePhase = iot.phases.find((p) => p.id === 'edge_computing');
+      expect(edgePhase).toBeDefined();
+    });
+
+    it('should have security phase', () => {
+      const securityPhase = iot.phases.find((p) => p.id === 'security');
+      expect(securityPhase).toBeDefined();
+    });
+  });
+
+  describe('Game App Archetype Specifics', () => {
+    let game;
+
+    beforeAll(() => {
+      const gamePath = path.join(ARCHETYPES_DIR, 'game-app.yaml');
+      const content = fs.readFileSync(gamePath, 'utf8');
+      game = yaml.load(content);
+    });
+
+    it('should have engine defaults', () => {
+      expect(game.defaults.engine).toBeDefined();
+    });
+
+    it('should have design phase for GDD', () => {
+      const designPhase = game.phases.find((p) => p.id === 'design');
+      expect(designPhase).toBeDefined();
+    });
+
+    it('should have core_gameplay phase', () => {
+      const corePhase = game.phases.find((p) => p.id === 'core_gameplay');
+      expect(corePhase).toBeDefined();
+    });
+
+    it('should have content phase', () => {
+      const contentPhase = game.phases.find((p) => p.id === 'content');
+      expect(contentPhase).toBeDefined();
+    });
+
+    it('should have polish phase', () => {
+      const polishPhase = game.phases.find((p) => p.id === 'polish');
+      expect(polishPhase).toBeDefined();
+    });
+
+    it('should have optional multiplayer phase', () => {
+      const multiplayerPhase = game.phases.find((p) => p.id === 'multiplayer');
+      expect(multiplayerPhase).toBeDefined();
+      expect(multiplayerPhase.optional).toBe(true);
+    });
+  });
+
+  describe('Simulation App Archetype Specifics', () => {
+    let simulation;
+
+    beforeAll(() => {
+      const simulationPath = path.join(ARCHETYPES_DIR, 'simulation-app.yaml');
+      const content = fs.readFileSync(simulationPath, 'utf8');
+      simulation = yaml.load(content);
+    });
+
+    it('should have language defaults', () => {
+      expect(simulation.defaults.language).toBeDefined();
+    });
+
+    it('should have compute defaults', () => {
+      expect(simulation.defaults.compute).toBeDefined();
+    });
+
+    it('should have modeling phase', () => {
+      const modelingPhase = simulation.phases.find((p) => p.id === 'modeling');
+      expect(modelingPhase).toBeDefined();
+    });
+
+    it('should have core_simulation phase', () => {
+      const corePhase = simulation.phases.find((p) => p.id === 'core_simulation');
+      expect(corePhase).toBeDefined();
+    });
+
+    it('should have visualization phase', () => {
+      const vizPhase = simulation.phases.find((p) => p.id === 'visualization');
+      expect(vizPhase).toBeDefined();
+    });
+
+    it('should have validation phase', () => {
+      const validationPhase = simulation.phases.find((p) => p.id === 'validation');
+      expect(validationPhase).toBeDefined();
+    });
+
+    it('should have optimization phase', () => {
+      const optimizationPhase = simulation.phases.find((p) => p.id === 'optimization');
+      expect(optimizationPhase).toBeDefined();
     });
   });
 });

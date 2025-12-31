@@ -1,0 +1,443 @@
+name: "AI Model Building"
+id: ai-model-building
+description: "ML/AI model development with training pipelines, experiment tracking, and model deployment"
+estimated_duration: "4-8 weeks"
+icon: "brain"
+
+# Default technology recommendations
+defaults:
+  framework: pytorch
+  experiment_tracking: wandb
+  data_versioning: dvc
+  model_registry: mlflow
+  compute: aws_sagemaker
+  serving: vllm
+  language: python
+
+# Alternative technology stacks
+alternatives:
+  framework:
+    - id: pytorch
+      name: "PyTorch"
+      description: "Most flexible, research-friendly"
+    - id: tensorflow
+      name: "TensorFlow"
+      description: "Production-ready, TFX ecosystem"
+    - id: jax
+      name: "JAX"
+      description: "High-performance, functional approach"
+    - id: huggingface
+      name: "Hugging Face Transformers"
+      description: "Best for NLP/LLM work"
+
+  experiment_tracking:
+    - id: wandb
+      name: "Weights & Biases"
+      description: "Most popular, excellent visualization"
+    - id: mlflow
+      name: "MLflow"
+      description: "Open-source, self-hosted option"
+    - id: comet
+      name: "Comet ML"
+      description: "Good for teams"
+    - id: neptune
+      name: "Neptune.ai"
+      description: "Lightweight, flexible"
+
+  compute:
+    - id: aws_sagemaker
+      name: "AWS SageMaker"
+      description: "Managed ML platform"
+    - id: gcp_vertex
+      name: "GCP Vertex AI"
+      description: "Google's ML platform"
+    - id: azure_ml
+      name: "Azure ML"
+      description: "Microsoft's ML platform"
+    - id: local_gpu
+      name: "Local GPU"
+      description: "On-premise training"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "Problem Definition"
+    description: "Define ML problem, success metrics, and data availability"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      Problem definition complete. Review:
+      - ML task definition and approach
+      - Success metrics and baselines
+      - Data availability and quality
+
+      Approve to proceed with data engineering.
+
+    steps:
+      - id: problem_definition
+        name: "Problem Definition"
+        agent: planner
+        description: "Define the ML problem clearly"
+
+      - id: success_metrics
+        name: "Success Metrics"
+        agent: planner
+        description: "Define metrics and baselines"
+
+      - id: data_audit
+        name: "Data Audit"
+        agent: researcher
+        description: "Audit available data sources"
+
+      - id: feasibility
+        name: "Feasibility Analysis"
+        agent: architect
+        description: "Assess technical feasibility"
+
+    outputs:
+      - ".omgkit/generated/ml-problem-definition.md"
+      - ".omgkit/generated/metrics-baseline.md"
+      - ".omgkit/generated/data-audit.md"
+
+  - id: data_engineering
+    name: "Data Engineering"
+    description: "Collect, clean, and version data"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Data engineering complete. Review:
+      - Data pipeline
+      - Data quality metrics
+      - Train/val/test splits
+
+      Approve to begin exploration.
+
+    steps:
+      - id: data_collection
+        name: "Data Collection"
+        agent: fullstack-developer
+        description: "Set up data collection pipelines"
+
+      - id: data_cleaning
+        name: "Data Cleaning"
+        agent: fullstack-developer
+        description: "Clean and preprocess data"
+
+      - id: data_versioning
+        name: "Data Versioning"
+        agent: fullstack-developer
+        description: "Set up DVC for data versioning"
+
+      - id: data_splits
+        name: "Data Splits"
+        agent: fullstack-developer
+        description: "Create train/val/test splits"
+
+      - id: data_validation
+        name: "Data Validation"
+        agent: tester
+        description: "Validate data quality"
+
+    outputs:
+      - "data/"
+      - "dvc.yaml"
+      - "src/data/"
+
+  - id: exploration
+    name: "Exploration"
+    description: "EDA, baseline models, and feature engineering"
+    order: 3
+    checkpoint: true
+    checkpoint_message: |
+      Exploration complete. Review:
+      - EDA findings
+      - Baseline model results
+      - Feature engineering approach
+
+      Approve to begin model development.
+
+    steps:
+      - id: eda
+        name: "Exploratory Data Analysis"
+        agent: researcher
+        description: "Analyze data distributions and patterns"
+
+      - id: baseline
+        name: "Baseline Models"
+        agent: fullstack-developer
+        description: "Train simple baseline models"
+
+      - id: feature_engineering
+        name: "Feature Engineering"
+        agent: fullstack-developer
+        description: "Engineer features from raw data"
+
+      - id: experiment_setup
+        name: "Experiment Setup"
+        agent: fullstack-developer
+        description: "Set up experiment tracking"
+
+    outputs:
+      - "notebooks/eda.ipynb"
+      - "notebooks/baseline.ipynb"
+      - "src/features/"
+
+  - id: model_development
+    name: "Model Development"
+    description: "Design and implement model architecture"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Model architecture complete. Review:
+      - Model architecture design
+      - Training configuration
+      - Resource requirements
+
+      Approve to begin training.
+
+    steps:
+      - id: architecture_design
+        name: "Architecture Design"
+        agent: architect
+        description: "Design model architecture"
+
+      - id: model_implementation
+        name: "Model Implementation"
+        agent: fullstack-developer
+        description: "Implement model in code"
+
+      - id: training_pipeline
+        name: "Training Pipeline"
+        agent: fullstack-developer
+        description: "Build training pipeline"
+
+      - id: config_system
+        name: "Config System"
+        agent: fullstack-developer
+        description: "Set up hyperparameter configuration"
+
+    outputs:
+      - "src/models/"
+      - "src/training/"
+      - "configs/"
+
+  - id: training
+    name: "Training"
+    description: "Train models with hyperparameter tuning"
+    order: 5
+    checkpoint: true
+    checkpoint_message: |
+      Training complete. Review:
+      - Training metrics and curves
+      - Best hyperparameters found
+      - Model checkpoints
+
+      Approve to proceed with evaluation.
+
+    steps:
+      - id: initial_training
+        name: "Initial Training"
+        agent: fullstack-developer
+        description: "Run initial training experiments"
+
+      - id: hyperparameter_tuning
+        name: "Hyperparameter Tuning"
+        agent: fullstack-developer
+        description: "Tune hyperparameters"
+
+      - id: distributed_training
+        name: "Distributed Training"
+        agent: fullstack-developer
+        description: "Scale training if needed"
+
+      - id: checkpoint_management
+        name: "Checkpoint Management"
+        agent: fullstack-developer
+        description: "Manage model checkpoints"
+
+    outputs:
+      - "checkpoints/"
+      - "wandb/"
+      - "results/"
+
+  - id: evaluation
+    name: "Evaluation"
+    description: "Comprehensive model evaluation"
+    order: 6
+    checkpoint: true
+    checkpoint_message: |
+      Evaluation complete. Review:
+      - Evaluation metrics
+      - Bias analysis
+      - Error analysis
+
+      Approve to proceed with deployment.
+
+    steps:
+      - id: metrics_evaluation
+        name: "Metrics Evaluation"
+        agent: tester
+        description: "Calculate evaluation metrics"
+
+      - id: bias_testing
+        name: "Bias Testing"
+        agent: tester
+        description: "Test for model bias"
+
+      - id: interpretability
+        name: "Interpretability"
+        agent: researcher
+        description: "Analyze model interpretability"
+
+      - id: error_analysis
+        name: "Error Analysis"
+        agent: tester
+        description: "Analyze failure cases"
+
+    outputs:
+      - "reports/evaluation.md"
+      - "reports/bias-analysis.md"
+      - "reports/errors/"
+
+  - id: deployment
+    name: "Model Deployment"
+    description: "Deploy model for inference"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      Deployment preparation complete. Review:
+      - Inference optimization
+      - Serving configuration
+      - API design
+
+      Approve for production deployment.
+
+    steps:
+      - id: model_optimization
+        name: "Model Optimization"
+        agent: fullstack-developer
+        description: "Optimize model for inference"
+
+      - id: serving_setup
+        name: "Serving Setup"
+        agent: cicd-manager
+        description: "Set up model serving"
+
+      - id: api_implementation
+        name: "API Implementation"
+        agent: fullstack-developer
+        description: "Build inference API"
+
+      - id: load_testing
+        name: "Load Testing"
+        agent: tester
+        description: "Test inference performance"
+
+    outputs:
+      - "src/serving/"
+      - "src/api/"
+      - "Dockerfile"
+
+  - id: monitoring
+    name: "Production Monitoring"
+    description: "Set up drift detection and retraining"
+    order: 8
+    checkpoint: true
+    checkpoint_message: |
+      Monitoring setup complete. Review:
+      - Drift detection configuration
+      - Alerting setup
+      - Retraining triggers
+
+      This is the final checkpoint.
+
+    steps:
+      - id: drift_detection
+        name: "Drift Detection"
+        agent: fullstack-developer
+        description: "Implement drift detection"
+
+      - id: monitoring_dashboard
+        name: "Monitoring Dashboard"
+        agent: fullstack-developer
+        description: "Build monitoring dashboard"
+
+      - id: alerting
+        name: "Alerting"
+        agent: cicd-manager
+        description: "Set up alerts"
+
+      - id: retraining_pipeline
+        name: "Retraining Pipeline"
+        agent: fullstack-developer
+        description: "Set up automated retraining"
+
+    outputs:
+      - "src/monitoring/"
+      - "src/retraining/"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/models/**"
+    level: 3
+    reason: "Model architecture needs review"
+  - pattern: "**/training/**"
+    level: 2
+    reason: "Training code needs quick review"
+  - pattern: "**/data/**"
+    level: 2
+    reason: "Data processing needs review"
+  - pattern: "configs/**"
+    level: 2
+    reason: "Configs affect training outcomes"
+  - pattern: "**/serving/**"
+    level: 3
+    reason: "Serving infrastructure is critical"
+  - pattern: "dvc.yaml"
+    level: 3
+    reason: "Data versioning config is important"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "pytest tests/"
+    - "mypy src/"
+    - "black --check src/"
+  before_checkpoint:
+    - "data validation passes"
+    - "model validation passes"
+  before_deploy:
+    - "evaluation metrics >= baseline"
+    - "bias tests pass"
+    - "load test passes"
+
+# ML-specific discovery questions
+discovery_additions:
+  - category: "ML Task"
+    questions:
+      - "What type of ML task? (classification, regression, generation, etc.)"
+      - "What's the input data format?"
+      - "What's the expected output?"
+      - "Is this supervised, unsupervised, or reinforcement learning?"
+
+  - category: "Data"
+    questions:
+      - "How much labeled data do you have?"
+      - "How is the data currently stored?"
+      - "Are there any data privacy requirements?"
+      - "How often does the data change?"
+      - "What's the data quality like?"
+
+  - category: "Performance Requirements"
+    questions:
+      - "What's the target accuracy/performance metric?"
+      - "What's the acceptable inference latency?"
+      - "What's the expected query volume?"
+      - "Are there model size constraints?"
+
+  - category: "Infrastructure"
+    questions:
+      - "What compute resources are available for training?"
+      - "Where will the model be deployed?"
+      - "Do you need real-time or batch inference?"
+      - "What's the MLOps maturity level?"

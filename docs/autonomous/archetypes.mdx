@@ -10,7 +10,7 @@ Archetypes are pre-configured project templates that define the phases, workflow
 
 ## Available Archetypes
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card title="SaaS MVP" icon="cloud">
     Multi-tenant SaaS with authentication, payments, and core features
   </Card>
@@ -25,6 +25,27 @@ Archetypes are pre-configured project templates that define the phases, workflow
   </Card>
   <Card title="Full-Stack App" icon="layers">
     Complete web application with frontend and backend
+  </Card>
+  <Card title="Mobile App" icon="mobile">
+    iOS and Android applications with React Native or native development
+  </Card>
+  <Card title="AI-Powered App" icon="brain">
+    LLM-based applications with RAG, function calling, and AI features
+  </Card>
+  <Card title="AI Model Building" icon="flask">
+    Machine learning model development with training and deployment
+  </Card>
+  <Card title="Desktop App" icon="desktop">
+    Cross-platform desktop applications with Electron or native frameworks
+  </Card>
+  <Card title="IoT App" icon="microchip">
+    Internet of Things applications with device management and real-time data
+  </Card>
+  <Card title="Game" icon="gamepad">
+    Game development with Unity, Godot, or web technologies
+  </Card>
+  <Card title="Simulation" icon="chart-line">
+    Scientific or engineering simulations with numerical methods
   </Card>
 </CardGroup>
 
@@ -197,6 +218,311 @@ before_checkpoint:
 
 ---
 
+## Mobile App
+
+**Best for**: iOS and Android applications, either cross-platform or native.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | React Native (Expo) |
+| State | Zustand |
+| Navigation | React Navigation |
+| Backend | Supabase |
+| Analytics | Mixpanel |
+
+### Phases
+
+1. **Discovery** - Requirements and platform strategy
+2. **Design** - UI/UX design and prototyping
+3. **Foundation** - Project setup, navigation structure
+4. **Core Features** - Main app functionality
+5. **Native Features** - Platform-specific integrations
+6. **Testing** - Device testing and optimization
+7. **Deployment** - App store submission
+
+### Discovery Questions
+
+- Target platforms (iOS, Android, both)?
+- Native features needed (camera, location, push)?
+- Offline support required?
+- App store requirements?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/auth/**` | 3 | Authentication code |
+| `**/native/**` | 2 | Native integrations |
+| `app.json` | 3 | App configuration |
+| `**/store-assets/**` | 4 | App store assets |
+
+---
+
+## AI-Powered App
+
+**Best for**: LLM-based applications with RAG, function calling, multi-model architectures, and AI features.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| AI Provider | Anthropic Claude |
+| Framework | Next.js |
+| Vector DB | Pinecone |
+| Orchestration | LangChain |
+| Embedding | OpenAI |
+| Caching | Redis |
+
+### Phases
+
+1. **Discovery** - AI requirements and use cases
+2. **Planning** - Architecture and model selection
+3. **Foundation** - Project setup, AI integrations
+4. **Core Features** - Main AI functionality
+5. **Advanced Features** - RAG, function calling, agents
+6. **Optimization** - Cost, latency, quality tuning
+7. **Safety** - Guardrails, content filtering
+8. **Deployment** - Production with monitoring
+
+### Discovery Questions
+
+- What AI capabilities are needed?
+- Single model or multi-model?
+- RAG required? What data sources?
+- Function calling / tool use?
+- Cost budget and latency requirements?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/prompts/**` | 2 | Prompt engineering |
+| `**/guardrails/**` | 3 | Safety critical |
+| `**/agents/**` | 3 | Agent behavior |
+| `**/models/**` | 2 | Model configuration |
+
+---
+
+## AI Model Building
+
+**Best for**: Machine learning model development, training pipelines, and ML deployment.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | PyTorch |
+| Experiment Tracking | Weights & Biases |
+| Data Versioning | DVC |
+| Model Registry | MLflow |
+| Compute | Cloud GPU |
+
+### Phases
+
+1. **Discovery** - Problem definition and metrics
+2. **Data Engineering** - Data collection and processing
+3. **Exploration** - EDA and baseline models
+4. **Model Development** - Architecture design
+5. **Training** - Training pipeline and experiments
+6. **Evaluation** - Testing and validation
+7. **Deployment** - Model serving
+8. **Monitoring** - Drift detection and retraining
+
+### Discovery Questions
+
+- Supervised, unsupervised, or reinforcement learning?
+- What evaluation metrics matter?
+- Dataset size and type?
+- Inference latency requirements?
+- On-device or cloud serving?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/data/**` | 2 | Data processing |
+| `**/models/**` | 3 | Model architecture |
+| `**/training/**` | 2 | Training config |
+| `**/deploy/**` | 3 | Deployment critical |
+
+---
+
+## Desktop App
+
+**Best for**: Cross-platform desktop applications for Windows, macOS, and Linux.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Electron |
+| UI | React |
+| Packaging | electron-builder |
+| Updates | electron-updater |
+| Storage | electron-store |
+
+### Phases
+
+1. **Discovery** - Requirements and platform targets
+2. **Planning** - Architecture and UX design
+3. **Foundation** - Project setup, window management
+4. **Core Features** - Main application features
+5. **Native Integration** - System tray, file system, IPC
+6. **Packaging** - Installers and code signing
+7. **Distribution** - Auto-updates and release
+
+### Discovery Questions
+
+- Target platforms (Windows, Mac, Linux)?
+- Native OS integrations needed?
+- Auto-update requirements?
+- Code signing and notarization?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/main/**` | 3 | Main process |
+| `**/native/**` | 3 | Native integrations |
+| `electron-builder.*` | 3 | Build config |
+| `**/signing/**` | 4 | Code signing |
+
+---
+
+## IoT App
+
+**Best for**: Internet of Things applications with device management, real-time data, and edge computing.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| Protocol | MQTT |
+| Broker | Mosquitto |
+| Time-Series DB | TimescaleDB |
+| Cloud | AWS IoT |
+| Dashboard | Grafana |
+
+### Phases
+
+1. **Discovery** - Device and data requirements
+2. **Planning** - Architecture and protocols
+3. **Foundation** - Cloud infrastructure setup
+4. **Backend** - Device registry and messaging
+5. **Dashboard** - Monitoring and control UI
+6. **Edge Computing** - Device-side processing
+7. **Security** - Device authentication and encryption
+8. **Scaling** - Fleet management and optimization
+
+### Discovery Questions
+
+- What devices and sensors?
+- Communication protocols needed?
+- Real-time vs batch processing?
+- Edge computing requirements?
+- Fleet size and scaling needs?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/firmware/**` | 4 | Device firmware |
+| `**/security/**` | 3 | Security critical |
+| `**/protocols/**` | 3 | Communication |
+| `**/edge/**` | 2 | Edge processing |
+
+---
+
+## Game
+
+**Best for**: Game development with Unity, Godot, or web-based game engines.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| Engine | Unity |
+| Language | C# |
+| Art | Blender |
+| Audio | FMOD |
+| Build | Unity Cloud Build |
+
+### Phases
+
+1. **Discovery** - Game concept and scope
+2. **Design** - GDD and mechanics design
+3. **Foundation** - Project setup, core systems
+4. **Core Gameplay** - Game loop and mechanics
+5. **Content** - Levels, assets, audio
+6. **Polish** - VFX, juice, optimization
+7. **Multiplayer** - Networking (if applicable)
+8. **Release** - Platform submission
+
+### Discovery Questions
+
+- What genre and platform?
+- Single-player or multiplayer?
+- 2D or 3D?
+- Monetization model?
+- Target performance specs?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/Core/**` | 3 | Core game systems |
+| `**/Multiplayer/**` | 3 | Networking code |
+| `**/Editor/**` | 2 | Editor tools |
+| `**/Content/**` | 1 | Game content |
+
+---
+
+## Simulation
+
+**Best for**: Scientific or engineering simulations with numerical methods, visualization, and validation.
+
+### Default Stack
+
+| Layer | Technology |
+|-------|------------|
+| Language | Python |
+| Compute | NumPy/SciPy |
+| Visualization | Matplotlib/Plotly |
+| Parallel | Multiprocessing |
+| Documentation | Sphinx |
+
+### Phases
+
+1. **Discovery** - Problem definition and accuracy requirements
+2. **Modeling** - Mathematical model development
+3. **Foundation** - Solver framework setup
+4. **Core Simulation** - Physics engine implementation
+5. **Visualization** - 2D/3D rendering
+6. **Optimization** - Performance and parallelization
+7. **Validation** - Verification against benchmarks
+8. **Distribution** - Packaging and documentation
+
+### Discovery Questions
+
+- What physical phenomena?
+- Continuous or discrete simulation?
+- Required numerical precision?
+- Real-time requirements?
+- Visualization needs?
+
+### Autonomy Rules
+
+| Pattern | Level | Reason |
+|---------|-------|--------|
+| `**/solvers/**` | 3 | Numerical methods |
+| `**/physics/**` | 3 | Physics critical |
+| `**/visualization/**` | 1 | Lower risk |
+| `configs/**` | 2 | Affects results |
+
+---
+
 ## Choosing an Archetype
 
 ### Decision Guide
@@ -204,14 +530,23 @@ before_checkpoint:
 ```mermaid
 graph TD
     A[What are you building?] --> B{Has UI?}
-    B -->|No| C{Consumed by other code?}
-    B -->|Yes| D{Has backend?}
+    B -->|No| C{Is it a library?}
+    B -->|Yes| D{What type of app?}
     C -->|Yes| E[Library]
-    C -->|No| F[CLI Tool]
-    D -->|No| G[Frontend Only]
-    D -->|Yes| H{Has payments?}
-    H -->|Yes| I[SaaS MVP]
-    H -->|No| J[Full-Stack App]
+    C -->|No| F{Is it a CLI?}
+    F -->|Yes| G[CLI Tool]
+    F -->|No| H[API Service]
+    D -->|Web| I{Has payments?}
+    D -->|Mobile| J[Mobile App]
+    D -->|Desktop| K[Desktop App]
+    D -->|Game| L[Game]
+    D -->|Simulation| M[Simulation]
+    I -->|Yes| N[SaaS MVP]
+    I -->|No| O{Uses AI?}
+    O -->|Yes| P{Building models?}
+    O -->|No| Q[Full-Stack App]
+    P -->|Yes| R[AI Model Building]
+    P -->|No| S[AI-Powered App]
 ```
 
 ### Quick Reference
@@ -219,10 +554,17 @@ graph TD
 | If you're building... | Use |
 |----------------------|-----|
 | SaaS with subscriptions | SaaS MVP |
-| API for mobile app | API Service |
+| API for other apps | API Service |
 | Developer tool | CLI Tool |
 | npm package | Library |
 | Web app without payments | Full-Stack App |
+| iOS/Android app | Mobile App |
+| LLM/RAG application | AI-Powered App |
+| ML models and training | AI Model Building |
+| Windows/Mac/Linux app | Desktop App |
+| IoT/sensor system | IoT App |
+| Video game | Game |
+| Scientific simulation | Simulation |
 
 ---
 

@@ -1,0 +1,428 @@
+name: "Simulation Application"
+id: simulation-app
+description: "Scientific or engineering simulation with numerical methods, visualization, and validation"
+estimated_duration: "4-10 weeks"
+icon: "flask"
+
+# Default technology recommendations
+defaults:
+  language: python
+  compute: numpy_scipy
+  visualization: matplotlib_plotly
+  parallel: multiprocessing
+  validation: pytest
+  documentation: sphinx
+
+# Alternative technology stacks
+alternatives:
+  language:
+    - id: python
+      name: "Python"
+      description: "Rich scientific ecosystem, rapid prototyping"
+    - id: julia
+      name: "Julia"
+      description: "High-performance scientific computing"
+    - id: cpp
+      name: "C++"
+      description: "Maximum performance, low-level control"
+    - id: matlab
+      name: "MATLAB/Simulink"
+      description: "Industry standard for control systems"
+
+  compute:
+    - id: numpy_scipy
+      name: "NumPy/SciPy"
+      description: "Standard Python scientific stack"
+    - id: jax
+      name: "JAX"
+      description: "GPU acceleration, autodiff"
+    - id: cuda
+      name: "CUDA/CuPy"
+      description: "GPU computing"
+    - id: simpy
+      name: "SimPy"
+      description: "Discrete event simulation"
+
+  visualization:
+    - id: matplotlib_plotly
+      name: "Matplotlib/Plotly"
+      description: "Static and interactive plots"
+    - id: vtk
+      name: "VTK/ParaView"
+      description: "3D scientific visualization"
+    - id: blender
+      name: "Blender Python"
+      description: "3D rendering and animation"
+    - id: unity
+      name: "Unity"
+      description: "Real-time 3D visualization"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "Problem Definition"
+    description: "Define simulation domain, accuracy requirements, and scale"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      Problem definition complete. Review:
+      - Simulation domain and physics
+      - Accuracy and validation requirements
+      - Scale and performance needs
+
+      Approve to proceed with modeling.
+
+    steps:
+      - id: domain_definition
+        name: "Domain Definition"
+        agent: researcher
+        description: "Define simulation domain and scope"
+
+      - id: physics_requirements
+        name: "Physics Requirements"
+        agent: researcher
+        description: "Document physical laws and equations"
+
+      - id: accuracy_requirements
+        name: "Accuracy Requirements"
+        agent: planner
+        description: "Define accuracy and error tolerance"
+
+      - id: scale_requirements
+        name: "Scale Requirements"
+        agent: architect
+        description: "Determine computational scale"
+
+    outputs:
+      - ".omgkit/generated/simulation-domain.md"
+      - ".omgkit/generated/physics-equations.md"
+      - ".omgkit/generated/requirements.md"
+
+  - id: modeling
+    name: "Mathematical Modeling"
+    description: "Develop mathematical model and validation criteria"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Mathematical model complete. Review:
+      - Governing equations
+      - Boundary conditions
+      - Validation criteria
+
+      Approve to begin implementation.
+
+    steps:
+      - id: governing_equations
+        name: "Governing Equations"
+        agent: researcher
+        description: "Formulate governing equations"
+
+      - id: discretization
+        name: "Discretization Scheme"
+        agent: architect
+        description: "Choose discretization methods"
+
+      - id: boundary_conditions
+        name: "Boundary Conditions"
+        agent: researcher
+        description: "Define boundary and initial conditions"
+
+      - id: validation_criteria
+        name: "Validation Criteria"
+        agent: tester
+        description: "Establish validation benchmarks"
+
+    outputs:
+      - ".omgkit/generated/mathematical-model.md"
+      - ".omgkit/generated/validation-plan.md"
+
+  - id: foundation
+    name: "Solver Framework"
+    description: "Set up numerical solver framework"
+    order: 3
+    checkpoint: false
+
+    steps:
+      - id: project_setup
+        name: "Project Setup"
+        agent: fullstack-developer
+        description: "Initialize simulation project"
+
+      - id: data_structures
+        name: "Data Structures"
+        agent: fullstack-developer
+        description: "Implement grid/mesh data structures"
+
+      - id: numerical_methods
+        name: "Numerical Methods"
+        agent: fullstack-developer
+        description: "Implement numerical solvers"
+
+      - id: config_system
+        name: "Configuration System"
+        agent: fullstack-developer
+        description: "Set up simulation configuration"
+
+    outputs:
+      - "src/core/"
+      - "src/solvers/"
+      - "configs/"
+
+  - id: core_simulation
+    name: "Core Simulation"
+    description: "Implement physics engine and state management"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Core simulation complete. Review:
+      - Physics implementation
+      - Numerical stability
+      - Initial validation results
+
+      Approve to add visualization.
+
+    steps:
+      - id: physics_engine
+        name: "Physics Engine"
+        agent: fullstack-developer
+        description: "Implement physics calculations"
+
+      - id: time_integration
+        name: "Time Integration"
+        agent: fullstack-developer
+        description: "Implement time-stepping"
+
+      - id: state_management
+        name: "State Management"
+        agent: fullstack-developer
+        description: "Manage simulation state"
+
+      - id: checkpointing
+        name: "Checkpointing"
+        agent: fullstack-developer
+        description: "Implement save/restore"
+
+      - id: initial_validation
+        name: "Initial Validation"
+        agent: tester
+        description: "Validate against simple cases"
+
+    outputs:
+      - "src/physics/"
+      - "src/state/"
+      - "tests/validation/"
+
+  - id: visualization
+    name: "Visualization"
+    description: "2D/3D rendering and real-time plots"
+    order: 5
+    checkpoint: true
+    checkpoint_message: |
+      Visualization complete. Review:
+      - Plot quality and accuracy
+      - Real-time performance
+      - Export capabilities
+
+      Approve to optimize.
+
+    steps:
+      - id: plotting
+        name: "2D Plotting"
+        agent: fullstack-developer
+        description: "Implement 2D visualization"
+
+      - id: 3d_rendering
+        name: "3D Rendering"
+        agent: fullstack-developer
+        description: "Implement 3D visualization if needed"
+
+      - id: realtime_viz
+        name: "Real-Time Visualization"
+        agent: fullstack-developer
+        description: "Add real-time plotting"
+
+      - id: export
+        name: "Export Functions"
+        agent: fullstack-developer
+        description: "Export to images, videos, data"
+
+    outputs:
+      - "src/visualization/"
+      - "src/export/"
+
+  - id: optimization
+    name: "Performance Optimization"
+    description: "Optimize for speed and parallelization"
+    order: 6
+    checkpoint: false
+
+    steps:
+      - id: profiling
+        name: "Performance Profiling"
+        agent: fullstack-developer
+        description: "Profile simulation performance"
+
+      - id: vectorization
+        name: "Vectorization"
+        agent: fullstack-developer
+        description: "Optimize with vectorization"
+
+      - id: parallelization
+        name: "Parallelization"
+        agent: fullstack-developer
+        description: "Add parallel processing"
+
+      - id: gpu_acceleration
+        name: "GPU Acceleration"
+        agent: fullstack-developer
+        description: "Add GPU support if beneficial"
+
+    outputs:
+      - "benchmarks/"
+      - "src/parallel/"
+
+  - id: validation
+    name: "Validation"
+    description: "Verify against known results and benchmarks"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      Validation complete. Review:
+      - Benchmark comparisons
+      - Error analysis
+      - Convergence studies
+
+      Approve for distribution.
+
+    steps:
+      - id: benchmark_tests
+        name: "Benchmark Tests"
+        agent: tester
+        description: "Compare with known results"
+
+      - id: convergence
+        name: "Convergence Studies"
+        agent: tester
+        description: "Verify numerical convergence"
+
+      - id: error_analysis
+        name: "Error Analysis"
+        agent: tester
+        description: "Quantify simulation errors"
+
+      - id: sensitivity
+        name: "Sensitivity Analysis"
+        agent: tester
+        description: "Analyze parameter sensitivity"
+
+    outputs:
+      - "reports/validation/"
+      - "tests/benchmarks/"
+
+  - id: distribution
+    name: "Distribution"
+    description: "Package for distribution with documentation"
+    order: 8
+    checkpoint: true
+    checkpoint_message: |
+      Distribution ready. Review:
+      - Documentation complete
+      - Examples working
+      - Package installable
+
+      This is the final checkpoint.
+
+    steps:
+      - id: documentation
+        name: "Documentation"
+        agent: docs-manager
+        description: "Write comprehensive documentation"
+
+      - id: examples
+        name: "Example Cases"
+        agent: fullstack-developer
+        description: "Create example simulations"
+
+      - id: packaging
+        name: "Packaging"
+        agent: cicd-manager
+        description: "Create distributable package"
+
+      - id: tutorials
+        name: "Tutorials"
+        agent: docs-manager
+        description: "Write getting started tutorials"
+
+    outputs:
+      - "docs/"
+      - "examples/"
+      - "pyproject.toml"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/solvers/**"
+    level: 3
+    reason: "Numerical methods are critical"
+  - pattern: "**/physics/**"
+    level: 3
+    reason: "Physics implementation is critical"
+  - pattern: "**/visualization/**"
+    level: 1
+    reason: "Visualization is lower risk"
+  - pattern: "**/tests/**"
+    level: 2
+    reason: "Tests need review"
+  - pattern: "configs/**"
+    level: 2
+    reason: "Configs affect results"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "pytest tests/"
+    - "mypy src/"
+  before_checkpoint:
+    - "unit tests pass"
+    - "benchmark tests pass"
+  before_deploy:
+    - "validation against known solutions"
+    - "documentation complete"
+    - "examples run successfully"
+
+# Simulation-specific discovery questions
+discovery_additions:
+  - category: "Domain"
+    questions:
+      - "What physical phenomena are you simulating?"
+      - "Continuous or discrete simulation?"
+      - "Deterministic or stochastic?"
+      - "Time scales involved? (nanoseconds to years)"
+      - "Spatial scales? (atoms to planets)"
+
+  - category: "Accuracy"
+    questions:
+      - "Required numerical precision?"
+      - "Error tolerance?"
+      - "Known analytical solutions for validation?"
+      - "Experimental data for comparison?"
+
+  - category: "Performance"
+    questions:
+      - "Problem size? (grid points, particles, etc.)"
+      - "Simulation duration?"
+      - "Real-time requirements?"
+      - "Available compute resources? (CPU cores, GPU)"
+
+  - category: "Output"
+    questions:
+      - "Visualization needs? (2D, 3D, animation)"
+      - "Data export formats needed?"
+      - "Interactive exploration needed?"
+      - "Report generation requirements?"
+
+  - category: "Distribution"
+    questions:
+      - "Who will use the simulation?"
+      - "GUI needed or CLI sufficient?"
+      - "Integration with other tools?"
+      - "Licensing requirements?"

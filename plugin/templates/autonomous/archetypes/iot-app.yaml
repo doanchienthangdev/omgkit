@@ -1,0 +1,415 @@
+name: "IoT Application"
+id: iot-app
+description: "Internet of Things system with device management, real-time data, and edge computing"
+estimated_duration: "4-8 weeks"
+icon: "microchip"
+
+# Default technology recommendations
+defaults:
+  protocol: mqtt
+  broker: mosquitto
+  backend: nodejs
+  database: timescaledb
+  cloud: aws_iot
+  frontend: nextjs
+  device_sdk: esp_idf
+
+# Alternative technology stacks
+alternatives:
+  protocol:
+    - id: mqtt
+      name: "MQTT"
+      description: "Lightweight, pub/sub, most popular for IoT"
+    - id: coap
+      name: "CoAP"
+      description: "REST-like for constrained devices"
+    - id: http
+      name: "HTTP/REST"
+      description: "Standard web protocols"
+    - id: websocket
+      name: "WebSocket"
+      description: "Real-time bidirectional"
+
+  cloud:
+    - id: aws_iot
+      name: "AWS IoT Core"
+      description: "Full-featured, scalable"
+    - id: azure_iot
+      name: "Azure IoT Hub"
+      description: "Enterprise integration"
+    - id: gcp_iot
+      name: "Google Cloud IoT"
+      description: "ML integration"
+    - id: self_hosted
+      name: "Self-Hosted"
+      description: "Full control, on-premise"
+
+  database:
+    - id: timescaledb
+      name: "TimescaleDB"
+      description: "PostgreSQL-based time-series"
+    - id: influxdb
+      name: "InfluxDB"
+      description: "Purpose-built time-series"
+    - id: questdb
+      name: "QuestDB"
+      description: "High-performance time-series"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "IoT Discovery"
+    description: "Define devices, protocols, and data requirements"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      IoT discovery complete. Review:
+      - Device types and capabilities
+      - Communication protocols
+      - Data collection requirements
+      - Security requirements
+
+      Approve to proceed with planning.
+
+    steps:
+      - id: device_inventory
+        name: "Device Inventory"
+        agent: planner
+        description: "Catalog all device types"
+
+      - id: protocol_selection
+        name: "Protocol Selection"
+        agent: architect
+        description: "Select communication protocols"
+
+      - id: data_requirements
+        name: "Data Requirements"
+        agent: planner
+        description: "Define data collection needs"
+
+      - id: security_requirements
+        name: "Security Requirements"
+        agent: security-auditor
+        description: "Define security requirements"
+
+    outputs:
+      - ".omgkit/generated/device-inventory.md"
+      - ".omgkit/generated/protocol-decision.md"
+      - ".omgkit/generated/data-requirements.md"
+
+  - id: planning
+    name: "Architecture Planning"
+    description: "Design device architecture, data flow, and security model"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Architecture complete. Review:
+      - Device architecture
+      - Data flow design
+      - Security model
+
+      Approve to begin foundation.
+
+    steps:
+      - id: device_architecture
+        name: "Device Architecture"
+        agent: architect
+        description: "Design device firmware architecture"
+
+      - id: data_flow
+        name: "Data Flow Design"
+        agent: architect
+        description: "Design data ingestion pipeline"
+
+      - id: security_model
+        name: "Security Model"
+        agent: security-auditor
+        description: "Design device identity and auth"
+
+      - id: scaling_plan
+        name: "Scaling Plan"
+        agent: architect
+        description: "Plan for device fleet scaling"
+
+    outputs:
+      - ".omgkit/generated/device-architecture.md"
+      - ".omgkit/generated/data-flow.md"
+      - ".omgkit/generated/iot-security.md"
+
+  - id: foundation
+    name: "Foundation"
+    description: "Set up device firmware and communication layer"
+    order: 3
+    checkpoint: false
+
+    steps:
+      - id: firmware_setup
+        name: "Firmware Setup"
+        agent: fullstack-developer
+        description: "Initialize device firmware project"
+
+      - id: communication_layer
+        name: "Communication Layer"
+        agent: fullstack-developer
+        description: "Implement MQTT/CoAP client"
+
+      - id: device_provisioning
+        name: "Device Provisioning"
+        agent: fullstack-developer
+        description: "Create provisioning workflow"
+
+      - id: local_storage
+        name: "Local Storage"
+        agent: fullstack-developer
+        description: "Implement on-device storage"
+
+    outputs:
+      - "firmware/"
+      - "firmware/src/mqtt/"
+      - "firmware/src/storage/"
+
+  - id: backend
+    name: "Backend Infrastructure"
+    description: "Set up MQTT broker, data ingestion, and storage"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Backend complete. Review:
+      - MQTT broker configuration
+      - Data ingestion pipeline
+      - Time-series storage
+
+      Approve to build dashboard.
+
+    steps:
+      - id: broker_setup
+        name: "MQTT Broker"
+        agent: cicd-manager
+        description: "Set up MQTT broker"
+
+      - id: ingestion_pipeline
+        name: "Data Ingestion"
+        agent: fullstack-developer
+        description: "Build data ingestion pipeline"
+
+      - id: time_series_db
+        name: "Time-Series Database"
+        agent: database-admin
+        description: "Set up time-series storage"
+
+      - id: api_layer
+        name: "API Layer"
+        agent: fullstack-developer
+        description: "Build device management API"
+
+    outputs:
+      - "backend/src/mqtt/"
+      - "backend/src/ingestion/"
+      - "backend/src/api/"
+
+  - id: dashboard
+    name: "Dashboard & Visualization"
+    description: "Real-time visualization and device management UI"
+    order: 5
+    checkpoint: true
+    checkpoint_message: |
+      Dashboard complete. Review:
+      - Real-time data visualization
+      - Device management interface
+      - Alerting configuration
+
+      Approve to add edge computing.
+
+    steps:
+      - id: realtime_viz
+        name: "Real-Time Visualization"
+        agent: fullstack-developer
+        description: "Build real-time data charts"
+
+      - id: device_management
+        name: "Device Management UI"
+        agent: fullstack-developer
+        description: "Create device management interface"
+
+      - id: alerting
+        name: "Alerting System"
+        agent: fullstack-developer
+        description: "Implement threshold-based alerts"
+
+      - id: historical_data
+        name: "Historical Data"
+        agent: fullstack-developer
+        description: "Build historical data views"
+
+    outputs:
+      - "dashboard/src/components/"
+      - "dashboard/src/pages/"
+
+  - id: edge_computing
+    name: "Edge Computing"
+    description: "Local processing and offline operation"
+    order: 6
+    checkpoint: false
+
+    steps:
+      - id: local_processing
+        name: "Local Processing"
+        agent: fullstack-developer
+        description: "Implement on-device data processing"
+
+      - id: offline_operation
+        name: "Offline Operation"
+        agent: fullstack-developer
+        description: "Handle offline scenarios"
+
+      - id: data_sync
+        name: "Data Sync"
+        agent: fullstack-developer
+        description: "Sync data when connectivity returns"
+
+      - id: edge_analytics
+        name: "Edge Analytics"
+        agent: fullstack-developer
+        description: "Run analytics at the edge"
+
+    outputs:
+      - "firmware/src/edge/"
+      - "firmware/src/sync/"
+
+  - id: security
+    name: "Security Hardening"
+    description: "Device authentication, encryption, and OTA updates"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      Security hardening complete. Review:
+      - Device authentication
+      - Data encryption
+      - OTA update security
+
+      Approve to proceed with scaling.
+
+    steps:
+      - id: device_auth
+        name: "Device Authentication"
+        agent: security-auditor
+        description: "Implement device identity and auth"
+
+      - id: encryption
+        name: "Data Encryption"
+        agent: security-auditor
+        description: "Encrypt data in transit and at rest"
+
+      - id: ota_updates
+        name: "OTA Updates"
+        agent: fullstack-developer
+        description: "Implement secure OTA updates"
+
+      - id: security_audit
+        name: "Security Audit"
+        agent: security-auditor
+        description: "Audit entire IoT stack"
+
+    outputs:
+      - "firmware/src/security/"
+      - "backend/src/ota/"
+
+  - id: scaling
+    name: "Fleet Management & Scaling"
+    description: "Manage large device fleets and batch operations"
+    order: 8
+    checkpoint: true
+    checkpoint_message: |
+      Scaling setup complete. Review:
+      - Fleet management tools
+      - Batch operations
+      - Monitoring at scale
+
+      This is the final checkpoint.
+
+    steps:
+      - id: fleet_management
+        name: "Fleet Management"
+        agent: fullstack-developer
+        description: "Build fleet management tools"
+
+      - id: batch_operations
+        name: "Batch Operations"
+        agent: fullstack-developer
+        description: "Implement batch device operations"
+
+      - id: monitoring
+        name: "Fleet Monitoring"
+        agent: fullstack-developer
+        description: "Monitor device fleet health"
+
+      - id: auto_scaling
+        name: "Auto-Scaling"
+        agent: cicd-manager
+        description: "Configure backend auto-scaling"
+
+    outputs:
+      - "dashboard/src/fleet/"
+      - "backend/src/batch/"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/firmware/**"
+    level: 3
+    reason: "Firmware changes are critical"
+  - pattern: "**/security/**"
+    level: 3
+    reason: "Security code needs review"
+  - pattern: "**/ota/**"
+    level: 3
+    reason: "OTA updates are critical"
+  - pattern: "**/dashboard/**"
+    level: 1
+    reason: "Dashboard UI is less critical"
+  - pattern: "**/api/**"
+    level: 2
+    reason: "API changes need review"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "firmware builds successfully"
+    - "backend tests pass"
+  before_checkpoint:
+    - "device connects to broker"
+    - "data flows correctly"
+  before_deploy:
+    - "security audit passes"
+    - "load test with 1000+ devices"
+    - "OTA update tested"
+
+# IoT-specific discovery questions
+discovery_additions:
+  - category: "Devices"
+    questions:
+      - "What types of devices/sensors?"
+      - "How many devices initially? At scale?"
+      - "Device hardware capabilities? (MCU, memory, connectivity)"
+      - "Power source? (battery, mains, solar)"
+      - "Environmental conditions? (temperature, humidity, outdoor)"
+
+  - category: "Connectivity"
+    questions:
+      - "Connectivity type? (WiFi, cellular, LoRa, Zigbee, BLE)"
+      - "Expected connectivity reliability?"
+      - "Data transmission frequency?"
+      - "Payload size per transmission?"
+
+  - category: "Data"
+    questions:
+      - "Types of data collected?"
+      - "Data retention requirements?"
+      - "Real-time processing needs?"
+      - "Edge processing requirements?"
+
+  - category: "Security"
+    questions:
+      - "Device authentication method?"
+      - "Firmware update requirements?"
+      - "Compliance requirements? (industrial, medical)"
+      - "Physical security concerns?"

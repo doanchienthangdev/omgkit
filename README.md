@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **AI Team System for Claude Code**
-> 23 Agents • 58 Commands • 29 Workflows • 88 Skills • 10 Modes
+> 23 Agents • 58 Commands • 29 Workflows • 88 Skills • 10 Modes • 12 Archetypes
 > *"Think Omega. Build Omega. Be Omega."*
 
 OMGKIT transforms Claude Code into an autonomous AI development team with sprint management, specialized agents, and Omega-level thinking for 10x-1000x productivity improvements.
@@ -21,8 +21,10 @@ OMGKIT transforms Claude Code into an autonomous AI development team with sprint
 | **Workflows** | 29 | Complete development processes |
 | **Skills** | 88 | Domain expertise modules |
 | **Modes** | 10 | Behavioral configurations |
+| **Archetypes** | 12 | Project templates for autonomous dev |
 | **Sprint Management** | ✅ | Vision, backlog, team autonomy |
 | **Omega Thinking** | ✅ | 7 modes for 10x-1000x solutions |
+| **Autonomous Dev** | ✅ | Build complete apps from idea to deploy |
 
 ## 🚀 Installation
 
@@ -162,6 +164,49 @@ After installation, use these commands in Claude Code:
 /backlog:show       # Display backlog
 /team:run [--mode]  # Run AI team (full-auto|semi-auto|manual)
 /team:status        # Show team activity
+```
+
+### Autonomous Development
+```bash
+/auto:init <idea>   # Start discovery for new project
+/auto:start         # Begin/continue autonomous execution
+/auto:status        # Check project progress
+/auto:approve       # Approve checkpoint to continue
+/auto:reject        # Request changes with feedback
+/auto:resume        # Resume from saved state
+```
+
+## 🤖 Autonomous Development (12 Archetypes)
+
+Build complete applications autonomously from idea to deployment.
+
+| Archetype | Description |
+|-----------|-------------|
+| **SaaS MVP** | Multi-tenant SaaS with auth, payments |
+| **API Service** | Backend APIs for web/mobile apps |
+| **CLI Tool** | Command-line utilities |
+| **Library/SDK** | Reusable npm packages |
+| **Full-Stack App** | Complete web applications |
+| **Mobile App** | iOS/Android with React Native |
+| **AI-Powered App** | LLM apps with RAG, function calling |
+| **AI Model Building** | ML model training pipelines |
+| **Desktop App** | Electron cross-platform apps |
+| **IoT App** | Device management, real-time data |
+| **Game** | Unity/Godot game development |
+| **Simulation** | Scientific/engineering simulations |
+
+### Artifacts System
+
+Provide project context through artifacts:
+
+```
+.omgkit/artifacts/
+├── data/       # Sample data, schemas
+├── docs/       # Requirements, user stories
+├── knowledge/  # Glossary, business rules
+├── research/   # Competitor analysis
+├── assets/     # Images, templates
+└── examples/   # Code samples
 ```
 
 ## 📋 Workflows (29)

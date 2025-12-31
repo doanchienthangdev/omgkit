@@ -1,0 +1,420 @@
+name: "AI-Powered Application"
+id: ai-powered-app
+description: "LLM-based application with AI capabilities, RAG, function calling, and intelligent features"
+estimated_duration: "3-5 weeks"
+icon: "microchip"
+
+# Default technology recommendations
+defaults:
+  ai_provider: anthropic
+  framework: nextjs
+  vector_db: pinecone
+  embedding: openai_embedding
+  orchestration: langchain
+  streaming: true
+  cache: redis
+
+# Alternative technology stacks
+alternatives:
+  ai_provider:
+    - id: anthropic
+      name: "Anthropic Claude"
+      description: "Best for complex reasoning and safety"
+    - id: openai
+      name: "OpenAI GPT"
+      description: "Wide adoption, strong ecosystem"
+    - id: google
+      name: "Google Gemini"
+      description: "Multimodal capabilities"
+    - id: multi_provider
+      name: "Multi-Provider"
+      description: "Use multiple providers with fallbacks"
+
+  vector_db:
+    - id: pinecone
+      name: "Pinecone"
+      description: "Managed, scalable vector database"
+    - id: weaviate
+      name: "Weaviate"
+      description: "Open-source with hybrid search"
+    - id: qdrant
+      name: "Qdrant"
+      description: "High-performance, self-hosted option"
+    - id: supabase_pgvector
+      name: "Supabase pgvector"
+      description: "PostgreSQL-based, integrated with Supabase"
+
+  orchestration:
+    - id: langchain
+      name: "LangChain"
+      description: "Most popular, extensive tooling"
+    - id: llamaindex
+      name: "LlamaIndex"
+      description: "Best for RAG applications"
+    - id: custom
+      name: "Custom Implementation"
+      description: "Direct API calls, full control"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "AI Use Case Discovery"
+    description: "Define AI capabilities, model selection, and data requirements"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      AI discovery complete. Please review:
+      - AI use case and expected outcomes
+      - Model selection and cost estimates
+      - Data requirements and sources
+      - RAG requirements (if applicable)
+
+      Approve to proceed with architecture.
+
+    steps:
+      - id: use_case
+        name: "Use Case Definition"
+        agent: planner
+        description: "Define specific AI capabilities needed"
+
+      - id: model_selection
+        name: "Model Selection"
+        agent: architect
+        description: "Select AI models based on requirements"
+
+      - id: cost_estimation
+        name: "Cost Estimation"
+        agent: planner
+        description: "Estimate token usage and API costs"
+
+      - id: data_requirements
+        name: "Data Requirements"
+        agent: planner
+        description: "Identify data sources for RAG/fine-tuning"
+
+    outputs:
+      - ".omgkit/generated/ai-use-case.md"
+      - ".omgkit/generated/model-selection.md"
+      - ".omgkit/generated/cost-estimate.md"
+
+  - id: planning
+    name: "AI Architecture Planning"
+    description: "Design prompt engineering, RAG architecture, and system design"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      AI architecture complete. Review:
+      - Prompt templates and strategies
+      - RAG pipeline design
+      - System architecture
+
+      Approve to begin implementation.
+
+    steps:
+      - id: prompt_engineering
+        name: "Prompt Engineering"
+        agent: planner
+        description: "Design prompt templates and strategies"
+
+      - id: rag_architecture
+        name: "RAG Architecture"
+        agent: architect
+        description: "Design retrieval-augmented generation pipeline"
+
+      - id: system_design
+        name: "System Design"
+        agent: architect
+        description: "Design overall system architecture"
+
+      - id: evaluation_plan
+        name: "Evaluation Plan"
+        agent: tester
+        description: "Define evaluation metrics and test cases"
+
+    outputs:
+      - ".omgkit/generated/prompt-templates.md"
+      - ".omgkit/generated/rag-architecture.md"
+      - ".omgkit/generated/ai-evaluation-plan.md"
+
+  - id: foundation
+    name: "AI Foundation"
+    description: "Set up AI SDK integration and vector database"
+    order: 3
+    checkpoint: false
+
+    steps:
+      - id: ai_sdk_setup
+        name: "AI SDK Integration"
+        agent: fullstack-developer
+        description: "Integrate AI provider SDKs"
+
+      - id: vector_db_setup
+        name: "Vector Database Setup"
+        agent: database-admin
+        description: "Set up and configure vector database"
+
+      - id: embedding_pipeline
+        name: "Embedding Pipeline"
+        agent: fullstack-developer
+        description: "Create document embedding pipeline"
+
+      - id: streaming_setup
+        name: "Streaming Setup"
+        agent: fullstack-developer
+        description: "Implement response streaming"
+
+    outputs:
+      - "src/lib/ai/"
+      - "src/lib/embeddings/"
+      - "src/lib/vector-store/"
+
+  - id: core_features
+    name: "Core AI Features"
+    description: "Implement chat interfaces, completions, and basic AI features"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Core AI features implemented. Review:
+      - Chat/completion interfaces
+      - Response quality
+      - Error handling
+
+      Approve to add advanced features.
+
+    steps:
+      - id: chat_interface
+        name: "Chat Interface"
+        agent: fullstack-developer
+        description: "Build conversational AI interface"
+
+      - id: completion_api
+        name: "Completion API"
+        agent: fullstack-developer
+        description: "Create completion endpoints"
+
+      - id: context_management
+        name: "Context Management"
+        agent: fullstack-developer
+        description: "Implement conversation context handling"
+
+      - id: error_handling
+        name: "Error Handling"
+        agent: fullstack-developer
+        description: "Handle API errors, rate limits, fallbacks"
+
+    outputs:
+      - "src/app/api/chat/"
+      - "src/components/chat/"
+
+  - id: advanced_features
+    name: "Advanced AI Features"
+    description: "Implement RAG, function calling, and agents"
+    order: 5
+    checkpoint: true
+    checkpoint_message: |
+      Advanced AI features complete. Review:
+      - RAG pipeline quality
+      - Function calling accuracy
+      - Agent behavior
+
+      Approve to proceed with optimization.
+
+    steps:
+      - id: rag_implementation
+        name: "RAG Implementation"
+        agent: fullstack-developer
+        description: "Implement retrieval-augmented generation"
+
+      - id: function_calling
+        name: "Function Calling"
+        agent: fullstack-developer
+        description: "Implement tool use and function calling"
+
+      - id: agents
+        name: "AI Agents"
+        agent: fullstack-developer
+        description: "Build autonomous AI agents if needed"
+
+      - id: memory
+        name: "Long-term Memory"
+        agent: fullstack-developer
+        description: "Implement conversation memory"
+
+    outputs:
+      - "src/lib/rag/"
+      - "src/lib/tools/"
+      - "src/lib/agents/"
+
+  - id: optimization
+    name: "Optimization"
+    description: "Optimize for cost, latency, and reliability"
+    order: 6
+    checkpoint: false
+
+    steps:
+      - id: caching
+        name: "Response Caching"
+        agent: fullstack-developer
+        description: "Implement semantic caching"
+
+      - id: rate_limiting
+        name: "Rate Limiting"
+        agent: fullstack-developer
+        description: "Implement rate limiting and quotas"
+
+      - id: cost_optimization
+        name: "Cost Optimization"
+        agent: fullstack-developer
+        description: "Optimize token usage and API calls"
+
+      - id: latency
+        name: "Latency Optimization"
+        agent: fullstack-developer
+        description: "Reduce response latency"
+
+    outputs:
+      - "src/lib/cache/"
+      - "src/middleware/rate-limit.ts"
+
+  - id: safety
+    name: "Safety & Guardrails"
+    description: "Implement content moderation and safety measures"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      Safety measures implemented. Review:
+      - Content moderation
+      - Prompt injection defense
+      - Output validation
+
+      Approve for deployment.
+
+    steps:
+      - id: guardrails
+        name: "Guardrails"
+        agent: security-auditor
+        description: "Implement input/output guardrails"
+
+      - id: moderation
+        name: "Content Moderation"
+        agent: security-auditor
+        description: "Set up content moderation"
+
+      - id: injection_defense
+        name: "Injection Defense"
+        agent: security-auditor
+        description: "Protect against prompt injection"
+
+      - id: eval_suite
+        name: "Evaluation Suite"
+        agent: tester
+        description: "Build evaluation test suite"
+
+    outputs:
+      - "src/lib/guardrails/"
+      - "src/lib/moderation/"
+      - "evals/"
+
+  - id: deployment
+    name: "Deployment & Monitoring"
+    description: "Deploy with monitoring and A/B testing"
+    order: 8
+    checkpoint: true
+    checkpoint_message: |
+      Ready for production. Review:
+      - Monitoring setup
+      - Cost tracking
+      - A/B testing configuration
+
+      This is the final checkpoint.
+
+    steps:
+      - id: monitoring
+        name: "AI Monitoring"
+        agent: cicd-manager
+        description: "Set up AI-specific monitoring"
+
+      - id: cost_tracking
+        name: "Cost Tracking"
+        agent: fullstack-developer
+        description: "Implement cost tracking dashboard"
+
+      - id: ab_testing
+        name: "A/B Testing"
+        agent: fullstack-developer
+        description: "Set up prompt A/B testing"
+
+      - id: deploy
+        name: "Production Deploy"
+        agent: cicd-manager
+        description: "Deploy to production"
+
+    outputs:
+      - "src/lib/analytics/"
+      - ".env.production"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/prompts/**"
+    level: 3
+    reason: "Prompts significantly affect output quality"
+  - pattern: "**/guardrails/**"
+    level: 3
+    reason: "Safety measures need careful review"
+  - pattern: "**/tools/**"
+    level: 3
+    reason: "Function calling needs validation"
+  - pattern: "**/.env*"
+    level: 4
+    reason: "API keys are sensitive"
+  - pattern: "**/chat/**"
+    level: 2
+    reason: "Chat UI can be reviewed quickly"
+  - pattern: "**/embeddings/**"
+    level: 2
+    reason: "Embedding pipelines need review"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "npm test"
+    - "npm run lint"
+    - "evals pass"
+  before_checkpoint:
+    - "npm run build"
+    - "eval accuracy >= 80%"
+    - "guardrails tests pass"
+  before_deploy:
+    - "security scan"
+    - "cost estimation review"
+    - "load testing"
+
+# AI-specific discovery questions
+discovery_additions:
+  - category: "AI Capabilities"
+    questions:
+      - "What AI capabilities do you need? (chat, completion, classification, etc.)"
+      - "Do you need RAG (Retrieval-Augmented Generation)?"
+      - "Will you use function calling/tool use?"
+      - "Do you need multi-modal capabilities (vision, audio)?"
+      - "Should the AI maintain conversation memory?"
+
+  - category: "Data & Knowledge"
+    questions:
+      - "What data sources will the AI use?"
+      - "How much data needs to be indexed? (documents, size)"
+      - "How often is the data updated?"
+      - "Are there privacy/compliance requirements for data?"
+
+  - category: "Performance & Cost"
+    questions:
+      - "Expected request volume? (per day/month)"
+      - "Acceptable response latency?"
+      - "Monthly budget for AI API costs?"
+      - "Do you need fallback models?"
+
+  - category: "Safety & Compliance"
+    questions:
+      - "Content moderation requirements?"
+      - "Do you need to log/audit AI interactions?"
+      - "Industry compliance requirements? (HIPAA, SOC2, etc.)"

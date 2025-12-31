@@ -1,0 +1,465 @@
+# Artifacts System Schema
+# Enables the autonomous system to leverage project context from various sources
+
+name: "Artifacts System"
+version: "1.0.0"
+description: "Schema for managing project artifacts that provide context for autonomous development"
+
+# Directory structure for artifacts
+directory_structure:
+  root: ".omgkit/artifacts"
+  subdirectories:
+    - name: "data"
+      description: "Sample data, fixtures, and schemas"
+      auto_detect: true
+    - name: "docs"
+      description: "Requirements, user stories, and specifications"
+      auto_detect: true
+    - name: "knowledge"
+      description: "Domain glossary, business rules, and constraints"
+      auto_detect: true
+    - name: "research"
+      description: "Competitor analysis, technology reviews, and benchmarks"
+      auto_detect: true
+    - name: "assets"
+      description: "Images, icons, and templates"
+      auto_detect: true
+    - name: "examples"
+      description: "Reference implementations and code samples"
+      auto_detect: true
+
+# Artifact type definitions
+artifact_types:
+  # Data artifacts
+  - id: sample_data
+    category: data
+    name: "Sample Data"
+    description: "Sample data for development and testing"
+    file_patterns:
+      - "*.json"
+      - "*.csv"
+      - "*.xml"
+      - "*.yaml"
+      - "*.yml"
+    phase_relevance:
+      - discovery
+      - planning
+      - core_features
+    context_injection:
+      max_size_kb: 50
+      summary_if_larger: true
+
+  - id: data_schema
+    category: data
+    name: "Data Schema"
+    description: "Schema definitions for data structures"
+    file_patterns:
+      - "*schema*.json"
+      - "*schema*.yaml"
+      - "*.schema"
+      - "*.xsd"
+    phase_relevance:
+      - planning
+      - foundation
+      - core_features
+    context_injection:
+      max_size_kb: 100
+      include_full: true
+
+  - id: test_fixtures
+    category: data
+    name: "Test Fixtures"
+    description: "Test data and fixtures"
+    file_patterns:
+      - "fixtures/**"
+      - "*fixture*"
+      - "*mock*"
+    phase_relevance:
+      - testing
+      - core_features
+    context_injection:
+      max_size_kb: 30
+      summary_if_larger: true
+
+  # Documentation artifacts
+  - id: requirements
+    category: docs
+    name: "Requirements Document"
+    description: "Business and functional requirements"
+    file_patterns:
+      - "requirements*.md"
+      - "requirements*.txt"
+      - "PRD*.md"
+      - "BRD*.md"
+    phase_relevance:
+      - discovery
+      - planning
+    context_injection:
+      max_size_kb: 200
+      include_full: true
+      priority: high
+
+  - id: user_stories
+    category: docs
+    name: "User Stories"
+    description: "User stories and acceptance criteria"
+    file_patterns:
+      - "user-stories*.md"
+      - "stories*.md"
+      - "features*.md"
+    phase_relevance:
+      - discovery
+      - planning
+      - core_features
+    context_injection:
+      max_size_kb: 100
+      include_full: true
+      priority: high
+
+  - id: wireframes
+    category: docs
+    name: "Wireframes"
+    description: "UI mockups and wireframes"
+    file_patterns:
+      - "wireframes/**"
+      - "*.figma"
+      - "*.sketch"
+      - "mockup*.png"
+      - "wireframe*.png"
+    phase_relevance:
+      - planning
+      - foundation
+      - core_features
+    context_injection:
+      type: image
+      describe_with_ai: true
+
+  - id: api_specs
+    category: docs
+    name: "API Specifications"
+    description: "API documentation and specifications"
+    file_patterns:
+      - "openapi*.yaml"
+      - "openapi*.json"
+      - "swagger*.yaml"
+      - "api-spec*.md"
+    phase_relevance:
+      - planning
+      - foundation
+      - core_features
+    context_injection:
+      max_size_kb: 200
+      include_full: true
+
+  - id: architecture_docs
+    category: docs
+    name: "Architecture Documentation"
+    description: "System architecture and design docs"
+    file_patterns:
+      - "architecture*.md"
+      - "design*.md"
+      - "ADR-*.md"
+      - "RFC-*.md"
+    phase_relevance:
+      - planning
+      - foundation
+    context_injection:
+      max_size_kb: 150
+      include_full: true
+      priority: high
+
+  # Knowledge artifacts
+  - id: domain_glossary
+    category: knowledge
+    name: "Domain Glossary"
+    description: "Domain-specific terminology and definitions"
+    file_patterns:
+      - "glossary*.md"
+      - "terminology*.md"
+      - "definitions*.md"
+    phase_relevance:
+      - discovery
+      - planning
+      - all
+    context_injection:
+      max_size_kb: 50
+      include_full: true
+      priority: high
+
+  - id: business_rules
+    category: knowledge
+    name: "Business Rules"
+    description: "Business logic and validation rules"
+    file_patterns:
+      - "business-rules*.md"
+      - "rules*.md"
+      - "constraints*.md"
+    phase_relevance:
+      - planning
+      - core_features
+      - testing
+    context_injection:
+      max_size_kb: 100
+      include_full: true
+      priority: high
+
+  - id: constraints
+    category: knowledge
+    name: "Technical Constraints"
+    description: "Technical limitations and constraints"
+    file_patterns:
+      - "constraints*.md"
+      - "limitations*.md"
+      - "technical-debt*.md"
+    phase_relevance:
+      - planning
+      - foundation
+    context_injection:
+      max_size_kb: 50
+      include_full: true
+
+  - id: references
+    category: knowledge
+    name: "External References"
+    description: "Links to external documentation and resources"
+    file_patterns:
+      - "references/*.md"
+      - "links*.md"
+      - "resources*.md"
+    phase_relevance:
+      - discovery
+      - planning
+    context_injection:
+      max_size_kb: 30
+      include_full: true
+
+  # Research artifacts
+  - id: competitor_analysis
+    category: research
+    name: "Competitor Analysis"
+    description: "Analysis of competitor products"
+    file_patterns:
+      - "competitor*.md"
+      - "market-research*.md"
+      - "competitive*.md"
+    phase_relevance:
+      - discovery
+      - planning
+    context_injection:
+      max_size_kb: 100
+      summary_if_larger: true
+
+  - id: technology_review
+    category: research
+    name: "Technology Review"
+    description: "Technology evaluation and comparisons"
+    file_patterns:
+      - "tech-review*.md"
+      - "technology*.md"
+      - "evaluation*.md"
+    phase_relevance:
+      - discovery
+      - planning
+    context_injection:
+      max_size_kb: 100
+      summary_if_larger: true
+
+  - id: benchmarks
+    category: research
+    name: "Benchmarks"
+    description: "Performance benchmarks and comparisons"
+    file_patterns:
+      - "benchmarks/**"
+      - "benchmark*.md"
+      - "performance*.md"
+    phase_relevance:
+      - optimization
+      - testing
+    context_injection:
+      max_size_kb: 50
+      include_full: true
+
+  # Asset artifacts
+  - id: images
+    category: assets
+    name: "Image Assets"
+    description: "Images, logos, and graphics"
+    file_patterns:
+      - "images/**"
+      - "*.png"
+      - "*.jpg"
+      - "*.svg"
+    phase_relevance:
+      - design
+      - core_features
+    context_injection:
+      type: image
+      catalog_only: true
+
+  - id: icons
+    category: assets
+    name: "Icons"
+    description: "Icon sets and graphics"
+    file_patterns:
+      - "icons/**"
+      - "icon-*.svg"
+    phase_relevance:
+      - design
+      - polish
+    context_injection:
+      type: image
+      catalog_only: true
+
+  - id: templates
+    category: assets
+    name: "Templates"
+    description: "Document and code templates"
+    file_patterns:
+      - "templates/**"
+      - "*.template"
+      - "*.tmpl"
+    phase_relevance:
+      - all
+    context_injection:
+      max_size_kb: 50
+      include_full: true
+
+  # Example artifacts
+  - id: code_examples
+    category: examples
+    name: "Code Examples"
+    description: "Reference implementations and code samples"
+    file_patterns:
+      - "examples/**"
+      - "*example*"
+      - "*sample*"
+    phase_relevance:
+      - core_features
+      - testing
+    context_injection:
+      max_size_kb: 100
+      include_full: true
+
+  - id: reference_implementation
+    category: examples
+    name: "Reference Implementation"
+    description: "Complete reference implementations"
+    file_patterns:
+      - "reference/**"
+      - "prototype/**"
+    phase_relevance:
+      - planning
+      - core_features
+    context_injection:
+      max_size_kb: 200
+      summary_if_larger: true
+
+# Artifact metadata schema
+artifact_metadata:
+  required_fields:
+    - id
+    - type
+    - name
+    - path
+    - created_at
+  optional_fields:
+    - version
+    - author
+    - description
+    - tags
+    - relevance_score
+    - last_accessed
+    - checksum
+
+# Context injection rules
+context_injection:
+  # How to inject artifact context into agent prompts
+  rules:
+    - name: "Phase-based injection"
+      description: "Inject artifacts relevant to current phase"
+      trigger: phase_start
+      selection: by_phase_relevance
+
+    - name: "On-demand injection"
+      description: "Inject artifacts when referenced in conversation"
+      trigger: explicit_reference
+      selection: by_name_or_type
+
+    - name: "Priority injection"
+      description: "Always inject high-priority artifacts"
+      trigger: always
+      selection: by_priority_high
+
+  # Size limits for context
+  limits:
+    max_total_kb: 500
+    max_per_artifact_kb: 100
+    max_artifacts_per_injection: 10
+
+  # Summarization rules
+  summarization:
+    enabled: true
+    when: size_exceeds_limit
+    method: ai_summary
+    preserve_structure: true
+
+# Auto-detection configuration
+auto_detection:
+  enabled: true
+  scan_on_init: true
+  watch_for_changes: true
+  excluded_patterns:
+    - "node_modules/**"
+    - ".git/**"
+    - "dist/**"
+    - "build/**"
+    - "*.lock"
+
+# Artifact versioning
+versioning:
+  enabled: true
+  strategy: content_hash
+  keep_history: 5
+
+# Integration with state machine
+state_integration:
+  # Track artifacts in project state
+  track_in_state: true
+  state_key: "artifacts"
+
+  # Artifact events
+  events:
+    - artifact_added
+    - artifact_updated
+    - artifact_removed
+    - artifact_accessed
+
+# CLI commands for artifact management
+cli_commands:
+  - name: "artifacts:scan"
+    description: "Scan and index project artifacts"
+  - name: "artifacts:list"
+    description: "List all indexed artifacts"
+  - name: "artifacts:add"
+    description: "Add an artifact manually"
+  - name: "artifacts:info"
+    description: "Show artifact details"
+  - name: "artifacts:context"
+    description: "Show current context injection"
+
+# Example artifact index entry
+example_index_entry:
+  id: "req-001"
+  type: "requirements"
+  name: "Core Requirements"
+  path: ".omgkit/artifacts/docs/requirements.md"
+  created_at: "2024-01-15T10:00:00Z"
+  version: "1.0.0"
+  description: "Main product requirements document"
+  tags: ["core", "v1", "approved"]
+  relevance_score: 0.95
+  checksum: "sha256:abc123..."
+  metadata:
+    author: "product-team"
+    approved_by: "stakeholder"
+    last_review: "2024-01-14"

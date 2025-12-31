@@ -14,7 +14,7 @@ schema:
     type:
       type: string
       required: true
-      enum: [saas, api, cli, library, fullstack, mobile]
+      enum: [saas, api, cli, library, fullstack, mobile, ai, desktop, iot, game, simulation]
       description: Type of project being built
 
     archetype:
@@ -308,6 +308,98 @@ schema:
       type: integer
       default: 0
 
+  # Artifacts tracking
+  artifacts:
+    scanned:
+      type: boolean
+      default: false
+      description: Whether artifacts have been scanned
+
+    last_scan:
+      type: datetime
+      description: Last artifact scan timestamp
+
+    count:
+      type: integer
+      default: 0
+      description: Total number of indexed artifacts
+
+    categories:
+      type: object
+      description: Count by category
+      properties:
+        data:
+          type: integer
+          default: 0
+        docs:
+          type: integer
+          default: 0
+        knowledge:
+          type: integer
+          default: 0
+        research:
+          type: integer
+          default: 0
+        assets:
+          type: integer
+          default: 0
+        examples:
+          type: integer
+          default: 0
+
+    index:
+      type: array
+      items:
+        id:
+          type: string
+          required: true
+          description: Unique artifact identifier
+        type:
+          type: string
+          required: true
+          description: Artifact type ID
+        category:
+          type: string
+          required: true
+          description: Artifact category
+        name:
+          type: string
+          required: true
+          description: Display name
+        path:
+          type: string
+          required: true
+          description: File path relative to project root
+        created_at:
+          type: datetime
+          description: When artifact was indexed
+        size_kb:
+          type: number
+          description: File size in KB
+        checksum:
+          type: string
+          description: Content hash for change detection
+        relevance:
+          type: object
+          description: Phase relevance scores
+        metadata:
+          type: object
+          description: Additional artifact metadata
+
+    active_context:
+      type: array
+      items:
+        artifact_id:
+          type: string
+        injected_at:
+          type: datetime
+        phase:
+          type: string
+        summary:
+          type: string
+          description: Summary if artifact was too large
+      description: Currently active artifacts in context
+
 # State transitions
 transitions:
   ready:
@@ -381,3 +473,15 @@ default_state:
     files_modified: 0
     tests_run: 0
     tests_passed: 0
+  artifacts:
+    scanned: false
+    count: 0
+    categories:
+      data: 0
+      docs: 0
+      knowledge: 0
+      research: 0
+      assets: 0
+      examples: 0
+    index: []
+    active_context: []

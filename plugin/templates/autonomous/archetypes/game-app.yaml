@@ -1,0 +1,428 @@
+name: "Game Development"
+id: game-app
+description: "Video game with gameplay mechanics, assets pipeline, and platform deployment"
+estimated_duration: "6-12 weeks"
+icon: "gamepad"
+
+# Default technology recommendations
+defaults:
+  engine: unity
+  language: csharp
+  art_pipeline: blender
+  audio: fmod
+  version_control: git_lfs
+  ci: unity_cloud_build
+
+# Alternative technology stacks
+alternatives:
+  engine:
+    - id: unity
+      name: "Unity (C#)"
+      description: "Most popular, cross-platform, large asset store"
+    - id: unreal
+      name: "Unreal Engine (C++/Blueprints)"
+      description: "AAA quality, best graphics"
+    - id: godot
+      name: "Godot"
+      description: "Open-source, lightweight, GDScript"
+    - id: phaser
+      name: "Phaser.js"
+      description: "Web games, 2D focused"
+    - id: bevy
+      name: "Bevy (Rust)"
+      description: "Modern ECS, data-driven"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "Game Concept"
+    description: "Define game concept, genre, and target platforms"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      Game concept complete. Review:
+      - Core game concept and mechanics
+      - Target platforms
+      - Art style direction
+      - Scope and timeline
+
+      Approve to proceed with design.
+
+    steps:
+      - id: concept_definition
+        name: "Concept Definition"
+        agent: planner
+        description: "Define core game concept"
+
+      - id: genre_mechanics
+        name: "Genre & Mechanics"
+        agent: planner
+        description: "Define genre and core mechanics"
+
+      - id: platform_selection
+        name: "Platform Selection"
+        agent: architect
+        description: "Select target platforms"
+
+      - id: scope_estimation
+        name: "Scope Estimation"
+        agent: planner
+        description: "Estimate development scope"
+
+    outputs:
+      - ".omgkit/generated/game-concept.md"
+      - ".omgkit/generated/platform-targets.md"
+
+  - id: design
+    name: "Game Design Document"
+    description: "Create detailed game design document"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Game design document complete. Review:
+      - Gameplay mechanics in detail
+      - Progression system
+      - Level design approach
+      - Art and audio direction
+
+      Approve to begin foundation.
+
+    steps:
+      - id: gdd_core
+        name: "Core Mechanics GDD"
+        agent: planner
+        description: "Document core gameplay mechanics"
+
+      - id: progression
+        name: "Progression Design"
+        agent: planner
+        description: "Design progression systems"
+
+      - id: level_design
+        name: "Level Design Doc"
+        agent: planner
+        description: "Plan level design approach"
+
+      - id: art_direction
+        name: "Art Direction"
+        agent: ui-ux-designer
+        description: "Define art style and direction"
+
+      - id: audio_direction
+        name: "Audio Direction"
+        agent: planner
+        description: "Define audio style and needs"
+
+    outputs:
+      - ".omgkit/generated/gdd.md"
+      - ".omgkit/generated/art-bible.md"
+      - ".omgkit/generated/audio-design.md"
+
+  - id: foundation
+    name: "Engine Foundation"
+    description: "Set up game engine and core systems"
+    order: 3
+    checkpoint: false
+
+    steps:
+      - id: project_setup
+        name: "Project Setup"
+        agent: fullstack-developer
+        description: "Initialize game project"
+
+      - id: input_system
+        name: "Input System"
+        agent: fullstack-developer
+        description: "Implement input handling"
+
+      - id: physics_setup
+        name: "Physics Setup"
+        agent: fullstack-developer
+        description: "Configure physics engine"
+
+      - id: camera_system
+        name: "Camera System"
+        agent: fullstack-developer
+        description: "Implement camera controls"
+
+      - id: scene_management
+        name: "Scene Management"
+        agent: fullstack-developer
+        description: "Set up scene loading"
+
+    outputs:
+      - "Assets/Scripts/Core/"
+      - "Assets/Scripts/Input/"
+      - "Assets/Scripts/Camera/"
+
+  - id: core_gameplay
+    name: "Core Gameplay"
+    description: "Implement main player mechanics and game loop"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Core gameplay complete. Review:
+      - Player mechanics feel good
+      - Game loop is functional
+      - Core systems working
+
+      Approve to add content.
+
+    steps:
+      - id: player_controller
+        name: "Player Controller"
+        agent: fullstack-developer
+        description: "Implement player movement and actions"
+
+      - id: game_loop
+        name: "Game Loop"
+        agent: fullstack-developer
+        description: "Implement main game loop"
+
+      - id: enemy_ai
+        name: "Enemy AI"
+        agent: fullstack-developer
+        description: "Implement basic enemy AI"
+
+      - id: combat_system
+        name: "Combat/Interaction"
+        agent: fullstack-developer
+        description: "Implement combat or interaction system"
+
+      - id: progression_system
+        name: "Progression System"
+        agent: fullstack-developer
+        description: "Implement progression mechanics"
+
+    outputs:
+      - "Assets/Scripts/Player/"
+      - "Assets/Scripts/Enemy/"
+      - "Assets/Scripts/Combat/"
+      - "Assets/Scripts/Progression/"
+
+  - id: content
+    name: "Content Creation"
+    description: "Create levels, assets, characters, and audio"
+    order: 5
+    checkpoint: true
+    checkpoint_message: |
+      Content creation progress. Review:
+      - Level content
+      - Art assets
+      - Audio implementation
+
+      Approve to proceed with polish.
+
+    steps:
+      - id: level_creation
+        name: "Level Creation"
+        agent: fullstack-developer
+        description: "Build game levels"
+
+      - id: art_integration
+        name: "Art Integration"
+        agent: ui-ux-designer
+        description: "Integrate art assets"
+
+      - id: character_setup
+        name: "Character Setup"
+        agent: fullstack-developer
+        description: "Set up characters and animations"
+
+      - id: audio_integration
+        name: "Audio Integration"
+        agent: fullstack-developer
+        description: "Integrate sound effects and music"
+
+    outputs:
+      - "Assets/Scenes/"
+      - "Assets/Art/"
+      - "Assets/Audio/"
+      - "Assets/Characters/"
+
+  - id: polish
+    name: "Polish & Effects"
+    description: "UI/UX, animations, effects, and optimization"
+    order: 6
+    checkpoint: true
+    checkpoint_message: |
+      Polish phase complete. Review:
+      - UI/UX quality
+      - Visual effects
+      - Performance optimization
+
+      Approve for multiplayer or release prep.
+
+    steps:
+      - id: ui_implementation
+        name: "UI Implementation"
+        agent: ui-ux-designer
+        description: "Build game UI"
+
+      - id: visual_effects
+        name: "Visual Effects"
+        agent: fullstack-developer
+        description: "Add particle effects and polish"
+
+      - id: animation_polish
+        name: "Animation Polish"
+        agent: fullstack-developer
+        description: "Polish animations and transitions"
+
+      - id: performance
+        name: "Performance Optimization"
+        agent: fullstack-developer
+        description: "Optimize for target platforms"
+
+      - id: accessibility
+        name: "Accessibility"
+        agent: ui-ux-designer
+        description: "Add accessibility features"
+
+    outputs:
+      - "Assets/Scripts/UI/"
+      - "Assets/VFX/"
+
+  - id: multiplayer
+    name: "Multiplayer (Optional)"
+    description: "Networking, matchmaking, and multiplayer features"
+    order: 7
+    checkpoint: true
+    optional: true
+    checkpoint_message: |
+      Multiplayer implementation complete. Review:
+      - Network stability
+      - Matchmaking flow
+      - Anti-cheat measures
+
+      Approve for release preparation.
+
+    steps:
+      - id: networking
+        name: "Networking Setup"
+        agent: fullstack-developer
+        description: "Implement networking layer"
+
+      - id: matchmaking
+        name: "Matchmaking"
+        agent: fullstack-developer
+        description: "Build matchmaking system"
+
+      - id: sync
+        name: "State Synchronization"
+        agent: fullstack-developer
+        description: "Sync game state across clients"
+
+      - id: anti_cheat
+        name: "Anti-Cheat"
+        agent: security-auditor
+        description: "Implement anti-cheat measures"
+
+    outputs:
+      - "Assets/Scripts/Networking/"
+      - "Assets/Scripts/Matchmaking/"
+
+  - id: release
+    name: "Release Preparation"
+    description: "Playtesting, store submission, and analytics"
+    order: 8
+    checkpoint: true
+    checkpoint_message: |
+      Release preparation complete. Review:
+      - Playtest feedback addressed
+      - Store assets ready
+      - Analytics configured
+
+      This is the final checkpoint before release.
+
+    steps:
+      - id: playtesting
+        name: "Playtesting"
+        agent: tester
+        description: "Conduct playtesting sessions"
+
+      - id: bug_fixing
+        name: "Bug Fixing"
+        agent: fullstack-developer
+        description: "Fix critical bugs"
+
+      - id: store_assets
+        name: "Store Assets"
+        agent: copywriter
+        description: "Create store listings and assets"
+
+      - id: analytics
+        name: "Analytics Setup"
+        agent: fullstack-developer
+        description: "Integrate analytics"
+
+      - id: store_submission
+        name: "Store Submission"
+        agent: cicd-manager
+        description: "Submit to platforms"
+
+    outputs:
+      - "Builds/"
+      - "Marketing/"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/Scripts/**"
+    level: 2
+    reason: "Game scripts need review"
+  - pattern: "**/Core/**"
+    level: 3
+    reason: "Core systems are critical"
+  - pattern: "**/Networking/**"
+    level: 3
+    reason: "Networking is complex"
+  - pattern: "**/Scenes/**"
+    level: 1
+    reason: "Level changes are low risk"
+  - pattern: "ProjectSettings/**"
+    level: 3
+    reason: "Project settings are critical"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "game builds successfully"
+    - "no console errors"
+  before_checkpoint:
+    - "playtesting feedback positive"
+    - "performance targets met"
+  before_deploy:
+    - "all platforms tested"
+    - "store requirements met"
+    - "age rating approved"
+
+# Game-specific discovery questions
+discovery_additions:
+  - category: "Game Concept"
+    questions:
+      - "What genre? (platformer, RPG, FPS, puzzle, etc.)"
+      - "Single-player, multiplayer, or both?"
+      - "Target playtime per session?"
+      - "Core gameplay hook?"
+      - "Similar games for reference?"
+
+  - category: "Platforms"
+    questions:
+      - "Target platforms? (PC, console, mobile, web)"
+      - "Cross-platform play needed?"
+      - "Controller support required?"
+      - "VR/AR support?"
+
+  - category: "Content"
+    questions:
+      - "Art style? (realistic, stylized, pixel art, etc.)"
+      - "Do you have art assets or need creation?"
+      - "Audio needs? (original score, sound effects)"
+      - "Estimated content volume? (levels, characters)"
+
+  - category: "Monetization"
+    questions:
+      - "Business model? (premium, F2P, subscription)"
+      - "In-app purchases planned?"
+      - "Ads integration needed?"
+      - "DLC or expansion plans?"

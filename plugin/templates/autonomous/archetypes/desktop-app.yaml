@@ -1,0 +1,371 @@
+name: "Desktop Application"
+id: desktop-app
+description: "Native desktop application with system integration, auto-updates, and cross-platform support"
+estimated_duration: "3-6 weeks"
+icon: "desktop"
+
+# Default technology recommendations
+defaults:
+  framework: electron
+  ui: react
+  state: zustand
+  build: electron_builder
+  updates: electron_updater
+  storage: electron_store
+
+# Alternative technology stacks
+alternatives:
+  framework:
+    - id: electron
+      name: "Electron"
+      description: "Web technologies, large ecosystem, cross-platform"
+    - id: tauri
+      name: "Tauri"
+      description: "Rust-based, smaller bundle, better performance"
+    - id: qt
+      name: "Qt (Python/C++)"
+      description: "Native look and feel, excellent performance"
+    - id: dotnet_maui
+      name: ".NET MAUI"
+      description: "Microsoft ecosystem, C#"
+    - id: flutter_desktop
+      name: "Flutter Desktop"
+      description: "Single codebase for all platforms"
+
+# Phases of development
+phases:
+  - id: discovery
+    name: "Discovery & Requirements"
+    description: "Define app purpose, target platforms, and native features"
+    order: 1
+    checkpoint: true
+    checkpoint_message: |
+      Discovery complete. Review:
+      - App purpose and target users
+      - Target operating systems
+      - Native features required
+      - Offline/online requirements
+
+      Approve to proceed with design.
+
+    steps:
+      - id: requirements
+        name: "Requirements Gathering"
+        agent: planner
+        description: "Gather desktop app requirements"
+
+      - id: platform_selection
+        name: "Platform Selection"
+        agent: architect
+        description: "Select target platforms and framework"
+
+      - id: native_features
+        name: "Native Features Audit"
+        agent: architect
+        description: "Identify required native features"
+
+      - id: offline_strategy
+        name: "Offline Strategy"
+        agent: architect
+        description: "Plan offline functionality"
+
+    outputs:
+      - ".omgkit/generated/desktop-requirements.md"
+      - ".omgkit/generated/platform-decision.md"
+
+  - id: planning
+    name: "Architecture Planning"
+    description: "Design window management, IPC, and system integration"
+    order: 2
+    checkpoint: true
+    checkpoint_message: |
+      Architecture complete. Review:
+      - Window management design
+      - IPC communication patterns
+      - File system access patterns
+
+      Approve to begin foundation.
+
+    steps:
+      - id: window_design
+        name: "Window Management"
+        agent: architect
+        description: "Design window structure and management"
+
+      - id: ipc_design
+        name: "IPC Design"
+        agent: architect
+        description: "Design main/renderer process communication"
+
+      - id: security_model
+        name: "Security Model"
+        agent: security-auditor
+        description: "Define security boundaries and permissions"
+
+      - id: update_strategy
+        name: "Update Strategy"
+        agent: architect
+        description: "Plan auto-update mechanism"
+
+    outputs:
+      - ".omgkit/generated/window-design.md"
+      - ".omgkit/generated/ipc-design.md"
+      - ".omgkit/generated/security-model.md"
+
+  - id: foundation
+    name: "App Foundation"
+    description: "Set up app shell, IPC, and native bindings"
+    order: 3
+    checkpoint: false
+
+    steps:
+      - id: project_setup
+        name: "Project Setup"
+        agent: fullstack-developer
+        description: "Initialize desktop project"
+
+      - id: app_shell
+        name: "App Shell"
+        agent: fullstack-developer
+        description: "Create main window and process"
+
+      - id: ipc_setup
+        name: "IPC Setup"
+        agent: fullstack-developer
+        description: "Implement IPC communication"
+
+      - id: preload_scripts
+        name: "Preload Scripts"
+        agent: fullstack-developer
+        description: "Set up secure preload scripts"
+
+      - id: dev_tools
+        name: "Dev Tools"
+        agent: fullstack-developer
+        description: "Configure development environment"
+
+    outputs:
+      - "src/main/"
+      - "src/renderer/"
+      - "src/preload/"
+
+  - id: core_features
+    name: "Core Features"
+    description: "Implement main app functionality"
+    order: 4
+    checkpoint: true
+    checkpoint_message: |
+      Core features complete. Review:
+      - Main functionality working
+      - IPC communication stable
+      - File operations working
+
+      Approve to add native features.
+
+    steps:
+      - id: main_ui
+        name: "Main UI"
+        agent: fullstack-developer
+        description: "Build main application UI"
+
+      - id: file_operations
+        name: "File Operations"
+        agent: fullstack-developer
+        description: "Implement file system operations"
+
+      - id: data_persistence
+        name: "Data Persistence"
+        agent: fullstack-developer
+        description: "Implement local data storage"
+
+      - id: menu_shortcuts
+        name: "Menus & Shortcuts"
+        agent: fullstack-developer
+        description: "Create application menus and shortcuts"
+
+    outputs:
+      - "src/renderer/components/"
+      - "src/main/file-system.ts"
+      - "src/main/storage.ts"
+
+  - id: native_integration
+    name: "Native Integration"
+    description: "Implement system tray, notifications, and OS features"
+    order: 5
+    checkpoint: false
+
+    steps:
+      - id: system_tray
+        name: "System Tray"
+        agent: fullstack-developer
+        description: "Implement system tray icon and menu"
+
+      - id: notifications
+        name: "Native Notifications"
+        agent: fullstack-developer
+        description: "Implement desktop notifications"
+
+      - id: keyboard_shortcuts
+        name: "Global Shortcuts"
+        agent: fullstack-developer
+        description: "Register global keyboard shortcuts"
+
+      - id: deep_links
+        name: "Deep Links"
+        agent: fullstack-developer
+        description: "Handle custom protocol links"
+
+      - id: file_associations
+        name: "File Associations"
+        agent: fullstack-developer
+        description: "Register file type associations"
+
+    outputs:
+      - "src/main/tray.ts"
+      - "src/main/notifications.ts"
+      - "src/main/shortcuts.ts"
+
+  - id: packaging
+    name: "Packaging & Distribution"
+    description: "Create installers, configure auto-updates, code signing"
+    order: 6
+    checkpoint: true
+    checkpoint_message: |
+      Packaging complete. Review:
+      - Installers for all platforms
+      - Auto-update configuration
+      - Code signing status
+
+      Approve for distribution.
+
+    steps:
+      - id: build_config
+        name: "Build Configuration"
+        agent: cicd-manager
+        description: "Configure build for all platforms"
+
+      - id: installers
+        name: "Create Installers"
+        agent: cicd-manager
+        description: "Generate platform installers"
+
+      - id: code_signing
+        name: "Code Signing"
+        agent: cicd-manager
+        description: "Set up code signing certificates"
+
+      - id: auto_update
+        name: "Auto-Update Setup"
+        agent: fullstack-developer
+        description: "Configure auto-update mechanism"
+
+      - id: notarization
+        name: "macOS Notarization"
+        agent: cicd-manager
+        description: "Notarize for macOS (if applicable)"
+
+    outputs:
+      - "electron-builder.yml"
+      - "scripts/sign.js"
+      - "dist/"
+
+  - id: distribution
+    name: "Distribution"
+    description: "Set up distribution channels"
+    order: 7
+    checkpoint: true
+    checkpoint_message: |
+      Ready for distribution. Review:
+      - Download site/page
+      - App store listings (if applicable)
+      - Update server
+
+      This is the final checkpoint.
+
+    steps:
+      - id: download_page
+        name: "Download Page"
+        agent: fullstack-developer
+        description: "Create download landing page"
+
+      - id: update_server
+        name: "Update Server"
+        agent: cicd-manager
+        description: "Set up update server"
+
+      - id: app_stores
+        name: "App Store Submission"
+        agent: cicd-manager
+        description: "Submit to app stores if applicable"
+
+      - id: ci_releases
+        name: "CI Release Pipeline"
+        agent: cicd-manager
+        description: "Set up automated release pipeline"
+
+    outputs:
+      - ".github/workflows/release.yml"
+      - "docs/download.html"
+
+# Autonomy rules for this archetype
+autonomy_rules:
+  - pattern: "**/renderer/**"
+    level: 1
+    reason: "UI code can be auto-generated"
+  - pattern: "**/main/**"
+    level: 2
+    reason: "Main process needs review"
+  - pattern: "**/preload/**"
+    level: 3
+    reason: "Preload scripts are security-sensitive"
+  - pattern: "electron-builder.yml"
+    level: 3
+    reason: "Build config affects distribution"
+  - pattern: "**/sign*"
+    level: 4
+    reason: "Code signing is manual only"
+
+# Quality gates
+quality_gates:
+  after_feature:
+    - "npm test"
+    - "npm run lint"
+  before_checkpoint:
+    - "npm run build"
+    - "app launches successfully"
+  before_deploy:
+    - "installers work on all platforms"
+    - "auto-update works"
+    - "code is signed"
+
+# Desktop-specific discovery questions
+discovery_additions:
+  - category: "Platform"
+    questions:
+      - "Which operating systems to support? (Windows, macOS, Linux)"
+      - "Minimum OS versions to support?"
+      - "32-bit support needed?"
+      - "ARM support needed? (Apple Silicon, ARM Windows)"
+
+  - category: "Native Features"
+    questions:
+      - "System tray icon needed?"
+      - "Global keyboard shortcuts?"
+      - "File type associations?"
+      - "Custom protocol handling (myapp://)?"
+      - "Background running required?"
+
+  - category: "Distribution"
+    questions:
+      - "App store distribution? (Mac App Store, Microsoft Store)"
+      - "Direct download from website?"
+      - "Enterprise deployment needs?"
+      - "Auto-update mechanism required?"
+      - "Do you have code signing certificates?"
+
+  - category: "Data"
+    questions:
+      - "Local file storage needs?"
+      - "Database requirements? (SQLite, etc.)"
+      - "Cloud sync needed?"
+      - "Offline-first required?"
