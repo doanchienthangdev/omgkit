@@ -232,14 +232,22 @@ describe('CLI Core Functions', () => {
 
       const result = uninstallPlugin({ homeDir: TEST_HOME, silent: true });
       expect(result.success).toBe(true);
-      expect(result.removed).toBe(true);
+      // Check that things were actually removed
+      expect(result.removed.backup).toBe(true);
+      expect(result.removed.commands).toBeGreaterThan(0);
+      expect(result.removed.skills).toBeGreaterThan(0);
+      expect(result.removed.agents).toBeGreaterThan(0);
       expect(isPluginInstalled(TEST_HOME)).toBe(false);
     });
 
     it('should handle non-existent plugin gracefully', () => {
       const result = uninstallPlugin({ homeDir: TEST_HOME, silent: true });
       expect(result.success).toBe(true);
-      expect(result.removed).toBe(false);
+      // Nothing to remove
+      expect(result.removed.backup).toBe(false);
+      expect(result.removed.commands).toBe(0);
+      expect(result.removed.skills).toBe(0);
+      expect(result.removed.agents).toBe(0);
     });
   });
 

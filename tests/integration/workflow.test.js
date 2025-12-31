@@ -111,7 +111,9 @@ describe('Integration: Complete Workflow', () => {
     it('Step 11: Uninstall plugin', () => {
       const result = uninstallPlugin({ homeDir: TEST_HOME, silent: true });
       expect(result.success).toBe(true);
-      expect(result.removed).toBe(true);
+      // Check that things were actually removed
+      expect(result.removed.backup).toBe(true);
+      expect(result.removed.commands).toBeGreaterThan(0);
       expect(isPluginInstalled(TEST_HOME)).toBe(false);
     });
 
@@ -163,7 +165,11 @@ describe('Integration: Complete Workflow', () => {
       uninstallPlugin({ homeDir: TEST_HOME, silent: true });
       const result = uninstallPlugin({ homeDir: TEST_HOME, silent: true });
       expect(result.success).toBe(true);
-      expect(result.removed).toBe(false); // Already removed
+      // Nothing to remove the second time
+      expect(result.removed.backup).toBe(false);
+      expect(result.removed.commands).toBe(0);
+      expect(result.removed.skills).toBe(0);
+      expect(result.removed.agents).toBe(0);
     });
   });
 });
