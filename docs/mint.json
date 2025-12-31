@@ -261,9 +261,7 @@
     {
       "group": "Workflow Commands",
       "pages": [
-        "commands/feature",
         "commands/bug-fix",
-        "commands/refactor",
         "commands/code-review",
         "commands/rag-development",
         "commands/model-evaluation",
