@@ -1,0 +1,65 @@
+---
+name: ml-systems
+description: Machine Learning Systems - comprehensive knowledge for building production ML systems from data engineering through deployment and operations. Based on Harvard ML Systems course and Designing ML Systems by Chip Huyen.
+---
+
+# ML Systems
+
+Building production-ready machine learning systems.
+
+## Overview
+
+This skill category covers the complete ML system lifecycle:
+
+1. **Foundations** - Core concepts, architectures, paradigms
+2. **Data Engineering** - Data collection, quality, feature engineering
+3. **Model Development** - Training, evaluation, frameworks
+4. **Performance** - Optimization, acceleration, efficiency
+5. **Deployment** - Serving, edge deployment, scaling
+6. **Operations** - MLOps, monitoring, reliability
+
+## Categories
+
+### Foundations
+- `ml-systems-fundamentals` - Core ML systems concepts
+- `deep-learning-primer` - Deep learning foundations
+- `dnn-architectures` - Neural network architectures
+- `deployment-paradigms` - Deployment patterns
+
+### Data Engineering
+- `data-engineering` - Data pipelines and quality
+- `training-data` - Training data management
+- `feature-engineering` - Feature creation and stores
+
+### Model Development
+- `ml-workflow` - ML development workflow
+- `model-development` - Model training and selection
+- `ml-frameworks` - Framework best practices
+
+### Performance
+- `efficient-ai` - Efficiency techniques
+- `model-optimization` - Quantization, pruning, distillation
+- `ai-accelerators` - Hardware acceleration
+
+### Deployment
+- `model-deployment` - Production deployment
+- `inference-optimization` - Inference optimization
+- `edge-deployment` - Edge and mobile deployment
+
+### Operations
+- `mlops` - ML operations and lifecycle
+- `robust-ai` - Reliability and robustness
+
+## Key Principles
+
+1. **Data-Centric AI** - Focus on data quality over model complexity
+2. **Iterative Development** - Start simple, iterate based on metrics
+3. **Production-First** - Design for deployment from the start
+4. **Monitoring** - Continuous monitoring and improvement
+5. **Reproducibility** - Version everything (data, code, models)
+
+## References
+
+- Harvard CS 329S: Machine Learning Systems Design
+- Designing Machine Learning Systems by Chip Huyen
+- MLOps: Continuous Delivery and Automation Pipelines

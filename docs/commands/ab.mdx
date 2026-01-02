@@ -1,0 +1,181 @@
+---
+title: "/omgdeploy:ab"
+description: "Setup A/B testing between model versions with traffic splitting and statistical analysis"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgdeploy
+
+  **Syntax:** `/omgdeploy:ab "[--models <models>] [--traffic_split <split>]"`
+</Info>
+
+## Overview
+
+Setup A/B testing between model versions with traffic splitting and statistical analysis
+
+## Quick Start
+
+```bash
+/omgdeploy:ab "[--models
+```
+
+
+# A/B Testing: "[--models \<models\>] [--traffic_split \<split\>]"
+
+Setup A/B test: **"[--models \<models\>] [--traffic_split \<split\>]"**
+
+## Agent
+Uses **deployment-agent** for A/B testing configuration.
+
+## Parameters
+- **models**: List of model versions to test
+- **traffic_split**: Traffic distribution percentages
+
+## A/B Test Components
+
+### Traffic Splitting
+- Percentage-based routing
+- User-based stickiness
+- Geographic routing
+- Feature-based routing
+
+### Metrics Collection
+- Primary metrics (accuracy, latency)
+- Business metrics (conversion, revenue)
+- User experience metrics
+- System metrics
+
+### Statistical Analysis
+- Significance testing
+- Confidence intervals
+- Sample size calculation
+- Stopping rules
+
+## Code Template
+```python
+from omgkit.deployment import ABTester
+
+ab_tester = ABTester()
+
+experiment = ab_tester.create_experiment(
+    name="churn_model_v2_test",
+    models={
+        "control": "models/v1.0.0/model.pt",
+        "treatment": "models/v2.0.0/model.pt"
+    },
+    traffic_split={
+        "control": 0.8,
+        "treatment": 0.2
+    },
+    metrics=["accuracy", "latency", "conversion_rate"],
+    min_samples=10000,
+    significance_level=0.05
+)
+
+# Monitor experiment
+ab_tester.monitor(experiment)
+
+# Analyze results
+results = ab_tester.analyze(experiment)
+
+if results.is_significant and results.treatment_better:
+    ab_tester.promote("treatment")
+```
+
+## Experiment Types
+- A/B (two variants)
+- A/B/n (multiple variants)
+- Multi-armed bandit
+- Shadow mode
+
+## Safety Features
+- Automatic rollback
+- Circuit breaker
+- Error rate monitoring
+- Latency guardrails
+
+## Output Report
+- Statistical significance
+- Effect size
+- Confidence intervals
+- Recommendation
+
+## Progress
+- [ ] Experiment configured
+- [ ] Traffic routing active
+- [ ] Metrics collecting
+- [ ] Analysis running
+- [ ] Decision ready
+
+Make data-driven model rollout decisions.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [mlops-engineer-agent](/agents/mlops-engineer-agent) | Expert MLOps engineer for building and maintaining productio... |
+| [production-engineer-agent](/agents/production-engineer-agent) | Expert agent for deploying and operating ML systems in produ... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgdeploy:ab "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgdeploy:ab "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgdeploy Commands" icon="terminal" href="/commands/overview#omgdeploy">
+    More omgdeploy commands
+  </Card>
+</CardGroup>

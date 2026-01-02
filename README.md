@@ -36,10 +36,10 @@ All coordinated through **Omega-level thinking** - a framework for finding break
 
 | Component | Count | Description |
 |-----------|-------|-------------|
-| **Agents** | 33 | Specialized AI team members with distinct roles |
-| **Commands** | 113 | Slash commands for every development task |
-| **Workflows** | 49 | Complete development processes from idea to deploy |
-| **Skills** | 128 | Domain expertise modules across 22 categories |
+| **Agents** | 41 | Specialized AI team members with distinct roles |
+| **Commands** | 144 | Slash commands for every development task |
+| **Workflows** | 61 | Complete development processes from idea to deploy |
+| **Skills** | 145 | Domain expertise modules across 23 categories |
 | **Modes** | 10 | Behavioral configurations for different contexts |
 | **Archetypes** | 14 | Project templates for autonomous development |
 
@@ -141,7 +141,7 @@ After installation, use these commands in Claude Code:
 
 ---
 
-## Agents (33)
+## Agents (41)
 
 Agents are specialized AI team members, each with distinct expertise and responsibilities.
 
@@ -192,6 +192,19 @@ Agents are specialized AI team members, each with distinct expertise and respons
 | `data-engineer` | Data pipelines, ETL, schema design |
 | `ml-engineer` | ML pipelines, model training, MLOps |
 
+### ML Systems (New)
+
+| Agent | Description |
+|-------|-------------|
+| `ml-engineer-agent` | Full-stack ML engineering from data to deployment |
+| `data-scientist-agent` | Statistical modeling, experimentation, analysis |
+| `research-scientist-agent` | Novel algorithms, paper implementation, experiments |
+| `model-optimizer-agent` | Quantization, pruning, distillation |
+| `production-engineer-agent` | Model serving, reliability, scaling |
+| `mlops-engineer-agent` | ML infrastructure, pipelines, monitoring |
+| `ai-architect-agent` | ML system architecture, requirements analysis |
+| `experiment-analyst-agent` | Experiment tracking, analysis, reporting |
+
 ### Specialized Domains
 
 | Agent | Description |
@@ -209,7 +222,7 @@ Agents are specialized AI team members, each with distinct expertise and respons
 
 ---
 
-## Commands (113)
+## Commands (144)
 
 Commands are slash-prefixed actions organized by namespace.
 
@@ -296,9 +309,68 @@ Commands are slash-prefixed actions organized by namespace.
 /alignment:deps <type:name>  # Show dependency graph
 ```
 
+### ML Systems (New - 31 commands)
+
+#### `/omgml:*` - Project Management
+```bash
+/omgml:init             # Initialize ML project structure
+/omgml:status           # Show ML project status
+```
+
+#### `/omgdata:*` - Data Engineering
+```bash
+/omgdata:collect        # Collect data from sources
+/omgdata:validate       # Validate data quality
+/omgdata:clean          # Clean and preprocess data
+/omgdata:split          # Split train/val/test
+/omgdata:version        # Version datasets with DVC
+```
+
+#### `/omgfeature:*` - Feature Engineering
+```bash
+/omgfeature:extract     # Extract features from raw data
+/omgfeature:select      # Select important features
+/omgfeature:store       # Store in feature store
+```
+
+#### `/omgtrain:*` - Model Training
+```bash
+/omgtrain:baseline      # Create baseline models
+/omgtrain:train         # Train model with config
+/omgtrain:tune          # Hyperparameter tuning
+/omgtrain:evaluate      # Evaluate model performance
+/omgtrain:compare       # Compare model versions
+```
+
+#### `/omgoptim:*` - Model Optimization
+```bash
+/omgoptim:quantize      # Quantize to INT8/FP16
+/omgoptim:prune         # Prune model weights
+/omgoptim:distill       # Knowledge distillation
+/omgoptim:profile       # Profile latency/memory
+```
+
+#### `/omgdeploy:*` - Deployment
+```bash
+/omgdeploy:package      # Package model for deployment
+/omgdeploy:serve        # Deploy model serving
+/omgdeploy:edge         # Deploy to edge devices
+/omgdeploy:cloud        # Deploy to cloud platforms
+/omgdeploy:ab           # Setup A/B testing
+```
+
+#### `/omgops:*` - ML Operations
+```bash
+/omgops:pipeline        # Create ML pipeline
+/omgops:monitor         # Setup monitoring
+/omgops:drift           # Detect data/model drift
+/omgops:retrain         # Trigger retraining
+/omgops:registry        # Manage model registry
+```
+
 ---
 
-## Workflows (49)
+## Workflows (61)
 
 Workflows are orchestrated sequences of agents, commands, and skills.
 
@@ -363,11 +435,28 @@ Workflows are orchestrated sequences of agents, commands, and skills.
 | `omega/100x-architecture` | System redesign |
 | `omega/1000x-innovation` | Industry transformation |
 
+### ML Systems (New - 12 workflows)
+
+| Workflow | Description |
+|----------|-------------|
+| `ml-systems/full-ml-lifecycle-workflow` | Complete ML lifecycle orchestration |
+| `ml-systems/data-pipeline-workflow` | Data collection to feature store |
+| `ml-systems/model-development-workflow` | Baseline to optimized models |
+| `ml-systems/model-optimization-workflow` | Quantization, pruning, distillation |
+| `ml-systems/production-deployment-workflow` | Model packaging to serving |
+| `ml-systems/mlops-pipeline-workflow` | CI/CD for ML systems |
+| `ml-systems/model-monitoring-workflow` | Drift detection and alerting |
+| `ml-systems/experiment-tracking-workflow` | Systematic experimentation |
+| `ml-systems/feature-engineering-workflow` | Feature extraction and selection |
+| `ml-systems/model-retraining-workflow` | Automated retraining triggers |
+| `ml-systems/edge-deployment-workflow` | Edge/mobile model deployment |
+| `ml-systems/ab-testing-workflow` | A/B testing for models |
+
 ---
 
-## Skills (128)
+## Skills (145)
 
-Skills are domain expertise modules organized in 22 categories.
+Skills are domain expertise modules organized in 23 categories.
 
 ### AI Engineering (12 skills)
 
@@ -383,6 +472,31 @@ Based on production AI application patterns:
 | `ai-engineering/finetuning` | LoRA, QLoRA, PEFT, model merging |
 | `ai-engineering/inference-optimization` | Quantization, batching, caching, vLLM |
 | `ai-engineering/guardrails-safety` | Input/output guards, PII protection |
+
+### ML Systems (18 skills - New)
+
+Based on Chip Huyen's "Designing ML Systems" and Stanford CS 329S:
+
+| Skill | Description |
+|-------|-------------|
+| `ml-systems/ml-systems-fundamentals` | Core ML concepts, design principles |
+| `ml-systems/deep-learning-primer` | Neural network foundations |
+| `ml-systems/dnn-architectures` | CNNs, RNNs, Transformers, hybrid models |
+| `ml-systems/data-eng` | ML data pipelines, storage, processing |
+| `ml-systems/training-data` | Sampling, labeling, augmentation |
+| `ml-systems/feature-engineering` | Feature extraction, selection, stores |
+| `ml-systems/ml-workflow` | Experiment design, model selection |
+| `ml-systems/model-dev` | Training, evaluation, debugging |
+| `ml-systems/ml-frameworks` | PyTorch, TensorFlow, scikit-learn |
+| `ml-systems/efficient-ai` | Model compression, efficient architectures |
+| `ml-systems/model-optimization` | Quantization, pruning, distillation |
+| `ml-systems/ai-accelerators` | GPU/TPU optimization, hardware selection |
+| `ml-systems/model-deployment` | Serving, containerization, scaling |
+| `ml-systems/ml-serving-optimization` | Batching, caching, latency reduction |
+| `ml-systems/edge-deployment` | TFLite, Core ML, TensorRT |
+| `ml-systems/mlops` | CI/CD for ML, model registry, pipelines |
+| `ml-systems/robust-ai` | Reliability, monitoring, drift detection |
+| `ml-systems/deployment-paradigms` | Batch vs real-time vs streaming |
 
 ### Methodology (17 skills)
 
@@ -409,6 +523,7 @@ Based on production AI application patterns:
 | Category | Skills | Focus |
 |----------|--------|-------|
 | AI-ML Operations | 6 | MLOps, feature stores, model serving |
+| ML Systems | 18 | Production ML from data to deployment |
 | Microservices | 6 | Service mesh, API gateway, tracing |
 | Event-Driven | 6 | Kafka, event sourcing, CQRS |
 | Game Development | 5 | Unity, Godot, networking |
@@ -568,7 +683,7 @@ omgkit help         # Show help
 
 ## Validation & Testing
 
-OMGKIT has 4800+ automated tests ensuring system integrity.
+OMGKIT has 5600+ automated tests ensuring system integrity.
 
 ### Run Tests
 

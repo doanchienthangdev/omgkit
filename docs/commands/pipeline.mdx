@@ -1,67 +1,122 @@
 ---
-title: "/data:pipeline"
-description: "Design and implement data pipeline with ETL/ELT patterns"
+title: "/omgops:pipeline"
+description: "Create CI/CD pipeline for ML using GitHub Actions, GitLab CI, Jenkins, Kubeflow, or Airflow"
 icon: "terminal"
 ---
 
 <Info>
-  **Category:** Data
+  **Category:** Omgops
 
-  **Syntax:** `/data:pipeline <pipeline description or data source>`
+  **Syntax:** `/omgops:pipeline <platform> [--template <template>]`
 </Info>
 
 ## Overview
 
-Design and implement data pipeline with ETL/ELT patterns
+Create CI/CD pipeline for ML using GitHub Actions, GitLab CI, Jenkins, Kubeflow, or Airflow
 
 ## Quick Start
 
 ```bash
-/data:pipeline "pipeline
+/omgops:pipeline "platform"
 ```
 
 
-# 🔄 Data Pipeline: \<pipeline description or data source\>
+# ML Pipeline: \<platform\> [--template \<template\>]
 
-Create data pipeline: **\<pipeline description or data source\>**
+Create pipeline: **\<platform\> [--template \<template\>]**
 
 ## Agent
-Uses **data-engineer** agent for pipeline implementation.
+Uses **mlops-engineer-agent** for pipeline creation.
 
-## Workflow
-1. **Source Analysis** - Understand data sources
-2. **Schema Design** - Define target schema
-3. **Transform Logic** - Design transformations
-4. **Quality Gates** - Add validation
-5. **Orchestration** - Schedule and monitor
+## Parameters
+- **platform**: github_actions | gitlab_ci | jenkins | kubeflow | airflow
+- **template**: training | deployment | full (default: full)
 
-## Pipeline Components
-- **Extract**: Source connectors
-- **Transform**: Data transformations
-- **Load**: Destination sinks
-- **Monitor**: Metrics and alerts
+## Pipeline Types
 
-## Technologies
-- Apache Airflow / Dagster
-- dbt for transformations
-- Great Expectations for quality
-- Prefect for orchestration
+### Training Pipeline
+- Data validation
+- Feature engineering
+- Model training
+- Model evaluation
+- Model registration
 
-## Outputs
-- Pipeline DAG definition
-- Transformation SQL/code
-- Data quality tests
-- Monitoring dashboard config
-- Documentation
+### Deployment Pipeline
+- Model validation
+- Canary deployment
+- Integration tests
+- Production promotion
+
+### Full Pipeline
+- Complete CI/CD
+- End-to-end automation
+- Monitoring integration
+
+## Code Template
+```python
+from omgkit.mlops import PipelineBuilder
+
+builder = PipelineBuilder(platform="github_actions")
+
+pipeline = builder.create_pipeline(
+    name="ml-training-pipeline",
+    stages=[
+        {
+            "name": "data_validation",
+            "script": "scripts/validate_data.py",
+            "triggers": ["data_push"]
+        },
+        {
+            "name": "training",
+            "script": "scripts/train.py",
+            "resources": {"gpu": True, "memory": "16Gi"},
+            "triggers": ["data_validation_success"]
+        },
+        {
+            "name": "evaluation",
+            "script": "scripts/evaluate.py",
+            "triggers": ["training_success"]
+        },
+        {
+            "name": "deployment",
+            "script": "scripts/deploy.py",
+            "triggers": ["evaluation_pass"],
+            "conditions": ["accuracy > 0.9"]
+        }
+    ]
+)
+
+pipeline.save(".github/workflows/ml-pipeline.yml")
+```
+
+## Platform Features
+
+### GitHub Actions
+- Matrix builds
+- Self-hosted runners
+- Secrets management
+- Artifact caching
+
+### Kubeflow
+- Kubernetes native
+- GPU scheduling
+- Experiment tracking
+- Pipeline versioning
+
+### Airflow
+- DAG scheduling
+- XCom data passing
+- Sensor triggers
+- Backfill support
 
 ## Progress
-- [ ] Sources analyzed
-- [ ] Schema designed
-- [ ] Transforms implemented
-- [ ] Quality gates added
-- [ ] Pipeline deployed
+- [ ] Platform configured
+- [ ] Stages defined
+- [ ] Triggers set
+- [ ] Pipeline generated
+- [ ] Tests added
 
-Include data lineage documentation.
+Automate ML workflows with CI/CD best practices.
 
 
 
@@ -83,8 +138,9 @@ This command uses the following tools:
 
 | Agent | Description |
 |-------|-------------|
-| [data-engineer](/agents/data-engineer) | Data engineering specialist for building robust data pipelin... |
-| [pipeline-architect](/agents/pipeline-architect) | Pipeline optimization, workflow design, automation architect... |
+| [ai-architect-agent](/agents/ai-architect-agent) | Senior AI/ML architect for designing end-to-end ML systems, ... |
+| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
+| [mlops-engineer-agent](/agents/mlops-engineer-agent) | Expert MLOps engineer for building and maintaining productio... |
 
 
 ## Examples
@@ -92,7 +148,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/data:pipeline "your input here"
+/omgops:pipeline "your input here"
 ```
 
 ### With Context
@@ -102,7 +158,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/data:pipeline "detailed description"
+/omgops:pipeline "detailed description"
 ```
 
 ## Tips
@@ -128,7 +184,7 @@ For best results, be specific in your descriptions and include relevant file pat
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 58 commands
   </Card>
-  <Card title="Data Commands" icon="terminal" href="/commands/overview#data">
-    More data commands
+  <Card title="Omgops Commands" icon="terminal" href="/commands/overview#omgops">
+    More omgops commands
   </Card>
 </CardGroup>

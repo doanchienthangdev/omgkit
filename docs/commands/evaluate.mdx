@@ -1,67 +1,105 @@
 ---
-title: "/ml:evaluate"
-description: "Evaluate ML model performance with comprehensive metrics"
-icon: "brain"
+title: "/omgtrain:evaluate"
+description: "Evaluate model comprehensively including performance, robustness, fairness, and efficiency metrics"
+icon: "terminal"
 ---
 
 <Info>
-  **Category:** Ml
+  **Category:** Omgtrain
 
-  **Syntax:** `/ml:evaluate <model name or path>`
+  **Syntax:** `/omgtrain:evaluate <model_path> [--test_data <path>]`
 </Info>
 
 ## Overview
 
-Evaluate ML model performance with comprehensive metrics
+Evaluate model comprehensively including performance, robustness, fairness, and efficiency metrics
 
 ## Quick Start
 
 ```bash
-/ml:evaluate "model
+/omgtrain:evaluate "model_path"
 ```
 
 
-# 📊 ML Evaluation: \<model name or path\>
+# Model Evaluation: \<model_path\> [--test_data \<path\>]
 
-Evaluate model: **\<model name or path\>**
+Evaluate model: **\<model_path\> [--test_data \<path\>]**
 
 ## Agent
-Uses **ml-engineer** agent for model evaluation.
+Uses **model-engineer-agent** for comprehensive evaluation.
+
+## Parameters
+- **model_path**: Path to trained model
+- **test_data**: Path to test dataset
 
 ## Evaluation Types
-- **Offline** - Test set metrics
-- **Online** - A/B testing
-- **Shadow** - Production comparison
-- **Bias** - Fairness analysis
 
-## Metrics
-- Classification: Accuracy, F1, AUC, Precision, Recall
-- Regression: RMSE, MAE, R², MAPE
-- Ranking: NDCG, MAP, MRR
-- Custom: Business metrics
-
-## Workflow
-1. **Data Split** - Ensure proper splits
-2. **Baseline** - Compare against baseline
-3. **Metrics** - Compute all metrics
-4. **Analysis** - Error analysis
-5. **Report** - Generate evaluation report
-
-## Outputs
+### Performance Metrics
+- Accuracy, Precision, Recall, F1
+- ROC-AUC, PR-AUC
 - Confusion matrix
+- Classification report
+
+### Robustness Testing
+- Perturbation tests
+- Out-of-distribution detection
+- Adversarial evaluation
+- Noise sensitivity
+
+### Fairness Analysis
+- Demographic parity
+- Equal opportunity
+- Calibration by group
+- Bias detection
+
+### Efficiency Metrics
+- Inference latency
+- Memory usage
+- Throughput
+- Model size
+
+## Code Template
+```python
+from omgkit.training import ModelEvaluator
+
+evaluator = ModelEvaluator()
+
+results = evaluator.evaluate(
+    model_path="models/best_model.pt",
+    test_data="data/splits/test.parquet",
+    evaluation_types=[
+        "performance",
+        "robustness",
+        "fairness",
+        "efficiency"
+    ],
+    fairness_groups=["gender", "age_group"],
+    perturbation_levels=[0.01, 0.05, 0.1]
+)
+
+evaluator.report(
+    results=results,
+    output="reports/evaluation_report.html",
+    include_plots=True
+)
+```
+
+## Report Includes
+- Summary metrics
+- Per-class performance
+- Confusion matrix visualization
 - ROC/PR curves
 - Feature importance
 - Error analysis
-- Evaluation report
 
 ## Progress
+- [ ] Model loaded
 - [ ] Test data prepared
-- [ ] Baseline computed
-- [ ] Metrics calculated
-- [ ] Errors analyzed
+- [ ] Metrics computed
+- [ ] Analysis complete
 - [ ] Report generated
 
-Include model comparison if multiple models.
+Comprehensive evaluation for production readiness.
 
 
 
@@ -83,7 +121,11 @@ This command uses the following tools:
 
 | Agent | Description |
 |-------|-------------|
-| [ml-engineer](/agents/ml-engineer) | Machine learning engineering specialist for building product... |
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+| [experiment-analyst-agent](/agents/experiment-analyst-agent) | Expert agent for analyzing ML experiments, comparing models,... |
+| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
+| [model-optimizer-agent](/agents/model-optimizer-agent) | Expert agent for optimizing ML models through quantization, ... |
+| [research-scientist-agent](/agents/research-scientist-agent) | AI/ML research agent for exploring novel approaches, impleme... |
 
 
 ## Examples
@@ -91,7 +133,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/ml:evaluate "your input here"
+/omgtrain:evaluate "your input here"
 ```
 
 ### With Context
@@ -101,7 +143,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/ml:evaluate "detailed description"
+/omgtrain:evaluate "detailed description"
 ```
 
 ## Tips
@@ -127,7 +169,7 @@ For best results, be specific in your descriptions and include relevant file pat
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 58 commands
   </Card>
-  <Card title="Ml Commands" icon="brain" href="/commands/overview#ml">
-    More ml commands
+  <Card title="Omgtrain Commands" icon="terminal" href="/commands/overview#omgtrain">
+    More omgtrain commands
   </Card>
 </CardGroup>

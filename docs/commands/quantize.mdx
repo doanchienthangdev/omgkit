@@ -1,0 +1,169 @@
+---
+title: "/omgoptim:quantize"
+description: "Quantize model using dynamic, static, or QAT methods to reduce size and improve inference speed"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgoptim
+
+  **Syntax:** `/omgoptim:quantize <method> [--calibration_data <path>]`
+</Info>
+
+## Overview
+
+Quantize model using dynamic, static, or QAT methods to reduce size and improve inference speed
+
+## Quick Start
+
+```bash
+/omgoptim:quantize "method"
+```
+
+
+# Model Quantization: \<method\> [--calibration_data \<path\>]
+
+Quantize model: **\<method\> [--calibration_data \<path\>]**
+
+## Agent
+Uses **performance-engineer-agent** for model quantization.
+
+## Parameters
+- **method**: dynamic | static | qat (default: dynamic)
+- **calibration_data**: Path to calibration data (for static)
+
+## Quantization Methods
+
+### Dynamic Quantization
+- Quantize weights only
+- Activations at runtime
+- No calibration needed
+- Quick to apply
+
+### Static Quantization
+- Quantize weights and activations
+- Requires calibration data
+- Better performance
+- More accurate
+
+### QAT (Quantization-Aware Training)
+- Train with quantization simulation
+- Best accuracy preservation
+- Requires retraining
+- Most effort
+
+## Code Template
+```python
+from omgkit.optimization import ModelQuantizer
+
+quantizer = ModelQuantizer()
+
+# Static quantization
+quantized_model = quantizer.quantize(
+    model_path="models/best_model.pt",
+    method="static",
+    calibration_data="data/splits/val.parquet",
+    calibration_samples=1000,
+    dtype="int8"
+)
+
+# Evaluate quantized model
+metrics = quantizer.evaluate(
+    original_model="models/best_model.pt",
+    quantized_model=quantized_model,
+    test_data="data/splits/test.parquet"
+)
+
+print(f"Size reduction: {metrics['size_reduction']:.1%}")
+print(f"Speedup: {metrics['speedup']:.2f}x")
+print(f"Accuracy drop: {metrics['accuracy_drop']:.2%}")
+```
+
+## Output Formats
+- INT8: 4x smaller, ~2-4x faster
+- INT4: 8x smaller, experimental
+- FP16: 2x smaller, minimal accuracy loss
+
+## Comparison Metrics
+- Model size reduction
+- Inference speedup
+- Memory usage reduction
+- Accuracy degradation
+
+## Progress
+- [ ] Model loaded
+- [ ] Calibration complete
+- [ ] Quantization applied
+- [ ] Quality validated
+- [ ] Output saved
+
+Optimize model for production deployment.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [model-optimizer-agent](/agents/model-optimizer-agent) | Expert agent for optimizing ML models through quantization, ... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgoptim:quantize "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgoptim:quantize "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgoptim Commands" icon="terminal" href="/commands/overview#omgoptim">
+    More omgoptim commands
+  </Card>
+</CardGroup>

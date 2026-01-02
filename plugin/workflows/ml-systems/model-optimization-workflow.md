@@ -1,0 +1,390 @@
+---
+name: Model Optimization Workflow
+description: Model optimization workflow for improving efficiency through quantization, pruning, distillation, and hardware-specific optimizations.
+category: ml-systems
+complexity: medium
+agents:
+  - model-optimizer-agent
+  - production-engineer-agent
+---
+
+# Model Optimization Workflow
+
+Optimize models for production efficiency.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│               MODEL OPTIMIZATION WORKFLOW                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. PROFILE        2. QUANTIZE       3. PRUNE               │
+│     ↓                 ↓                 ↓                   │
+│  Baseline metrics  FP16/INT8        Remove weights          │
+│  Bottleneck ID     Calibration      Structured/unstructured │
+│  Target setting    Accuracy check   Fine-tune               │
+│                                                              │
+│  4. DISTILL        5. COMPILE        6. VALIDATE            │
+│     ↓                 ↓                 ↓                   │
+│  Teacher-student   TensorRT/XLA     A/B comparison          │
+│  Smaller model     Graph optimize   Accuracy delta          │
+│  Match accuracy    Target hardware  Production test         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Steps
+
+### Step 1: Profile Baseline
+**Agent**: model-optimizer-agent
+
+**Inputs**:
+- Original model
+- Target hardware
+- Performance requirements
+
+**Actions**:
+```bash
+# Profile model
+/omgoptim:profile --model model.pt --device cuda --batch-sizes 1,8,32
+```
+
+```python
+def profile_model(model, input_shape, device='cuda'):
+    import torch
+    import time
+    from thop import profile as thop_profile
+
+    model = model.to(device).eval()
+    x = torch.randn(1, *input_shape).to(device)
+
+    # Model size
+    param_size = sum(p.numel() * p.element_size() for p in model.parameters())
+    buffer_size = sum(b.numel() * b.element_size() for b in model.buffers())
+
+    # FLOPs
+    flops, params = thop_profile(model, inputs=(x,), verbose=False)
+
+    # Latency
+    warmup = 50
+    iterations = 200
+
+    for _ in range(warmup):
+        model(x)
+
+    torch.cuda.synchronize()
+    start = time.perf_counter()
+    for _ in range(iterations):
+        model(x)
+    torch.cuda.synchronize()
+    latency_ms = (time.perf_counter() - start) / iterations * 1000
+
+    return {
+        'size_mb': (param_size + buffer_size) / 1024 / 1024,
+        'params': params,
+        'flops': flops,
+        'latency_ms': latency_ms,
+        'throughput': 1000 / latency_ms
+    }
+```
+
+**Outputs**:
+- Baseline metrics
+- Bottleneck analysis
+- Optimization targets
+
+### Step 2: Quantization
+**Agent**: model-optimizer-agent
+
+**Inputs**:
+- Model
+- Calibration data
+- Target precision
+
+**Actions**:
+```bash
+# Apply quantization
+/omgoptim:quantize --model model.pt --precision int8 --calibration calibration.pt
+```
+
+```python
+import torch
+
+def apply_quantization(model, calibration_loader, method='dynamic'):
+    if method == 'dynamic':
+        # Dynamic quantization (weights only)
+        quantized = torch.quantization.quantize_dynamic(
+            model,
+            {torch.nn.Linear, torch.nn.LSTM},
+            dtype=torch.qint8
+        )
+
+    elif method == 'static':
+        # Static quantization (weights + activations)
+        model.eval()
+        model.qconfig = torch.quantization.get_default_qconfig('fbgemm')
+        model_prepared = torch.quantization.prepare(model)
+
+        # Calibrate
+        with torch.no_grad():
+            for batch in calibration_loader:
+                model_prepared(batch[0])
+
+        quantized = torch.quantization.convert(model_prepared)
+
+    elif method == 'qat':
+        # Quantization-aware training
+        model.train()
+        model.qconfig = torch.quantization.get_default_qat_qconfig('fbgemm')
+        model_prepared = torch.quantization.prepare_qat(model)
+
+        # Fine-tune
+        for epoch in range(3):
+            train_epoch(model_prepared, train_loader)
+
+        model_prepared.eval()
+        quantized = torch.quantization.convert(model_prepared)
+
+    return quantized
+```
+
+**Outputs**:
+- Quantized model
+- Size reduction
+- Accuracy comparison
+
+### Step 3: Pruning
+**Agent**: model-optimizer-agent
+
+**Inputs**:
+- Model
+- Target sparsity
+- Pruning strategy
+
+**Actions**:
+```bash
+# Apply pruning
+/omgoptim:prune --model model.pt --sparsity 0.5 --method magnitude
+```
+
+```python
+import torch.nn.utils.prune as prune
+
+def iterative_pruning(model, target_sparsity, train_loader, val_loader):
+    current_sparsity = 0
+    n_steps = 5
+    step_sparsity = target_sparsity / n_steps
+
+    for step in range(n_steps):
+        # Prune
+        for name, module in model.named_modules():
+            if isinstance(module, (torch.nn.Linear, torch.nn.Conv2d)):
+                prune.l1_unstructured(module, 'weight', amount=step_sparsity)
+
+        # Fine-tune
+        for epoch in range(2):
+            train_epoch(model, train_loader)
+
+        # Evaluate
+        current_sparsity = calculate_sparsity(model)
+        accuracy = evaluate(model, val_loader)
+        print(f"Step {step+1}: Sparsity={current_sparsity:.2%}, Accuracy={accuracy:.4f}")
+
+    # Make permanent
+    for module in model.modules():
+        if hasattr(module, 'weight_orig'):
+            prune.remove(module, 'weight')
+
+    return model
+
+def calculate_sparsity(model):
+    total_zeros = 0
+    total_params = 0
+    for p in model.parameters():
+        total_zeros += (p == 0).sum().item()
+        total_params += p.numel()
+    return total_zeros / total_params
+```
+
+**Outputs**:
+- Pruned model
+- Sparsity achieved
+- Performance impact
+
+### Step 4: Knowledge Distillation
+**Agent**: model-optimizer-agent
+
+**Inputs**:
+- Teacher model
+- Student architecture
+- Training data
+
+**Actions**:
+```bash
+# Distill knowledge
+/omgoptim:distill --teacher teacher.pt --student-config student.yaml --epochs 10
+```
+
+```python
+class DistillationTrainer:
+    def __init__(self, teacher, student, temperature=4.0, alpha=0.5):
+        self.teacher = teacher.eval()
+        self.student = student
+        self.temperature = temperature
+        self.alpha = alpha
+
+    def train(self, train_loader, epochs, optimizer):
+        for epoch in range(epochs):
+            for x, y in train_loader:
+                optimizer.zero_grad()
+
+                with torch.no_grad():
+                    teacher_logits = self.teacher(x)
+
+                student_logits = self.student(x)
+
+                # Distillation loss
+                loss = self.distillation_loss(student_logits, teacher_logits, y)
+
+                loss.backward()
+                optimizer.step()
+
+    def distillation_loss(self, student_logits, teacher_logits, labels):
+        # Soft targets
+        soft_teacher = F.softmax(teacher_logits / self.temperature, dim=1)
+        soft_student = F.log_softmax(student_logits / self.temperature, dim=1)
+        soft_loss = F.kl_div(soft_student, soft_teacher, reduction='batchmean')
+        soft_loss *= self.temperature ** 2
+
+        # Hard targets
+        hard_loss = F.cross_entropy(student_logits, labels)
+
+        return self.alpha * hard_loss + (1 - self.alpha) * soft_loss
+```
+
+**Outputs**:
+- Distilled student model
+- Compression ratio
+- Accuracy retention
+
+### Step 5: Compile & Optimize
+**Agent**: production-engineer-agent
+
+**Inputs**:
+- Optimized model
+- Target hardware
+- Deployment format
+
+**Actions**:
+```python
+# TensorRT compilation
+def compile_tensorrt(model, input_shape, precision='fp16'):
+    import torch_tensorrt
+
+    trt_model = torch_tensorrt.compile(
+        model,
+        inputs=[torch_tensorrt.Input(
+            min_shape=[1, *input_shape],
+            opt_shape=[8, *input_shape],
+            max_shape=[32, *input_shape],
+            dtype=torch.float16 if precision == 'fp16' else torch.float32
+        )],
+        enabled_precisions={torch.float16} if precision == 'fp16' else {torch.float32}
+    )
+
+    return trt_model
+
+# ONNX export and optimize
+def export_onnx(model, input_shape, output_path):
+    x = torch.randn(1, *input_shape)
+    torch.onnx.export(
+        model, x, output_path,
+        input_names=['input'],
+        output_names=['output'],
+        dynamic_axes={'input': {0: 'batch'}, 'output': {0: 'batch'}},
+        opset_version=14
+    )
+
+    # Optimize with ONNX Runtime
+    import onnxruntime as ort
+    sess_options = ort.SessionOptions()
+    sess_options.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+```
+
+**Outputs**:
+- Compiled model
+- Optimized graph
+- Deployment artifacts
+
+### Step 6: Validation
+**Agent**: experiment-analyst-agent
+
+**Inputs**:
+- Original model
+- Optimized model
+- Test dataset
+
+**Actions**:
+```python
+def validate_optimization(original_model, optimized_model, test_loader, tolerance=0.02):
+    # Accuracy comparison
+    orig_preds = predict_all(original_model, test_loader)
+    opt_preds = predict_all(optimized_model, test_loader)
+
+    orig_acc = accuracy_score(test_loader.targets, orig_preds)
+    opt_acc = accuracy_score(test_loader.targets, opt_preds)
+
+    # Profile comparison
+    orig_profile = profile_model(original_model)
+    opt_profile = profile_model(optimized_model)
+
+    results = {
+        'accuracy': {
+            'original': orig_acc,
+            'optimized': opt_acc,
+            'delta': opt_acc - orig_acc,
+            'within_tolerance': abs(orig_acc - opt_acc) < tolerance
+        },
+        'speedup': orig_profile['latency_ms'] / opt_profile['latency_ms'],
+        'size_reduction': orig_profile['size_mb'] / opt_profile['size_mb'],
+        'profiles': {
+            'original': orig_profile,
+            'optimized': opt_profile
+        }
+    }
+
+    results['approved'] = (
+        results['accuracy']['within_tolerance'] and
+        results['speedup'] > 1.5  # At least 1.5x faster
+    )
+
+    return results
+```
+
+**Outputs**:
+- Comparison report
+- Approval status
+- Production recommendation
+
+## Artifacts
+
+- `baseline_profile.json` - Original metrics
+- `optimized_model.pt` - Final model
+- `optimization_report.json` - Full report
+- `onnx/` - ONNX exports
+- `tensorrt/` - TRT engines
+
+## Next Workflows
+
+After optimization:
+- → **model-deployment-workflow** for production
+- → **edge-deployment-workflow** for edge devices
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained

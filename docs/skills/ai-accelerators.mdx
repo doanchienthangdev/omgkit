@@ -1,0 +1,404 @@
+---
+title: "ai-accelerators"
+description: "AI hardware accelerators including GPUs, TPUs, custom silicon, and hardware-aware optimization strategies for ML workloads."
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ml-systems
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+AI hardware accelerators including GPUs, TPUs, custom silicon, and hardware-aware optimization strategies for ML workloads.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# AI Accelerators
+
+Hardware acceleration for ML workloads.
+
+## Hardware Landscape
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    AI ACCELERATOR TYPES                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  GPU (NVIDIA)         TPU (Google)        NPU/Custom        │
+│  ─────────────        ────────────        ─────────         │
+│  CUDA cores           Systolic array      Apple Neural      │
+│  Tensor cores         BF16 native         Qualcomm Hexagon  │
+│  General purpose      TPU pods            Intel Habana      │
+│  PyTorch/TF native    JAX optimized       AWS Inferentia    │
+│                                                              │
+│  FPGA                 ASIC                Edge Accelerators │
+│  ─────────────        ────────────        ─────────         │
+│  Reconfigurable       Fixed function      Coral Edge TPU    │
+│  Low latency          Maximum perf        Jetson (NVIDIA)   │
+│  Power efficient      High volume         Intel NCS2        │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## GPU Optimization
+
+### CUDA Memory Management
+```python
+import torch
+
+# Memory allocation
+torch.cuda.empty_cache()
+torch.cuda.memory_allocated()
+torch.cuda.max_memory_allocated()
+
+# Pin memory for faster transfers
+train_loader = DataLoader(
+    dataset,
+    batch_size=32,
+    pin_memory=True,
+    num_workers=4
+)
+
+# Async data transfer
+def async_prefetch(loader, device):
+    stream = torch.cuda.Stream()
+    for batch in loader:
+        with torch.cuda.stream(stream):
+            batch = batch.to(device, non_blocking=True)
+        torch.cuda.current_stream().wait_stream(stream)
+        yield batch
+```
+
+### Tensor Core Utilization
+```python
+# Ensure tensor core alignment (multiples of 8)
+class TensorCoreOptimized(nn.Module):
+    def __init__(self, in_features, out_features):
+        super().__init__()
+        # Round to multiple of 8 for tensor cores
+        self.in_features = ((in_features + 7) // 8) * 8
+        self.out_features = ((out_features + 7) // 8) * 8
+        self.linear = nn.Linear(self.in_features, self.out_features)
+        self.pad_in = self.in_features - in_features
+
+    def forward(self, x):
+        if self.pad_in > 0:
+            x = F.pad(x, (0, self.pad_in))
+        return self.linear(x)
+
+# Enable TF32 on Ampere+ GPUs
+torch.backends.cuda.matmul.allow_tf32 = True
+torch.backends.cudnn.allow_tf32 = True
+
+# Force FP16 computation
+with torch.cuda.amp.autocast(dtype=torch.float16):
+    output = model(input)
+```
+
+### Multi-GPU Strategies
+```python
+# DataParallel (simple, not recommended for training)
+model = nn.DataParallel(model)
+
+# DistributedDataParallel (recommended)
+model = DistributedDataParallel(model, device_ids=[local_rank])
+
+# Model Parallelism (for large models)
+class ModelParallel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.encoder = nn.TransformerEncoder(...).to('cuda:0')
+        self.decoder = nn.TransformerDecoder(...).to('cuda:1')
+
+    def forward(self, x):
+        x = self.encoder(x.to('cuda:0'))
+        x = self.decoder(x.to('cuda:1'))
+        return x
+
+# Pipeline Parallelism
+from torch.distributed.pipeline.sync import Pipe
+
+model = nn.Sequential(
+    nn.Linear(100, 200).to('cuda:0'),
+    nn.ReLU().to('cuda:0'),
+    nn.Linear(200, 100).to('cuda:1')
+)
+model = Pipe(model, chunks=8)
+```
+
+## TPU Optimization
+
+```python
+# JAX/TPU optimized training
+import jax
+import jax.numpy as jnp
+from flax import linen as nn
+
+class TPUModel(nn.Module):
+    features: int
+
+    @nn.compact
+    def __call__(self, x):
+        x = nn.Dense(self.features)(x)
+        x = nn.relu(x)
+        return nn.Dense(10)(x)
+
+# pmap for data parallelism across TPU cores
+@jax.pmap
+def train_step(state, batch):
+    def loss_fn(params):
+        logits = state.apply_fn({'params': params}, batch['image'])
+        loss = jnp.mean(optax.softmax_cross_entropy(logits, batch['label']))
+        return loss
+
+    grad_fn = jax.value_and_grad(loss_fn)
+    loss, grads = grad_fn(state.params)
+    grads = jax.lax.pmean(grads, axis_name='batch')
+    state = state.apply_gradients(grads=grads)
+    return state, loss
+
+# PyTorch/XLA for TPU
+import torch_xla.core.xla_model as xm
+import torch_xla.distributed.parallel_loader as pl
+
+device = xm.xla_device()
+model = model.to(device)
+
+for batch in pl.ParallelLoader(train_loader, [device]):
+    output = model(batch)
+    loss.backward()
+    xm.optimizer_step(optimizer)
+```
+
+## Edge Accelerators
+
+### NVIDIA Jetson
+```python
+# TensorRT optimization for Jetson
+import tensorrt as trt
+import pycuda.driver as cuda
+
+def build_engine(onnx_path, precision='fp16'):
+    logger = trt.Logger(trt.Logger.WARNING)
+    builder = trt.Builder(logger)
+    network = builder.create_network(
+        1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
+    )
+    parser = trt.OnnxParser(network, logger)
+
+    with open(onnx_path, 'rb') as f:
+        parser.parse(f.read())
+
+    config = builder.create_builder_config()
+    config.max_workspace_size = 1 << 30  # 1GB
+
+    if precision == 'fp16':
+        config.set_flag(trt.BuilderFlag.FP16)
+    elif precision == 'int8':
+        config.set_flag(trt.BuilderFlag.INT8)
+        config.int8_calibrator = EntropyCalibrator(calibration_data)
+
+    return builder.build_engine(network, config)
+
+# DeepStream for video inference
+# gst-launch-1.0 filesrc location=video.mp4 ! \
+#   decodebin ! nvvideoconvert ! \
+#   nvinfer config-file-path=config.txt ! \
+#   nvdsosd ! nveglglessink
+```
+
+### Coral Edge TPU
+```python
+from pycoral.utils import edgetpu
+from pycoral.adapters import common, classify
+
+# Load Edge TPU model
+interpreter = edgetpu.make_interpreter('model_edgetpu.tflite')
+interpreter.allocate_tensors()
+
+# Inference
+common.set_input(interpreter, image)
+interpreter.invoke()
+classes = classify.get_classes(interpreter, top_k=5)
+
+# Compile model for Edge TPU
+# edgetpu_compiler model.tflite
+```
+
+### TFLite for Mobile
+```python
+import tensorflow as tf
+
+# Convert to TFLite with quantization
+converter = tf.lite.TFLiteConverter.from_saved_model('saved_model/')
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+converter.target_spec.supported_types = [tf.float16]
+
+# Full integer quantization
+converter.representative_dataset = representative_dataset
+converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+converter.inference_input_type = tf.uint8
+converter.inference_output_type = tf.uint8
+
+tflite_model = converter.convert()
+
+# Inference
+interpreter = tf.lite.Interpreter(model_content=tflite_model)
+interpreter.allocate_tensors()
+```
+
+## Hardware-Aware Optimization
+
+### Auto-Tuning
+```python
+# TVM auto-tuning for specific hardware
+import tvm
+from tvm import relay, autotvm
+
+# Extract tuning tasks
+tasks = autotvm.task.extract_from_program(
+    mod["main"], target="cuda", params=params
+)
+
+# Tune each task
+for task in tasks:
+    tuner = autotvm.tuner.XGBTuner(task)
+    tuner.tune(
+        n_trial=1000,
+        measure_option=autotvm.measure_option(
+            builder=autotvm.LocalBuilder(),
+            runner=autotvm.LocalRunner(number=10)
+        ),
+        callbacks=[autotvm.callback.log_to_file('tune.log')]
+    )
+
+# Compile with best configs
+with autotvm.apply_history_best('tune.log'):
+    with tvm.transform.PassContext(opt_level=3):
+        lib = relay.build(mod, target="cuda", params=params)
+```
+
+### Hardware Selection Matrix
+```python
+def select_hardware(model_size, latency_req, batch_size, budget):
+    """Select optimal hardware for ML workload."""
+    recommendations = []
+
+    if model_size > 10e9:  # >10B params
+        recommendations.append({
+            'hardware': 'Multi-GPU (A100/H100)',
+            'reason': 'Large model requires high memory bandwidth',
+            'cost': 'High'
+        })
+
+    if latency_req < 10:  # <10ms
+        recommendations.append({
+            'hardware': 'TensorRT + GPU',
+            'reason': 'Low latency requires optimized inference',
+            'cost': 'Medium'
+        })
+
+    if batch_size == 1 and latency_req < 5:
+        recommendations.append({
+            'hardware': 'Edge TPU / Jetson',
+            'reason': 'Single-sample low-latency inference',
+            'cost': 'Low'
+        })
+
+    return recommendations
+```
+
+## Benchmarking
+
+```python
+import torch.utils.benchmark as benchmark
+
+def benchmark_model(model, input_shape, device='cuda'):
+    x = torch.randn(*input_shape).to(device)
+    model = model.to(device)
+    model.eval()
+
+    # Warmup
+    for _ in range(10):
+        model(x)
+
+    # Benchmark
+    timer = benchmark.Timer(
+        stmt='model(x)',
+        globals={'model': model, 'x': x}
+    )
+
+    result = timer.blocked_autorange(min_run_time=1)
+
+    return {
+        'mean_ms': result.mean * 1000,
+        'median_ms': result.median * 1000,
+        'iqr_ms': result.iqr * 1000,
+        'throughput': 1000 / (result.mean * 1000)
+    }
+```
+
+## Commands
+- `/omgoptim:profile` - Profile on hardware
+- `/omgdeploy:edge` - Edge deployment
+- `/omgdeploy:cloud` - Cloud GPU deployment
+
+## Best Practices
+
+1. Profile on target hardware early
+2. Use hardware-specific optimizations
+3. Batch for throughput, stream for latency
+4. Consider power consumption for edge
+5. Test with production data volumes
+
+
+## Usage Graph
+
+### Used By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [model-optimizer-agent](/agents/model-optimizer-agent) | Expert agent for optimizing ML models through quantization, ... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  ai-accelerators:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ml-systems" icon="brain" href="/skills/overview#ml-systems">
+    More ml-systems skills
+  </Card>
+</CardGroup>

@@ -1,0 +1,180 @@
+---
+title: "/omgdeploy:serve"
+description: "Deploy model serving endpoint on local, Kubernetes, AWS SageMaker, GCP Vertex, or Azure ML"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgdeploy
+
+  **Syntax:** `/omgdeploy:serve <platform> [--config <config>]`
+</Info>
+
+## Overview
+
+Deploy model serving endpoint on local, Kubernetes, AWS SageMaker, GCP Vertex, or Azure ML
+
+## Quick Start
+
+```bash
+/omgdeploy:serve "platform"
+```
+
+
+# Model Serving: \<platform\> [--config \<config\>]
+
+Deploy serving: **\<platform\> [--config \<config\>]**
+
+## Agent
+Uses **deployment-agent** for model serving deployment.
+
+## Parameters
+- **platform**: local | kubernetes | aws_sagemaker | gcp_vertex | azure_ml
+- **config**: Path to deployment configuration
+
+## Deployment Platforms
+
+### Local
+- FastAPI server
+- Development/testing
+- Quick iteration
+- localhost access
+
+### Kubernetes
+- Seldon Core / KServe
+- Auto-scaling
+- Canary deployments
+- Production grade
+
+### AWS SageMaker
+- Managed endpoints
+- Auto-scaling
+- Multi-model serving
+- A/B testing
+
+### GCP Vertex AI
+- Managed prediction
+- Explanation support
+- Batch prediction
+- AutoML integration
+
+### Azure ML
+- Managed endpoints
+- Blue-green deployment
+- Container support
+- Enterprise features
+
+## Code Template
+```python
+from omgkit.deployment import ModelServer
+
+server = ModelServer()
+
+# Deploy to Kubernetes
+endpoint = server.deploy(
+    model_path="artifacts/churn_predictor.mar",
+    platform="kubernetes",
+    config={
+        "replicas": 3,
+        "resources": {
+            "requests": {"cpu": "500m", "memory": "1Gi"},
+            "limits": {"cpu": "2", "memory": "4Gi"}
+        },
+        "autoscaling": {
+            "min_replicas": 2,
+            "max_replicas": 10,
+            "target_cpu_utilization": 70
+        }
+    },
+    namespace="ml-serving"
+)
+
+print(f"Endpoint deployed: {endpoint.url}")
+```
+
+## Features
+- Health checks
+- Metrics collection
+- Request logging
+- Error handling
+- Graceful shutdown
+
+## Progress
+- [ ] Config validated
+- [ ] Platform connected
+- [ ] Model deployed
+- [ ] Health verified
+- [ ] Endpoint active
+
+Deploy scalable model serving infrastructure.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
+| [mlops-engineer-agent](/agents/mlops-engineer-agent) | Expert MLOps engineer for building and maintaining productio... |
+| [production-engineer-agent](/agents/production-engineer-agent) | Expert agent for deploying and operating ML systems in produ... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgdeploy:serve "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgdeploy:serve "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgdeploy Commands" icon="terminal" href="/commands/overview#omgdeploy">
+    More omgdeploy commands
+  </Card>
+</CardGroup>

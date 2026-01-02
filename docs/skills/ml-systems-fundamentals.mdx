@@ -1,0 +1,168 @@
+---
+title: "ml-systems-fundamentals"
+description: "Core ML systems concepts including ML lifecycle, system architecture, requirements, and design principles for production ML."
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ml-systems
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Core ML systems concepts including ML lifecycle, system architecture, requirements, and design principles for production ML.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# ML Systems Fundamentals
+
+Foundation concepts for building production ML systems.
+
+## ML System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    ML SYSTEM ARCHITECTURE                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  DATA LAYER                                                  │
+│  ├── Data Collection    ├── Data Storage                    │
+│  ├── Data Processing    └── Feature Store                   │
+│                                                              │
+│  MODEL LAYER                                                 │
+│  ├── Training Pipeline  ├── Experiment Tracking              │
+│  ├── Model Registry     └── Evaluation                      │
+│                                                              │
+│  SERVING LAYER                                               │
+│  ├── Model Serving      ├── Feature Serving                 │
+│  ├── Prediction Cache   └── Load Balancing                  │
+│                                                              │
+│  MONITORING LAYER                                            │
+│  ├── Data Monitoring    ├── Model Monitoring                │
+│  ├── System Metrics     └── Alerting                        │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## ML Lifecycle
+
+1. **Problem Definition** - Business goal → ML task
+2. **Data Collection** - Gather relevant data
+3. **Data Processing** - Clean, transform, validate
+4. **Feature Engineering** - Create informative features
+5. **Model Development** - Train, tune, evaluate
+6. **Deployment** - Serve predictions
+7. **Monitoring** - Track performance
+8. **Iteration** - Improve based on feedback
+
+## System Requirements
+
+### Reliability
+- Handle failures gracefully
+- Maintain prediction quality
+- Provide consistent latency
+
+### Scalability
+- Handle growing data
+- Support more requests
+- Enable parallel training
+
+### Maintainability
+- Easy to update models
+- Clear documentation
+- Reproducible experiments
+
+### Adaptability
+- Respond to data changes
+- Support new features
+- Enable quick iterations
+
+## Design Principles
+
+```python
+# 1. Start Simple
+baseline = LogisticRegression()
+baseline.fit(X_train, y_train)
+print(f"Baseline: {baseline.score(X_test, y_test)}")
+
+# 2. Data Quality > Model Complexity
+def validate_data(df):
+    assert df.isnull().sum().sum() == 0
+    assert df.duplicated().sum() == 0
+    return True
+
+# 3. Version Everything
+import mlflow
+mlflow.log_param("model_version", "1.0.0")
+mlflow.log_artifact("data/processed/")
+
+# 4. Monitor Continuously
+def check_drift(reference, current):
+    return ks_2samp(reference, current).pvalue < 0.05
+```
+
+## Commands
+- `/omgml:init` - Initialize ML project
+- `/omgml:status` - Project status
+
+## Best Practices
+
+1. Define clear success metrics
+2. Establish baselines early
+3. Invest in data quality
+4. Automate everything possible
+5. Monitor production models
+
+
+## Usage Graph
+
+### Used By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [ai-architect-agent](/agents/ai-architect-agent) | Senior AI/ML architect for designing end-to-end ML systems, ... |
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
+| [research-scientist-agent](/agents/research-scientist-agent) | AI/ML research agent for exploring novel approaches, impleme... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  ml-systems-fundamentals:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ml-systems" icon="brain" href="/skills/overview#ml-systems">
+    More ml-systems skills
+  </Card>
+</CardGroup>

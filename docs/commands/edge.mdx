@@ -1,0 +1,179 @@
+---
+title: "/omgdeploy:edge"
+description: "Deploy model to edge devices including TFLite Micro, Jetson, Raspberry Pi, and mobile platforms"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgdeploy
+
+  **Syntax:** `/omgdeploy:edge <target> [--model <path>] [--optimize]`
+</Info>
+
+## Overview
+
+Deploy model to edge devices including TFLite Micro, Jetson, Raspberry Pi, and mobile platforms
+
+## Quick Start
+
+```bash
+/omgdeploy:edge "target"
+```
+
+
+# Edge Deployment: \<target\> [--model \<path\>] [--optimize]
+
+Deploy to edge: **\<target\> [--model \<path\>] [--optimize]**
+
+## Agent
+Uses **deployment-agent** for edge deployment.
+
+## Parameters
+- **target**: tflite_micro | jetson | raspberry_pi | mobile_ios | mobile_android
+- **model**: Path to model
+- **optimize**: Apply target-specific optimization (default: true)
+
+## Edge Targets
+
+### TFLite Micro
+- Microcontroller deployment
+- <1MB Flash, <256KB RAM
+- INT8 quantization required
+- C++ runtime
+
+### Jetson (Nano/Xavier/Orin)
+- NVIDIA GPU accelerated
+- TensorRT optimization
+- FP16/INT8 support
+- CUDA runtime
+
+### Raspberry Pi
+- ARM CPU deployment
+- ONNX Runtime
+- INT8 quantization
+- Python/C++ runtime
+
+### Mobile iOS
+- CoreML format
+- Neural Engine
+- On-device inference
+- Swift/Obj-C integration
+
+### Mobile Android
+- TFLite format
+- NNAPI delegate
+- GPU delegate
+- Kotlin/Java integration
+
+## Code Template
+```python
+from omgkit.deployment import EdgeDeployer
+
+deployer = EdgeDeployer()
+
+# Deploy to TFLite Micro (TinyML)
+tflite_model = deployer.deploy(
+    model_path="models/best_model.pt",
+    target="tflite_micro",
+    optimize=True,
+    constraints={
+        "max_flash_kb": 512,
+        "max_ram_kb": 128,
+        "target_latency_ms": 10
+    },
+    output_dir="edge/tflite_micro/"
+)
+
+# Deploy to Jetson
+jetson_model = deployer.deploy(
+    model_path="models/best_model.pt",
+    target="jetson",
+    optimize=True,
+    tensorrt_precision="fp16",
+    output_dir="edge/jetson/"
+)
+```
+
+## Optimization Applied
+- Quantization (INT8/FP16)
+- Pruning
+- Operator fusion
+- Memory optimization
+
+## Progress
+- [ ] Target validated
+- [ ] Model converted
+- [ ] Optimization applied
+- [ ] Size verified
+- [ ] Package created
+
+Deploy ML models to resource-constrained devices.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [production-engineer-agent](/agents/production-engineer-agent) | Expert agent for deploying and operating ML systems in produ... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgdeploy:edge "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgdeploy:edge "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgdeploy Commands" icon="terminal" href="/commands/overview#omgdeploy">
+    More omgdeploy commands
+  </Card>
+</CardGroup>

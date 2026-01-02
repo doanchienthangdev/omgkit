@@ -1,0 +1,177 @@
+---
+title: "/omgops:retrain"
+description: "Trigger model retraining with full, incremental, or transfer learning strategies"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgops
+
+  **Syntax:** `/omgops:retrain <strategy> [--trigger <trigger>]`
+</Info>
+
+## Overview
+
+Trigger model retraining with full, incremental, or transfer learning strategies
+
+## Quick Start
+
+```bash
+/omgops:retrain "strategy"
+```
+
+
+# Model Retraining: \<strategy\> [--trigger \<trigger\>]
+
+Trigger retraining: **\<strategy\> [--trigger \<trigger\>]**
+
+## Agent
+Uses **mlops-engineer-agent** for retraining orchestration.
+
+## Parameters
+- **strategy**: full | incremental | transfer (default: incremental)
+- **trigger**: manual | scheduled | drift_detected | performance_drop
+
+## Retraining Strategies
+
+### Full Retraining
+- Train from scratch
+- All historical data
+- New architecture possible
+- Use case: Major updates
+
+### Incremental Training
+- Update with new data
+- Stateful training
+- Faster convergence
+- Use case: Regular updates
+
+### Transfer Learning
+- Fine-tune from checkpoint
+- Domain adaptation
+- New task learning
+- Use case: Limited new data
+
+## Code Template
+```python
+from omgkit.mlops import RetrainingPipeline
+
+pipeline = RetrainingPipeline()
+
+pipeline.setup(
+    strategy="incremental",
+    triggers=[
+        {"type": "scheduled", "cron": "0 0 * * 0"},  # Weekly
+        {"type": "drift_detected", "threshold": 0.1},
+        {"type": "performance_drop", "metric": "accuracy", "threshold": 0.05}
+    ],
+    data_config={
+        "new_data_path": "data/production/new/",
+        "validation_data": "data/splits/val.parquet",
+        "min_new_samples": 1000
+    },
+    training_config={
+        "epochs": 10,
+        "learning_rate": 1e-4,
+        "early_stopping": True
+    },
+    validation_config={
+        "metrics": ["accuracy", "f1"],
+        "minimum_improvement": 0.01,
+        "fallback_on_regression": True
+    }
+)
+
+# Manual trigger
+pipeline.trigger(reason="manual_update")
+```
+
+## Safety Checks
+- Minimum improvement threshold
+- Regression detection
+- Automatic rollback
+- Shadow deployment
+
+## Triggers
+- **Scheduled**: Cron-based
+- **Drift**: Automatic on drift
+- **Performance**: Metrics degradation
+- **Data**: New data threshold
+
+## Progress
+- [ ] Trigger validated
+- [ ] Data prepared
+- [ ] Training started
+- [ ] Validation passed
+- [ ] Model deployed
+
+Maintain model freshness with automated retraining.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [mlops-engineer-agent](/agents/mlops-engineer-agent) | Expert MLOps engineer for building and maintaining productio... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgops:retrain "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgops:retrain "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgops Commands" icon="terminal" href="/commands/overview#omgops">
+    More omgops commands
+  </Card>
+</CardGroup>

@@ -493,6 +493,154 @@ agents:
       - simulation/visualization-scientific
     commands: []
 
+  # ---------------------------------------------------------------------------
+  # ML SYSTEMS AGENTS (Harvard CS 329S + Chip Huyen)
+  # ---------------------------------------------------------------------------
+  ml-engineer-agent:
+    file: agents/ml-engineer-agent.md
+    description: Full-stack ML engineering for end-to-end ML systems
+    skills:
+      - ml-systems/ml-systems-fundamentals
+      - ml-systems/data-eng
+      - ml-systems/feature-engineering
+      - ml-systems/ml-workflow
+      - ml-systems/model-dev
+      - ml-systems/ml-frameworks
+      - ml-systems/model-deployment
+      - ml-systems/mlops
+    commands:
+      - /omgml:init
+      - /omgml:status
+      - /omgdata:collect
+      - /omgdata:validate
+      - /omgfeature:extract
+      - /omgfeature:select
+      - /omgtrain:train
+      - /omgtrain:evaluate
+      - /omgdeploy:package
+      - /omgdeploy:serve
+      - /omgops:pipeline
+
+  data-scientist-agent:
+    file: agents/data-scientist-agent.md
+    description: Expert data science for EDA, statistical modeling, and insights
+    skills:
+      - ml-systems/ml-systems-fundamentals
+      - ml-systems/data-eng
+      - ml-systems/training-data
+      - ml-systems/feature-engineering
+      - ml-systems/ml-workflow
+      - ml-systems/model-dev
+    commands:
+      - /omgdata:collect
+      - /omgdata:validate
+      - /omgdata:label
+      - /omgdata:augment
+      - /omgdata:split
+      - /omgfeature:extract
+      - /omgfeature:select
+      - /omgtrain:baseline
+      - /omgtrain:train
+      - /omgtrain:evaluate
+      - /omgtrain:compare
+
+  mlops-engineer-agent:
+    file: agents/mlops-engineer-agent.md
+    description: MLOps for production ML infrastructure and automation
+    skills:
+      - ml-systems/mlops
+      - ml-systems/robust-ai
+      - ml-systems/model-deployment
+      - ml-systems/ml-serving-optimization
+    commands:
+      - /omgops:pipeline
+      - /omgops:monitor
+      - /omgops:drift
+      - /omgops:retrain
+      - /omgops:registry
+      - /omgdeploy:package
+      - /omgdeploy:serve
+      - /omgdeploy:cloud
+      - /omgdeploy:ab
+
+  research-scientist-agent:
+    file: agents/research-scientist-agent.md
+    description: AI/ML research for novel approaches and paper implementation
+    skills:
+      - ml-systems/ml-systems-fundamentals
+      - ml-systems/deep-learning-primer
+      - ml-systems/dnn-architectures
+      - ml-systems/ml-workflow
+      - ml-systems/model-dev
+      - ml-systems/ml-frameworks
+    commands:
+      - /omgtrain:train
+      - /omgtrain:tune
+      - /omgtrain:evaluate
+      - /omgtrain:compare
+      - /omgml:status
+
+  model-optimizer-agent:
+    file: agents/model-optimizer-agent.md
+    description: Model optimization through quantization, pruning, and distillation
+    skills:
+      - ml-systems/efficient-ai
+      - ml-systems/model-optimization
+      - ml-systems/ai-accelerators
+      - ml-systems/ml-serving-optimization
+    commands:
+      - /omgoptim:quantize
+      - /omgoptim:prune
+      - /omgoptim:distill
+      - /omgoptim:profile
+      - /omgtrain:evaluate
+
+  production-engineer-agent:
+    file: agents/production-engineer-agent.md
+    description: ML production deployment with reliability and scalability
+    skills:
+      - ml-systems/model-deployment
+      - ml-systems/ml-serving-optimization
+      - ml-systems/edge-deployment
+      - ml-systems/robust-ai
+    commands:
+      - /omgdeploy:package
+      - /omgdeploy:serve
+      - /omgdeploy:edge
+      - /omgdeploy:cloud
+      - /omgdeploy:ab
+      - /omgops:monitor
+
+  ai-architect-agent:
+    file: agents/ai-architect-agent.md
+    description: Senior AI/ML architect for end-to-end ML system design
+    skills:
+      - ml-systems/ml-systems-fundamentals
+      - ml-systems/deployment-paradigms
+      - ml-systems/data-eng
+      - ml-systems/feature-engineering
+      - ml-systems/ml-workflow
+      - ml-systems/model-deployment
+      - ml-systems/mlops
+      - ml-systems/robust-ai
+    commands:
+      - /omgml:init
+      - /omgml:status
+      - /omgops:pipeline
+      - /omgops:registry
+
+  experiment-analyst-agent:
+    file: agents/experiment-analyst-agent.md
+    description: ML experiment analysis and model comparison
+    skills:
+      - ml-systems/ml-workflow
+      - ml-systems/model-dev
+      - ml-systems/training-data
+    commands:
+      - /omgtrain:evaluate
+      - /omgtrain:compare
+      - /omgml:status
+
 # =============================================================================
 # SKILL CATEGORIES
 # =============================================================================
@@ -514,6 +662,7 @@ skill_categories:
   - languages
   - methodology
   - microservices
+  - ml-systems        # ML Systems Design (Harvard CS 329S + Chip Huyen)
   - mobile
   - mobile-advanced
   - omega
@@ -540,6 +689,13 @@ command_namespaces:
   - iot       # IoT operations
   - ml        # Machine learning
   - omega     # Omega principles
+  - omgdata   # ML Data Engineering
+  - omgdeploy # ML Model Deployment
+  - omgfeature # ML Feature Engineering
+  - omgml     # ML Project Management
+  - omgops    # ML Operations
+  - omgoptim  # ML Model Optimization
+  - omgtrain  # ML Model Training
   - perf      # Performance
   - planning  # Planning and research
   - platform  # Platform engineering
@@ -772,3 +928,97 @@ workflows:
     agents: [copywriter, researcher]
     skills: []
     commands: [/planning:brainstorm, /planning:research]
+
+  # ---------------------------------------------------------------------------
+  # ML SYSTEMS WORKFLOWS (Harvard CS 329S + Chip Huyen)
+  # ---------------------------------------------------------------------------
+  ml-systems/model-development-workflow:
+    agents: [data-scientist-agent, research-scientist-agent, experiment-analyst-agent]
+    skills:
+      - ml-systems/ml-systems-fundamentals
+      - ml-systems/ml-workflow
+      - ml-systems/model-dev
+    commands: [/omgml:init, /omgtrain:baseline, /omgtrain:train, /omgtrain:evaluate]
+
+  ml-systems/data-preparation-workflow:
+    agents: [data-scientist-agent, ml-engineer-agent]
+    skills:
+      - ml-systems/data-eng
+      - ml-systems/training-data
+      - ml-systems/feature-engineering
+    commands: [/omgdata:collect, /omgdata:validate, /omgdata:label, /omgdata:augment, /omgdata:split]
+
+  ml-systems/training-pipeline-workflow:
+    agents: [ml-engineer-agent, mlops-engineer-agent]
+    skills:
+      - ml-systems/ml-workflow
+      - ml-systems/mlops
+    commands: [/omgops:pipeline, /omgtrain:train, /omgtrain:evaluate, /omgops:registry]
+
+  ml-systems/hyperparameter-tuning-workflow:
+    agents: [research-scientist-agent, experiment-analyst-agent]
+    skills:
+      - ml-systems/model-dev
+      - ml-systems/ml-frameworks
+    commands: [/omgtrain:tune, /omgtrain:compare]
+
+  ml-systems/model-evaluation-workflow:
+    agents: [experiment-analyst-agent, data-scientist-agent]
+    skills:
+      - ml-systems/model-dev
+      - ml-systems/training-data
+    commands: [/omgtrain:evaluate, /omgtrain:compare]
+
+  ml-systems/model-optimization-workflow:
+    agents: [model-optimizer-agent, production-engineer-agent]
+    skills:
+      - ml-systems/efficient-ai
+      - ml-systems/model-optimization
+      - ml-systems/ml-serving-optimization
+    commands: [/omgoptim:profile, /omgoptim:quantize, /omgoptim:prune, /omgoptim:distill]
+
+  ml-systems/model-deployment-workflow:
+    agents: [production-engineer-agent, mlops-engineer-agent]
+    skills:
+      - ml-systems/model-deployment
+      - ml-systems/ml-serving-optimization
+      - ml-systems/robust-ai
+    commands: [/omgdeploy:package, /omgdeploy:serve, /omgdeploy:cloud, /omgdeploy:ab]
+
+  ml-systems/edge-deployment-workflow:
+    agents: [model-optimizer-agent, production-engineer-agent]
+    skills:
+      - ml-systems/edge-deployment
+      - ml-systems/efficient-ai
+    commands: [/omgoptim:quantize, /omgdeploy:edge]
+
+  ml-systems/mlops-pipeline-workflow:
+    agents: [mlops-engineer-agent, production-engineer-agent]
+    skills:
+      - ml-systems/mlops
+      - ml-systems/model-deployment
+    commands: [/omgops:pipeline, /omgops:monitor, /omgops:registry]
+
+  ml-systems/monitoring-drift-workflow:
+    agents: [mlops-engineer-agent, experiment-analyst-agent]
+    skills:
+      - ml-systems/robust-ai
+      - ml-systems/mlops
+    commands: [/omgops:monitor, /omgops:drift]
+
+  ml-systems/retraining-workflow:
+    agents: [ml-engineer-agent, mlops-engineer-agent, experiment-analyst-agent]
+    skills:
+      - ml-systems/mlops
+      - ml-systems/ml-workflow
+    commands: [/omgops:retrain, /omgtrain:train, /omgtrain:evaluate]
+
+  ml-systems/full-ml-lifecycle-workflow:
+    agents: [ai-architect-agent, data-scientist-agent, ml-engineer-agent, research-scientist-agent, model-optimizer-agent, production-engineer-agent, mlops-engineer-agent, experiment-analyst-agent]
+    skills:
+      - ml-systems/ml-systems-fundamentals
+      - ml-systems/data-eng
+      - ml-systems/ml-workflow
+      - ml-systems/model-deployment
+      - ml-systems/mlops
+    commands: [/omgml:init, /omgdata:collect, /omgtrain:train, /omgdeploy:serve, /omgops:monitor]

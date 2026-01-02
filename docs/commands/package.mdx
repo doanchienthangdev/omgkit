@@ -1,0 +1,179 @@
+---
+title: "/omgdeploy:package"
+description: "Package model for deployment in TorchServe, TF Serving, ONNX, TFLite, or Docker formats"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgdeploy
+
+  **Syntax:** `/omgdeploy:package <format> [--model <path>]`
+</Info>
+
+## Overview
+
+Package model for deployment in TorchServe, TF Serving, ONNX, TFLite, or Docker formats
+
+## Quick Start
+
+```bash
+/omgdeploy:package "format"
+```
+
+
+# Model Packaging: \<format\> [--model \<path\>]
+
+Package model: **\<format\> [--model \<path\>]**
+
+## Agent
+Uses **deployment-agent** for model packaging.
+
+## Parameters
+- **format**: torchserve | tensorflow_serving | onnx | tflite | docker
+- **model**: Path to trained model
+
+## Package Formats
+
+### TorchServe
+- .mar archive file
+- Custom handler support
+- Multi-model serving
+- Batch inference
+
+### TensorFlow Serving
+- SavedModel format
+- gRPC/REST endpoints
+- Model versioning
+- Warm-up support
+
+### ONNX
+- Cross-framework format
+- Hardware agnostic
+- Wide runtime support
+- Optimization passes
+
+### TFLite
+- Mobile/embedded ready
+- Quantization built-in
+- Delegates support
+- Minimal footprint
+
+### Docker
+- Containerized deployment
+- All dependencies included
+- Kubernetes ready
+- Easy scaling
+
+## Code Template
+```python
+from omgkit.deployment import ModelPackager
+
+packager = ModelPackager()
+
+# Package for TorchServe
+package = packager.package(
+    model_path="models/best_model.pt",
+    format="torchserve",
+    model_name="churn_predictor",
+    version="1.0",
+    handler="src/serving/handler.py",
+    requirements=["torch", "numpy", "pandas"],
+    output_dir="artifacts/"
+)
+
+# Package as Docker
+docker_image = packager.package(
+    model_path="models/best_model.pt",
+    format="docker",
+    base_image="pytorch/pytorch:2.0.0-cuda11.7-cudnn8-runtime",
+    expose_port=8080,
+    output_dir="docker/"
+)
+```
+
+## Output Artifacts
+- Packaged model file
+- Dockerfile (if docker)
+- Requirements file
+- Handler script
+- Config files
+
+## Progress
+- [ ] Model loaded
+- [ ] Format validated
+- [ ] Dependencies resolved
+- [ ] Package created
+- [ ] Artifacts saved
+
+Create deployment-ready model packages.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
+| [mlops-engineer-agent](/agents/mlops-engineer-agent) | Expert MLOps engineer for building and maintaining productio... |
+| [production-engineer-agent](/agents/production-engineer-agent) | Expert agent for deploying and operating ML systems in produ... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgdeploy:package "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgdeploy:package "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgdeploy Commands" icon="terminal" href="/commands/overview#omgdeploy">
+    More omgdeploy commands
+  </Card>
+</CardGroup>

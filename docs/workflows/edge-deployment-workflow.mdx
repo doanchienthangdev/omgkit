@@ -1,0 +1,467 @@
+---
+title: "Edge Deployment Workflow"
+description: "Edge deployment workflow for deploying ML models to mobile devices, embedded systems, and IoT with optimization for resource constraints."
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Ml Systems
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:edge-deployment-workflow "your description here"
+```
+
+
+# Edge Deployment Workflow
+
+Deploy ML models to edge devices.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 EDGE DEPLOYMENT WORKFLOW                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. ASSESS          2. OPTIMIZE        3. CONVERT           │
+│     TARGET             MODEL              FORMAT            │
+│     ↓                  ↓                  ↓                 │
+│  Hardware specs     Quantize          TFLite/CoreML         │
+│  Constraints        Prune             ONNX                  │
+│  Framework          Distill           TensorRT              │
+│                                                              │
+│  4. PACKAGE         5. DEPLOY          6. VALIDATE          │
+│     ↓                  ↓                  ↓                 │
+│  Mobile SDK         OTA update        Device testing        │
+│  Firmware           App store         Performance           │
+│  Container          Direct flash      Accuracy              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Steps
+
+### Step 1: Assess Target
+**Agent**: production-engineer-agent
+
+**Inputs**:
+- Target device specifications
+- Use case requirements
+- Connectivity constraints
+
+**Actions**:
+```python
+# Device assessment
+target_devices = {
+    'mobile_ios': {
+        'framework': 'CoreML',
+        'compute': ['CPU', 'GPU', 'Neural Engine'],
+        'memory_mb': 4096,
+        'storage_mb': 500,
+        'precision': ['float16', 'int8']
+    },
+    'mobile_android': {
+        'framework': 'TFLite',
+        'compute': ['CPU', 'GPU', 'NNAPI'],
+        'memory_mb': 3072,
+        'storage_mb': 300,
+        'precision': ['float16', 'int8']
+    },
+    'jetson_nano': {
+        'framework': 'TensorRT',
+        'compute': ['GPU (Maxwell)'],
+        'memory_mb': 4096,
+        'storage_mb': 2048,
+        'precision': ['float16', 'int8']
+    },
+    'raspberry_pi': {
+        'framework': 'TFLite',
+        'compute': ['CPU'],
+        'memory_mb': 1024,
+        'storage_mb': 100,
+        'precision': ['int8']
+    },
+    'coral_edge': {
+        'framework': 'TFLite + EdgeTPU',
+        'compute': ['Edge TPU'],
+        'memory_mb': 1024,
+        'storage_mb': 50,
+        'precision': ['int8']
+    }
+}
+
+def assess_deployment_target(model_profile, target):
+    constraints = target_devices[target]
+
+    assessment = {
+        'size_ok': model_profile['size_mb'] < constraints['storage_mb'],
+        'memory_ok': model_profile['runtime_memory_mb'] < constraints['memory_mb'],
+        'precision_supported': model_profile['precision'] in constraints['precision'],
+        'framework': constraints['framework'],
+        'optimization_needed': []
+    }
+
+    if not assessment['size_ok']:
+        assessment['optimization_needed'].append('quantization')
+        assessment['optimization_needed'].append('pruning')
+
+    return assessment
+```
+
+**Outputs**:
+- Target assessment
+- Constraint analysis
+- Optimization requirements
+
+### Step 2: Optimize Model
+**Agent**: model-optimizer-agent
+
+**Inputs**:
+- Original model
+- Target constraints
+- Optimization budget
+
+**Actions**:
+```bash
+# Optimize for edge
+/omgdeploy:edge --model model.pt --target mobile_android --optimize full
+```
+
+```python
+def optimize_for_edge(model, target_size_mb, target_latency_ms):
+    optimizations = []
+
+    # 1. Quantization (always first)
+    quantized = quantize_dynamic(model)
+    if measure_size(quantized) <= target_size_mb:
+        optimizations.append(('quantization', quantized))
+
+    # 2. Pruning (if still too large)
+    if measure_size(quantized) > target_size_mb:
+        pruned = iterative_pruning(model, target_sparsity=0.5)
+        pruned_quantized = quantize_dynamic(pruned)
+        if measure_size(pruned_quantized) <= target_size_mb:
+            optimizations.append(('pruning + quantization', pruned_quantized))
+
+    # 3. Knowledge distillation (for significant reduction)
+    if target_size_mb < measure_size(model) / 10:
+        student = create_mobile_net(model)
+        distilled = knowledge_distill(model, student)
+        optimizations.append(('distillation', distilled))
+
+    # Select best based on accuracy-size tradeoff
+    best = max(optimizations, key=lambda x: evaluate(x[1])['accuracy'])
+    return best
+```
+
+**Outputs**:
+- Optimized model
+- Size/speed improvements
+- Accuracy delta
+
+### Step 3: Convert Format
+**Agent**: production-engineer-agent
+
+**Inputs**:
+- Optimized model
+- Target framework
+- Conversion config
+
+**TFLite Conversion**:
+```python
+import tensorflow as tf
+
+def convert_to_tflite(model, calibration_data, quantize='int8'):
+    converter = tf.lite.TFLiteConverter.from_saved_model(model)
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+
+    if quantize == 'int8':
+        def representative_dataset():
+            for data in calibration_data:
+                yield [data.astype(np.float32)]
+
+        converter.representative_dataset = representative_dataset
+        converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+        converter.inference_input_type = tf.uint8
+        converter.inference_output_type = tf.uint8
+
+    elif quantize == 'float16':
+        converter.target_spec.supported_types = [tf.float16]
+
+    tflite_model = converter.convert()
+
+    # Validate
+    interpreter = tf.lite.Interpreter(model_content=tflite_model)
+    interpreter.allocate_tensors()
+
+    return tflite_model
+```
+
+**CoreML Conversion**:
+```python
+import coremltools as ct
+
+def convert_to_coreml(model, example_input):
+    traced = torch.jit.trace(model, example_input)
+
+    mlmodel = ct.convert(
+        traced,
+        inputs=[ct.TensorType(shape=example_input.shape)],
+        compute_precision=ct.precision.FLOAT16,
+        minimum_deployment_target=ct.target.iOS15
+    )
+
+    # Add metadata
+    mlmodel.author = "ML Team"
+    mlmodel.short_description = "Edge inference model"
+
+    return mlmodel
+```
+
+**TensorRT Conversion (Jetson)**:
+```python
+import tensorrt as trt
+
+def convert_to_tensorrt(onnx_path, precision='fp16'):
+    logger = trt.Logger(trt.Logger.WARNING)
+    builder = trt.Builder(logger)
+    network = builder.create_network(1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH))
+    parser = trt.OnnxParser(network, logger)
+
+    with open(onnx_path, 'rb') as f:
+        parser.parse(f.read())
+
+    config = builder.create_builder_config()
+    config.max_workspace_size = 1 << 28  # 256MB
+
+    if precision == 'fp16':
+        config.set_flag(trt.BuilderFlag.FP16)
+
+    engine = builder.build_engine(network, config)
+    return engine
+```
+
+**Outputs**:
+- Converted model files
+- Validation results
+- Integration code
+
+### Step 4: Package
+**Agent**: production-engineer-agent
+
+**Inputs**:
+- Converted model
+- Target platform
+- Distribution method
+
+**Mobile SDK Package**:
+```kotlin
+// Android integration
+class ModelInference(context: Context) {
+    private val interpreter: Interpreter
+
+    init {
+        val modelBuffer = loadModelFile(context, "model.tflite")
+        val options = Interpreter.Options()
+            .setNumThreads(4)
+            .addDelegate(GpuDelegate())
+        interpreter = Interpreter(modelBuffer, options)
+    }
+
+    fun predict(input: FloatArray): FloatArray {
+        val output = Array(1) { FloatArray(NUM_CLASSES) }
+        interpreter.run(input, output)
+        return output[0]
+    }
+}
+```
+
+```swift
+// iOS integration
+class ModelInference {
+    private let model: VNCoreMLModel
+
+    init() throws {
+        let config = MLModelConfiguration()
+        config.computeUnits = .all
+        let mlModel = try MyModel(configuration: config)
+        self.model = try VNCoreMLModel(for: mlModel.model)
+    }
+
+    func predict(image: CGImage) async throws -> [String: Float] {
+        // Inference code
+    }
+}
+```
+
+**Outputs**:
+- SDK package
+- Integration guide
+- Test app
+
+### Step 5: Deploy
+**Agent**: mlops-engineer-agent
+
+**Inputs**:
+- Packaged model
+- Deployment channel
+- Update strategy
+
+**Actions**:
+```bash
+# Deploy to devices
+/omgdeploy:edge --package model-sdk/ --channel production --strategy staged
+```
+
+**OTA Update**:
+```python
+class OTAModelManager:
+    def __init__(self, base_url, device_id):
+        self.base_url = base_url
+        self.device_id = device_id
+        self.current_version = self.get_local_version()
+
+    def check_update(self):
+        response = requests.get(f"{self.base_url}/version")
+        server_version = response.json()['version']
+        return server_version > self.current_version
+
+    def download_update(self):
+        response = requests.get(f"{self.base_url}/model")
+        model_path = self.save_model(response.content)
+        return model_path
+
+    def apply_update(self, model_path):
+        # Validate model
+        if self.validate_model(model_path):
+            self.swap_model(model_path)
+            self.update_version()
+            return True
+        return False
+```
+
+**Outputs**:
+- Deployed models
+- Update mechanism
+- Rollback capability
+
+### Step 6: Validate
+**Agent**: experiment-analyst-agent
+
+**Inputs**:
+- Deployed model
+- Test devices
+- Acceptance criteria
+
+**Actions**:
+```python
+def validate_edge_deployment(model_path, test_data, device_type):
+    # Load model based on device
+    if device_type == 'tflite':
+        interpreter = tf.lite.Interpreter(model_path=model_path)
+        interpreter.allocate_tensors()
+
+    # Accuracy test
+    correct = 0
+    total = 0
+    for x, y in test_data:
+        pred = infer(interpreter, x)
+        correct += (pred == y)
+        total += 1
+
+    accuracy = correct / total
+
+    # Latency test
+    latencies = []
+    for _ in range(100):
+        start = time.time()
+        infer(interpreter, test_data[0][0])
+        latencies.append(time.time() - start)
+
+    # Power test (if available)
+    # Battery impact measurement
+
+    return {
+        'accuracy': accuracy,
+        'latency_ms': np.mean(latencies) * 1000,
+        'latency_p95_ms': np.percentile(latencies, 95) * 1000,
+        'model_size_mb': os.path.getsize(model_path) / 1024 / 1024
+    }
+```
+
+**Outputs**:
+- Device test results
+- Performance metrics
+- Deployment approval
+
+## Artifacts
+
+- `models/tflite/` - TFLite models
+- `models/coreml/` - CoreML models
+- `models/tensorrt/` - TensorRT engines
+- `sdk/` - Platform SDKs
+- `docs/integration.md` - Integration guide
+
+## Next Workflows
+
+After edge deployment:
+- → **monitoring-drift-workflow** for edge monitoring
+- → **retraining-workflow** for model updates
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@model-optimizer-agent](/agents/model-optimizer-agent)** - Specialized agent for model optimizer agent tasks
+- **[@production-engineer-agent](/agents/production-engineer-agent)** - Specialized agent for production engineer agent tasks
+
+
+
+
+
+
+
+
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [model-optimizer-agent](/agents/model-optimizer-agent) | ml-systems/efficient-ai, ml-systems/model-optimization... | /omgoptim:quantize, /omgoptim:prune... |
+| [production-engineer-agent](/agents/production-engineer-agent) | ml-systems/model-deployment, ml-systems/ml-serving-optimization... | /omgdeploy:package, /omgdeploy:serve... |
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Ml Systems" icon="diagram-project" href="/workflows/overview#ml-systems">
+    More ml-systems workflows
+  </Card>
+</CardGroup>

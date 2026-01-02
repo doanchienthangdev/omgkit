@@ -1,0 +1,164 @@
+---
+title: "/omgtrain:baseline"
+description: "Train baseline models for comparison including logistic regression, random forest, and XGBoost"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgtrain
+
+  **Syntax:** `/omgtrain:baseline <task_type> [--models <models>]`
+</Info>
+
+## Overview
+
+Train baseline models for comparison including logistic regression, random forest, and XGBoost
+
+## Quick Start
+
+```bash
+/omgtrain:baseline "task_type"
+```
+
+
+# Baseline Training: \<task_type\> [--models \<models\>]
+
+Train baselines: **\<task_type\> [--models \<models\>]**
+
+## Agent
+Uses **model-engineer-agent** for baseline model training.
+
+## Parameters
+- **task_type**: classification | regression | detection | segmentation | nlp
+- **models**: List of baseline models to train
+
+## Default Baselines by Task
+
+### Classification
+- Logistic Regression
+- Random Forest
+- XGBoost
+- LightGBM
+- Naive Bayes
+
+### Regression
+- Linear Regression
+- Random Forest Regressor
+- XGBoost Regressor
+- LightGBM Regressor
+
+### NLP
+- TF-IDF + SVM
+- FastText
+- DistilBERT
+
+## Code Template
+```python
+from omgkit.training import BaselineTrainer
+
+trainer = BaselineTrainer(task_type="classification")
+
+# Train multiple baselines
+results = trainer.train_baselines(
+    data_path="data/splits/",
+    models=["logistic_regression", "random_forest", "xgboost"],
+    target_column="label",
+    metrics=["accuracy", "f1", "roc_auc"]
+)
+
+# Compare and select best
+best_model = trainer.select_best(metric="f1")
+
+# Save report
+trainer.report(output="reports/baseline_comparison.html")
+```
+
+## Output
+- Trained models
+- Comparison metrics table
+- Best baseline selection
+- Confusion matrices
+- Feature importance (if applicable)
+
+## Comparison Metrics
+- Primary: Task-specific (accuracy, F1, RMSE)
+- Secondary: Training time, inference time
+- Tertiary: Model size, memory usage
+
+## Progress
+- [ ] Data loaded
+- [ ] Models trained
+- [ ] Metrics computed
+- [ ] Best selected
+- [ ] Report generated
+
+Establish performance baseline before complex models.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgtrain:baseline "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgtrain:baseline "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgtrain Commands" icon="terminal" href="/commands/overview#omgtrain">
+    More omgtrain commands
+  </Card>
+</CardGroup>

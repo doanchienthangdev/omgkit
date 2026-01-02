@@ -1,0 +1,143 @@
+---
+name: deep-learning-primer
+description: Deep learning foundations including neural network basics, backpropagation, optimization, regularization, and training best practices.
+---
+
+# Deep Learning Primer
+
+Essential deep learning concepts for ML systems.
+
+## Neural Network Basics
+
+```python
+import torch
+import torch.nn as nn
+
+class MLP(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(hidden_dim, output_dim)
+        )
+
+    def forward(self, x):
+        return self.layers(x)
+```
+
+## Activation Functions
+
+| Function | Use Case | Output Range |
+|----------|----------|--------------|
+| ReLU | Hidden layers | [0, ∞) |
+| LeakyReLU | Prevent dead neurons | (-∞, ∞) |
+| GELU | Transformers | (-∞, ∞) |
+| Sigmoid | Binary classification | (0, 1) |
+| Softmax | Multi-class | (0, 1) |
+| Tanh | Centered output | (-1, 1) |
+
+## Loss Functions
+
+```python
+# Classification
+cross_entropy = nn.CrossEntropyLoss()
+binary_ce = nn.BCEWithLogitsLoss()
+focal_loss = lambda p, y, gamma=2: -((1-p)**gamma * y * torch.log(p))
+
+# Regression
+mse = nn.MSELoss()
+mae = nn.L1Loss()
+huber = nn.HuberLoss()
+
+# Custom loss
+def contrastive_loss(embeddings, labels, margin=1.0):
+    distances = torch.cdist(embeddings, embeddings)
+    same_class = labels.unsqueeze(0) == labels.unsqueeze(1)
+    loss = same_class * distances + (~same_class) * F.relu(margin - distances)
+    return loss.mean()
+```
+
+## Optimization
+
+```python
+# Optimizers
+optimizer = torch.optim.AdamW(
+    model.parameters(),
+    lr=1e-3,
+    weight_decay=0.01
+)
+
+# Learning rate scheduling
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+    optimizer,
+    T_max=num_epochs
+)
+
+# Training loop
+for epoch in range(num_epochs):
+    for batch in dataloader:
+        optimizer.zero_grad()
+        loss = criterion(model(batch.x), batch.y)
+        loss.backward()
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+        optimizer.step()
+    scheduler.step()
+```
+
+## Regularization Techniques
+
+```python
+# Dropout
+nn.Dropout(p=0.5)
+
+# Weight decay (L2)
+optimizer = AdamW(params, weight_decay=0.01)
+
+# Batch normalization
+nn.BatchNorm1d(num_features)
+
+# Layer normalization (for transformers)
+nn.LayerNorm(hidden_dim)
+
+# Early stopping
+class EarlyStopping:
+    def __init__(self, patience=5):
+        self.patience = patience
+        self.counter = 0
+        self.best_score = None
+
+    def __call__(self, val_loss):
+        if self.best_score is None or val_loss < self.best_score:
+            self.best_score = val_loss
+            self.counter = 0
+        else:
+            self.counter += 1
+        return self.counter >= self.patience
+```
+
+## Initialization
+
+```python
+def init_weights(module):
+    if isinstance(module, nn.Linear):
+        nn.init.xavier_uniform_(module.weight)
+        if module.bias is not None:
+            nn.init.zeros_(module.bias)
+    elif isinstance(module, nn.Embedding):
+        nn.init.normal_(module.weight, std=0.02)
+
+model.apply(init_weights)
+```
+
+## Best Practices
+
+1. Start with Adam optimizer, lr=1e-3
+2. Use learning rate warmup
+3. Apply gradient clipping
+4. Monitor training/validation gap
+5. Use mixed precision training

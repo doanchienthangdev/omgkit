@@ -1,0 +1,167 @@
+---
+title: "/omgoptim:prune"
+description: "Prune model weights using magnitude, structured, or lottery ticket methods to reduce redundancy"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgoptim
+
+  **Syntax:** `/omgoptim:prune <method> [--sparsity <sparsity>]`
+</Info>
+
+## Overview
+
+Prune model weights using magnitude, structured, or lottery ticket methods to reduce redundancy
+
+## Quick Start
+
+```bash
+/omgoptim:prune "method"
+```
+
+
+# Model Pruning: \<method\> [--sparsity \<sparsity\>]
+
+Prune model: **\<method\> [--sparsity \<sparsity\>]**
+
+## Agent
+Uses **performance-engineer-agent** for model pruning.
+
+## Parameters
+- **method**: magnitude | structured | lottery_ticket (default: magnitude)
+- **sparsity**: Target sparsity level (default: 0.5 = 50% removed)
+
+## Pruning Methods
+
+### Magnitude Pruning
+- Remove smallest weights
+- Unstructured sparsity
+- Most flexible
+- Requires sparse support
+
+### Structured Pruning
+- Remove entire channels/filters
+- Hardware-friendly
+- Immediate speedup
+- More accuracy loss
+
+### Lottery Ticket
+- Find sparse subnetwork
+- Train from scratch
+- Best theoretical results
+- Most compute-intensive
+
+## Code Template
+```python
+from omgkit.optimization import ModelPruner
+
+pruner = ModelPruner()
+
+# Iterative magnitude pruning
+pruned_model = pruner.prune(
+    model_path="models/best_model.pt",
+    method="magnitude",
+    target_sparsity=0.7,
+    iterative_steps=5,
+    finetune_epochs=10,
+    finetune_data="data/splits/train.parquet"
+)
+
+# Report
+pruner.report(
+    original_model="models/best_model.pt",
+    pruned_model=pruned_model,
+    output="reports/pruning_report.html"
+)
+```
+
+## Sparsity Levels
+- 50%: Safe, minimal accuracy loss
+- 70%: Moderate, some accuracy drop
+- 90%: Aggressive, significant drop
+- 95%+: Extreme, research only
+
+## Best Practices
+- Iterative pruning (gradual)
+- Fine-tune after pruning
+- Validate on holdout set
+- Consider structured for deployment
+
+## Progress
+- [ ] Model analyzed
+- [ ] Pruning applied
+- [ ] Fine-tuning complete
+- [ ] Quality validated
+- [ ] Report generated
+
+Remove redundant weights while maintaining performance.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [model-optimizer-agent](/agents/model-optimizer-agent) | Expert agent for optimizing ML models through quantization, ... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgoptim:prune "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgoptim:prune "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgoptim Commands" icon="terminal" href="/commands/overview#omgoptim">
+    More omgoptim commands
+  </Card>
+</CardGroup>

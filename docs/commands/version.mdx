@@ -1,0 +1,164 @@
+---
+title: "/omgdata:version"
+description: "Version data with DVC for reproducibility - commit, checkout, diff, and history operations"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgdata
+
+  **Syntax:** `/omgdata:version <action> [--message <message>]`
+</Info>
+
+## Overview
+
+Version data with DVC for reproducibility - commit, checkout, diff, and history operations
+
+## Quick Start
+
+```bash
+/omgdata:version "action"
+```
+
+
+# Data Version: \<action\> [--message \<message\>]
+
+Version data: **\<action\> [--message \<message\>]**
+
+## Agent
+Uses **data-engineer-agent** for data versioning with DVC.
+
+## Parameters
+- **action**: commit | checkout | diff | history
+- **message**: Version commit message
+
+## Actions
+
+### Commit
+- Track changes with DVC
+- Create git commit with data hash
+- Push to remote storage
+- Tag version
+
+### Checkout
+- Restore specific data version
+- Download from remote storage
+- Verify data integrity
+
+### Diff
+- Compare data versions
+- Show added/removed files
+- Statistical differences
+
+### History
+- Show version history
+- List all data commits
+- Display metadata
+
+## Code Template
+```python
+from omgkit.data import DataVersioner
+
+versioner = DataVersioner()
+
+# Commit new version
+versioner.commit(
+    data_paths=["data/processed/"],
+    message="Added augmented training data v1.2",
+    tags=["training", "augmented"]
+)
+
+# Checkout specific version
+versioner.checkout(version="v1.1.0")
+
+# Compare versions
+diff = versioner.diff(v1="v1.0.0", v2="v1.2.0")
+print(diff)
+
+# Show history
+history = versioner.history()
+for version in history:
+    print(f"{version.tag}: {version.message} ({version.date})")
+```
+
+## Best Practices
+- Version data with each significant change
+- Include meaningful commit messages
+- Tag releases for reproducibility
+- Link data versions to model versions
+
+## Remote Storage
+- S3, GCS, Azure Blob
+- SSH/SFTP servers
+- Local network storage
+
+## Progress
+- [ ] Action validated
+- [ ] DVC operation executed
+- [ ] Remote synced
+- [ ] Git updated
+- [ ] Verification complete
+
+Enable full data reproducibility and lineage tracking.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgdata:version "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgdata:version "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgdata Commands" icon="terminal" href="/commands/overview#omgdata">
+    More omgdata commands
+  </Card>
+</CardGroup>

@@ -1,0 +1,382 @@
+---
+name: Training Pipeline Workflow
+description: Automated training pipeline workflow for reproducible model training with experiment tracking and model registration.
+category: ml-systems
+complexity: medium
+agents:
+  - ml-engineer-agent
+  - mlops-engineer-agent
+---
+
+# Training Pipeline Workflow
+
+Automated pipeline for reproducible model training.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                TRAINING PIPELINE WORKFLOW                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  TRIGGER         DATA PREP        TRAINING                  │
+│  ────────        ─────────        ────────                  │
+│  Schedule        Load features    Train model               │
+│  Manual          Validate         Log metrics               │
+│  Drift detect    Split            Save checkpoint           │
+│                                                              │
+│  EVALUATION      REGISTRATION     NOTIFICATION              │
+│  ──────────      ────────────     ────────────              │
+│  Test metrics    Model registry   Slack/Email               │
+│  Comparison      Version tag      Dashboard update          │
+│  Quality gates   Artifacts        Next steps                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Pipeline Configuration
+
+```yaml
+# pipeline_config.yaml
+pipeline:
+  name: model_training_pipeline
+  schedule: "0 2 * * 0"  # Weekly at 2 AM Sunday
+  timeout: 3600  # 1 hour
+  retries: 2
+
+data:
+  source: feature_store
+  features:
+    - user_features
+    - transaction_features
+  target: is_churned
+  split:
+    train: 0.7
+    val: 0.15
+    test: 0.15
+
+training:
+  model_type: xgboost
+  hyperparameters:
+    max_depth: 6
+    learning_rate: 0.1
+    n_estimators: 100
+  early_stopping:
+    patience: 10
+    metric: val_auc
+
+evaluation:
+  metrics:
+    - accuracy
+    - precision
+    - recall
+    - f1
+    - auc
+  thresholds:
+    auc: 0.85
+    precision: 0.80
+
+registration:
+  model_name: churn_predictor
+  auto_promote: false
+```
+
+## Steps
+
+### Step 1: Pipeline Trigger
+**Agent**: mlops-engineer-agent
+
+**Triggers**:
+- Scheduled (cron)
+- Manual trigger
+- Drift detection alert
+- New data arrival
+- CI/CD push
+
+**Actions**:
+```bash
+# Create/update pipeline
+/omgops:pipeline --config pipeline_config.yaml --action create
+
+# Manual trigger
+/omgops:pipeline --name model_training_pipeline --action run
+```
+
+### Step 2: Data Preparation
+**Agent**: ml-engineer-agent
+
+**Inputs**:
+- Feature store reference
+- Data version
+- Split configuration
+
+**Actions**:
+```python
+# Pipeline step: data_preparation
+def prepare_data(config):
+    # Load features from feature store
+    features = feature_store.get_historical_features(
+        entity_df=entity_df,
+        features=config['data']['features']
+    )
+
+    # Validate data
+    validation_result = validate_data(features, config['data']['schema'])
+    if not validation_result.passed:
+        raise DataValidationError(validation_result.errors)
+
+    # Split data
+    train, val, test = split_data(
+        features,
+        ratios=config['data']['split'],
+        stratify=config['data']['target']
+    )
+
+    return train, val, test
+```
+
+**Outputs**:
+- Prepared datasets
+- Data validation report
+- Split statistics
+
+### Step 3: Model Training
+**Agent**: ml-engineer-agent
+
+**Inputs**:
+- Training data
+- Hyperparameters
+- Training configuration
+
+**Actions**:
+```bash
+# Execute training
+/omgtrain:train --config pipeline_config.yaml --experiment-name weekly_training
+```
+
+```python
+# Pipeline step: train_model
+def train_model(train_data, val_data, config):
+    with mlflow.start_run(run_name=f"train_{datetime.now().isoformat()}"):
+        # Log parameters
+        mlflow.log_params(config['training']['hyperparameters'])
+
+        # Initialize model
+        model = XGBClassifier(**config['training']['hyperparameters'])
+
+        # Train with early stopping
+        model.fit(
+            train_data.X, train_data.y,
+            eval_set=[(val_data.X, val_data.y)],
+            early_stopping_rounds=config['training']['early_stopping']['patience']
+        )
+
+        # Log training metrics
+        for metric, value in model.evals_result_['validation_0'].items():
+            for i, v in enumerate(value):
+                mlflow.log_metric(f"val_{metric}", v, step=i)
+
+        # Save model checkpoint
+        mlflow.xgboost.log_model(model, "model")
+
+        return model, mlflow.active_run().info.run_id
+```
+
+**Outputs**:
+- Trained model
+- Training metrics
+- MLflow run ID
+
+### Step 4: Evaluation
+**Agent**: experiment-analyst-agent
+
+**Inputs**:
+- Trained model
+- Test dataset
+- Evaluation thresholds
+
+**Actions**:
+```bash
+# Evaluate model
+/omgtrain:evaluate --run-id <run_id> --data test.csv --thresholds thresholds.yaml
+```
+
+```python
+# Pipeline step: evaluate_model
+def evaluate_model(model, test_data, config):
+    predictions = model.predict(test_data.X)
+    probabilities = model.predict_proba(test_data.X)[:, 1]
+
+    metrics = {
+        'accuracy': accuracy_score(test_data.y, predictions),
+        'precision': precision_score(test_data.y, predictions),
+        'recall': recall_score(test_data.y, predictions),
+        'f1': f1_score(test_data.y, predictions),
+        'auc': roc_auc_score(test_data.y, probabilities)
+    }
+
+    # Check quality gates
+    quality_passed = all(
+        metrics[metric] >= threshold
+        for metric, threshold in config['evaluation']['thresholds'].items()
+    )
+
+    return metrics, quality_passed
+```
+
+**Outputs**:
+- Evaluation metrics
+- Quality gate results
+- Error analysis
+
+### Step 5: Model Registration
+**Agent**: mlops-engineer-agent
+
+**Inputs**:
+- Trained model
+- Evaluation results
+- Registration configuration
+
+**Actions**:
+```bash
+# Register model
+/omgops:registry --run-id <run_id> --model-name churn_predictor --stage staging
+```
+
+```python
+# Pipeline step: register_model
+def register_model(run_id, metrics, config):
+    if not metrics['quality_passed']:
+        logging.warning("Quality gates not passed, skipping registration")
+        return None
+
+    # Register model version
+    model_version = mlflow.register_model(
+        f"runs:/{run_id}/model",
+        config['registration']['model_name']
+    )
+
+    # Add metadata
+    client = MlflowClient()
+    client.set_model_version_tag(
+        name=config['registration']['model_name'],
+        version=model_version.version,
+        key="metrics",
+        value=json.dumps(metrics)
+    )
+
+    # Auto-promote if configured
+    if config['registration']['auto_promote']:
+        client.transition_model_version_stage(
+            name=config['registration']['model_name'],
+            version=model_version.version,
+            stage="Staging"
+        )
+
+    return model_version
+```
+
+**Outputs**:
+- Registered model version
+- Model artifacts
+- Promotion status
+
+### Step 6: Notification
+**Agent**: mlops-engineer-agent
+
+**Inputs**:
+- Pipeline results
+- Metrics
+- Status
+
+**Actions**:
+```python
+# Pipeline step: notify
+def notify_completion(results):
+    message = f"""
+    🤖 Training Pipeline Complete
+
+    Model: {results['model_name']}
+    Version: {results['version']}
+    Status: {'✅ Passed' if results['quality_passed'] else '❌ Failed'}
+
+    Metrics:
+    - AUC: {results['metrics']['auc']:.4f}
+    - F1: {results['metrics']['f1']:.4f}
+
+    Next: {'Ready for review' if results['quality_passed'] else 'Investigate failures'}
+    """
+
+    # Send to Slack
+    send_slack_notification(message, channel="#ml-alerts")
+
+    # Update dashboard
+    update_training_dashboard(results)
+```
+
+**Outputs**:
+- Notifications sent
+- Dashboard updated
+- Logs archived
+
+## Airflow DAG
+
+```python
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+
+with DAG(
+    'model_training_pipeline',
+    schedule_interval='0 2 * * 0',
+    catchup=False
+) as dag:
+
+    prepare = PythonOperator(
+        task_id='prepare_data',
+        python_callable=prepare_data
+    )
+
+    train = PythonOperator(
+        task_id='train_model',
+        python_callable=train_model
+    )
+
+    evaluate = PythonOperator(
+        task_id='evaluate_model',
+        python_callable=evaluate_model
+    )
+
+    register = PythonOperator(
+        task_id='register_model',
+        python_callable=register_model
+    )
+
+    notify = PythonOperator(
+        task_id='notify',
+        python_callable=notify_completion
+    )
+
+    prepare >> train >> evaluate >> register >> notify
+```
+
+## Artifacts
+
+- `pipeline_config.yaml` - Pipeline configuration
+- `mlflow/` - Experiment tracking
+- `models/` - Model artifacts
+- `logs/` - Pipeline logs
+- `reports/` - Evaluation reports
+
+## Next Workflows
+
+After training pipeline:
+- → **model-evaluation-workflow** for detailed analysis
+- → **model-deployment-workflow** for production
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained

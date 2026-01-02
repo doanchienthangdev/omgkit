@@ -1,0 +1,128 @@
+---
+name: dnn-architectures
+description: Deep neural network architectures including CNNs, RNNs, Transformers, and modern architectures for vision, NLP, and multimodal tasks.
+---
+
+# DNN Architectures
+
+Modern deep neural network architectures.
+
+## Convolutional Neural Networks
+
+```python
+import torch.nn as nn
+
+class CNN(nn.Module):
+    def __init__(self, num_classes=10):
+        super().__init__()
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.AdaptiveAvgPool2d(1)
+        )
+        self.classifier = nn.Linear(256, num_classes)
+
+    def forward(self, x):
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+        return self.classifier(x)
+```
+
+## Transformer Architecture
+
+```python
+class TransformerBlock(nn.Module):
+    def __init__(self, d_model, n_heads, d_ff, dropout=0.1):
+        super().__init__()
+        self.attn = nn.MultiheadAttention(d_model, n_heads, dropout=dropout)
+        self.ff = nn.Sequential(
+            nn.Linear(d_model, d_ff),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(d_ff, d_model)
+        )
+        self.ln1 = nn.LayerNorm(d_model)
+        self.ln2 = nn.LayerNorm(d_model)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x, mask=None):
+        # Self-attention with residual
+        attn_out, _ = self.attn(x, x, x, attn_mask=mask)
+        x = self.ln1(x + self.dropout(attn_out))
+        # Feedforward with residual
+        ff_out = self.ff(x)
+        x = self.ln2(x + self.dropout(ff_out))
+        return x
+```
+
+## Vision Transformer (ViT)
+
+```python
+class ViT(nn.Module):
+    def __init__(self, image_size, patch_size, num_classes, d_model, n_heads, n_layers):
+        super().__init__()
+        num_patches = (image_size // patch_size) ** 2
+        self.patch_embed = nn.Conv2d(3, d_model, patch_size, patch_size)
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, d_model))
+        self.pos_embed = nn.Parameter(torch.zeros(1, num_patches + 1, d_model))
+        self.transformer = nn.ModuleList([
+            TransformerBlock(d_model, n_heads, d_model * 4)
+            for _ in range(n_layers)
+        ])
+        self.head = nn.Linear(d_model, num_classes)
+
+    def forward(self, x):
+        patches = self.patch_embed(x).flatten(2).transpose(1, 2)
+        cls_tokens = self.cls_token.expand(x.size(0), -1, -1)
+        x = torch.cat([cls_tokens, patches], dim=1)
+        x = x + self.pos_embed
+        for block in self.transformer:
+            x = block(x)
+        return self.head(x[:, 0])
+```
+
+## Architecture Comparison
+
+| Architecture | Best For | Params | Inference |
+|--------------|----------|--------|-----------|
+| ResNet | Image classification | 25M | Fast |
+| EfficientNet | Efficient vision | 5-66M | Efficient |
+| ViT | Vision + scale | 86-632M | GPU optimized |
+| BERT | NLP understanding | 110-340M | Moderate |
+| GPT | Text generation | 117M-175B | Heavy |
+| T5 | Seq2seq tasks | 60M-11B | Heavy |
+
+## Modern Architectures
+
+```python
+# Using pretrained models
+from transformers import AutoModel
+
+# Vision
+vit = AutoModel.from_pretrained("google/vit-base-patch16-224")
+clip = AutoModel.from_pretrained("openai/clip-vit-base-patch32")
+
+# NLP
+bert = AutoModel.from_pretrained("bert-base-uncased")
+llama = AutoModel.from_pretrained("meta-llama/Llama-2-7b-hf")
+
+# Multimodal
+blip = AutoModel.from_pretrained("Salesforce/blip-image-captioning-base")
+```
+
+## Best Practices
+
+1. Use pretrained models when possible
+2. Match architecture to task
+3. Consider compute budget
+4. Scale model size with data size
+5. Monitor memory usage

@@ -1,0 +1,187 @@
+---
+title: "/omgtrain:compare"
+description: "Compare multiple experiments and models across metrics, visualize differences, and select best"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgtrain
+
+  **Syntax:** `/omgtrain:compare <experiments> [--metric <metric>]`
+</Info>
+
+## Overview
+
+Compare multiple experiments and models across metrics, visualize differences, and select best
+
+## Quick Start
+
+```bash
+/omgtrain:compare "experiments"
+```
+
+
+# Experiment Comparison: \<experiments\> [--metric \<metric\>]
+
+Compare experiments: **\<experiments\> [--metric \<metric\>]**
+
+## Agent
+Uses **model-engineer-agent** for experiment comparison.
+
+## Parameters
+- **experiments**: List of experiment names or run IDs
+- **metric**: Primary comparison metric
+
+## Comparison Dimensions
+
+### Metrics
+- Primary performance metric
+- Secondary metrics
+- Training metrics (loss curves)
+- Validation metrics
+
+### Resources
+- Training time
+- GPU memory usage
+- Inference latency
+- Model size
+
+### Parameters
+- Hyperparameter differences
+- Architecture variations
+- Data preprocessing
+
+## Code Template
+```python
+from omgkit.training import ExperimentComparer
+import mlflow
+
+comparer = ExperimentComparer(tracking_uri="http://mlflow.example.com")
+
+comparison = comparer.compare(
+    experiments=[
+        "churn_v1",
+        "churn_v2_deeper",
+        "churn_v3_ensemble"
+    ],
+    metrics=["accuracy", "f1", "roc_auc", "latency"],
+    primary_metric="f1"
+)
+
+# Visualize comparison
+comparer.plot_comparison(
+    comparison,
+    output="reports/experiment_comparison.html"
+)
+
+# Statistical significance test
+significance = comparer.significance_test(
+    experiment_a="churn_v2_deeper",
+    experiment_b="churn_v3_ensemble",
+    metric="f1"
+)
+
+# Select best model
+best = comparer.select_best(
+    comparison,
+    metric="f1",
+    constraints={"latency_ms": 50}
+)
+```
+
+## Visualizations
+- Parallel coordinates
+- Metric bar charts
+- Learning curve overlay
+- Hyperparameter importance
+
+## Statistical Tests
+- t-test for significance
+- Bootstrap confidence intervals
+- McNemar's test (classification)
+
+## Output
+- Comparison table
+- Winner recommendation
+- Trade-off analysis
+- Visual report
+
+## Progress
+- [ ] Experiments loaded
+- [ ] Metrics extracted
+- [ ] Comparison computed
+- [ ] Significance tested
+- [ ] Report generated
+
+Make data-driven model selection decisions.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+| [experiment-analyst-agent](/agents/experiment-analyst-agent) | Expert agent for analyzing ML experiments, comparing models,... |
+| [research-scientist-agent](/agents/research-scientist-agent) | AI/ML research agent for exploring novel approaches, impleme... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgtrain:compare "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgtrain:compare "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgtrain Commands" icon="terminal" href="/commands/overview#omgtrain">
+    More omgtrain commands
+  </Card>
+</CardGroup>

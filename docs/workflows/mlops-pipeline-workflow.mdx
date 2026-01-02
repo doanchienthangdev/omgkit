@@ -1,0 +1,438 @@
+---
+title: "MLOps Pipeline Workflow"
+description: "Complete MLOps pipeline workflow covering CI/CD for ML, automated testing, model validation, and continuous deployment."
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Ml Systems
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:mlops-pipeline-workflow "your description here"
+```
+
+
+# MLOps Pipeline Workflow
+
+End-to-end MLOps automation pipeline.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   MLOPS PIPELINE WORKFLOW                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  TRIGGER          CI PIPELINE        CD PIPELINE            │
+│  ───────          ───────────        ───────────            │
+│  Push/PR          Lint & Test        Deploy Staging         │
+│  Schedule         Train Model        Validate               │
+│  Manual           Validate           Deploy Prod            │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ Data Change → Feature Eng → Training → Evaluation →     ││
+│  │ Registration → Staging → Validation → Production        ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Pipeline Configuration
+
+### GitHub Actions Workflow
+```yaml
+# .github/workflows/ml-pipeline.yml
+name: ML Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**'
+      - 'models/**'
+      - 'data/**'
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * 0'  # Weekly retraining
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+
+env:
+  MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_URI }}
+  MODEL_REGISTRY: ${{ secrets.MODEL_REGISTRY }}
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Lint
+        run: |
+          black --check src/
+          ruff src/
+          mypy src/
+
+      - name: Unit tests
+        run: pytest tests/unit/ -v --cov=src --cov-report=xml
+
+  data-validation:
+    runs-on: ubuntu-latest
+    needs: lint-and-test
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Pull data
+        run: dvc pull
+
+      - name: Validate data
+        run: |
+          python -m great_expectations checkpoint run data_quality
+          python scripts/validate_data.py
+
+  train:
+    runs-on: [self-hosted, gpu]
+    needs: data-validation
+    outputs:
+      run_id: ${{ steps.train.outputs.run_id }}
+      model_version: ${{ steps.train.outputs.model_version }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Train model
+        id: train
+        run: |
+          RUN_ID=$(python train.py --config configs/production.yaml)
+          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+
+      - name: Register model
+        run: |
+          VERSION=$(python scripts/register_model.py --run-id ${{ steps.train.outputs.run_id }})
+          echo "model_version=$VERSION" >> $GITHUB_OUTPUT
+
+  evaluate:
+    runs-on: ubuntu-latest
+    needs: train
+    steps:
+      - name: Evaluate model
+        run: |
+          python evaluate.py --run-id ${{ needs.train.outputs.run_id }}
+          python scripts/check_regression.py --baseline production
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: evaluate
+    environment: staging
+    steps:
+      - name: Deploy to staging
+        run: |
+          kubectl apply -f k8s/staging/
+          kubectl set image deployment/ml-model \
+            model=registry/ml-model:${{ needs.train.outputs.model_version }}
+
+      - name: Smoke tests
+        run: python tests/smoke/test_staging.py
+
+  validate-staging:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    steps:
+      - name: Integration tests
+        run: pytest tests/integration/ -v
+
+      - name: Load tests
+        run: |
+          locust -f tests/load/locustfile.py \
+            --headless -u 100 -r 10 -t 5m \
+            --host $STAGING_URL
+
+      - name: Shadow comparison
+        run: python scripts/shadow_compare.py --duration 1h
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: validate-staging
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Deploy canary
+        run: |
+          kubectl apply -f k8s/production/canary.yaml
+          kubectl set image deployment/ml-model-canary \
+            model=registry/ml-model:${{ needs.train.outputs.model_version }}
+
+      - name: Monitor canary
+        run: |
+          python scripts/monitor_canary.py \
+            --duration 30m \
+            --error-threshold 0.01
+
+      - name: Promote to production
+        run: |
+          kubectl apply -f k8s/production/
+          kubectl set image deployment/ml-model \
+            model=registry/ml-model:${{ needs.train.outputs.model_version }}
+```
+
+## Steps
+
+### Step 1: Continuous Integration
+**Agent**: mlops-engineer-agent
+
+**Components**:
+```bash
+# Setup CI pipeline
+/omgops:pipeline --type ci --template ml-standard
+```
+
+**Tests**:
+```python
+# tests/unit/test_model.py
+def test_model_forward():
+    model = load_model()
+    x = torch.randn(1, 100)
+    output = model(x)
+    assert output.shape == (1, 10)
+
+# tests/unit/test_preprocessing.py
+def test_preprocessing_pipeline():
+    raw = {"text": "Hello world"}
+    processed = preprocess(raw)
+    assert "input_ids" in processed
+
+# tests/integration/test_endpoint.py
+def test_prediction_endpoint():
+    response = requests.post(f"{API_URL}/predict", json=sample_input)
+    assert response.status_code == 200
+    assert "prediction" in response.json()
+```
+
+### Step 2: Continuous Training
+**Agent**: ml-engineer-agent
+
+**Training Automation**:
+```python
+# scripts/train.py
+import mlflow
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', required=True)
+    args = parser.parse_args()
+
+    config = load_config(args.config)
+
+    with mlflow.start_run() as run:
+        # Log configuration
+        mlflow.log_params(config)
+
+        # Load data
+        train_data = load_data(config['data']['train'])
+        val_data = load_data(config['data']['val'])
+
+        # Train
+        model = train(train_data, val_data, config)
+
+        # Evaluate
+        metrics = evaluate(model, val_data)
+        mlflow.log_metrics(metrics)
+
+        # Log model
+        mlflow.pytorch.log_model(model, "model")
+
+        print(run.info.run_id)
+        return run.info.run_id
+
+if __name__ == '__main__':
+    main()
+```
+
+### Step 3: Model Validation
+**Agent**: experiment-analyst-agent
+
+**Validation Gates**:
+```python
+# scripts/check_regression.py
+def check_regression(new_run_id, baseline='production'):
+    # Get baseline metrics
+    baseline_model = mlflow.pyfunc.load_model(f"models:/my_model/{baseline}")
+    baseline_metrics = evaluate(baseline_model, test_data)
+
+    # Get new metrics
+    new_model = mlflow.pyfunc.load_model(f"runs:/{new_run_id}/model")
+    new_metrics = evaluate(new_model, test_data)
+
+    # Check regression
+    checks = {
+        'accuracy': new_metrics['accuracy'] >= baseline_metrics['accuracy'] - 0.01,
+        'latency': new_metrics['latency'] <= baseline_metrics['latency'] * 1.1,
+        'f1': new_metrics['f1'] >= baseline_metrics['f1'] - 0.02
+    }
+
+    if not all(checks.values()):
+        print("Regression detected!")
+        for check, passed in checks.items():
+            print(f"  {check}: {'✓' if passed else '✗'}")
+        sys.exit(1)
+
+    print("All checks passed!")
+```
+
+### Step 4: Continuous Deployment
+**Agent**: mlops-engineer-agent
+
+**Deployment Strategy**:
+```python
+class DeploymentManager:
+    def __init__(self, k8s_client):
+        self.k8s = k8s_client
+
+    def canary_deploy(self, model_version, canary_pct=10):
+        # Deploy canary
+        self.k8s.apply(f"""
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ml-model-canary
+        spec:
+          replicas: 1
+          template:
+            spec:
+              containers:
+              - name: model
+                image: registry/ml-model:{model_version}
+        """)
+
+        # Configure traffic split
+        self.k8s.apply(f"""
+        apiVersion: networking.istio.io/v1alpha3
+        kind: VirtualService
+        spec:
+          http:
+          - route:
+            - destination:
+                host: ml-model
+              weight: {100 - canary_pct}
+            - destination:
+                host: ml-model-canary
+              weight: {canary_pct}
+        """)
+
+    def promote(self, model_version):
+        # Update production
+        self.k8s.set_image('deployment/ml-model', f'model=registry/ml-model:{model_version}')
+
+        # Remove canary
+        self.k8s.delete('deployment/ml-model-canary')
+
+    def rollback(self):
+        self.k8s.rollout_undo('deployment/ml-model')
+```
+
+### Step 5: Observability
+**Agent**: mlops-engineer-agent
+
+**Pipeline Metrics**:
+```python
+# Prometheus metrics for pipeline
+from prometheus_client import Counter, Histogram, Gauge
+
+PIPELINE_RUNS = Counter('mlops_pipeline_runs_total', 'Pipeline executions', ['status'])
+PIPELINE_DURATION = Histogram('mlops_pipeline_duration_seconds', 'Pipeline duration')
+MODEL_VERSIONS = Counter('mlops_model_versions_total', 'Model versions deployed')
+TRAINING_TIME = Histogram('mlops_training_duration_seconds', 'Training duration')
+
+# Dashboard metrics
+pipeline_metrics = {
+    'runs_per_day': 'rate(mlops_pipeline_runs_total[24h])',
+    'success_rate': 'sum(mlops_pipeline_runs_total{status="success"}) / sum(mlops_pipeline_runs_total)',
+    'avg_duration': 'avg(mlops_pipeline_duration_seconds)',
+    'deployments_per_week': 'sum(increase(mlops_model_versions_total[7d]))'
+}
+```
+
+## Artifacts
+
+- `.github/workflows/` - CI/CD definitions
+- `scripts/` - Pipeline scripts
+- `configs/` - Configuration files
+- `k8s/` - Kubernetes manifests
+- `tests/` - Test suites
+
+## Next Workflows
+
+After MLOps pipeline:
+- → **monitoring-drift-workflow** for production monitoring
+- → **retraining-workflow** for automated retraining
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@mlops-engineer-agent](/agents/mlops-engineer-agent)** - Specialized agent for mlops engineer agent tasks
+- **[@production-engineer-agent](/agents/production-engineer-agent)** - Specialized agent for production engineer agent tasks
+
+
+
+
+
+
+
+
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [mlops-engineer-agent](/agents/mlops-engineer-agent) | ml-systems/mlops, ml-systems/robust-ai... | /omgops:pipeline, /omgops:monitor... |
+| [production-engineer-agent](/agents/production-engineer-agent) | ml-systems/model-deployment, ml-systems/ml-serving-optimization... | /omgdeploy:package, /omgdeploy:serve... |
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Ml Systems" icon="diagram-project" href="/workflows/overview#ml-systems">
+    More ml-systems workflows
+  </Card>
+</CardGroup>

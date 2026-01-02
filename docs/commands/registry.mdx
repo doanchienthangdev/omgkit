@@ -1,0 +1,196 @@
+---
+title: "/omgops:registry"
+description: "Model registry operations - register, list, promote, archive, and rollback model versions"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgops
+
+  **Syntax:** `/omgops:registry <action> [--model <model>] [--version <version>]`
+</Info>
+
+## Overview
+
+Model registry operations - register, list, promote, archive, and rollback model versions
+
+## Quick Start
+
+```bash
+/omgops:registry "action"
+```
+
+
+# Model Registry: \<action\> [--model \<model\>] [--version \<version\>]
+
+Registry operation: **\<action\> [--model \<model\>] [--version \<version\>]**
+
+## Agent
+Uses **mlops-engineer-agent** for model registry management.
+
+## Parameters
+- **action**: register | list | promote | archive | rollback
+- **model**: Model name
+- **version**: Model version
+
+## Registry Actions
+
+### Register
+- Add new model version
+- Store metadata
+- Link artifacts
+- Tag for tracking
+
+### List
+- Show all versions
+- Filter by stage
+- Display metrics
+- Show lineage
+
+### Promote
+- Move to next stage
+- Staging → Production
+- Update endpoints
+- Notify stakeholders
+
+### Archive
+- Deprecate old versions
+- Preserve artifacts
+- Update documentation
+
+### Rollback
+- Revert to previous version
+- Restore endpoint
+- Emergency recovery
+
+## Code Template
+```python
+from omgkit.mlops import ModelRegistry
+import mlflow
+
+registry = ModelRegistry(tracking_uri="http://mlflow.example.com")
+
+# Register new model
+registry.register(
+    model_path="models/best_model.pt",
+    model_name="churn_predictor",
+    tags={
+        "framework": "pytorch",
+        "task": "classification",
+        "team": "data-science"
+    },
+    metrics={
+        "accuracy": 0.94,
+        "f1": 0.89,
+        "latency_ms": 15
+    }
+)
+
+# Promote to production
+registry.promote(
+    model_name="churn_predictor",
+    version="2.1.0",
+    stage="Production"
+)
+
+# Rollback if needed
+registry.rollback(
+    model_name="churn_predictor",
+    to_version="2.0.0"
+)
+
+# List all versions
+versions = registry.list_versions("churn_predictor")
+```
+
+## Model Stages
+- **None**: Development
+- **Staging**: Testing
+- **Production**: Live
+- **Archived**: Deprecated
+
+## Metadata Stored
+- Training parameters
+- Performance metrics
+- Data version
+- Code commit
+- Environment specs
+
+## Progress
+- [ ] Action validated
+- [ ] Registry connected
+- [ ] Operation executed
+- [ ] Endpoints updated
+- [ ] Notifications sent
+
+Centralize model lifecycle management.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [ai-architect-agent](/agents/ai-architect-agent) | Senior AI/ML architect for designing end-to-end ML systems, ... |
+| [mlops-engineer-agent](/agents/mlops-engineer-agent) | Expert MLOps engineer for building and maintaining productio... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgops:registry "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgops:registry "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgops Commands" icon="terminal" href="/commands/overview#omgops">
+    More omgops commands
+  </Card>
+</CardGroup>

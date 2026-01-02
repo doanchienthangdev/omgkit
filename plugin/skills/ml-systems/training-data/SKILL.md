@@ -1,0 +1,152 @@
+---
+name: training-data
+description: Training data management including labeling strategies, data augmentation, handling imbalanced data, and data splitting best practices.
+---
+
+# Training Data
+
+Managing and improving training data quality.
+
+## Data Labeling Strategies
+
+### Manual Labeling
+```python
+# Export for Label Studio
+def export_for_labeling(data: pd.DataFrame, output_path: str):
+    tasks = [
+        {"data": {"text": row["text"]}, "id": idx}
+        for idx, row in data.iterrows()
+    ]
+    with open(output_path, 'w') as f:
+        json.dump(tasks, f)
+```
+
+### Weak Supervision
+```python
+from snorkel.labeling import labeling_function, LabelingFunction
+from snorkel.labeling.model import LabelModel
+
+@labeling_function()
+def lf_keyword(x):
+    keywords = ["urgent", "free", "winner"]
+    return 1 if any(k in x.text.lower() for k in keywords) else -1
+
+@labeling_function()
+def lf_short_text(x):
+    return 1 if len(x.text) < 20 else -1
+
+# Combine weak labels
+lfs = [lf_keyword, lf_short_text]
+applier = PandasLFApplier(lfs)
+L_train = applier.apply(df_train)
+
+label_model = LabelModel(cardinality=2)
+label_model.fit(L_train, n_epochs=100)
+labels = label_model.predict(L_train)
+```
+
+### Active Learning
+```python
+from modAL.models import ActiveLearner
+from sklearn.ensemble import RandomForestClassifier
+
+learner = ActiveLearner(
+    estimator=RandomForestClassifier(),
+    query_strategy=uncertainty_sampling,
+    X_training=X_initial, y_training=y_initial
+)
+
+for _ in range(n_queries):
+    query_idx, query_instance = learner.query(X_pool)
+    # Human labels the instance
+    y_new = get_human_label(query_instance)
+    learner.teach(X_pool[query_idx], y_new)
+    X_pool = np.delete(X_pool, query_idx, axis=0)
+```
+
+## Data Augmentation
+
+```python
+# Text augmentation
+import nlpaug.augmenter.word as naw
+
+aug = naw.SynonymAug(aug_src='wordnet')
+augmented = aug.augment("The quick brown fox jumps over the lazy dog")
+
+# Image augmentation
+import albumentations as A
+
+transform = A.Compose([
+    A.RandomCrop(width=256, height=256),
+    A.HorizontalFlip(p=0.5),
+    A.RandomBrightnessContrast(p=0.2),
+    A.Normalize()
+])
+
+# Tabular augmentation (SMOTE)
+from imblearn.over_sampling import SMOTE
+
+smote = SMOTE(random_state=42)
+X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
+```
+
+## Handling Imbalanced Data
+
+```python
+# Class weights
+from sklearn.utils.class_weight import compute_class_weight
+
+class_weights = compute_class_weight('balanced', classes=np.unique(y), y=y)
+
+# Focal loss
+def focal_loss(y_true, y_pred, gamma=2, alpha=0.25):
+    bce = F.binary_cross_entropy(y_pred, y_true, reduction='none')
+    p_t = y_true * y_pred + (1 - y_true) * (1 - y_pred)
+    focal_weight = (1 - p_t) ** gamma
+    return (alpha * focal_weight * bce).mean()
+
+# Stratified sampling
+from sklearn.model_selection import StratifiedKFold
+
+skf = StratifiedKFold(n_splits=5, shuffle=True)
+for train_idx, val_idx in skf.split(X, y):
+    X_train, X_val = X[train_idx], X[val_idx]
+```
+
+## Data Splitting
+
+```python
+from sklearn.model_selection import train_test_split
+
+# Random split (with stratification)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, stratify=y, random_state=42
+)
+
+# Temporal split (for time series)
+def temporal_split(df, time_col, train_end, val_end):
+    train = df[df[time_col] < train_end]
+    val = df[(df[time_col] >= train_end) & (df[time_col] < val_end)]
+    test = df[df[time_col] >= val_end]
+    return train, val, test
+
+# Group split (no data leakage)
+from sklearn.model_selection import GroupShuffleSplit
+
+gss = GroupShuffleSplit(n_splits=1, test_size=0.2)
+for train_idx, test_idx in gss.split(X, y, groups=user_ids):
+    X_train, X_test = X[train_idx], X[test_idx]
+```
+
+## Commands
+- `/omgdata:label` - Data labeling
+- `/omgdata:augment` - Augmentation
+- `/omgdata:split` - Data splitting
+
+## Best Practices
+
+1. Start with a small, high-quality labeled set
+2. Use weak supervision to scale labeling
+3. Match augmentation to your domain
+4. Prevent data leakage in splits
+5. Monitor label quality over time

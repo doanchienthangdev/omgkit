@@ -1,0 +1,215 @@
+---
+title: "feature-engineering"
+description: "Feature engineering techniques including feature extraction, transformation, selection, and feature store management for ML systems."
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ml-systems
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Feature engineering techniques including feature extraction, transformation, selection, and feature store management for ML systems.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Feature Engineering
+
+Creating informative features for ML models.
+
+## Feature Types
+
+### Numerical Features
+```python
+from sklearn.preprocessing import StandardScaler, RobustScaler
+
+# Scaling
+scaler = StandardScaler()  # Mean=0, Std=1
+robust_scaler = RobustScaler()  # Robust to outliers
+
+# Log transform (for skewed data)
+df['log_income'] = np.log1p(df['income'])
+
+# Polynomial features
+from sklearn.preprocessing import PolynomialFeatures
+poly = PolynomialFeatures(degree=2, include_bias=False)
+X_poly = poly.fit_transform(X)
+
+# Binning
+df['age_group'] = pd.cut(df['age'], bins=[0, 18, 35, 55, 100],
+                         labels=['youth', 'young_adult', 'middle', 'senior'])
+```
+
+### Categorical Features
+```python
+from sklearn.preprocessing import OneHotEncoder, LabelEncoder
+
+# One-hot encoding
+ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')
+encoded = ohe.fit_transform(df[['category']])
+
+# Target encoding
+def target_encode(df, col, target, smoothing=10):
+    global_mean = df[target].mean()
+    agg = df.groupby(col)[target].agg(['mean', 'count'])
+    smooth = (agg['count'] * agg['mean'] + smoothing * global_mean) / (agg['count'] + smoothing)
+    return df[col].map(smooth)
+
+# Hash encoding (for high cardinality)
+from sklearn.feature_extraction import FeatureHasher
+hasher = FeatureHasher(n_features=100, input_type='string')
+```
+
+### Text Features
+```python
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# TF-IDF
+tfidf = TfidfVectorizer(max_features=5000, ngram_range=(1, 2))
+text_features = tfidf.fit_transform(df['text'])
+
+# Embeddings
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
+embeddings = model.encode(df['text'].tolist())
+
+# Text statistics
+df['text_length'] = df['text'].str.len()
+df['word_count'] = df['text'].str.split().str.len()
+df['avg_word_length'] = df['text'].str.split().apply(lambda x: np.mean([len(w) for w in x]))
+```
+
+### Temporal Features
+```python
+# Datetime components
+df['hour'] = df['timestamp'].dt.hour
+df['day_of_week'] = df['timestamp'].dt.dayofweek
+df['is_weekend'] = df['day_of_week'].isin([5, 6]).astype(int)
+
+# Cyclical encoding
+df['hour_sin'] = np.sin(2 * np.pi * df['hour'] / 24)
+df['hour_cos'] = np.cos(2 * np.pi * df['hour'] / 24)
+
+# Lag features
+df['lag_1'] = df['value'].shift(1)
+df['lag_7'] = df['value'].shift(7)
+df['rolling_mean_7'] = df['value'].rolling(window=7).mean()
+```
+
+## Feature Selection
+
+```python
+from sklearn.feature_selection import SelectKBest, mutual_info_classif
+
+# Filter method
+selector = SelectKBest(mutual_info_classif, k=50)
+X_selected = selector.fit_transform(X, y)
+
+# Embedded method (tree importance)
+from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier()
+rf.fit(X, y)
+importances = pd.Series(rf.feature_importances_, index=feature_names)
+
+# Recursive Feature Elimination
+from sklearn.feature_selection import RFE
+rfe = RFE(estimator=LogisticRegression(), n_features_to_select=20)
+X_rfe = rfe.fit_transform(X, y)
+```
+
+## Feature Store
+
+```python
+from feast import Entity, FeatureView, Feature, FileSource
+
+# Define feature view
+user_features = FeatureView(
+    name="user_features",
+    entities=["user_id"],
+    features=[
+        Feature(name="total_purchases", dtype=Float32),
+        Feature(name="avg_order_value", dtype=Float32),
+    ],
+    ttl=timedelta(days=1),
+    source=FileSource(path="data/user_features.parquet")
+)
+
+# Get features for training
+training_df = store.get_historical_features(
+    entity_df=entity_df,
+    features=["user_features:total_purchases"]
+).to_df()
+
+# Get features for inference
+online_features = store.get_online_features(
+    entity_rows=[{"user_id": 123}],
+    features=["user_features:total_purchases"]
+)
+```
+
+## Commands
+- `/omgfeature:extract` - Extract features
+- `/omgfeature:select` - Select features
+- `/omgfeature:store` - Feature store ops
+
+## Best Practices
+
+1. Start with simple features
+2. Use domain knowledge
+3. Validate feature distributions
+4. Document feature definitions
+5. Monitor feature drift
+
+
+## Usage Graph
+
+### Used By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [ai-architect-agent](/agents/ai-architect-agent) | Senior AI/ML architect for designing end-to-end ML systems, ... |
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  feature-engineering:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ml-systems" icon="brain" href="/skills/overview#ml-systems">
+    More ml-systems skills
+  </Card>
+</CardGroup>

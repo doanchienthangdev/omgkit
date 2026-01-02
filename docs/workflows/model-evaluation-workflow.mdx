@@ -1,0 +1,470 @@
+---
+title: "Model Evaluation Workflow"
+description: "Comprehensive model evaluation workflow including performance metrics, error analysis, fairness assessment, and production readiness checks."
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Ml Systems
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:model-evaluation-workflow "your description here"
+```
+
+
+# Model Evaluation Workflow
+
+Comprehensive evaluation of ML models before deployment.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│               MODEL EVALUATION WORKFLOW                      │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. PERFORMANCE     2. ERROR           3. FAIRNESS          │
+│     METRICS            ANALYSIS           ASSESSMENT        │
+│     ↓                  ↓                  ↓                 │
+│  Accuracy/F1       Confusion matrix   Demographic parity    │
+│  ROC/PR curves     Failure patterns   Equalized odds        │
+│  Calibration       Edge cases         Bias detection        │
+│                                                              │
+│  4. ROBUSTNESS     5. EXPLAIN-        6. PRODUCTION         │
+│     TESTING           ABILITY            READINESS          │
+│     ↓                  ↓                  ↓                 │
+│  Adversarial       SHAP values        Latency check         │
+│  Distribution shift Feature import.   Memory footprint      │
+│  Noise sensitivity Model cards        Integration test      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Steps
+
+### Step 1: Performance Metrics
+**Agent**: experiment-analyst-agent
+
+**Inputs**:
+- Trained model
+- Test dataset
+- Metric requirements
+
+**Actions**:
+```bash
+# Comprehensive evaluation
+/omgtrain:evaluate --model model.pt --data test.csv --report full
+```
+
+```python
+from sklearn.metrics import (
+    classification_report, confusion_matrix, roc_auc_score,
+    precision_recall_curve, average_precision_score
+)
+
+def comprehensive_metrics(y_true, y_pred, y_prob):
+    metrics = {}
+
+    # Classification metrics
+    metrics['accuracy'] = accuracy_score(y_true, y_pred)
+    metrics['precision'] = precision_score(y_true, y_pred, average='weighted')
+    metrics['recall'] = recall_score(y_true, y_pred, average='weighted')
+    metrics['f1'] = f1_score(y_true, y_pred, average='weighted')
+
+    # Probability-based metrics
+    metrics['roc_auc'] = roc_auc_score(y_true, y_prob, multi_class='ovr')
+    metrics['pr_auc'] = average_precision_score(y_true, y_prob)
+    metrics['log_loss'] = log_loss(y_true, y_prob)
+
+    # Calibration
+    metrics['brier_score'] = brier_score_loss(y_true, y_prob[:, 1])
+    metrics['ece'] = expected_calibration_error(y_true, y_prob[:, 1])
+
+    return metrics
+```
+
+**Outputs**:
+- Complete metrics report
+- ROC/PR curves
+- Calibration plots
+
+### Step 2: Error Analysis
+**Agent**: data-scientist-agent
+
+**Inputs**:
+- Predictions
+- Ground truth
+- Feature data
+
+**Actions**:
+```python
+def error_analysis(model, X_test, y_test, feature_names):
+    y_pred = model.predict(X_test)
+    y_prob = model.predict_proba(X_test)
+
+    errors = y_pred != y_test
+    error_indices = np.where(errors)[0]
+
+    analysis = {
+        'error_rate': errors.mean(),
+        'confusion_matrix': confusion_matrix(y_test, y_pred),
+        'per_class_errors': {},
+        'error_patterns': [],
+        'confident_errors': []
+    }
+
+    # Per-class error analysis
+    for cls in np.unique(y_test):
+        mask = y_test == cls
+        analysis['per_class_errors'][cls] = {
+            'count': mask.sum(),
+            'error_rate': errors[mask].mean(),
+            'most_confused_with': Counter(y_pred[mask & errors]).most_common(3)
+        }
+
+    # High-confidence errors (most concerning)
+    max_prob = y_prob.max(axis=1)
+    confident_errors = error_indices[max_prob[error_indices] > 0.9]
+    analysis['confident_errors'] = {
+        'count': len(confident_errors),
+        'examples': confident_errors[:10].tolist()
+    }
+
+    # Error patterns by feature
+    for i, feature in enumerate(feature_names):
+        error_values = X_test[error_indices, i]
+        correct_values = X_test[~errors, i]
+
+        if len(error_values) > 10:
+            stat, p_value = stats.mannwhitneyu(error_values, correct_values)
+            if p_value < 0.01:
+                analysis['error_patterns'].append({
+                    'feature': feature,
+                    'p_value': p_value,
+                    'error_mean': error_values.mean(),
+                    'correct_mean': correct_values.mean()
+                })
+
+    return analysis
+```
+
+**Outputs**:
+- Error patterns
+- Confusion analysis
+- High-confidence errors
+
+### Step 3: Fairness Assessment
+**Agent**: data-scientist-agent
+
+**Inputs**:
+- Predictions
+- Sensitive attributes
+- Fairness criteria
+
+**Actions**:
+```python
+def fairness_assessment(y_true, y_pred, y_prob, sensitive_attrs):
+    from fairlearn.metrics import (
+        demographic_parity_difference,
+        equalized_odds_difference,
+        MetricFrame
+    )
+
+    results = {}
+
+    for attr_name, attr_values in sensitive_attrs.items():
+        # Create metric frame
+        metric_frame = MetricFrame(
+            metrics={
+                'accuracy': accuracy_score,
+                'precision': precision_score,
+                'recall': recall_score,
+                'selection_rate': lambda y_t, y_p: y_p.mean()
+            },
+            y_true=y_true,
+            y_pred=y_pred,
+            sensitive_features=attr_values
+        )
+
+        results[attr_name] = {
+            'by_group': metric_frame.by_group.to_dict(),
+            'overall': metric_frame.overall.to_dict(),
+            'demographic_parity_diff': demographic_parity_difference(
+                y_true, y_pred, sensitive_features=attr_values
+            ),
+            'equalized_odds_diff': equalized_odds_difference(
+                y_true, y_pred, sensitive_features=attr_values
+            )
+        }
+
+    # Fairness summary
+    fairness_passed = all(
+        abs(r['demographic_parity_diff']) < 0.1
+        for r in results.values()
+    )
+
+    return {
+        'detailed': results,
+        'passed': fairness_passed,
+        'threshold': 0.1
+    }
+```
+
+**Outputs**:
+- Fairness metrics
+- Group disparities
+- Recommendations
+
+### Step 4: Robustness Testing
+**Agent**: research-scientist-agent
+
+**Inputs**:
+- Model
+- Test data
+- Perturbation types
+
+**Actions**:
+```python
+def robustness_testing(model, X_test, y_test):
+    results = {}
+
+    # Noise robustness
+    noise_levels = [0.01, 0.05, 0.1, 0.2]
+    results['noise'] = {}
+    for noise in noise_levels:
+        X_noisy = X_test + np.random.normal(0, noise, X_test.shape)
+        y_pred = model.predict(X_noisy)
+        results['noise'][noise] = accuracy_score(y_test, y_pred)
+
+    # Feature dropout
+    results['feature_dropout'] = {}
+    baseline_acc = accuracy_score(y_test, model.predict(X_test))
+    for i in range(X_test.shape[1]):
+        X_dropped = X_test.copy()
+        X_dropped[:, i] = 0
+        acc = accuracy_score(y_test, model.predict(X_dropped))
+        results['feature_dropout'][i] = baseline_acc - acc
+
+    # Out-of-distribution detection
+    # Use entropy of predictions
+    y_prob = model.predict_proba(X_test)
+    entropy = -np.sum(y_prob * np.log(y_prob + 1e-10), axis=1)
+    results['entropy_stats'] = {
+        'mean': entropy.mean(),
+        'std': entropy.std(),
+        'high_entropy_pct': (entropy > 0.5).mean()
+    }
+
+    return results
+```
+
+**Outputs**:
+- Noise sensitivity
+- Feature importance
+- OOD detection
+
+### Step 5: Explainability
+**Agent**: data-scientist-agent
+
+**Inputs**:
+- Model
+- Sample data
+- Explanation requirements
+
+**Actions**:
+```python
+import shap
+
+def model_explainability(model, X_train, X_test, feature_names):
+    # SHAP values
+    explainer = shap.TreeExplainer(model)
+    shap_values = explainer.shap_values(X_test)
+
+    # Global feature importance
+    global_importance = np.abs(shap_values).mean(axis=0)
+    importance_ranking = sorted(
+        zip(feature_names, global_importance),
+        key=lambda x: -x[1]
+    )
+
+    # Generate plots
+    shap.summary_plot(shap_values, X_test, feature_names=feature_names)
+
+    # Create model card
+    model_card = {
+        'model_details': {
+            'type': type(model).__name__,
+            'framework': 'sklearn',
+            'version': '1.0'
+        },
+        'intended_use': {
+            'primary_use': 'Classification',
+            'users': 'Data science team',
+            'limitations': 'Not tested on populations outside training distribution'
+        },
+        'metrics': {
+            'accuracy': 0.92,
+            'auc': 0.95
+        },
+        'training_data': {
+            'size': len(X_train),
+            'features': len(feature_names)
+        },
+        'ethical_considerations': {
+            'fairness_tested': True,
+            'sensitive_features': ['age', 'gender']
+        },
+        'top_features': importance_ranking[:10]
+    }
+
+    return {
+        'shap_values': shap_values,
+        'importance': importance_ranking,
+        'model_card': model_card
+    }
+```
+
+**Outputs**:
+- SHAP values
+- Feature importance
+- Model card
+
+### Step 6: Production Readiness
+**Agent**: production-engineer-agent
+
+**Inputs**:
+- Model
+- Production requirements
+- Infrastructure constraints
+
+**Actions**:
+```python
+def production_readiness_check(model, X_sample, requirements):
+    results = {
+        'latency': {},
+        'memory': {},
+        'size': {},
+        'integration': {}
+    }
+
+    # Latency test
+    import time
+    latencies = []
+    for _ in range(100):
+        start = time.perf_counter()
+        model.predict(X_sample[:1])
+        latencies.append((time.perf_counter() - start) * 1000)
+
+    results['latency'] = {
+        'p50': np.percentile(latencies, 50),
+        'p95': np.percentile(latencies, 95),
+        'p99': np.percentile(latencies, 99),
+        'meets_sla': np.percentile(latencies, 99) < requirements['max_latency_ms']
+    }
+
+    # Memory footprint
+    import sys
+    import pickle
+    model_bytes = len(pickle.dumps(model))
+    results['size'] = {
+        'bytes': model_bytes,
+        'mb': model_bytes / 1024 / 1024,
+        'meets_limit': model_bytes < requirements['max_size_mb'] * 1024 * 1024
+    }
+
+    # Integration test
+    try:
+        # Test serialization
+        model_path = '/tmp/test_model.pkl'
+        pickle.dump(model, open(model_path, 'wb'))
+        loaded = pickle.load(open(model_path, 'rb'))
+        test_pred = loaded.predict(X_sample[:1])
+        results['integration']['serialization'] = 'passed'
+    except Exception as e:
+        results['integration']['serialization'] = f'failed: {str(e)}'
+
+    results['ready'] = all([
+        results['latency']['meets_sla'],
+        results['size']['meets_limit'],
+        results['integration']['serialization'] == 'passed'
+    ])
+
+    return results
+```
+
+**Outputs**:
+- Latency benchmarks
+- Memory footprint
+- Production readiness
+
+## Artifacts
+
+- `evaluation_report.json` - Complete metrics
+- `error_analysis.json` - Error patterns
+- `fairness_report.json` - Bias assessment
+- `model_card.md` - Model documentation
+- `visualizations/` - Plots and charts
+
+## Next Workflows
+
+After evaluation:
+- → **model-optimization-workflow** if performance insufficient
+- → **model-deployment-workflow** if ready for production
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@experiment-analyst-agent](/agents/experiment-analyst-agent)** - Specialized agent for experiment analyst agent tasks
+- **[@data-scientist-agent](/agents/data-scientist-agent)** - Specialized agent for data scientist agent tasks
+
+
+
+
+
+
+
+
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [experiment-analyst-agent](/agents/experiment-analyst-agent) | ml-systems/ml-workflow, ml-systems/model-dev... | /omgtrain:evaluate, /omgtrain:compare... |
+| [data-scientist-agent](/agents/data-scientist-agent) | ml-systems/ml-systems-fundamentals, ml-systems/data-eng... | /omgdata:collect, /omgdata:validate... |
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 29 workflows
+  </Card>
+  <Card title="Ml Systems" icon="diagram-project" href="/workflows/overview#ml-systems">
+    More ml-systems workflows
+  </Card>
+</CardGroup>

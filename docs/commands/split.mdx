@@ -1,0 +1,169 @@
+---
+title: "/omgdata:split"
+description: "Split data into train/validation/test sets with stratified, temporal, or group-based strategies"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgdata
+
+  **Syntax:** `/omgdata:split "[--strategy <strategy>] [--ratios <ratios>]"`
+</Info>
+
+## Overview
+
+Split data into train/validation/test sets with stratified, temporal, or group-based strategies
+
+## Quick Start
+
+```bash
+/omgdata:split "[--strategy
+```
+
+
+# Data Split: "[--strategy \<strategy\>] [--ratios \<ratios\>]"
+
+Split data: **"[--strategy \<strategy\>] [--ratios \<ratios\>]"**
+
+## Agent
+Uses **data-engineer-agent** for data splitting.
+
+## Parameters
+- **strategy**: random | stratified | temporal | group (default: stratified)
+- **ratios**: Train/Val/Test ratios (default: "0.7,0.15,0.15")
+
+## Splitting Strategies
+
+### Random
+- Simple random sampling
+- Use case: IID data, no dependencies
+- Fastest approach
+
+### Stratified
+- Maintains class distribution
+- Use case: Classification with imbalanced classes
+- Ensures representative splits
+
+### Temporal
+- Split by time (no future leakage)
+- Use case: Time series, forecasting
+- Respects temporal order
+
+### Group
+- Keep groups together (e.g., same user)
+- Use case: User-level data
+- Prevents data leakage
+
+## Code Template
+```python
+from omgkit.data import DataSplitter
+
+splitter = DataSplitter()
+
+# Stratified split
+train, val, test = splitter.split(
+    data_path="data/processed/dataset.parquet",
+    strategy="stratified",
+    stratify_column="label",
+    ratios=[0.7, 0.15, 0.15],
+    random_state=42
+)
+
+# Temporal split (for time series)
+train, val, test = splitter.split(
+    data_path="data/processed/transactions.parquet",
+    strategy="temporal",
+    time_column="timestamp",
+    train_end="2023-10-01",
+    val_end="2023-11-01"
+)
+
+splitter.save_splits(
+    train=train, val=val, test=test,
+    output_dir="data/splits/"
+)
+```
+
+## Validation
+- No data leakage between splits
+- Class distribution preserved
+- Temporal order respected
+- Group integrity maintained
+
+## Progress
+- [ ] Strategy selected
+- [ ] Data loaded
+- [ ] Split executed
+- [ ] Validation passed
+- [ ] Splits saved
+
+Prevent data leakage for valid model evaluation.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgdata:split "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgdata:split "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgdata Commands" icon="terminal" href="/commands/overview#omgdata">
+    More omgdata commands
+  </Card>
+</CardGroup>

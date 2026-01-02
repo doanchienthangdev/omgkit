@@ -1,0 +1,173 @@
+---
+title: "/omgops:drift"
+description: "Detect and analyze data drift, label drift, and concept drift with statistical methods"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgops
+
+  **Syntax:** `/omgops:drift <drift_type> [--reference <ref>] [--current <current>]`
+</Info>
+
+## Overview
+
+Detect and analyze data drift, label drift, and concept drift with statistical methods
+
+## Quick Start
+
+```bash
+/omgops:drift "drift_type"
+```
+
+
+# Drift Detection: \<drift_type\> [--reference \<ref\>] [--current \<current\>]
+
+Detect drift: **\<drift_type\> [--reference \<ref\>] [--current \<current\>]**
+
+## Agent
+Uses **monitoring-agent** for drift detection.
+
+## Parameters
+- **drift_type**: feature | label | concept | all
+- **reference**: Path to reference data
+- **current**: Path to current data
+
+## Drift Types
+
+### Feature Drift
+- Input distribution change
+- P(X) has changed
+- Methods: KS test, PSI, Wasserstein
+
+### Label Drift
+- Target distribution change
+- P(Y) has changed
+- Methods: Chi-square, JS divergence
+
+### Concept Drift
+- P(Y|X) relationship change
+- Model degradation
+- Methods: Performance monitoring, DDM, ADWIN
+
+## Code Template
+```python
+from omgkit.mlops import DriftDetector
+
+detector = DriftDetector()
+
+drift_report = detector.detect(
+    reference_data="data/reference/baseline.parquet",
+    current_data="data/production/current_week.parquet",
+    drift_types=["feature", "label", "concept"],
+    methods={
+        "feature": "ks_test",
+        "label": "chi_square",
+        "concept": "model_performance"
+    },
+    model_path="models/production/model.pt",
+    threshold=0.05
+)
+
+print(drift_report.summary())
+
+if drift_report.drift_detected:
+    detector.trigger_retraining()
+```
+
+## Statistical Methods
+- **KS Test**: Kolmogorov-Smirnov
+- **PSI**: Population Stability Index
+- **Wasserstein**: Earth Mover's Distance
+- **Chi-Square**: Categorical data
+- **JS Divergence**: Jensen-Shannon
+
+## Actions on Drift
+- Alert notification
+- Trigger retraining
+- Rollback model
+- Increase monitoring
+
+## Report Output
+- Drift scores per feature
+- Statistical significance
+- Trend visualization
+- Recommended actions
+
+## Progress
+- [ ] Data loaded
+- [ ] Drift computed
+- [ ] Analysis complete
+- [ ] Report generated
+- [ ] Actions triggered
+
+Proactively detect model degradation causes.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [mlops-engineer-agent](/agents/mlops-engineer-agent) | Expert MLOps engineer for building and maintaining productio... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgops:drift "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgops:drift "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgops Commands" icon="terminal" href="/commands/overview#omgops">
+    More omgops commands
+  </Card>
+</CardGroup>

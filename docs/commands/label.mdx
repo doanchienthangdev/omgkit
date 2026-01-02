@@ -1,0 +1,169 @@
+---
+title: "/omgdata:label"
+description: "Label data using manual annotation, weak supervision, active learning, or automated labeling"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgdata
+
+  **Syntax:** `/omgdata:label <strategy> [--config <config>]`
+</Info>
+
+## Overview
+
+Label data using manual annotation, weak supervision, active learning, or automated labeling
+
+## Quick Start
+
+```bash
+/omgdata:label "strategy"
+```
+
+
+# Data Labeling: \<strategy\> [--config \<config\>]
+
+Label data using: **\<strategy\> [--config \<config\>]**
+
+## Agent
+Uses **data-engineer-agent** for data labeling workflows.
+
+## Parameters
+- **strategy**: manual | weak_supervision | active_learning | auto_label
+- **config**: Path to labeling configuration
+
+## Labeling Strategies
+
+### Manual
+- Export to Label Studio format
+- Human annotation interface
+- Quality assurance workflows
+- Inter-annotator agreement
+
+### Weak Supervision
+- Labeling functions with Snorkel
+- Programmatic labeling rules
+- Probabilistic label model
+- Noise-aware training
+
+### Active Learning
+- Uncertainty sampling
+- Query-by-committee
+- Prioritized labeling queue
+- Model-in-the-loop
+
+### Auto Label
+- Pretrained model inference
+- Confidence thresholding
+- Human review for low confidence
+- Continuous improvement
+
+## Code Template
+```python
+from omgkit.data import DataLabeler
+
+labeler = DataLabeler(strategy="weak_supervision")
+
+@labeler.labeling_function()
+def lf_keyword_spam(x):
+    spam_keywords = ["free", "win", "click here", "urgent"]
+    if any(kw in x.text.lower() for kw in spam_keywords):
+        return "SPAM"
+    return "ABSTAIN"
+
+@labeler.labeling_function()
+def lf_length(x):
+    if len(x.text) < 10:
+        return "SPAM"
+    return "ABSTAIN"
+
+labels = labeler.label(
+    data_path="data/raw/emails.parquet",
+    labeling_functions=[lf_keyword_spam, lf_length],
+    output_path="data/labeled/emails_labeled.parquet"
+)
+```
+
+## Metrics
+- Label coverage
+- Label accuracy (if ground truth available)
+- Annotator agreement
+- Model confidence distribution
+
+## Progress
+- [ ] Strategy configured
+- [ ] Labeling functions defined
+- [ ] Labels generated
+- [ ] Quality assessed
+- [ ] Output saved
+
+Maximize label quality with minimal manual effort.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgdata:label "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgdata:label "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgdata Commands" icon="terminal" href="/commands/overview#omgdata">
+    More omgdata commands
+  </Card>
+</CardGroup>

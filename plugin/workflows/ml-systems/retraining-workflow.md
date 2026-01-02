@@ -1,0 +1,401 @@
+---
+name: Retraining Workflow
+description: Automated model retraining workflow triggered by drift, scheduled intervals, or manual requests with validation and safe deployment.
+category: ml-systems
+complexity: medium
+agents:
+  - ml-engineer-agent
+  - mlops-engineer-agent
+  - experiment-analyst-agent
+---
+
+# Retraining Workflow
+
+Automated model retraining pipeline.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   RETRAINING WORKFLOW                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. TRIGGER        2. DATA           3. RETRAIN             │
+│     ↓                 REFRESH           ↓                   │
+│  Drift/Schedule    New data         Train model             │
+│  Manual            Validate         Hyperparams             │
+│  Performance       Feature eng      Checkpoints             │
+│                                                              │
+│  4. VALIDATE       5. COMPARE        6. DEPLOY              │
+│     ↓                 ↓                 ↓                   │
+│  Quality gates     vs Production    Canary rollout          │
+│  Regression test   A/B ready        Monitor                 │
+│  Fairness          Approval         Rollback ready          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Trigger Conditions
+
+```python
+class RetrainingTrigger:
+    def __init__(self, config):
+        self.config = config
+
+    def should_retrain(self, metrics):
+        triggers = []
+
+        # 1. Scheduled retraining
+        if self.is_scheduled():
+            triggers.append({'reason': 'scheduled', 'priority': 'normal'})
+
+        # 2. Drift detected
+        if metrics.get('drift_psi', 0) > self.config['drift_threshold']:
+            triggers.append({'reason': 'data_drift', 'priority': 'high'})
+
+        # 3. Performance degradation
+        if metrics.get('accuracy', 1) < self.config['min_accuracy']:
+            triggers.append({'reason': 'performance_drop', 'priority': 'critical'})
+
+        # 4. New data volume
+        if metrics.get('new_data_count', 0) > self.config['data_threshold']:
+            triggers.append({'reason': 'new_data', 'priority': 'normal'})
+
+        # 5. Concept drift
+        if metrics.get('concept_drift_detected', False):
+            triggers.append({'reason': 'concept_drift', 'priority': 'high'})
+
+        return triggers
+
+    def is_scheduled(self):
+        last_training = self.get_last_training_time()
+        days_since = (datetime.now() - last_training).days
+        return days_since >= self.config['retraining_interval_days']
+```
+
+## Steps
+
+### Step 1: Trigger
+**Agent**: mlops-engineer-agent
+
+**Actions**:
+```bash
+# Trigger retraining
+/omgops:retrain --reason drift --priority high
+```
+
+```python
+# Airflow DAG trigger
+def trigger_retraining(reason, priority='normal'):
+    from airflow.api.client.local_client import Client
+
+    client = Client(None, None)
+
+    # Trigger with context
+    client.trigger_dag(
+        dag_id='model_retraining',
+        conf={
+            'trigger_reason': reason,
+            'priority': priority,
+            'triggered_at': datetime.now().isoformat(),
+            'triggered_by': 'drift_monitor'
+        }
+    )
+
+    # Log trigger
+    log_retraining_trigger(reason, priority)
+```
+
+### Step 2: Data Refresh
+**Agent**: ml-engineer-agent
+
+**Actions**:
+```python
+class DataRefreshManager:
+    def __init__(self, data_sources, feature_store):
+        self.sources = data_sources
+        self.feature_store = feature_store
+
+    def refresh_training_data(self, lookback_days=90):
+        # 1. Collect new data
+        new_data = []
+        for source in self.sources:
+            data = source.fetch(
+                start_date=datetime.now() - timedelta(days=lookback_days),
+                end_date=datetime.now()
+            )
+            new_data.append(data)
+
+        combined = pd.concat(new_data)
+
+        # 2. Validate new data
+        validation = self.validate_data(combined)
+        if not validation['passed']:
+            raise DataValidationError(validation['errors'])
+
+        # 3. Engineer features
+        features = self.feature_store.compute_features(combined)
+
+        # 4. Create train/val/test splits
+        train, val, test = self.split_data(
+            features,
+            strategy='temporal',
+            train_end=datetime.now() - timedelta(days=14),
+            val_end=datetime.now() - timedelta(days=7)
+        )
+
+        # 5. Version data
+        version = self.version_data(train, val, test)
+
+        return {
+            'train': train,
+            'val': val,
+            'test': test,
+            'version': version,
+            'stats': self.compute_stats(train)
+        }
+```
+
+**Outputs**:
+- Fresh training data
+- Validation report
+- Data version
+
+### Step 3: Retrain
+**Agent**: ml-engineer-agent
+
+**Actions**:
+```python
+class RetrainingPipeline:
+    def __init__(self, config):
+        self.config = config
+
+    def retrain(self, train_data, val_data, production_model):
+        with mlflow.start_run(run_name=f"retrain_{datetime.now().strftime('%Y%m%d')}"):
+            # Log context
+            mlflow.log_params({
+                'trigger_reason': self.config['trigger_reason'],
+                'train_samples': len(train_data),
+                'val_samples': len(val_data)
+            })
+
+            # Option 1: Fine-tune from production
+            if self.config.get('fine_tune', True):
+                model = self.fine_tune(production_model, train_data, val_data)
+
+            # Option 2: Train from scratch
+            else:
+                model = self.train_from_scratch(train_data, val_data)
+
+            # Log metrics
+            val_metrics = self.evaluate(model, val_data)
+            mlflow.log_metrics(val_metrics)
+
+            # Save model
+            mlflow.pytorch.log_model(model, "model")
+
+            return model, mlflow.active_run().info.run_id
+
+    def fine_tune(self, base_model, train_data, val_data):
+        # Lower learning rate for fine-tuning
+        config = self.config.copy()
+        config['learning_rate'] *= 0.1
+        config['epochs'] = min(config['epochs'], 10)
+
+        return train_model(base_model, train_data, val_data, config)
+
+    def train_from_scratch(self, train_data, val_data):
+        # Full training with hyperparameter optimization
+        if self.config.get('tune_hyperparams', False):
+            best_params = self.tune_hyperparameters(train_data, val_data)
+            return train_model(None, train_data, val_data, best_params)
+        else:
+            return train_model(None, train_data, val_data, self.config)
+```
+
+**Outputs**:
+- Retrained model
+- Training metrics
+- MLflow run ID
+
+### Step 4: Validate
+**Agent**: experiment-analyst-agent
+
+**Actions**:
+```python
+class RetrainingValidator:
+    def __init__(self, quality_thresholds):
+        self.thresholds = quality_thresholds
+
+    def validate(self, new_model, test_data, production_model):
+        results = {
+            'quality_gates': {},
+            'comparison': {},
+            'fairness': {}
+        }
+
+        # 1. Quality gates
+        metrics = evaluate(new_model, test_data)
+        for metric, threshold in self.thresholds.items():
+            results['quality_gates'][metric] = {
+                'value': metrics[metric],
+                'threshold': threshold,
+                'passed': metrics[metric] >= threshold
+            }
+
+        # 2. Comparison with production
+        prod_metrics = evaluate(production_model, test_data)
+        for metric in metrics:
+            results['comparison'][metric] = {
+                'new': metrics[metric],
+                'production': prod_metrics[metric],
+                'improvement': metrics[metric] - prod_metrics[metric],
+                'regression': metrics[metric] < prod_metrics[metric] - 0.01
+            }
+
+        # 3. Fairness checks
+        results['fairness'] = self.check_fairness(new_model, test_data)
+
+        # 4. Overall decision
+        results['approved'] = (
+            all(g['passed'] for g in results['quality_gates'].values()) and
+            not any(c['regression'] for c in results['comparison'].values()) and
+            results['fairness']['passed']
+        )
+
+        return results
+```
+
+**Outputs**:
+- Validation results
+- Comparison report
+- Approval decision
+
+### Step 5: Compare
+**Agent**: experiment-analyst-agent
+
+**Actions**:
+```python
+def generate_comparison_report(new_model_id, production_model_id, test_data):
+    new_model = load_model(new_model_id)
+    prod_model = load_model(production_model_id)
+
+    report = {
+        'summary': {},
+        'detailed_metrics': {},
+        'error_analysis': {},
+        'recommendations': []
+    }
+
+    # Metrics comparison
+    new_metrics = comprehensive_evaluate(new_model, test_data)
+    prod_metrics = comprehensive_evaluate(prod_model, test_data)
+
+    report['summary'] = {
+        'accuracy_delta': new_metrics['accuracy'] - prod_metrics['accuracy'],
+        'f1_delta': new_metrics['f1'] - prod_metrics['f1'],
+        'latency_delta': new_metrics['latency'] - prod_metrics['latency']
+    }
+
+    # Statistical significance
+    report['significance'] = statistical_comparison(
+        new_model, prod_model, test_data
+    )
+
+    # Error analysis
+    report['error_analysis'] = {
+        'new_errors': find_new_errors(new_model, prod_model, test_data),
+        'fixed_errors': find_fixed_errors(new_model, prod_model, test_data)
+    }
+
+    # Recommendations
+    if report['summary']['accuracy_delta'] > 0.01:
+        report['recommendations'].append('Approve: Significant accuracy improvement')
+    elif report['summary']['accuracy_delta'] >= -0.005:
+        report['recommendations'].append('Approve: Performance maintained')
+    else:
+        report['recommendations'].append('Reject: Performance regression detected')
+
+    return report
+```
+
+**Outputs**:
+- Comparison report
+- Significance tests
+- Deployment recommendation
+
+### Step 6: Deploy
+**Agent**: mlops-engineer-agent
+
+**Actions**:
+```bash
+# Deploy retrained model
+/omgdeploy:cloud --model <run_id> --strategy canary --monitor-duration 2h
+```
+
+```python
+class RetrainingDeployment:
+    def deploy(self, model_run_id, validation_results):
+        if not validation_results['approved']:
+            logging.warning("Model not approved, skipping deployment")
+            return {'deployed': False, 'reason': 'validation_failed'}
+
+        # 1. Register model
+        model_version = mlflow.register_model(
+            f"runs:/{model_run_id}/model",
+            "production_model"
+        )
+
+        # 2. Deploy canary
+        self.deploy_canary(model_version.version, traffic_pct=5)
+
+        # 3. Monitor canary
+        monitoring_results = self.monitor_canary(duration_hours=2)
+
+        if monitoring_results['healthy']:
+            # 4. Gradual rollout
+            for pct in [10, 25, 50, 100]:
+                self.update_traffic(model_version.version, pct)
+                time.sleep(600)  # 10 min between steps
+
+                health = self.check_health()
+                if not health['ok']:
+                    self.rollback()
+                    return {'deployed': False, 'reason': 'rollout_failed'}
+
+            # 5. Promote to production
+            self.promote_to_production(model_version.version)
+
+            return {'deployed': True, 'version': model_version.version}
+
+        else:
+            self.rollback()
+            return {'deployed': False, 'reason': 'canary_failed'}
+```
+
+**Outputs**:
+- Deployed model
+- Deployment metrics
+- Rollback capability
+
+## Artifacts
+
+- `retraining/` - Retraining configs
+- `data_versions/` - Versioned datasets
+- `models/` - Model artifacts
+- `reports/` - Comparison reports
+- `logs/` - Pipeline logs
+
+## Next Workflows
+
+After retraining:
+- → **monitoring-drift-workflow** for ongoing monitoring
+- → **model-evaluation-workflow** for deep analysis
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained

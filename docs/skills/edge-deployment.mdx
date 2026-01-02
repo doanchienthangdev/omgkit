@@ -1,0 +1,428 @@
+---
+title: "edge-deployment"
+description: "Edge deployment strategies including mobile optimization, embedded systems, TFLite, Core ML, and resource-constrained inference."
+icon: "brain"
+---
+
+<Info>
+  **Category:** Ml-systems
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Edge deployment strategies including mobile optimization, embedded systems, TFLite, Core ML, and resource-constrained inference.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Edge Deployment
+
+Deploying ML models to edge devices.
+
+## Edge Deployment Landscape
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   EDGE DEPLOYMENT TARGETS                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  MOBILE              EMBEDDED           IOT/SENSORS         │
+│  ──────              ────────           ───────────         │
+│  iOS (Core ML)       Raspberry Pi       Arduino/ESP32       │
+│  Android (TFLite)    NVIDIA Jetson      Microcontrollers    │
+│  React Native        Google Coral       FPGA boards         │
+│                                                              │
+│  CONSTRAINTS:                                                │
+│  ├── Memory: 256MB - 8GB                                    │
+│  ├── Compute: CPU/GPU/NPU                                   │
+│  ├── Power: Battery/USB/Wall                                │
+│  ├── Connectivity: Always/Sometimes/Never                   │
+│  └── Latency: 1ms - 100ms                                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## TensorFlow Lite
+
+### Model Conversion
+```python
+import tensorflow as tf
+
+# Basic conversion
+converter = tf.lite.TFLiteConverter.from_saved_model('saved_model/')
+tflite_model = converter.convert()
+
+# With optimizations
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+
+# Float16 quantization
+converter.target_spec.supported_types = [tf.float16]
+
+# Full integer quantization
+def representative_dataset():
+    for data in calibration_data:
+        yield [data.astype(np.float32)]
+
+converter.representative_dataset = representative_dataset
+converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+converter.inference_input_type = tf.int8
+converter.inference_output_type = tf.int8
+
+# Save model
+with open('model.tflite', 'wb') as f:
+    f.write(converter.convert())
+```
+
+### TFLite Inference
+```python
+import numpy as np
+import tensorflow as tf
+
+# Load model
+interpreter = tf.lite.Interpreter(model_path='model.tflite')
+interpreter.allocate_tensors()
+
+# Get input/output details
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+
+# Inference
+def predict(input_data):
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+    interpreter.invoke()
+    return interpreter.get_tensor(output_details[0]['index'])
+
+# With delegate (GPU acceleration)
+delegate = tf.lite.experimental.load_delegate('libedgetpu.so.1')
+interpreter = tf.lite.Interpreter(
+    model_path='model_edgetpu.tflite',
+    experimental_delegates=[delegate]
+)
+```
+
+## Core ML (iOS)
+
+### PyTorch to Core ML
+```python
+import coremltools as ct
+import torch
+
+# Export to Core ML
+model.eval()
+example_input = torch.rand(1, 3, 224, 224)
+traced_model = torch.jit.trace(model, example_input)
+
+mlmodel = ct.convert(
+    traced_model,
+    inputs=[ct.TensorType(shape=example_input.shape, name="image")],
+    outputs=[ct.TensorType(name="predictions")],
+    compute_precision=ct.precision.FLOAT16,
+    minimum_deployment_target=ct.target.iOS15
+)
+
+# Add metadata
+mlmodel.author = "Your Name"
+mlmodel.short_description = "Image classifier"
+mlmodel.input_description["image"] = "Input image"
+mlmodel.output_description["predictions"] = "Class probabilities"
+
+mlmodel.save("Model.mlpackage")
+```
+
+### Swift Integration
+```swift
+import CoreML
+import Vision
+
+class ModelInference {
+    let model: VNCoreMLModel
+
+    init() throws {
+        let config = MLModelConfiguration()
+        config.computeUnits = .all  // Use Neural Engine
+        let mlModel = try MyModel(configuration: config)
+        self.model = try VNCoreMLModel(for: mlModel.model)
+    }
+
+    func predict(image: CGImage, completion: @escaping ([String: Double]) -> Void) {
+        let request = VNCoreMLRequest(model: model) { request, error in
+            guard let results = request.results as? [VNClassificationObservation] else { return }
+            let predictions = Dictionary(
+                uniqueKeysWithValues: results.prefix(5).map { ($0.identifier, Double($0.confidence)) }
+            )
+            completion(predictions)
+        }
+
+        let handler = VNImageRequestHandler(cgImage: image)
+        try? handler.perform([request])
+    }
+}
+```
+
+## NVIDIA Jetson
+
+### TensorRT Optimization
+```python
+import tensorrt as trt
+
+def build_engine(onnx_path, engine_path, precision='fp16'):
+    logger = trt.Logger(trt.Logger.INFO)
+    builder = trt.Builder(logger)
+    network = builder.create_network(
+        1 << int(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
+    )
+    parser = trt.OnnxParser(network, logger)
+
+    # Parse ONNX
+    with open(onnx_path, 'rb') as f:
+        parser.parse(f.read())
+
+    # Build config
+    config = builder.create_builder_config()
+    config.max_workspace_size = 1 << 30  # 1GB
+
+    if precision == 'fp16':
+        config.set_flag(trt.BuilderFlag.FP16)
+    elif precision == 'int8':
+        config.set_flag(trt.BuilderFlag.INT8)
+        config.int8_calibrator = EntropyCalibrator(calibration_data)
+
+    # Build engine
+    engine = builder.build_engine(network, config)
+
+    with open(engine_path, 'wb') as f:
+        f.write(engine.serialize())
+
+    return engine
+
+# Inference with TensorRT
+class TRTInference:
+    def __init__(self, engine_path):
+        logger = trt.Logger(trt.Logger.WARNING)
+        with open(engine_path, 'rb') as f:
+            self.engine = trt.Runtime(logger).deserialize_cuda_engine(f.read())
+        self.context = self.engine.create_execution_context()
+
+    def infer(self, input_data):
+        # Allocate buffers and run inference
+        pass
+```
+
+### DeepStream Pipeline
+```python
+# DeepStream config for video inference
+# config_infer_primary.txt
+"""
+[property]
+gpu-id=0
+net-scale-factor=0.0039215697906911373
+model-file=resnet18.onnx
+model-engine-file=resnet18.engine
+labelfile-path=labels.txt
+batch-size=4
+network-mode=2  # FP16
+num-detected-classes=80
+interval=0
+gie-unique-id=1
+process-mode=1
+network-type=0
+cluster-mode=2
+maintain-aspect-ratio=1
+symmetric-padding=1
+"""
+
+# Python pipeline
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import Gst
+
+Gst.init(None)
+pipeline = Gst.parse_launch("""
+    filesrc location=video.mp4 !
+    decodebin !
+    nvvideoconvert !
+    nvinfer config-file-path=config.txt !
+    nvdsosd !
+    nvegltransform !
+    nveglglessink
+""")
+pipeline.set_state(Gst.State.PLAYING)
+```
+
+## Microcontroller Deployment
+
+### TensorFlow Lite Micro
+```cpp
+#include "tensorflow/lite/micro/all_ops_resolver.h"
+#include "tensorflow/lite/micro/micro_interpreter.h"
+#include "model_data.h"
+
+// Allocate tensor arena
+constexpr int kTensorArenaSize = 10 * 1024;
+uint8_t tensor_arena[kTensorArenaSize];
+
+void setup() {
+    // Set up model
+    const tflite::Model* model = tflite::GetModel(model_data);
+
+    // Set up resolver
+    tflite::AllOpsResolver resolver;
+
+    // Build interpreter
+    tflite::MicroInterpreter interpreter(
+        model, resolver, tensor_arena, kTensorArenaSize
+    );
+    interpreter.AllocateTensors();
+
+    // Get input tensor
+    TfLiteTensor* input = interpreter.input(0);
+
+    // Fill input and invoke
+    // input->data.f[0] = sensor_value;
+    interpreter.Invoke();
+
+    // Get output
+    TfLiteTensor* output = interpreter.output(0);
+    float prediction = output->data.f[0];
+}
+```
+
+## Model Optimization for Edge
+
+```python
+def optimize_for_edge(model, target_size_mb=10, target_latency_ms=50):
+    """Optimize model for edge deployment."""
+    optimizations = []
+
+    # 1. Quantization
+    quantized = quantize_dynamic(model, {nn.Linear, nn.Conv2d}, dtype=torch.qint8)
+    if get_size_mb(quantized) <= target_size_mb:
+        optimizations.append(('quantization', quantized))
+
+    # 2. Pruning
+    pruned = prune_model(model, amount=0.5)
+    if get_size_mb(pruned) <= target_size_mb:
+        optimizations.append(('pruning', pruned))
+
+    # 3. Knowledge distillation
+    student = create_smaller_model(model)
+    distilled = distill(teacher=model, student=student)
+    if get_size_mb(distilled) <= target_size_mb:
+        optimizations.append(('distillation', distilled))
+
+    # Evaluate each
+    results = []
+    for name, opt_model in optimizations:
+        latency = measure_latency(opt_model)
+        accuracy = evaluate(opt_model)
+        if latency <= target_latency_ms:
+            results.append({
+                'method': name,
+                'latency': latency,
+                'accuracy': accuracy,
+                'size_mb': get_size_mb(opt_model)
+            })
+
+    return sorted(results, key=lambda x: x['accuracy'], reverse=True)
+```
+
+## Offline Inference
+
+```python
+class OfflineInferenceManager:
+    def __init__(self, model_path, cache_dir='./cache'):
+        self.model = load_model(model_path)
+        self.cache_dir = cache_dir
+        self.pending_queue = []
+
+    def predict(self, input_data, priority='normal'):
+        """Run inference locally."""
+        return self.model(input_data)
+
+    def predict_with_fallback(self, input_data, cloud_endpoint=None):
+        """Try cloud first, fall back to local."""
+        try:
+            if self._is_online() and cloud_endpoint:
+                return self._cloud_predict(input_data, cloud_endpoint)
+        except Exception:
+            pass
+
+        return self.predict(input_data)
+
+    def queue_for_sync(self, input_data, result):
+        """Queue predictions for later sync."""
+        self.pending_queue.append({
+            'input': input_data,
+            'result': result,
+            'timestamp': time.time()
+        })
+
+    def sync_when_online(self, endpoint):
+        """Sync queued predictions when connectivity restored."""
+        while self.pending_queue and self._is_online():
+            item = self.pending_queue.pop(0)
+            requests.post(endpoint, json=item)
+```
+
+## Commands
+- `/omgdeploy:edge` - Edge deployment
+- `/omgoptim:quantize` - Quantization
+- `/omgdeploy:package` - Package for target
+
+## Best Practices
+
+1. Profile on target device early
+2. Use hardware-specific frameworks
+3. Quantize to int8 when possible
+4. Implement offline fallbacks
+5. Monitor battery and thermal impact
+
+
+## Usage Graph
+
+### Used By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [production-engineer-agent](/agents/production-engineer-agent) | Expert agent for deploying and operating ML systems in produ... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  edge-deployment:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 43 skills
+  </Card>
+  <Card title="Ml-systems" icon="brain" href="/skills/overview#ml-systems">
+    More ml-systems skills
+  </Card>
+</CardGroup>

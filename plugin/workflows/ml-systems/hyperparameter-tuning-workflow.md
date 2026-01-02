@@ -1,0 +1,352 @@
+---
+name: Hyperparameter Tuning Workflow
+description: Systematic hyperparameter optimization workflow using grid search, random search, Bayesian optimization, and advanced techniques.
+category: ml-systems
+complexity: medium
+agents:
+  - research-scientist-agent
+  - experiment-analyst-agent
+---
+
+# Hyperparameter Tuning Workflow
+
+Systematic optimization of model hyperparameters.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              HYPERPARAMETER TUNING WORKFLOW                  │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. DEFINE         2. STRATEGY        3. SEARCH             │
+│     SPACE             SELECTION          EXECUTION          │
+│     ↓                 ↓                  ↓                  │
+│  Parameter ranges  Grid/Random        Run trials            │
+│  Constraints       Bayesian/Evol      Early stopping        │
+│  Prior knowledge   Resource budget    Parallelization       │
+│                                                              │
+│  4. ANALYSIS       5. VALIDATION      6. DOCUMENTATION      │
+│     ↓                 ↓                  ↓                  │
+│  Best params       Cross-validate     Save config           │
+│  Importance        Holdout test       Log results           │
+│  Sensitivity       Stability check    Best practices        │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Steps
+
+### Step 1: Define Search Space
+**Agent**: research-scientist-agent
+
+**Inputs**:
+- Model type
+- Domain knowledge
+- Computational budget
+
+**Actions**:
+```python
+# Define search space
+search_space = {
+    # Continuous parameters (log scale for learning rate)
+    "learning_rate": {
+        "type": "float",
+        "low": 1e-5,
+        "high": 1e-1,
+        "log": True
+    },
+
+    # Integer parameters
+    "max_depth": {
+        "type": "int",
+        "low": 3,
+        "high": 15
+    },
+
+    "n_estimators": {
+        "type": "int",
+        "low": 50,
+        "high": 500
+    },
+
+    # Categorical parameters
+    "booster": {
+        "type": "categorical",
+        "choices": ["gbtree", "gblinear", "dart"]
+    },
+
+    # Conditional parameters
+    "subsample": {
+        "type": "float",
+        "low": 0.5,
+        "high": 1.0,
+        "condition": "booster == 'gbtree'"
+    }
+}
+```
+
+**Outputs**:
+- Search space definition
+- Parameter constraints
+- Prior distributions
+
+### Step 2: Strategy Selection
+**Agent**: research-scientist-agent
+
+**Inputs**:
+- Search space
+- Computational budget
+- Time constraints
+
+**Strategy Selection**:
+```python
+def select_tuning_strategy(search_space, budget, time_hours):
+    n_params = len(search_space)
+    n_combinations = estimate_combinations(search_space)
+
+    if n_combinations < 100:
+        return "grid_search"
+    elif budget < 50:
+        return "random_search"
+    elif n_params < 10:
+        return "bayesian_tpe"
+    elif time_hours < 2:
+        return "hyperband"
+    else:
+        return "optuna_multiobj"
+
+strategies = {
+    "grid_search": "Exhaustive, best for small spaces",
+    "random_search": "Good baseline, parallelizable",
+    "bayesian_tpe": "Efficient, learns from trials",
+    "hyperband": "Fast, early stopping",
+    "optuna_multiobj": "Multi-objective optimization"
+}
+```
+
+**Outputs**:
+- Selected strategy
+- Resource allocation
+- Parallelization plan
+
+### Step 3: Search Execution
+**Agent**: research-scientist-agent
+
+**Actions**:
+```bash
+# Run hyperparameter tuning
+/omgtrain:tune --model xgboost --space space.yaml --trials 100 --strategy bayesian
+```
+
+**Optuna Implementation**:
+```python
+import optuna
+from optuna.pruners import MedianPruner
+from optuna.samplers import TPESampler
+
+def objective(trial):
+    params = {
+        "learning_rate": trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True),
+        "max_depth": trial.suggest_int("max_depth", 3, 15),
+        "n_estimators": trial.suggest_int("n_estimators", 50, 500),
+        "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
+        "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 10.0, log=True),
+        "reg_lambda": trial.suggest_float("reg_lambda", 1e-8, 10.0, log=True),
+    }
+
+    model = XGBClassifier(**params, use_label_encoder=False, eval_metric="logloss")
+
+    # Cross-validation with early stopping
+    scores = []
+    for fold, (train_idx, val_idx) in enumerate(kfold.split(X, y)):
+        X_train, X_val = X[train_idx], X[val_idx]
+        y_train, y_val = y[train_idx], y[val_idx]
+
+        model.fit(
+            X_train, y_train,
+            eval_set=[(X_val, y_val)],
+            early_stopping_rounds=50,
+            verbose=False
+        )
+
+        score = roc_auc_score(y_val, model.predict_proba(X_val)[:, 1])
+        scores.append(score)
+
+        # Report for pruning
+        trial.report(np.mean(scores), fold)
+        if trial.should_prune():
+            raise optuna.TrialPruned()
+
+    return np.mean(scores)
+
+# Create study
+study = optuna.create_study(
+    direction="maximize",
+    sampler=TPESampler(seed=42),
+    pruner=MedianPruner(n_startup_trials=10, n_warmup_steps=3)
+)
+
+# Optimize
+study.optimize(objective, n_trials=100, n_jobs=4, show_progress_bar=True)
+```
+
+**Outputs**:
+- Trial results
+- Best parameters
+- Optimization history
+
+### Step 4: Analysis
+**Agent**: experiment-analyst-agent
+
+**Inputs**:
+- All trial results
+- Best parameters
+- Optimization history
+
+**Actions**:
+```python
+# Analyze tuning results
+def analyze_tuning_results(study):
+    # Best parameters
+    print(f"Best trial: {study.best_trial.number}")
+    print(f"Best value: {study.best_value:.4f}")
+    print(f"Best params: {study.best_params}")
+
+    # Parameter importance
+    importance = optuna.importance.get_param_importances(study)
+    print("\nParameter Importance:")
+    for param, imp in sorted(importance.items(), key=lambda x: -x[1]):
+        print(f"  {param}: {imp:.4f}")
+
+    # Visualization
+    fig1 = optuna.visualization.plot_optimization_history(study)
+    fig2 = optuna.visualization.plot_param_importances(study)
+    fig3 = optuna.visualization.plot_parallel_coordinate(study)
+    fig4 = optuna.visualization.plot_contour(study, params=["learning_rate", "max_depth"])
+
+    return {
+        "best_params": study.best_params,
+        "best_value": study.best_value,
+        "importance": importance,
+        "n_trials": len(study.trials),
+        "n_pruned": len([t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED])
+    }
+```
+
+**Outputs**:
+- Parameter importance
+- Optimization curves
+- Sensitivity analysis
+
+### Step 5: Validation
+**Agent**: experiment-analyst-agent
+
+**Inputs**:
+- Best parameters
+- Validation strategy
+- Stability requirements
+
+**Actions**:
+```python
+# Validate best parameters
+def validate_best_params(best_params, X, y, n_seeds=5):
+    results = []
+
+    for seed in range(n_seeds):
+        # Train with different seeds
+        model = XGBClassifier(**best_params, random_state=seed)
+
+        # Full cross-validation
+        scores = cross_val_score(model, X, y, cv=5, scoring='roc_auc')
+
+        results.append({
+            "seed": seed,
+            "mean_cv": scores.mean(),
+            "std_cv": scores.std(),
+            "scores": scores.tolist()
+        })
+
+    # Aggregate results
+    all_means = [r["mean_cv"] for r in results]
+
+    return {
+        "overall_mean": np.mean(all_means),
+        "overall_std": np.std(all_means),
+        "min": np.min(all_means),
+        "max": np.max(all_means),
+        "stable": np.std(all_means) < 0.02,  # <2% variance
+        "individual_results": results
+    }
+```
+
+**Outputs**:
+- Stability metrics
+- Confidence intervals
+- Final recommendation
+
+### Step 6: Documentation
+**Agent**: research-scientist-agent
+
+**Inputs**:
+- All tuning results
+- Best configuration
+- Analysis
+
+**Actions**:
+```python
+# Generate tuning report
+tuning_report = {
+    "metadata": {
+        "model_type": "XGBClassifier",
+        "date": datetime.now().isoformat(),
+        "n_trials": 100,
+        "strategy": "TPE + MedianPruner"
+    },
+    "search_space": search_space,
+    "best_params": study.best_params,
+    "performance": {
+        "best_cv_score": study.best_value,
+        "validation_score": validation_results["overall_mean"],
+        "stability": validation_results["overall_std"]
+    },
+    "parameter_importance": importance,
+    "recommendations": [
+        "Use learning_rate=0.05 (most important parameter)",
+        "max_depth=8 is optimal, avoid >12",
+        "n_estimators saturates around 300"
+    ]
+}
+
+# Save configuration
+with open("best_config.yaml", "w") as f:
+    yaml.dump({"hyperparameters": study.best_params}, f)
+```
+
+**Outputs**:
+- Tuning report
+- Best configuration file
+- MLflow artifacts
+
+## Artifacts
+
+- `search_space.yaml` - Parameter definitions
+- `best_config.yaml` - Optimal hyperparameters
+- `tuning_report.json` - Complete analysis
+- `optuna.db` - Study database
+- `visualizations/` - Plots and charts
+
+## Next Workflows
+
+After hyperparameter tuning:
+- → **training-pipeline-workflow** with best params
+- → **model-evaluation-workflow** for validation
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained

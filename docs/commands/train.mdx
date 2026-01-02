@@ -1,68 +1,101 @@
 ---
-title: "/ml:train"
-description: "Train ML model with experiment tracking and hyperparameter tuning"
-icon: "brain"
+title: "/omgtrain:train"
+description: "Train ML model with full pipeline including experiment tracking, checkpointing, and early stopping"
+icon: "terminal"
 ---
 
 <Info>
-  **Category:** Ml
+  **Category:** Omgtrain
 
-  **Syntax:** `/ml:train <model type or training task>`
+  **Syntax:** `/omgtrain:train <model_type> [--config <config>] [--experiment <name>]`
 </Info>
 
 ## Overview
 
-Train ML model with experiment tracking and hyperparameter tuning
+Train ML model with full pipeline including experiment tracking, checkpointing, and early stopping
 
 ## Quick Start
 
 ```bash
-/ml:train "model
+/omgtrain:train "model_type"
 ```
 
 
-# 🤖 ML Training: \<model type or training task\>
+# Model Training: \<model_type\> [--config \<config\>] [--experiment \<name\>]
 
-Train model: **\<model type or training task\>**
+Train model: **\<model_type\> [--config \<config\>] [--experiment \<name\>]**
 
 ## Agent
-Uses **ml-engineer** agent for model training.
+Uses **model-engineer-agent** for comprehensive model training.
 
-## Workflow
-1. **Data Prep** - Load and preprocess data
-2. **Feature Engineering** - Create features
-3. **Model Selection** - Choose architecture
-4. **Training** - Train with tracking
-5. **Tuning** - Hyperparameter optimization
+## Parameters
+- **model_type**: Model architecture or type
+- **config**: Path to training config
+- **experiment**: Experiment name for tracking
 
-## Experiment Tracking
-- MLflow / Weights & Biases
-- Parameters logged
-- Metrics recorded
-- Artifacts stored
-- Model versioning
-
-## Hyperparameter Tuning
-- Grid search
-- Random search
-- Bayesian optimization
+## Features
+- Automatic experiment tracking (MLflow/W&B)
+- Checkpointing
 - Early stopping
+- Learning rate scheduling
+- Gradient accumulation
+- Mixed precision training
+- Distributed training support
 
-## Outputs
-- Trained model artifact
-- Training metrics
-- Learning curves
-- Hyperparameter config
-- Model card
+## Code Template
+```python
+from omgkit.training import Trainer
+import mlflow
+
+trainer = Trainer(
+    model_type="pytorch",
+    config_path="config/model_config.yaml",
+    experiment_name="churn_prediction_v2"
+)
+
+model = trainer.create_model(
+    architecture="mlp",
+    input_dim=100,
+    hidden_dims=[256, 128, 64],
+    output_dim=2,
+    dropout=0.3
+)
+
+with mlflow.start_run():
+    history = trainer.train(
+        model=model,
+        train_data="data/splits/train.parquet",
+        val_data="data/splits/val.parquet",
+        epochs=100,
+        batch_size=64,
+        learning_rate=1e-3,
+        early_stopping=True,
+        patience=10,
+        callbacks=[
+            trainer.callbacks.checkpoint("models/checkpoints/"),
+            trainer.callbacks.lr_scheduler("cosine"),
+            trainer.callbacks.tensorboard("logs/")
+        ]
+    )
+
+    mlflow.log_metrics(history.final_metrics)
+    mlflow.pytorch.log_model(model, "model")
+```
+
+## Training Options
+- Optimizers: Adam, SGD, AdamW
+- Schedulers: cosine, step, plateau
+- Loss functions: cross-entropy, focal, custom
+- Regularization: dropout, weight decay
 
 ## Progress
-- [ ] Data prepared
-- [ ] Features engineered
-- [ ] Model trained
-- [ ] Hyperparameters tuned
-- [ ] Model registered
+- [ ] Config loaded
+- [ ] Model created
+- [ ] Training started
+- [ ] Validation monitored
+- [ ] Model saved
 
-Log all experiments to tracking server.
+Train production-ready models with full reproducibility.
 
 
 
@@ -84,7 +117,9 @@ This command uses the following tools:
 
 | Agent | Description |
 |-------|-------------|
-| [ml-engineer](/agents/ml-engineer) | Machine learning engineering specialist for building product... |
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
+| [research-scientist-agent](/agents/research-scientist-agent) | AI/ML research agent for exploring novel approaches, impleme... |
 
 
 ## Examples
@@ -92,7 +127,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/ml:train "your input here"
+/omgtrain:train "your input here"
 ```
 
 ### With Context
@@ -102,7 +137,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/ml:train "detailed description"
+/omgtrain:train "detailed description"
 ```
 
 ## Tips
@@ -128,7 +163,7 @@ For best results, be specific in your descriptions and include relevant file pat
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all 58 commands
   </Card>
-  <Card title="Ml Commands" icon="brain" href="/commands/overview#ml">
-    More ml commands
+  <Card title="Omgtrain Commands" icon="terminal" href="/commands/overview#omgtrain">
+    More omgtrain commands
   </Card>
 </CardGroup>

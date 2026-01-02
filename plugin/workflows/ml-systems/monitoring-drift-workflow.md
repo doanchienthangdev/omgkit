@@ -1,0 +1,446 @@
+---
+name: Monitoring & Drift Workflow
+description: Production monitoring workflow for detecting data drift, model degradation, and triggering appropriate responses.
+category: ml-systems
+complexity: medium
+agents:
+  - mlops-engineer-agent
+  - experiment-analyst-agent
+---
+
+# Monitoring & Drift Workflow
+
+Monitor production models and detect drift.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              MONITORING & DRIFT WORKFLOW                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. COLLECT        2. DETECT         3. ANALYZE             │
+│     DATA              DRIFT             ROOT CAUSE          │
+│     ↓                 ↓                 ↓                   │
+│  Predictions      Statistical       Feature analysis        │
+│  Features         tests             Data investigation      │
+│  Ground truth     Thresholds        Model behavior          │
+│                                                              │
+│  4. ALERT          5. RESPOND        6. DOCUMENT            │
+│     ↓                 ↓                 ↓                   │
+│  PagerDuty        Switch model      Incident report         │
+│  Slack            Trigger retrain   Lessons learned         │
+│  Dashboard        Fallback          Model card update       │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Steps
+
+### Step 1: Data Collection
+**Agent**: mlops-engineer-agent
+
+**Inputs**:
+- Prediction logs
+- Input features
+- Ground truth (when available)
+
+**Actions**:
+```bash
+# Setup monitoring
+/omgops:monitor --config monitoring.yaml
+```
+
+```python
+# Prediction logging
+class PredictionLogger:
+    def __init__(self, storage_client):
+        self.storage = storage_client
+
+    def log_prediction(self, request_id, features, prediction, confidence):
+        record = {
+            'request_id': request_id,
+            'timestamp': datetime.utcnow().isoformat(),
+            'features': features,
+            'prediction': prediction,
+            'confidence': confidence,
+            'model_version': MODEL_VERSION
+        }
+
+        # Log to streaming storage
+        self.storage.append('predictions', record)
+
+        # Update real-time metrics
+        metrics.log_prediction(prediction, confidence)
+
+    def log_feedback(self, request_id, ground_truth):
+        self.storage.update('predictions', request_id, {
+            'ground_truth': ground_truth,
+            'correct': self.was_correct(request_id, ground_truth)
+        })
+
+# Reference data storage
+class ReferenceDataManager:
+    def __init__(self, reference_path):
+        self.reference = pd.read_parquet(reference_path)
+        self.stats = self.compute_statistics()
+
+    def compute_statistics(self):
+        return {
+            col: {
+                'mean': self.reference[col].mean(),
+                'std': self.reference[col].std(),
+                'quantiles': self.reference[col].quantile([0.25, 0.5, 0.75]).to_dict()
+            }
+            for col in self.reference.select_dtypes(include=[np.number]).columns
+        }
+```
+
+**Outputs**:
+- Prediction logs
+- Feature distributions
+- Reference statistics
+
+### Step 2: Drift Detection
+**Agent**: experiment-analyst-agent
+
+**Actions**:
+```bash
+# Check for drift
+/omgops:drift --reference reference.parquet --current current.parquet
+```
+
+```python
+from scipy import stats
+from evidently.metrics import DataDriftTable
+
+class DriftDetector:
+    def __init__(self, reference_data, significance=0.05):
+        self.reference = reference_data
+        self.significance = significance
+
+    def detect_data_drift(self, current_data):
+        results = {}
+
+        for col in self.reference.columns:
+            if self.reference[col].dtype in ['float64', 'int64']:
+                # KS test for numerical
+                stat, p_value = stats.ks_2samp(
+                    self.reference[col],
+                    current_data[col]
+                )
+                method = 'ks'
+            else:
+                # Chi-square for categorical
+                ref_counts = self.reference[col].value_counts()
+                cur_counts = current_data[col].value_counts()
+                stat, p_value = stats.chisquare(cur_counts, ref_counts)
+                method = 'chi2'
+
+            results[col] = {
+                'method': method,
+                'statistic': stat,
+                'p_value': p_value,
+                'drift_detected': p_value < self.significance
+            }
+
+        # Calculate PSI for overall drift
+        results['overall_psi'] = self.calculate_psi(current_data)
+        results['drift_detected'] = any(r.get('drift_detected', False) for r in results.values())
+
+        return results
+
+    def calculate_psi(self, current_data):
+        psi_values = []
+        for col in self.reference.select_dtypes(include=[np.number]).columns:
+            ref_hist, bins = np.histogram(self.reference[col], bins=10)
+            cur_hist, _ = np.histogram(current_data[col], bins=bins)
+
+            ref_pct = ref_hist / len(self.reference) + 0.0001
+            cur_pct = cur_hist / len(current_data) + 0.0001
+
+            psi = np.sum((cur_pct - ref_pct) * np.log(cur_pct / ref_pct))
+            psi_values.append(psi)
+
+        return np.mean(psi_values)
+
+class ConceptDriftDetector:
+    def __init__(self, window_size=1000):
+        self.window_size = window_size
+        self.performance_history = []
+
+    def update(self, y_true, y_pred):
+        is_correct = y_true == y_pred
+        self.performance_history.append(is_correct)
+
+        if len(self.performance_history) < self.window_size * 2:
+            return None
+
+        # Compare recent performance to historical
+        recent = self.performance_history[-self.window_size:]
+        historical = self.performance_history[-self.window_size*2:-self.window_size]
+
+        recent_acc = np.mean(recent)
+        historical_acc = np.mean(historical)
+
+        # Significant drop indicates concept drift
+        return {
+            'recent_accuracy': recent_acc,
+            'historical_accuracy': historical_acc,
+            'drift_detected': (historical_acc - recent_acc) > 0.05
+        }
+```
+
+**Outputs**:
+- Drift scores
+- Affected features
+- Detection alerts
+
+### Step 3: Root Cause Analysis
+**Agent**: experiment-analyst-agent
+
+**Actions**:
+```python
+class RootCauseAnalyzer:
+    def analyze_drift(self, drift_results, current_data, reference_data):
+        causes = []
+
+        # 1. Check feature shifts
+        for feature, result in drift_results.items():
+            if result.get('drift_detected'):
+                shift = self.analyze_feature_shift(
+                    reference_data[feature],
+                    current_data[feature]
+                )
+                causes.append({
+                    'type': 'feature_shift',
+                    'feature': feature,
+                    'details': shift
+                })
+
+        # 2. Check data quality
+        quality_issues = self.check_data_quality(current_data)
+        if quality_issues:
+            causes.append({
+                'type': 'data_quality',
+                'issues': quality_issues
+            })
+
+        # 3. Check for new categories
+        new_categories = self.check_new_categories(
+            reference_data, current_data
+        )
+        if new_categories:
+            causes.append({
+                'type': 'new_categories',
+                'details': new_categories
+            })
+
+        # 4. Check temporal patterns
+        temporal = self.check_temporal_patterns(current_data)
+        if temporal['anomaly_detected']:
+            causes.append({
+                'type': 'temporal_anomaly',
+                'details': temporal
+            })
+
+        return {
+            'causes': causes,
+            'severity': self.calculate_severity(causes),
+            'recommendations': self.generate_recommendations(causes)
+        }
+
+    def analyze_feature_shift(self, reference, current):
+        return {
+            'ref_mean': reference.mean(),
+            'cur_mean': current.mean(),
+            'shift': (current.mean() - reference.mean()) / reference.std(),
+            'ref_dist': reference.describe().to_dict(),
+            'cur_dist': current.describe().to_dict()
+        }
+```
+
+**Outputs**:
+- Root causes identified
+- Severity assessment
+- Remediation options
+
+### Step 4: Alerting
+**Agent**: mlops-engineer-agent
+
+**Actions**:
+```python
+class AlertManager:
+    def __init__(self, config):
+        self.slack = SlackClient(config['slack_webhook'])
+        self.pagerduty = PagerDutyClient(config['pagerduty_key'])
+
+    def alert(self, severity, message, details):
+        if severity == 'critical':
+            # Page on-call
+            self.pagerduty.trigger(
+                description=message,
+                severity='critical',
+                details=details
+            )
+
+        # Always send to Slack
+        self.slack.send(
+            channel='#ml-alerts',
+            text=self.format_message(severity, message, details),
+            attachments=self.format_attachments(details)
+        )
+
+    def format_message(self, severity, message, details):
+        emoji = {'critical': '🚨', 'warning': '⚠️', 'info': 'ℹ️'}
+        return f"{emoji[severity]} *{severity.upper()}*: {message}"
+
+# Prometheus alerting rules
+alerting_rules = """
+groups:
+- name: ml-drift-alerts
+  rules:
+  - alert: DataDriftDetected
+    expr: ml_data_drift_psi > 0.2
+    for: 30m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Data drift detected in production"
+
+  - alert: ModelAccuracyDrop
+    expr: ml_model_accuracy < 0.85
+    for: 1h
+    labels:
+      severity: critical
+    annotations:
+      summary: "Model accuracy below threshold"
+
+  - alert: HighPredictionLatency
+    expr: histogram_quantile(0.99, ml_prediction_latency) > 0.5
+    for: 15m
+    labels:
+      severity: warning
+"""
+```
+
+**Outputs**:
+- Alerts sent
+- Incident created
+- Team notified
+
+### Step 5: Response
+**Agent**: mlops-engineer-agent
+
+**Actions**:
+```python
+class DriftResponseManager:
+    def __init__(self, model_manager, pipeline_manager):
+        self.models = model_manager
+        self.pipelines = pipeline_manager
+
+    def respond(self, drift_analysis):
+        severity = drift_analysis['severity']
+        response = {'actions_taken': []}
+
+        if severity == 'critical':
+            # Immediate fallback
+            self.models.switch_to_fallback()
+            response['actions_taken'].append('switched_to_fallback')
+
+            # Trigger immediate retraining
+            run_id = self.pipelines.trigger('emergency_retraining')
+            response['actions_taken'].append(f'triggered_retraining:{run_id}')
+
+        elif severity == 'high':
+            # Schedule retraining
+            self.pipelines.schedule('retraining', priority='high')
+            response['actions_taken'].append('scheduled_retraining')
+
+            # Increase monitoring
+            self.models.increase_monitoring_frequency()
+            response['actions_taken'].append('increased_monitoring')
+
+        elif severity == 'medium':
+            # Log for review
+            self.log_for_review(drift_analysis)
+            response['actions_taken'].append('logged_for_review')
+
+        return response
+
+    def switch_to_fallback(self):
+        # Use simpler, more robust model
+        fallback_version = self.models.get_fallback_version()
+        self.models.deploy(fallback_version)
+```
+
+**Outputs**:
+- Response actions taken
+- Model switched if needed
+- Retraining triggered
+
+### Step 6: Documentation
+**Agent**: experiment-analyst-agent
+
+**Actions**:
+```python
+def create_incident_report(drift_analysis, response):
+    report = f"""
+# Drift Incident Report
+
+## Summary
+- **Date**: {datetime.now().isoformat()}
+- **Severity**: {drift_analysis['severity']}
+- **Type**: {drift_analysis['causes'][0]['type'] if drift_analysis['causes'] else 'Unknown'}
+
+## Detection
+- **PSI Score**: {drift_analysis.get('overall_psi', 'N/A')}
+- **Affected Features**: {len([c for c in drift_analysis['causes'] if c['type'] == 'feature_shift'])}
+- **Detection Method**: Statistical tests (KS, Chi-square)
+
+## Root Cause Analysis
+{format_causes(drift_analysis['causes'])}
+
+## Actions Taken
+{format_actions(response['actions_taken'])}
+
+## Recommendations
+{format_recommendations(drift_analysis['recommendations'])}
+
+## Lessons Learned
+- [To be filled post-incident]
+
+## Follow-up Actions
+- [ ] Review data pipeline
+- [ ] Update monitoring thresholds
+- [ ] Retrain model with new data
+"""
+    return report
+```
+
+**Outputs**:
+- Incident report
+- Lessons learned
+- Updated documentation
+
+## Artifacts
+
+- `monitoring/` - Monitoring configurations
+- `alerts/` - Alert definitions
+- `incidents/` - Incident reports
+- `dashboards/` - Grafana dashboards
+- `runbooks/` - Response procedures
+
+## Next Workflows
+
+After drift detection:
+- → **retraining-workflow** for model updates
+- → **model-evaluation-workflow** for post-retraining validation
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained

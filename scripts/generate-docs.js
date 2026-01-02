@@ -1246,6 +1246,7 @@ function formatCategoryName(cat) {
 const SKILL_CATEGORIES = {
   'ai-engineering': { icon: 'microchip', description: 'AI/ML engineering patterns and best practices' },
   'ai-ml': { icon: 'brain-circuit', description: 'MLOps, experiment tracking, and model serving' },
+  'ml-systems': { icon: 'brain', description: 'Production ML systems from data engineering to deployment' },
   autonomous: { icon: 'robot', description: 'Autonomous project development orchestration' },
   backend: { icon: 'server', description: 'Backend architecture and API patterns' },
   databases: { icon: 'database', description: 'Database design and optimization' },

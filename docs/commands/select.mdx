@@ -1,0 +1,172 @@
+---
+title: "/omgfeature:select"
+description: "Select most important features using filter, wrapper, embedded, or hybrid methods"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Omgfeature
+
+  **Syntax:** `/omgfeature:select <method> [--n_features <n>]`
+</Info>
+
+## Overview
+
+Select most important features using filter, wrapper, embedded, or hybrid methods
+
+## Quick Start
+
+```bash
+/omgfeature:select "method"
+```
+
+
+# Feature Selection: \<method\> [--n_features \<n\>]
+
+Select features: **\<method\> [--n_features \<n\>]**
+
+## Agent
+Uses **feature-engineer-agent** for feature selection.
+
+## Parameters
+- **method**: filter | wrapper | embedded | hybrid (default: hybrid)
+- **n_features**: Number of features to select
+
+## Selection Methods
+
+### Filter Methods
+- Mutual information
+- Chi-square test
+- ANOVA F-test
+- Correlation analysis
+- Variance threshold
+
+### Wrapper Methods
+- Recursive feature elimination (RFE)
+- Forward selection
+- Backward elimination
+- Exhaustive search
+
+### Embedded Methods
+- LASSO importance (L1)
+- Tree-based importance
+- Permutation importance
+- SHAP values
+
+### Hybrid
+- Combines multiple methods
+- Voting/consensus approach
+- Best of both worlds
+
+## Code Template
+```python
+from omgkit.features import FeatureSelector
+
+selector = FeatureSelector()
+
+selected_features = selector.select(
+    data_path="data/features/all_features.parquet",
+    target_column="label",
+    methods={
+        "filter": ["mutual_information", "correlation"],
+        "embedded": ["tree_importance"]
+    },
+    n_features=50,
+    output_path="data/features/selected_features.parquet"
+)
+
+# Generate importance report
+selector.report(output="reports/feature_importance.html")
+```
+
+## Output
+- Selected feature list
+- Feature importance scores
+- Selection rationale
+- Visualization plots
+- HTML report
+
+## Best Practices
+- Start with filter methods (fast)
+- Use embedded for final selection
+- Validate on holdout set
+- Consider domain knowledge
+
+## Progress
+- [ ] Features loaded
+- [ ] Methods applied
+- [ ] Selection complete
+- [ ] Report generated
+- [ ] Output saved
+
+Reduce dimensionality while preserving predictive power.
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Task** - Enables task capabilities
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [data-scientist-agent](/agents/data-scientist-agent) | Expert data science agent for exploratory analysis, statisti... |
+| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/omgfeature:select "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/omgfeature:select "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Omgfeature Commands" icon="terminal" href="/commands/overview#omgfeature">
+    More omgfeature commands
+  </Card>
+</CardGroup>

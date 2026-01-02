@@ -1,0 +1,392 @@
+---
+name: Model Deployment Workflow
+description: Complete model deployment workflow from packaging to production serving with monitoring and rollback capabilities.
+category: ml-systems
+complexity: medium
+agents:
+  - production-engineer-agent
+  - mlops-engineer-agent
+---
+
+# Model Deployment Workflow
+
+Deploy ML models to production environments.
+
+## Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                MODEL DEPLOYMENT WORKFLOW                     │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. PACKAGE        2. STAGE          3. TEST                │
+│     ↓                 ↓                 ↓                   │
+│  Containerize     Deploy staging    Integration tests       │
+│  Model archive    Config verify     Load testing            │
+│  Dependencies     Health checks     Smoke tests             │
+│                                                              │
+│  4. DEPLOY         5. VALIDATE       6. MONITOR             │
+│     ↓                 ↓                 ↓                   │
+│  Canary/Blue-green Shadow mode      Metrics                 │
+│  Traffic shift    A/B comparison    Alerts                  │
+│  Rollback ready   Approval          Dashboards              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Steps
+
+### Step 1: Package
+**Agent**: production-engineer-agent
+
+**Inputs**:
+- Trained model
+- Inference code
+- Dependencies
+
+**Actions**:
+```bash
+# Package model
+/omgdeploy:package --model model.pt --handler handler.py --output model-package/
+```
+
+**Dockerfile**:
+```dockerfile
+FROM python:3.10-slim
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy model and code
+COPY model.pt /app/model.pt
+COPY handler.py /app/handler.py
+COPY serve.py /app/serve.py
+
+WORKDIR /app
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+EXPOSE 8000
+CMD ["python", "serve.py"]
+```
+
+**Model Archive (TorchServe)**:
+```bash
+torch-model-archiver \
+  --model-name my_model \
+  --version 1.0 \
+  --serialized-file model.pt \
+  --handler handler.py \
+  --extra-files config.json \
+  --export-path model-store/
+```
+
+**Outputs**:
+- Docker image
+- Model archive
+- Deployment manifests
+
+### Step 2: Stage
+**Agent**: mlops-engineer-agent
+
+**Inputs**:
+- Packaged model
+- Staging environment config
+- Test data
+
+**Actions**:
+```bash
+# Deploy to staging
+/omgdeploy:serve --env staging --config staging.yaml
+```
+
+**Kubernetes Manifest**:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-model-staging
+  namespace: ml-staging
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ml-model
+      env: staging
+  template:
+    metadata:
+      labels:
+        app: ml-model
+        env: staging
+    spec:
+      containers:
+      - name: model
+        image: ml-model:v1.0.0
+        ports:
+        - containerPort: 8000
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 30
+        env:
+        - name: MODEL_VERSION
+          value: "v1.0.0"
+        - name: LOG_LEVEL
+          value: "INFO"
+```
+
+**Outputs**:
+- Staging deployment
+- Health check results
+- Configuration verified
+
+### Step 3: Test
+**Agent**: production-engineer-agent
+
+**Inputs**:
+- Staging endpoint
+- Test cases
+- Performance requirements
+
+**Actions**:
+```python
+# Integration tests
+def test_model_endpoint():
+    response = requests.post(
+        f"{STAGING_URL}/predict",
+        json={"features": [1.0, 2.0, 3.0]}
+    )
+    assert response.status_code == 200
+    assert "prediction" in response.json()
+
+# Load testing
+def load_test(endpoint, rps, duration_seconds):
+    from locust import HttpUser, task
+
+    class ModelUser(HttpUser):
+        @task
+        def predict(self):
+            self.client.post("/predict", json={"features": sample_data})
+
+    # Run with: locust -f load_test.py --headless -u 100 -r 10 -t 60s
+
+# Smoke tests
+smoke_tests = [
+    {"name": "health_check", "endpoint": "/health", "expected": 200},
+    {"name": "prediction", "endpoint": "/predict", "method": "POST", "expected": 200},
+    {"name": "batch", "endpoint": "/batch_predict", "method": "POST", "expected": 200},
+]
+```
+
+**Outputs**:
+- Test results
+- Load test metrics
+- Go/No-Go decision
+
+### Step 4: Deploy
+**Agent**: mlops-engineer-agent
+
+**Inputs**:
+- Tested staging deployment
+- Production config
+- Deployment strategy
+
+**Actions**:
+```bash
+# Deploy to production with canary
+/omgdeploy:cloud --env production --strategy canary --percentage 10
+```
+
+**Canary Deployment**:
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: ml-model
+spec:
+  replicas: 10
+  strategy:
+    canary:
+      canaryService: ml-model-canary
+      stableService: ml-model-stable
+      steps:
+      - setWeight: 10
+      - pause: {duration: 10m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+      - setWeight: 25
+      - pause: {duration: 10m}
+      - setWeight: 50
+      - pause: {duration: 10m}
+      - setWeight: 100
+```
+
+**Blue-Green Alternative**:
+```bash
+# Switch traffic
+kubectl patch service ml-model -p '{"spec":{"selector":{"version":"v2"}}}'
+```
+
+**Outputs**:
+- Production deployment
+- Traffic routing
+- Rollback readiness
+
+### Step 5: Validate
+**Agent**: experiment-analyst-agent
+
+**Inputs**:
+- Production metrics
+- Baseline metrics
+- Validation criteria
+
+**Actions**:
+```bash
+# A/B comparison
+/omgdeploy:ab --control v1 --treatment v2 --duration 24h --metric conversion
+```
+
+```python
+def validate_production(old_version, new_version, duration_hours=24):
+    # Collect metrics
+    old_metrics = get_metrics(old_version, hours=duration_hours)
+    new_metrics = get_metrics(new_version, hours=duration_hours)
+
+    validation = {
+        'latency': {
+            'old_p95': old_metrics['latency_p95'],
+            'new_p95': new_metrics['latency_p95'],
+            'regression': new_metrics['latency_p95'] > old_metrics['latency_p95'] * 1.1
+        },
+        'accuracy': {
+            'old': old_metrics['accuracy'],
+            'new': new_metrics['accuracy'],
+            'improvement': new_metrics['accuracy'] - old_metrics['accuracy']
+        },
+        'error_rate': {
+            'old': old_metrics['error_rate'],
+            'new': new_metrics['error_rate'],
+            'acceptable': new_metrics['error_rate'] < 0.01
+        }
+    }
+
+    validation['approved'] = (
+        not validation['latency']['regression'] and
+        validation['accuracy']['improvement'] >= -0.01 and
+        validation['error_rate']['acceptable']
+    )
+
+    return validation
+```
+
+**Outputs**:
+- Validation report
+- Comparison metrics
+- Promotion approval
+
+### Step 6: Monitor
+**Agent**: mlops-engineer-agent
+
+**Inputs**:
+- Production deployment
+- Monitoring config
+- Alert thresholds
+
+**Actions**:
+```bash
+# Setup monitoring
+/omgops:monitor --deployment ml-model --config monitoring.yaml
+```
+
+```yaml
+# Prometheus alerts
+groups:
+- name: ml-model-alerts
+  rules:
+  - alert: HighLatency
+    expr: histogram_quantile(0.99, model_latency_seconds) > 0.5
+    for: 5m
+    labels:
+      severity: warning
+
+  - alert: HighErrorRate
+    expr: rate(model_errors_total[5m]) / rate(model_requests_total[5m]) > 0.05
+    for: 5m
+    labels:
+      severity: critical
+
+  - alert: LowThroughput
+    expr: rate(model_requests_total[5m]) < 10
+    for: 10m
+    labels:
+      severity: warning
+```
+
+**Grafana Dashboard**:
+```json
+{
+  "panels": [
+    {"title": "Request Rate", "expr": "rate(model_requests_total[1m])"},
+    {"title": "Latency P99", "expr": "histogram_quantile(0.99, model_latency_seconds)"},
+    {"title": "Error Rate", "expr": "rate(model_errors_total[5m]) / rate(model_requests_total[5m])"},
+    {"title": "Model Version", "expr": "model_version_info"}
+  ]
+}
+```
+
+**Outputs**:
+- Monitoring dashboards
+- Alert configurations
+- Runbooks
+
+## Rollback Procedure
+
+```bash
+# Immediate rollback
+kubectl rollout undo deployment/ml-model
+
+# Rollback to specific version
+kubectl rollout undo deployment/ml-model --to-revision=3
+
+# Verify rollback
+kubectl rollout status deployment/ml-model
+```
+
+## Artifacts
+
+- `Dockerfile` - Container definition
+- `k8s/` - Kubernetes manifests
+- `monitoring/` - Dashboards and alerts
+- `runbooks/` - Operational procedures
+- `deployment-log.json` - Deployment history
+
+## Next Workflows
+
+After deployment:
+- → **monitoring-drift-workflow** for drift detection
+- → **retraining-workflow** for model updates
+
+## Quality Gates
+
+- [ ] All steps completed successfully
+- [ ] Metrics meet defined thresholds
+- [ ] Documentation updated
+- [ ] Artifacts versioned and stored
+- [ ] Stakeholder approval obtained
