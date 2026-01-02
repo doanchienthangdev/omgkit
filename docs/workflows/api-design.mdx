@@ -183,6 +183,33 @@ This workflow orchestrates the following agents:
 - Technology stack selected
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [api-designer](/agents/api-designer) | backend/api-architecture | /quality:api-gen, /workflow:api-design |
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [docs-manager](/agents/docs-manager) | methodology/writing-plans | /planning:doc |
+| [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [backend/api-architecture](/skills/api-architecture) | Enterprise API design with REST, GraphQL, gRPC patterns incl... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
+| [`/quality:api-gen`](/commands/quality-api-gen) | Generate API code from spec |
+| [`/planning:doc`](/commands/planning-doc) | Generate documentation |
+| [`/dev:review`](/commands/dev-review) | Code review with security and quality focus |
+
+
 ## Tips for Best Results
 
 <Note>

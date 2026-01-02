@@ -181,6 +181,32 @@ This workflow orchestrates the following agents:
 - Test environment ready
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
+| [vulnerability-scanner](/agents/vulnerability-scanner) | security/owasp, security/security-hardening | /security:scan, /quality:security-scan |
+| [researcher](/agents/researcher) | methodology/research-validation, methodology/brainstorming | /planning:research |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [security/owasp](/skills/owasp) | Claude applies OWASP security best practices to web applicat... |
+| [methodology/defense-in-depth](/skills/defense-in-depth) | AI agent designs layered security architecture with multiple... |
+| [security/security-hardening](/skills/security-hardening) | Advanced security patterns including zero-trust architecture... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
+| [`/planning:research`](/commands/planning-research) | Research technology or topic |
+
+
 ## Tips for Best Results
 
 <Note>

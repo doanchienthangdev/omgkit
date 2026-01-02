@@ -177,6 +177,31 @@ This workflow orchestrates the following agents:
 - Documentation scope defined
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [docs-manager](/agents/docs-manager) | methodology/writing-plans | /planning:doc |
+| [architect](/agents/architect) | omega/omega-architecture, backend/api-architecture... | /omega:100x, /planning:plan-detailed |
+| [copywriter](/agents/copywriter) |  |  |
+| [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/writing-plans](/skills/writing-plans) | AI agent creates structured implementation plans with task b... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:doc`](/commands/planning-doc) | Generate documentation |
+| [`/dev:review`](/commands/dev-review) | Code review with security and quality focus |
+
+
 ## Tips for Best Results
 
 <Note>

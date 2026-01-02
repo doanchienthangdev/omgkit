@@ -73,6 +73,36 @@ DROP TABLE users;
 - **[fullstack-developer](/agents/fullstack-developer)** - Full implementation, code writing, feature development
 - **[security-auditor](/agents/security-auditor)** - Security reviews, vulnerability assessment, compliance
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [databases/database-optimization](/skills/database-optimization) | Advanced database performance tuning including query optimiz... |
+| [databases/database-schema-design](/skills/database-schema-design) | AI agent designs production-grade database schemas with prop... |
+| [databases/database-migration](/skills/database-migration) | AI agent implements safe database migrations with zero-downt... |
+| [databases/database-management](/skills/database-management) | AI agent performs database administration tasks including ba... |
+| [databases/postgresql](/skills/postgresql) | PostgreSQL database design, queries, optimization, and best ... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/quality:optimize`](/commands/quality-optimize) | Performance optimization |
+| [`/workflow:schema-design`](/commands/workflow-schema-design) | Design production-grade database schemas |
+| [`/workflow:migration`](/commands/workflow-migration) | Safe database migration workflow |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [database/migration](/workflows/migration) | Safe database migrations with rollback |
+| [database/optimization](/workflows/optimization) | Optimize database performance |
+| [database/schema-design](/workflows/schema-design) | Design production-grade database schemas |
+| [fullstack/full-feature](/workflows/full-feature) | End-to-end feature with frontend and backend |
+| [microservices/service-scaffolding](/workflows/service-scaffolding) | Scaffold a new microservice with standard structure and infr... |
+
 
 ## Common Patterns
 

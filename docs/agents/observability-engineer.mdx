@@ -373,6 +373,31 @@ spec:
 - **[cicd-manager](/agents/cicd-manager)** - CI/CD pipelines, GitHub Actions, deployment automation
 - **[devsecops](/agents/devsecops)** - Security automation, SAST/DAST, container security, compliance
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [devops/observability](/skills/observability) | Production observability with structured logging, metrics co... |
+| [devops/performance-profiling](/skills/performance-profiling) | Performs browser performance profiling with Lighthouse, Core... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/sre:dashboard`](/commands/sre-dashboard) | Design and configure SRE observability dashboards with SLI/S... |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [ai-ml/model-deployment](/workflows/model-deployment) | Deploy ML models to production with proper validation and mo... |
+| [ai-ml/monitoring-setup](/workflows/monitoring-setup) | Set up comprehensive ML model monitoring for drift and perfo... |
+| [event-driven/consumer-groups](/workflows/consumer-groups) | Manage Kafka consumer groups for scaling and reliability |
+| [microservices/distributed-tracing](/workflows/distributed-tracing) | Implement distributed tracing across microservices |
+| [microservices/service-mesh-setup](/workflows/service-mesh-setup) | Configure service mesh for traffic management and security |
+
 
 ## Common Patterns
 

@@ -243,6 +243,34 @@ This workflow orchestrates the following agents:
 - Base model selected
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [researcher](/agents/researcher) | methodology/research-validation, methodology/brainstorming | /planning:research |
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [ai-engineering/finetuning](/skills/finetuning) | Finetuning Foundation Models - when to finetune, LoRA, QLoRA... |
+| [ai-engineering/dataset-engineering](/skills/dataset-engineering) | Building and processing datasets - data quality, curation, d... |
+| [ai-engineering/evaluation-methodology](/skills/evaluation-methodology) | Methods for evaluating AI model outputs - exact match, seman... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+
+
 ## Tips for Best Results
 
 <Note>

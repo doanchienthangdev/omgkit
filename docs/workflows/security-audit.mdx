@@ -207,6 +207,35 @@ This workflow orchestrates the following agents:
 - Dependencies listed
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
+| [vulnerability-scanner](/agents/vulnerability-scanner) | security/owasp, security/security-hardening | /security:scan, /quality:security-scan |
+| [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [docs-manager](/agents/docs-manager) | methodology/writing-plans | /planning:doc |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [security/owasp](/skills/owasp) | Claude applies OWASP security best practices to web applicat... |
+| [security/security-hardening](/skills/security-hardening) | Advanced security patterns including zero-trust architecture... |
+| [methodology/defense-in-depth](/skills/defense-in-depth) | AI agent designs layered security architecture with multiple... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
+| [`/planning:doc`](/commands/planning-doc) | Generate documentation |
+
+
 ## Tips for Best Results
 
 <Note>

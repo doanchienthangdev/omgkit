@@ -79,6 +79,28 @@ jobs:
 - [`/git:deploy`](/commands/git-deploy) - Activates this agent
 - [`/dev:fix-ci`](/commands/dev-fix-ci) - Activates this agent
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [devops/github-actions](/skills/github-actions) | The agent implements GitHub Actions CI/CD workflows with bui... |
+| [devops/docker](/skills/docker) | Docker containerization with best practices for builds, comp... |
+| [devops/kubernetes](/skills/kubernetes) | The agent implements Kubernetes container orchestration with... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/git:deploy`](/commands/git-deploy) | Deploy to environment |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [microservices/service-scaffolding](/workflows/service-scaffolding) | Scaffold a new microservice with standard structure and infr... |
+
 
 ## Common Patterns
 

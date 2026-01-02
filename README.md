@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **AI Team System for Claude Code**
-> 33 Agents • 111 Commands • 49 Workflows • 127 Skills • 10 Modes • 14 Archetypes
+> 33 Agents • 113 Commands • 49 Workflows • 127 Skills • 10 Modes • 14 Archetypes
 > *"Think Omega. Build Omega. Be Omega."*
 
 OMGKIT transforms Claude Code into an autonomous AI development team with sprint management, specialized agents, and Omega-level thinking for 10x-1000x productivity improvements.
@@ -17,7 +17,7 @@ OMGKIT transforms Claude Code into an autonomous AI development team with sprint
 | Component | Count | Description |
 |-----------|-------|-------------|
 | **Agents** | 33 | Specialized AI team members |
-| **Commands** | 111 | Slash commands for every task |
+| **Commands** | 113 | Slash commands for every task |
 | **Workflows** | 49 | Complete development processes |
 | **Skills** | 127 | Domain expertise modules |
 | **Modes** | 10 | Behavioral configurations |
@@ -127,7 +127,7 @@ After installation, use these commands in Claude Code:
 | `architect` | System design, leverage multiplication |
 | `sprint-master` | Sprint management, team orchestration |
 
-## ⚡ Commands (111)
+## ⚡ Commands (113)
 
 ### Development
 ```bash
@@ -197,6 +197,18 @@ After installation, use these commands in Claude Code:
 /auto:reject        # Request changes with feedback
 /auto:resume        # Resume from saved state
 ```
+
+### Alignment & Dependencies ⭐
+```bash
+/alignment:health   # Check system alignment health status
+/alignment:deps <type:name>  # Show dependency graph tree
+```
+
+The alignment commands help you understand and validate OMGKIT's component hierarchy:
+- `agent:fullstack-developer` - Shows agent's skills, commands, and workflows
+- `workflow:development/feature` - Shows workflow's agents, skills, commands
+- `skill:methodology/writing-plans` - Shows which agents/workflows use this skill
+- `command:/dev:feature` - Shows which agents trigger this command
 
 ## 🤖 Autonomous Development (14 Archetypes)
 

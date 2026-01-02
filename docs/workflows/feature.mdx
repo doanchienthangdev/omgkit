@@ -202,6 +202,38 @@ This workflow orchestrates the following agents:
 - Git repository configured
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
+| [git-manager](/agents/git-manager) | methodology/finishing-development-branch, devops/github-actions | /git:commit, /git:pr... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/writing-plans](/skills/writing-plans) | AI agent creates structured implementation plans with task b... |
+| [methodology/executing-plans](/skills/executing-plans) | AI agent follows implementation plans systematically with pr... |
+| [methodology/test-driven-development](/skills/test-driven-development) | AI agent practices test-first development with the Red-Green... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:review`](/commands/dev-review) | Code review with security and quality focus |
+| [`/git:commit`](/commands/git-commit) | Smart commit with conventional message |
+| [`/git:pr`](/commands/git-pr) | Create pull request |
+
+
 ## Tips for Best Results
 
 <Note>

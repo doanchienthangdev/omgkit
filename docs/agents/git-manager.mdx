@@ -498,6 +498,36 @@ Closes #123
 - [`/git:cm`](/commands/git-cm) - Activates this agent
 - [`/git:cp`](/commands/git-cp) - Activates this agent
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/finishing-development-branch](/skills/finishing-development-branch) | AI agent completes development branches with comprehensive q... |
+| [devops/github-actions](/skills/github-actions) | The agent implements GitHub Actions CI/CD workflows with bui... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/git:commit`](/commands/git-commit) | Smart commit with conventional message |
+| [`/git:pr`](/commands/git-pr) | Create pull request |
+| [`/git:ship`](/commands/git-ship) | Commit and create PR |
+| [`/git:cm`](/commands/git-cm) | Quick conventional commit |
+| [`/git:cp`](/commands/git-cp) | Commit and push |
+| [`/git:deploy`](/commands/git-deploy) | Deploy to environment |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution |
+| [development/code-review](/workflows/code-review) | Review and improve code quality |
+| [development/feature](/workflows/feature) | Complete feature development from planning to deployment |
+| [development/refactor](/workflows/refactor) | Improve code quality without changing behavior |
+| [fullstack/full-feature](/workflows/full-feature) | End-to-end feature with frontend and backend |
+
 
 ## Common Patterns
 

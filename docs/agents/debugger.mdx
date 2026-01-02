@@ -453,6 +453,33 @@ Before marking bug as fixed:
 - [`/dev:fix-fast`](/commands/dev-fix-fast) - Activates this agent
 - [`/dev:fix-hard`](/commands/dev-fix-hard) - Activates this agent
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/systematic-debugging](/skills/systematic-debugging) | AI agent follows a 5-phase debugging process with reproducti... |
+| [methodology/root-cause-tracing](/skills/root-cause-tracing) | AI agent performs systematic root cause analysis using 5 Why... |
+| [methodology/problem-solving](/skills/problem-solving) | AI agent applies a 5-phase systematic framework for tackling... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
+| [`/dev:fix-hard`](/commands/dev-fix-hard) | Complex bug fix with deep investigation |
+| [`/dev:fix-ci`](/commands/dev-fix-ci) | Fix CI/CD pipeline issues |
+| [`/dev:fix-logs`](/commands/dev-fix-logs) | Auto-fetch logs and fix issues |
+| [`/dev:fix-test`](/commands/dev-fix-test) | Fix failing tests |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution |
+| [sprint/sprint-execution](/workflows/sprint-execution) | Execute sprint with AI team |
+
 
 ## Common Patterns
 

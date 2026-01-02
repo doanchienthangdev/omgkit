@@ -184,6 +184,36 @@ This workflow orchestrates the following agents:
 - User model defined
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [security/oauth](/skills/oauth) | Claude implements OAuth 2.0 and OpenID Connect authorization... |
+| [security/better-auth](/skills/better-auth) | Claude implements enterprise TypeScript authentication with ... |
+| [security/owasp](/skills/owasp) | Claude applies OWASP security best practices to web applicat... |
+| [security/security-hardening](/skills/security-hardening) | Advanced security patterns including zero-trust architecture... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+| [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+
+
 ## Tips for Best Results
 
 <Note>

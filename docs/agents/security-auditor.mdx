@@ -81,6 +81,33 @@ Bash("npm audit")
 
 - [`/quality:security-scan`](/commands/quality-security-scan) - Activates this agent
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [security/owasp](/skills/owasp) | Claude applies OWASP security best practices to web applicat... |
+| [security/security-hardening](/skills/security-hardening) | Advanced security patterns including zero-trust architecture... |
+| [methodology/defense-in-depth](/skills/defense-in-depth) | AI agent designs layered security architecture with multiple... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/security:audit`](/commands/security-audit) | Comprehensive security audit with OWASP compliance check |
+| [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [ai-engineering/agent-development](/workflows/agent-development) | Build autonomous AI agents with tools |
+| [api/api-testing](/workflows/api-testing) | Comprehensive API testing |
+| [fullstack/authentication](/workflows/authentication) | Implement authentication system |
+| [security/penetration-testing](/workflows/penetration-testing) | Test security through attack simulation |
+| [security/security-audit](/workflows/security-audit) | Comprehensive security review |
+
 
 ## Common Patterns
 

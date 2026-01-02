@@ -486,6 +486,41 @@ When blocker detected:
 - [`/sprint:new`](/commands/sprint-new) - Activates this agent
 - [`/sprint:start`](/commands/sprint-start) - Activates this agent
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [omega/omega-sprint](/skills/omega-sprint) | Orchestrates AI-native sprint management with autonomous age... |
+| [methodology/dispatching-parallel-agents](/skills/dispatching-parallel-agents) | AI agent orchestrates parallel task execution through concur... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/sprint:init`](/commands/sprint-init) | Initialize OMGKIT in project |
+| [`/sprint:sprint-new`](/commands/sprint-sprint-new) | Create new sprint |
+| [`/sprint:sprint-start`](/commands/sprint-sprint-start) | Start current sprint |
+| [`/sprint:sprint-current`](/commands/sprint-sprint-current) | Show sprint progress |
+| [`/sprint:sprint-end`](/commands/sprint-sprint-end) | End sprint with retrospective |
+| [`/sprint:backlog-add`](/commands/sprint-backlog-add) | Add task to backlog |
+| [`/sprint:backlog-show`](/commands/sprint-backlog-show) | Display backlog |
+| [`/sprint:backlog-prioritize`](/commands/sprint-backlog-prioritize) | AI-powered backlog prioritization |
+| [`/sprint:vision-set`](/commands/sprint-vision-set) | Set product vision interactively |
+| [`/sprint:vision-show`](/commands/sprint-vision-show) | Display current vision |
+| [`/sprint:team-run`](/commands/sprint-team-run) | Run AI team on sprint tasks |
+| [`/sprint:team-status`](/commands/sprint-team-status) | Show AI team activity |
+| [`/sprint:team-ask`](/commands/sprint-team-ask) | Ask the AI team a question |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [sprint/sprint-execution](/workflows/sprint-execution) | Execute sprint with AI team |
+| [sprint/sprint-retrospective](/workflows/sprint-retrospective) | Analyze sprint and improve process |
+| [sprint/sprint-setup](/workflows/sprint-setup) | Initialize and configure a new sprint |
+
 
 ## Common Patterns
 

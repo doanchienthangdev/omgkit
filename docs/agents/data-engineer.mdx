@@ -273,6 +273,33 @@ def feature_store_sync(user_activity_daily):
 - **[database-admin](/agents/database-admin)** - Schema design, query optimization, migrations
 - **[architect](/agents/architect)** - System architecture, design patterns, scalability
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [ai-engineering/dataset-engineering](/skills/dataset-engineering) | Building and processing datasets - data quality, curation, d... |
+| [databases/database-optimization](/skills/database-optimization) | Advanced database performance tuning including query optimiz... |
+| [ai-ml/feature-stores](/skills/feature-stores) |  |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/data:pipeline`](/commands/data-pipeline) | Design and implement data pipeline with ETL/ELT patterns |
+| [`/data:quality`](/commands/data-quality) | Analyze and implement data quality checks and validation |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [ai-ml/data-pipeline](/workflows/data-pipeline) | Build production data pipelines for ML training and inferenc... |
+| [ai-ml/experiment-cycle](/workflows/experiment-cycle) | Run ML experiments with proper tracking and reproducibility |
+| [ai-ml/feature-engineering](/workflows/feature-engineering) | Systematic feature engineering for ML models |
+| [event-driven/consumer-groups](/workflows/consumer-groups) | Manage Kafka consumer groups for scaling and reliability |
+| [event-driven/replay-testing](/workflows/replay-testing) | Test event-driven systems by replaying production events |
+
 
 ## Common Patterns
 

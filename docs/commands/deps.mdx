@@ -1,0 +1,290 @@
+---
+title: "/alignment:deps"
+description: "Show the dependency graph tree for any OMGKIT component"
+icon: "terminal"
+---
+
+<Info>
+  **Category:** Alignment
+
+  **Syntax:** `/alignment:deps <type:name>`
+</Info>
+
+## Overview
+
+Show the dependency graph tree for any OMGKIT component
+
+## Quick Start
+
+```bash
+/alignment:deps "type:name"
+```
+
+
+# Dependency Graph Command
+
+Display the dependency graph tree for any component in OMGKIT.
+
+## Usage
+
+```bash
+/alignment:deps <type>:<name>
+```
+
+Where `<type>` is one of:
+- `agent` - Show agent's skills, commands, and which workflows use it
+- `workflow` - Show workflow's agents, skills, and commands
+- `skill` - Show which agents and workflows use this skill
+- `command` - Show which agents and workflows trigger this command
+
+## Examples
+
+### View Agent Dependencies
+
+```bash
+/alignment:deps agent:fullstack-developer
+```
+
+Output:
+```
+🔮 Dependency Graph: fullstack-developer
+═══════════════════════════════════════════
+
+📋 Agent: fullstack-developer
+   └── Full implementation with strict file ownership
+
+🧠 Skills Used (5):
+   ├── methodology/executing-plans
+   │   └── Skill for following implementation plans...
+   ├── methodology/verification-before-completion
+   │   └── Skill for verifying work before marking done...
+   ├── methodology/test-driven-development
+   │   └── Skill for TDD practices...
+   ├── languages/typescript
+   │   └── TypeScript language expertise...
+   └── languages/javascript
+       └── JavaScript language expertise...
+
+⚡ Commands Triggered (5):
+   ├── /dev:feature
+   ├── /dev:fix
+   ├── /dev:fix-fast
+   ├── /dev:fix-hard
+   └── /dev:tdd
+
+📊 Used By Workflows (5):
+   ├── development/feature
+   ├── development/bug-fix
+   ├── development/refactor
+   ├── omega/10x-improvement
+   └── fullstack/full-feature
+```
+
+### View Workflow Dependencies
+
+```bash
+/alignment:deps workflow:development/feature
+```
+
+Output:
+```
+🔮 Dependency Graph: development/feature
+═══════════════════════════════════════════
+
+📋 Workflow: development/feature
+   └── Complete feature development from planning to deployment
+
+🤖 Agents Orchestrated (5):
+   ├── planner
+   │   ├── Skills: methodology/writing-plans, methodology/executing-plans...
+   │   └── Commands: /planning:plan, /planning:plan-detailed...
+   ├── fullstack-developer
+   │   ├── Skills: methodology/executing-plans, languages/typescript...
+   │   └── Commands: /dev:feature, /dev:fix...
+   ├── tester
+   │   ├── Skills: methodology/test-driven-development, testing/vitest...
+   │   └── Commands: /dev:test, /dev:tdd...
+   ├── code-reviewer
+   │   ├── Skills: methodology/verification-before-completion...
+   │   └── Commands: /dev:review
+   └── git-manager
+       ├── Skills: methodology/finishing-development-branch...
+       └── Commands: /git:commit, /git:pr...
+
+🧠 Skills Applied (3):
+   ├── methodology/writing-plans
+   ├── methodology/executing-plans
+   └── methodology/test-driven-development
+
+⚡ Commands Available (6):
+   ├── /planning:plan
+   ├── /dev:feature
+   ├── /dev:test
+   ├── /dev:review
+   ├── /git:commit
+   └── /git:pr
+```
+
+### View Skill Usage (Reverse Lookup)
+
+```bash
+/alignment:deps skill:methodology/writing-plans
+```
+
+Output:
+```
+🔮 Usage Graph: methodology/writing-plans
+═══════════════════════════════════════════
+
+🧠 Skill: methodology/writing-plans
+   └── AI agent creates structured implementation plans...
+
+🤖 Used By Agents (2):
+   ├── planner
+   │   └── Task decomposition and implementation planning...
+   └── docs-manager
+       └── Documentation architect and maintainer...
+
+📊 Used By Workflows (5):
+   ├── development/feature
+   ├── fullstack/full-feature
+   ├── omega/10x-improvement
+   ├── omega/100x-architecture
+   └── sprint/sprint-setup
+```
+
+### View Command Usage (Reverse Lookup)
+
+```bash
+/alignment:deps command:/dev:feature
+```
+
+Output:
+```
+🔮 Usage Graph: /dev:feature
+═══════════════════════════════════════════
+
+⚡ Command: /dev:feature
+   └── Build a complete feature based on requirements
+
+🤖 Triggered By Agents (1):
+   └── fullstack-developer
+
+📊 Available In Workflows (4):
+   ├── development/feature
+   ├── ai-engineering/rag-development
+   ├── fullstack/full-feature
+   └── omega/10x-improvement
+```
+
+## Understanding the Graph
+
+### Forward Dependencies (dependsOn)
+Shows what components THIS component uses:
+- Agent → Skills it applies, Commands it triggers
+- Workflow → Agents it orchestrates, Skills applied, Commands available
+- Skill → Commands or MCPs it may use
+
+### Reverse Dependencies (usedBy)
+Shows what components USE this component:
+- Agent → Which workflows orchestrate it
+- Skill → Which agents apply it, which workflows include it
+- Command → Which agents trigger it, which workflows include it
+
+## Use Cases
+
+### 1. Impact Analysis
+Before modifying a component, see what depends on it:
+```bash
+/alignment:deps skill:methodology/test-driven-development
+# Shows all agents and workflows that would be affected
+```
+
+### 2. Workflow Understanding
+Understand what a workflow does and what it orchestrates:
+```bash
+/alignment:deps workflow:security/security-audit
+```
+
+### 3. Skill Discovery
+Find which agents have a particular skill:
+```bash
+/alignment:deps skill:security/owasp
+```
+
+### 4. Command Tracing
+Find which agents trigger a command:
+```bash
+/alignment:deps command:/git:commit
+```
+
+## Related Commands
+
+- `/alignment:health` - Check overall system alignment health
+- `/omega:principles` - View Omega principles
+
+## See Also
+
+- [Optimized Alignment Principle](/concepts/alignment-principle)
+- [Agents Overview](/agents/overview)
+- [Workflows Overview](/workflows/overview)
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Bash** - Enables bash capabilities
+- **Glob** - Enables glob capabilities
+- **Grep** - Enables grep capabilities
+
+
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/alignment:deps "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/alignment:deps "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 58 commands
+  </Card>
+  <Card title="Alignment Commands" icon="terminal" href="/commands/overview#alignment">
+    More alignment commands
+  </Card>
+</CardGroup>

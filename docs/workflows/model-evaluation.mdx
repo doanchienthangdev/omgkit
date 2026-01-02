@@ -234,6 +234,32 @@ This workflow orchestrates the following agents:
 - Evaluation criteria defined
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [researcher](/agents/researcher) | methodology/research-validation, methodology/brainstorming | /planning:research |
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [ai-engineering/ai-system-evaluation](/skills/ai-system-evaluation) | End-to-end AI system evaluation - model selection, benchmark... |
+| [ai-engineering/evaluation-methodology](/skills/evaluation-methodology) | Methods for evaluating AI model outputs - exact match, seman... |
+| [ai-engineering/dataset-engineering](/skills/dataset-engineering) | Building and processing datasets - data quality, curation, d... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+
+
 ## Tips for Best Results
 
 <Note>

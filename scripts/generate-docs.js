@@ -9,9 +9,234 @@
 import { readdir, readFile, writeFile, mkdir } from 'fs/promises';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { buildDependencyGraph } from './build-dependency-graph.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// Global dependency graph (built once, used by all generators)
+let dependencyGraph = null;
+let graphStats = null;
 const ROOT = join(__dirname, '..');
+
+/**
+ * Initialize dependency graph (called once at start)
+ */
+async function initDependencyGraph() {
+  if (!dependencyGraph) {
+    const result = await buildDependencyGraph();
+    dependencyGraph = result.graph;
+    graphStats = result.stats;
+  }
+  return { graph: dependencyGraph, stats: graphStats };
+}
+
+/**
+ * Generate dependency graph section for an agent
+ */
+function generateAgentDependencySection(agentName) {
+  if (!dependencyGraph || !dependencyGraph.agents[agentName]) return '';
+
+  const agent = dependencyGraph.agents[agentName];
+  const sections = [];
+
+  sections.push('## Dependency Graph');
+  sections.push('');
+
+  // Skills Used
+  if (agent.dependsOn.skills.length > 0) {
+    sections.push('### Skills Used');
+    sections.push('');
+    sections.push('| Skill | Description |');
+    sections.push('|-------|-------------|');
+    for (const skillId of agent.dependsOn.skills) {
+      const skill = dependencyGraph.skills[skillId];
+      const desc = skill ? skill.description.slice(0, 60) + (skill.description.length > 60 ? '...' : '') : '';
+      const skillSlug = skillId.split('/')[1] || skillId;
+      sections.push(`| [${skillId}](/skills/${skillSlug}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  // Commands Triggered
+  if (agent.dependsOn.commands.length > 0) {
+    sections.push('### Commands Triggered');
+    sections.push('');
+    sections.push('| Command | Description |');
+    sections.push('|---------|-------------|');
+    for (const cmdId of agent.dependsOn.commands) {
+      const cmd = dependencyGraph.commands[cmdId];
+      const desc = cmd ? cmd.description.slice(0, 60) + (cmd.description.length > 60 ? '...' : '') : '';
+      const cmdSlug = cmdId.replace('/', '').replace(':', '-');
+      sections.push(`| [\`${cmdId}\`](/commands/${cmdSlug}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  // Used By Workflows
+  if (agent.usedBy.workflows.length > 0) {
+    sections.push('### Used By Workflows');
+    sections.push('');
+    sections.push('| Workflow | Description |');
+    sections.push('|----------|-------------|');
+    for (const wfId of agent.usedBy.workflows) {
+      const wf = dependencyGraph.workflows[wfId];
+      const desc = wf ? wf.description.slice(0, 60) + (wf.description.length > 60 ? '...' : '') : '';
+      const wfSlug = wfId.split('/')[1] || wfId;
+      sections.push(`| [${wfId}](/workflows/${wfSlug}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  return sections.length > 2 ? sections.join('\n') : '';
+}
+
+/**
+ * Generate usage graph section for a skill
+ */
+function generateSkillUsageSection(skillId) {
+  if (!dependencyGraph || !dependencyGraph.skills[skillId]) return '';
+
+  const skill = dependencyGraph.skills[skillId];
+  const sections = [];
+
+  sections.push('## Usage Graph');
+  sections.push('');
+
+  // Used By Agents
+  if (skill.usedBy.agents.length > 0) {
+    sections.push('### Used By Agents');
+    sections.push('');
+    sections.push('| Agent | Description |');
+    sections.push('|-------|-------------|');
+    for (const agentName of skill.usedBy.agents) {
+      const agent = dependencyGraph.agents[agentName];
+      const desc = agent ? agent.description.slice(0, 60) + (agent.description.length > 60 ? '...' : '') : '';
+      sections.push(`| [${agentName}](/agents/${agentName}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  // Used By Workflows
+  if (skill.usedBy.workflows.length > 0) {
+    sections.push('### Used By Workflows');
+    sections.push('');
+    sections.push('| Workflow | Description |');
+    sections.push('|----------|-------------|');
+    for (const wfId of skill.usedBy.workflows) {
+      const wf = dependencyGraph.workflows[wfId];
+      const desc = wf ? wf.description.slice(0, 60) + (wf.description.length > 60 ? '...' : '') : '';
+      const wfSlug = wfId.split('/')[1] || wfId;
+      sections.push(`| [${wfId}](/workflows/${wfSlug}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  return sections.length > 2 ? sections.join('\n') : '';
+}
+
+/**
+ * Generate usage graph section for a command
+ */
+function generateCommandUsageSection(commandId) {
+  if (!dependencyGraph || !dependencyGraph.commands[commandId]) return '';
+
+  const command = dependencyGraph.commands[commandId];
+  const sections = [];
+
+  sections.push('## Usage Graph');
+  sections.push('');
+
+  // Triggered By Agents
+  if (command.usedBy.agents.length > 0) {
+    sections.push('### Triggered By Agents');
+    sections.push('');
+    sections.push('| Agent | Description |');
+    sections.push('|-------|-------------|');
+    for (const agentName of command.usedBy.agents) {
+      const agent = dependencyGraph.agents[agentName];
+      const desc = agent ? agent.description.slice(0, 60) + (agent.description.length > 60 ? '...' : '') : '';
+      sections.push(`| [${agentName}](/agents/${agentName}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  // Available In Workflows
+  if (command.usedBy.workflows.length > 0) {
+    sections.push('### Available In Workflows');
+    sections.push('');
+    sections.push('| Workflow | Description |');
+    sections.push('|----------|-------------|');
+    for (const wfId of command.usedBy.workflows) {
+      const wf = dependencyGraph.workflows[wfId];
+      const desc = wf ? wf.description.slice(0, 60) + (wf.description.length > 60 ? '...' : '') : '';
+      const wfSlug = wfId.split('/')[1] || wfId;
+      sections.push(`| [${wfId}](/workflows/${wfSlug}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  return sections.length > 2 ? sections.join('\n') : '';
+}
+
+/**
+ * Generate orchestration graph section for a workflow
+ */
+function generateWorkflowOrchestrationSection(workflowId) {
+  if (!dependencyGraph || !dependencyGraph.workflows[workflowId]) return '';
+
+  const workflow = dependencyGraph.workflows[workflowId];
+  const sections = [];
+
+  sections.push('## Orchestration Graph');
+  sections.push('');
+
+  // Agents Orchestrated
+  if (workflow.dependsOn.agents.length > 0) {
+    sections.push('### Agents Orchestrated');
+    sections.push('');
+    sections.push('| Agent | Skills | Commands |');
+    sections.push('|-------|--------|----------|');
+    for (const agentName of workflow.dependsOn.agents) {
+      const agent = dependencyGraph.agents[agentName];
+      const skills = agent ? agent.dependsOn.skills.slice(0, 2).join(', ') + (agent.dependsOn.skills.length > 2 ? '...' : '') : '';
+      const commands = agent ? agent.dependsOn.commands.slice(0, 2).join(', ') + (agent.dependsOn.commands.length > 2 ? '...' : '') : '';
+      sections.push(`| [${agentName}](/agents/${agentName}) | ${skills} | ${commands} |`);
+    }
+    sections.push('');
+  }
+
+  // Skills Applied
+  if (workflow.dependsOn.skills.length > 0) {
+    sections.push('### Skills Applied');
+    sections.push('');
+    sections.push('| Skill | Description |');
+    sections.push('|-------|-------------|');
+    for (const skillId of workflow.dependsOn.skills) {
+      const skill = dependencyGraph.skills[skillId];
+      const desc = skill ? skill.description.slice(0, 60) + (skill.description.length > 60 ? '...' : '') : '';
+      const skillSlug = skillId.split('/')[1] || skillId;
+      sections.push(`| [${skillId}](/skills/${skillSlug}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  // Commands Available
+  if (workflow.dependsOn.commands.length > 0) {
+    sections.push('### Commands Available');
+    sections.push('');
+    sections.push('| Command | Description |');
+    sections.push('|---------|-------------|');
+    for (const cmdId of workflow.dependsOn.commands) {
+      const cmd = dependencyGraph.commands[cmdId];
+      const desc = cmd ? cmd.description.slice(0, 60) + (cmd.description.length > 60 ? '...' : '') : '';
+      const cmdSlug = cmdId.replace('/', '').replace(':', '-');
+      sections.push(`| [\`${cmdId}\`](/commands/${cmdSlug}) | ${desc} |`);
+    }
+    sections.push('');
+  }
+
+  return sections.length > 2 ? sections.join('\n') : '';
+}
 const PLUGIN_DIR = join(ROOT, 'plugin');
 const DOCS_DIR = join(ROOT, 'docs');
 
@@ -395,6 +620,7 @@ icon: "${metadata.icon}"
 
 ${body}
 ${worksWithSection}${commandsSection}
+${generateAgentDependencySection(slug)}
 
 ## Common Patterns
 
@@ -736,6 +962,8 @@ This command uses the following tools:
 
 ${tools.map(t => `- **${t}** - Enables ${t.toLowerCase()} capabilities`).join('\n')}
 ` : ''}
+
+${generateCommandUsageSection(`/${fullCommandName}`)}
 
 ## Examples
 
@@ -1099,6 +1327,8 @@ When this skill is active, agents automatically apply:
 <Check>Performance optimizations</Check>
 
 ${body}
+
+${generateSkillUsageSection(`${category}/${item}`)}
 
 ## Configuration
 
@@ -1726,6 +1956,8 @@ ${prerequisites.length > 0 ? `
 ${prerequisites.map(p => `- ${p}`).join('\n')}
 ` : ''}
 
+${generateWorkflowOrchestrationSection(`${category}/${slug}`)}
+
 ## Tips for Best Results
 
 <Note>
@@ -1941,6 +2173,11 @@ async function main() {
   console.log('==============================\n');
 
   try {
+    // Initialize dependency graph first
+    console.log('Building dependency graph...');
+    await initDependencyGraph();
+    console.log(`  Loaded ${graphStats.agents} agents, ${graphStats.skills} skills, ${graphStats.commands} commands, ${graphStats.workflows} workflows`);
+
     await generateAgentDocs();
     await generateCommandDocs();
     await generateSkillDocs();

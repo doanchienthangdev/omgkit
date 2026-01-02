@@ -151,6 +151,32 @@ This workflow orchestrates the following agents:
 - Code changes to review
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [git-manager](/agents/git-manager) | methodology/finishing-development-branch, devops/github-actions | /git:commit, /git:pr... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/verification-before-completion](/skills/verification-before-completion) | AI agent validates work through evidence-based verification ... |
+| [security/owasp](/skills/owasp) | Claude applies OWASP security best practices to web applicat... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/dev:review`](/commands/dev-review) | Code review with security and quality focus |
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
+| [`/git:commit`](/commands/git-commit) | Smart commit with conventional message |
+
+
 ## Tips for Best Results
 
 <Note>

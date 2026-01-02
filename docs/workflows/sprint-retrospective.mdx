@@ -199,6 +199,30 @@ This workflow orchestrates the following agents:
 - Sprint completed
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [sprint-master](/agents/sprint-master) | omega/omega-sprint, methodology/dispatching-parallel-agents | /sprint:init, /sprint:sprint-new... |
+| [project-manager](/agents/project-manager) | omega/omega-sprint |  |
+| [journal-writer](/agents/journal-writer) |  |  |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [omega/omega-sprint](/skills/omega-sprint) | Orchestrates AI-native sprint management with autonomous age... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/sprint:sprint-end`](/commands/sprint-sprint-end) | End sprint with retrospective |
+| [`/planning:doc`](/commands/planning-doc) | Generate documentation |
+
+
 ## Tips for Best Results
 
 <Note>

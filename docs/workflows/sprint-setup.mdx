@@ -184,6 +184,33 @@ This workflow orchestrates the following agents:
 - Product vision defined
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [sprint-master](/agents/sprint-master) | omega/omega-sprint, methodology/dispatching-parallel-agents | /sprint:init, /sprint:sprint-new... |
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [project-manager](/agents/project-manager) | omega/omega-sprint |  |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [omega/omega-sprint](/skills/omega-sprint) | Orchestrates AI-native sprint management with autonomous age... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/sprint:vision-set`](/commands/sprint-vision-set) | Set product vision interactively |
+| [`/sprint:backlog-add`](/commands/sprint-backlog-add) | Add task to backlog |
+| [`/sprint:backlog-prioritize`](/commands/sprint-backlog-prioritize) | AI-powered backlog prioritization |
+| [`/sprint:sprint-new`](/commands/sprint-sprint-new) | Create new sprint |
+| [`/sprint:sprint-start`](/commands/sprint-sprint-start) | Start current sprint |
+
+
 ## Tips for Best Results
 
 <Note>

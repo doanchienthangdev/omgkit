@@ -533,6 +533,34 @@ The following MUST block merge:
 
 - [`/dev:review`](/commands/dev-review) - Activates this agent
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/verification-before-completion](/skills/verification-before-completion) | AI agent validates work through evidence-based verification ... |
+| [methodology/receiving-code-review](/skills/receiving-code-review) | AI agent handles code review feedback professionally by cate... |
+| [security/owasp](/skills/owasp) | Claude applies OWASP security best practices to web applicat... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/dev:review`](/commands/dev-review) | Code review with security and quality focus |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [api/api-design](/workflows/api-design) | Design RESTful or GraphQL APIs |
+| [content/technical-docs](/workflows/technical-docs) | Create comprehensive technical documentation |
+| [development/code-review](/workflows/code-review) | Review and improve code quality |
+| [development/feature](/workflows/feature) | Complete feature development from planning to deployment |
+| [development/refactor](/workflows/refactor) | Improve code quality without changing behavior |
+| [fullstack/full-feature](/workflows/full-feature) | End-to-end feature with frontend and backend |
+| [security/security-audit](/workflows/security-audit) | Comprehensive security review |
+
 
 ## Common Patterns
 

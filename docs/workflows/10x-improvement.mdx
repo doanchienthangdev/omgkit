@@ -259,6 +259,36 @@ This workflow orchestrates the following agents:
 - Baseline metrics available
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [oracle](/agents/oracle) | omega/omega-thinking, methodology/problem-solving... | /omega:1000x, /omega:10x... |
+| [architect](/agents/architect) | omega/omega-architecture, backend/api-architecture... | /omega:100x, /planning:plan-detailed |
+| [brainstormer](/agents/brainstormer) | methodology/brainstorming | /planning:brainstorm |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [journal-writer](/agents/journal-writer) |  |  |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [omega/omega-thinking](/skills/omega-thinking) | Applies 7 systematic thinking modes for breakthrough problem... |
+| [omega/omega-coding](/skills/omega-coding) | Applies AI-first development patterns for 10-100x productivi... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/omega:10x`](/commands/omega-10x) | Find 10x improvement path |
+| [`/planning:brainstorm`](/commands/planning-brainstorm) | Interactive brainstorming session |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+
+
 ## Tips for Best Results
 
 <Note>

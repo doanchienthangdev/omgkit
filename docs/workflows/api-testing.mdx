@@ -183,6 +183,30 @@ This workflow orchestrates the following agents:
 - Test environment ready
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [backend/api-architecture](/skills/api-architecture) | Enterprise API design with REST, GraphQL, gRPC patterns incl... |
+| [security/owasp](/skills/owasp) | Claude applies OWASP security best practices to web applicat... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
+
+
 ## Tips for Best Results
 
 <Note>

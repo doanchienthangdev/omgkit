@@ -190,6 +190,35 @@ This workflow orchestrates the following agents:
 - Access to relevant logs/errors
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [debugger](/agents/debugger) | methodology/systematic-debugging, methodology/root-cause-tracing... | /dev:fix, /dev:fix-hard... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [git-manager](/agents/git-manager) | methodology/finishing-development-branch, devops/github-actions | /git:commit, /git:pr... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/systematic-debugging](/skills/systematic-debugging) | AI agent follows a 5-phase debugging process with reproducti... |
+| [methodology/root-cause-tracing](/skills/root-cause-tracing) | AI agent performs systematic root cause analysis using 5 Why... |
+| [methodology/test-driven-development](/skills/test-driven-development) | AI agent practices test-first development with the Red-Green... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
+| [`/dev:fix-hard`](/commands/dev-fix-hard) | Complex bug fix with deep investigation |
+| [`/dev:fix-test`](/commands/dev-fix-test) | Fix failing tests |
+| [`/git:cm`](/commands/git-cm) | Quick conventional commit |
+
+
 ## Tips for Best Results
 
 <Note>

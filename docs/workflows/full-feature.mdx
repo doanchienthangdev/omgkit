@@ -248,6 +248,41 @@ This workflow orchestrates the following agents:
 - Technology stack defined
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [database-admin](/agents/database-admin) | databases/database-optimization, databases/database-schema-design... | /quality:optimize, /workflow:schema-design... |
+| [api-designer](/agents/api-designer) | backend/api-architecture | /quality:api-gen, /workflow:api-design |
+| [ui-ux-designer](/agents/ui-ux-designer) | frontend/advanced-ui-design, frontend/frontend-design... | /design:screenshot, /design:cro... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
+| [git-manager](/agents/git-manager) | methodology/finishing-development-branch, devops/github-actions | /git:commit, /git:pr... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/writing-plans](/skills/writing-plans) | AI agent creates structured implementation plans with task b... |
+| [databases/database-schema-design](/skills/database-schema-design) | AI agent designs production-grade database schemas with prop... |
+| [backend/api-architecture](/skills/api-architecture) | Enterprise API design with REST, GraphQL, gRPC patterns incl... |
+| [frontend/frontend-design](/skills/frontend-design) | Claude designs scalable React component architectures using ... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:plan-detailed`](/commands/planning-plan-detailed) | Detailed plan with 2-5 min tasks |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:review`](/commands/dev-review) | Code review with security and quality focus |
+| [`/git:pr`](/commands/git-pr) | Create pull request |
+
+
 ## Tips for Best Results
 
 <Note>

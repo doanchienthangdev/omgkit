@@ -179,6 +179,33 @@ This workflow orchestrates the following agents:
 - Database type selected
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [database-admin](/agents/database-admin) | databases/database-optimization, databases/database-schema-design... | /quality:optimize, /workflow:schema-design... |
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [databases/database-schema-design](/skills/database-schema-design) | AI agent designs production-grade database schemas with prop... |
+| [databases/postgresql](/skills/postgresql) | PostgreSQL database design, queries, optimization, and best ... |
+| [databases/mongodb](/skills/mongodb) | The agent implements MongoDB NoSQL database solutions with d... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+
+
 ## Tips for Best Results
 
 <Note>

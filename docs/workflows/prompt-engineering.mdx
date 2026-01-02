@@ -223,6 +223,30 @@ This workflow orchestrates the following agents:
 - LLM API access
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [researcher](/agents/researcher) | methodology/research-validation, methodology/brainstorming | /planning:research |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [ai-engineering/prompt-engineering](/skills/prompt-engineering) | Designing effective prompts - system/user prompts, few-shot ... |
+| [ai-engineering/evaluation-methodology](/skills/evaluation-methodology) | Methods for evaluating AI model outputs - exact match, seman... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:research`](/commands/planning-research) | Research technology or topic |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+
+
 ## Tips for Best Results
 
 <Note>

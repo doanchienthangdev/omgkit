@@ -94,6 +94,29 @@ components:
 
 - [`/quality:api-gen`](/commands/quality-api-gen) - Activates this agent
 
+## Dependency Graph
+
+### Skills Used
+
+| Skill | Description |
+|-------|-------------|
+| [backend/api-architecture](/skills/api-architecture) | Enterprise API design with REST, GraphQL, gRPC patterns incl... |
+
+### Commands Triggered
+
+| Command | Description |
+|---------|-------------|
+| [`/quality:api-gen`](/commands/quality-api-gen) | Generate API code from spec |
+| [`/workflow:api-design`](/commands/workflow-api-design) | Design RESTful or GraphQL APIs |
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [api/api-design](/workflows/api-design) | Design RESTful or GraphQL APIs |
+| [fullstack/full-feature](/workflows/full-feature) | End-to-end feature with frontend and backend |
+| [microservices/contract-first](/workflows/contract-first) | Develop APIs using contract-first methodology with consumer-... |
+
 
 ## Common Patterns
 

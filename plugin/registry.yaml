@@ -1,9 +1,9 @@
 # OMGKIT Component Registry
 # Single Source of Truth for Agents, Skills, Commands, Workflows, and MCPs
-# Version: 2.0.0
+# Version: 2.1.0
 # Updated: 2026-01-02
 
-version: "2.0.0"
+version: "2.1.0"
 
 # =============================================================================
 # OPTIMIZED ALIGNMENT PRINCIPLE (OAP)
@@ -449,21 +449,7 @@ agents:
   # ---------------------------------------------------------------------------
   # SPECIALIZED AGENTS
   # ---------------------------------------------------------------------------
-  autonomous-orchestrator:
-    file: agents/autonomous-orchestrator.yaml
-    description: State-driven autonomous project execution
-    skills:
-      - autonomous/project-orchestration
-    commands:
-      - /auto:init
-      - /auto:start
-      - /auto:status
-      - /auto:next
-      - /auto:approve
-      - /auto:reject
-      - /auto:verify
-      - /auto:checkpoint
-      - /auto:resume
+  # Note: autonomous-orchestrator uses YAML format and is handled separately
 
   domain-decomposer:
     file: agents/domain-decomposer.md
@@ -542,6 +528,7 @@ skill_categories:
 # All valid command namespace prefixes
 
 command_namespaces:
+  - alignment # Alignment and dependency graph
   - auto      # Autonomous orchestration
   - context   # Context management
   - data      # Data engineering
@@ -578,15 +565,15 @@ workflows:
     commands: [/planning:plan, /dev:feature, /dev:test, /dev:review, /git:pr]
 
   development/bug-fix:
-    agents: [debugger, fullstack-developer, tester, code-reviewer, git-manager]
+    agents: [debugger, fullstack-developer, tester, git-manager]
     skills:
       - methodology/systematic-debugging
       - methodology/root-cause-tracing
       - methodology/test-driven-development
-    commands: [/dev:fix, /dev:fix-hard, /dev:test, /git:cm]
+    commands: [/dev:fix, /dev:fix-hard, /dev:fix-test, /git:cm]
 
   development/refactor:
-    agents: [architect, fullstack-developer, tester, code-reviewer, git-manager]
+    agents: [code-reviewer, fullstack-developer, tester, git-manager]
     skills:
       - methodology/verification-before-completion
       - methodology/test-driven-development
@@ -618,31 +605,31 @@ workflows:
     commands: [/planning:research, /planning:plan-detailed, /dev:feature, /dev:test, /quality:security-scan]
 
   ai-engineering/fine-tuning:
-    agents: [ml-engineer, data-engineer, tester]
+    agents: [researcher, planner, fullstack-developer, tester]
     skills:
       - ai-engineering/finetuning
       - ai-engineering/dataset-engineering
       - ai-engineering/evaluation-methodology
-    commands: [/planning:plan, /ml:train, /ml:evaluate, /dev:test]
+    commands: [/planning:plan, /dev:feature, /dev:test]
 
   ai-engineering/prompt-engineering:
-    agents: [researcher, fullstack-developer, tester]
+    agents: [researcher, tester]
     skills:
       - ai-engineering/prompt-engineering
       - ai-engineering/evaluation-methodology
-    commands: [/planning:research, /dev:feature, /dev:test]
+    commands: [/planning:research, /dev:test]
 
   ai-engineering/model-evaluation:
-    agents: [ml-engineer, researcher, tester]
+    agents: [researcher, planner, tester]
     skills:
       - ai-engineering/ai-system-evaluation
       - ai-engineering/evaluation-methodology
       - ai-engineering/dataset-engineering
-    commands: [/planning:plan, /ml:evaluate, /dev:test]
+    commands: [/planning:plan, /dev:test]
 
   # Security workflows
   security/security-audit:
-    agents: [security-auditor, fullstack-developer, docs-manager]
+    agents: [security-auditor, vulnerability-scanner, code-reviewer, fullstack-developer, docs-manager]
     skills:
       - security/owasp
       - security/security-hardening
@@ -659,7 +646,7 @@ workflows:
 
   # Database workflows
   database/schema-design:
-    agents: [database-admin, architect, fullstack-developer, tester]
+    agents: [database-admin, planner, tester]
     skills:
       - databases/database-schema-design
       - databases/postgresql
@@ -667,20 +654,20 @@ workflows:
     commands: [/planning:plan, /dev:feature, /dev:test]
 
   database/migration:
-    agents: [database-admin, fullstack-developer, tester]
+    agents: [database-admin, planner, tester]
     skills:
       - databases/database-migration
-    commands: [/planning:plan, /dev:feature, /dev:test]
+    commands: [/planning:plan, /dev:test]
 
   database/optimization:
-    agents: [database-admin, performance-engineer, tester]
+    agents: [database-admin, tester]
     skills:
       - databases/database-optimization
-    commands: [/quality:optimize, /perf:profile, /dev:test]
+    commands: [/quality:optimize, /dev:test]
 
   # API workflows
   api/api-design:
-    agents: [api-designer, architect, docs-manager, code-reviewer]
+    agents: [api-designer, planner, docs-manager, code-reviewer]
     skills:
       - backend/api-architecture
     commands: [/planning:plan, /quality:api-gen, /planning:doc, /dev:review]
@@ -694,21 +681,21 @@ workflows:
 
   # Omega workflows
   omega/10x-improvement:
-    agents: [oracle, brainstormer, fullstack-developer, tester]
+    agents: [oracle, architect, brainstormer, fullstack-developer, tester, journal-writer]
     skills:
       - omega/omega-thinking
       - omega/omega-coding
     commands: [/omega:10x, /planning:brainstorm, /dev:feature, /dev:test]
 
   omega/100x-architecture:
-    agents: [oracle, architect, researcher]
+    agents: [oracle, architect, planner, researcher]
     skills:
       - omega/omega-architecture
       - omega/omega-thinking
     commands: [/omega:100x, /planning:plan-detailed]
 
   omega/1000x-innovation:
-    agents: [oracle, researcher, brainstormer]
+    agents: [oracle, researcher, brainstormer, architect]
     skills:
       - omega/omega-thinking
       - omega/omega-architecture
@@ -716,27 +703,27 @@ workflows:
 
   # Sprint workflows
   sprint/sprint-setup:
-    agents: [sprint-master, planner]
+    agents: [sprint-master, planner, project-manager]
     skills:
       - omega/omega-sprint
     commands: [/sprint:vision-set, /sprint:backlog-add, /sprint:backlog-prioritize, /sprint:sprint-new, /sprint:sprint-start]
 
   sprint/sprint-execution:
-    agents: [sprint-master, fullstack-developer, tester, debugger]
+    agents: [sprint-master, fullstack-developer, tester, debugger, project-manager]
     skills:
       - omega/omega-sprint
       - methodology/executing-plans
     commands: [/sprint:sprint-current, /sprint:team-run, /sprint:team-status, /dev:fix, /sprint:sprint-end]
 
   sprint/sprint-retrospective:
-    agents: [sprint-master, journal-writer, docs-manager]
+    agents: [sprint-master, project-manager, journal-writer]
     skills:
       - omega/omega-sprint
     commands: [/sprint:sprint-end, /planning:doc]
 
   # Fullstack workflows
   fullstack/full-feature:
-    agents: [planner, architect, fullstack-developer, tester, code-reviewer, git-manager]
+    agents: [planner, database-admin, api-designer, ui-ux-designer, fullstack-developer, tester, code-reviewer, git-manager]
     skills:
       - methodology/writing-plans
       - databases/database-schema-design
@@ -745,7 +732,7 @@ workflows:
     commands: [/planning:plan-detailed, /dev:feature, /dev:test, /dev:review, /git:pr]
 
   fullstack/authentication:
-    agents: [architect, fullstack-developer, security-auditor, tester]
+    agents: [planner, fullstack-developer, security-auditor, tester]
     skills:
       - security/oauth
       - security/better-auth
@@ -755,21 +742,21 @@ workflows:
 
   # Quality workflows
   quality/performance-optimization:
-    agents: [performance-engineer, fullstack-developer, tester]
+    agents: [fullstack-developer, tester]
     skills:
       - ai-engineering/inference-optimization
       - databases/database-optimization
-    commands: [/quality:optimize, /perf:profile, /dev:test]
+    commands: [/quality:optimize, /dev:test]
 
   # Research workflows
   research/technology-research:
-    agents: [researcher, architect, docs-manager]
+    agents: [researcher, oracle, docs-manager]
     skills:
       - methodology/research-validation
     commands: [/planning:research, /planning:doc]
 
   research/best-practices:
-    agents: [researcher, fullstack-developer]
+    agents: [researcher, planner, fullstack-developer]
     skills:
       - methodology/research-validation
     commands: [/planning:research, /planning:plan, /dev:feature]

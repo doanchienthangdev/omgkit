@@ -161,6 +161,30 @@ This workflow orchestrates the following agents:
 - Research topic defined
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [researcher](/agents/researcher) | methodology/research-validation, methodology/brainstorming | /planning:research |
+| [oracle](/agents/oracle) | omega/omega-thinking, methodology/problem-solving... | /omega:1000x, /omega:10x... |
+| [docs-manager](/agents/docs-manager) | methodology/writing-plans | /planning:doc |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/research-validation](/skills/research-validation) | Multi-source validation framework for technology decisions, ... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:research`](/commands/planning-research) | Research technology or topic |
+| [`/planning:doc`](/commands/planning-doc) | Generate documentation |
+
+
 ## Tips for Best Results
 
 <Note>

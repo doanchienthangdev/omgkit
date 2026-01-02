@@ -1,0 +1,118 @@
+---
+description: Check the alignment health status of the OMGKIT system
+argument-hint:
+allowed-tools: Read, Bash, Glob, Grep
+---
+
+# Alignment Health Check
+
+Check the health status of OMGKIT's component alignment system.
+
+## Overview
+
+This command validates that:
+1. **Registry Sync** - registry.yaml matches actual component files
+2. **Dependency Integrity** - All references point to existing components
+3. **Format Compliance** - All component IDs use correct formats
+4. **Hierarchy Respect** - Components only reference appropriate levels
+
+## Usage
+
+```bash
+/alignment:health
+```
+
+## Output
+
+The command provides a comprehensive health report:
+
+```
+🔮 OMGKIT Alignment Health Report
+=================================
+
+Registry Sync Status: ✓ ALIGNED / ⚠ DRIFT DETECTED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 Component Counts:
+   Agents:    33 registered, 33 actual    ✓
+   Skills:    127 actual                  ✓
+   Commands:  111 actual                  ✓
+   Workflows: 49 registered, 49 actual    ✓
+
+🔗 Dependency Health:
+   Agent→Skill refs:    153 valid    ✓
+   Agent→Command refs:  172 valid    ✓
+   Workflow→Agent refs: 156 valid    ✓
+
+Overall: ✓ HEALTHY
+```
+
+## What Gets Checked
+
+### 1. Component Count Validation
+Verifies that the number of registered components matches actual files:
+- All agents in registry exist as files
+- All workflows in registry exist as files
+- No orphaned entries (registry entries without files)
+- No missing entries (files without registry entries)
+
+### 2. Dependency Reference Validation
+Verifies all dependency references are valid:
+- Agent skill references point to existing skills
+- Agent command references point to existing commands
+- Workflow agent references point to existing agents
+- Workflow skill references point to existing skills
+- Workflow command references point to existing commands
+
+### 3. Format Compliance
+Verifies all component IDs use correct formats:
+- Skills: `category/skill-name`
+- Commands: `/namespace:command-name`
+- Agents: `kebab-case`
+- Workflows: `category/workflow-name`
+
+### 4. Hierarchy Validation
+Verifies the Optimized Alignment Principle:
+- Level 0: MCPs (foundation)
+- Level 1: Commands → use MCPs
+- Level 2: Skills → use Commands, MCPs
+- Level 3: Agents → use Skills, Commands, MCPs
+- Level 4: Workflows → use Agents, Skills, Commands, MCPs
+
+## Troubleshooting
+
+If the health check reports issues:
+
+### Registry Drift
+```bash
+# Check specific component
+/alignment:deps agent:fullstack-developer
+
+# Review the registry
+cat plugin/registry.yaml | grep fullstack-developer
+```
+
+### Missing References
+```bash
+# Verify skill exists
+ls plugin/skills/methodology/writing-plans/SKILL.md
+
+# Verify command exists
+ls plugin/commands/dev/feature.md
+```
+
+### Format Issues
+Ensure component references follow the correct format:
+- Skills must have category prefix: `methodology/writing-plans`
+- Commands must have namespace: `/dev:feature`
+- Agents must be kebab-case: `fullstack-developer`
+
+## Related Commands
+
+- `/alignment:deps <component>` - Show dependency graph for any component
+- `/omega:principles` - View the Omega principles including alignment
+
+## See Also
+
+- [Optimized Alignment Principle](/concepts/alignment-principle)
+- [Registry Documentation](/concepts/registry)

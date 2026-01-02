@@ -271,6 +271,38 @@ This workflow orchestrates the following agents:
 - LLM API access
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [researcher](/agents/researcher) | methodology/research-validation, methodology/brainstorming | /planning:research |
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [architect](/agents/architect) | omega/omega-architecture, backend/api-architecture... | /omega:100x, /planning:plan-detailed |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [ai-engineering/ai-agents](/skills/ai-agents) | Building AI agents - tool use, planning strategies (ReAct, P... |
+| [ai-engineering/ai-architecture](/skills/ai-architecture) | AI application architecture - gateway, orchestration, model ... |
+| [ai-engineering/guardrails-safety](/skills/guardrails-safety) | Protecting AI applications - input/output guards, toxicity d... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:research`](/commands/planning-research) | Research technology or topic |
+| [`/planning:plan-detailed`](/commands/planning-plan-detailed) | Detailed plan with 2-5 min tasks |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
+
+
 ## Tips for Best Results
 
 <Note>

@@ -171,6 +171,31 @@ This workflow orchestrates the following agents:
 - Area of interest defined
 
 
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [researcher](/agents/researcher) | methodology/research-validation, methodology/brainstorming | /planning:research |
+| [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/research-validation](/skills/research-validation) | Multi-source validation framework for technology decisions, ... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/planning:research`](/commands/planning-research) | Research technology or topic |
+| [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+
+
 ## Tips for Best Results
 
 <Note>
