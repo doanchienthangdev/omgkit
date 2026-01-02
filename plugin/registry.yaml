@@ -1,9 +1,85 @@
 # OMGKIT Component Registry
-# Single Source of Truth for Agents, Skills, Commands, and Workflows
-# Version: 1.0.0
+# Single Source of Truth for Agents, Skills, Commands, Workflows, and MCPs
+# Version: 2.0.0
 # Updated: 2026-01-02
 
-version: "1.0.0"
+version: "2.0.0"
+
+# =============================================================================
+# OPTIMIZED ALIGNMENT PRINCIPLE (OAP)
+# =============================================================================
+# Core architectural rule defining component relationships.
+# See: plugin/stdrules/ALIGNMENT_PRINCIPLE.md for full documentation.
+#
+# Hierarchy (lower levels are used by higher levels):
+#   Level 0: MCPs       → Foundation layer
+#   Level 1: Commands   → Use: MCPs
+#   Level 2: Skills     → Use: Commands, MCPs
+#   Level 3: Agents     → Use: Skills, Commands, MCPs
+#   Level 4: Workflows  → Use: Agents, Skills, Commands, MCPs
+#
+# Rules:
+#   1. Format Compliance  - Use correct format for each component type
+#   2. Existence Validation - All references must point to existing components
+#   3. No Cross-Type Confusion - Don't mix agents/skills/commands
+#   4. Hierarchical Respect - Only reference lower or same level components
+#   5. Optimization - Appropriate, minimal, unique, contextual references
+# =============================================================================
+
+alignment_principle:
+  version: "1.0.0"
+  enforced: true
+  documentation: "plugin/stdrules/ALIGNMENT_PRINCIPLE.md"
+  hierarchy:
+    - level: 0
+      type: mcp
+      format: "mcp-name"
+      location: "plugin/mcp/"
+      uses: []
+    - level: 1
+      type: command
+      format: "/namespace:command-name"
+      location: "plugin/commands/<namespace>/<name>.md"
+      uses: [mcp]
+    - level: 2
+      type: skill
+      format: "category/skill-name"
+      location: "plugin/skills/<category>/<name>/SKILL.md"
+      uses: [command, mcp]
+    - level: 3
+      type: agent
+      format: "kebab-case"
+      location: "plugin/agents/<name>.md"
+      uses: [skill, command, mcp]
+    - level: 4
+      type: workflow
+      format: "category/workflow-name"
+      location: "plugin/workflows/<category>/<name>.md"
+      uses: [agent, skill, command, mcp]
+
+# =============================================================================
+# MCP SERVERS (Model Context Protocol)
+# =============================================================================
+# MCPs provide external capabilities to OMGKIT components.
+# Foundation layer of the alignment hierarchy.
+# =============================================================================
+
+mcp_servers:
+  context7:
+    description: Up-to-date library documentation
+    status: supported
+  sequential-thinking:
+    description: Multi-step reasoning
+    status: supported
+  memory:
+    description: Persistent knowledge graph
+    status: supported
+  filesystem:
+    description: Secure file operations
+    status: supported
+  playwright:
+    description: Browser automation
+    status: supported
 
 # =============================================================================
 # AGENTS

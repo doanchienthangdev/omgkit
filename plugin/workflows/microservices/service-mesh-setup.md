@@ -5,7 +5,7 @@ triggers:
   - infrastructure:mesh
 agents:
   - platform-engineer
-  - site-reliability-engineer
+  - observability-engineer
 ---
 
 # Service Mesh Setup Workflow
@@ -105,7 +105,7 @@ rules:
 
 ### Step 4.1: Configure Telemetry
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 integrations:
   - prometheus_metrics
@@ -116,7 +116,7 @@ integrations:
 
 ### Step 4.2: Create Dashboards
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: create
 dashboards:
   - service_mesh_overview
@@ -129,7 +129,7 @@ dashboards:
 
 ### Step 5.1: Verify Mesh Functionality
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: test
 validations:
   - mtls_working

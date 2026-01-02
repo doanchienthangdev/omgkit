@@ -4,7 +4,7 @@ triggers:
   - manual
   - game:submit
 agents:
-  - game-designer
+  - game-systems-designer
   - fullstack-developer
   - tester
 ---
@@ -22,7 +22,7 @@ Navigate platform certification and store submission.
 
 ### Step 1.1: Platform Requirements Review
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: review
 platforms:
   steam:
@@ -54,7 +54,7 @@ platforms:
 
 ### Step 1.2: Content Rating
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: submit
 rating_boards:
   - ESRB (North America)
@@ -161,7 +161,7 @@ scope:
 
 ### Step 4.1: Marketing Materials
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: prepare
 assets:
   - Store page screenshots (platform sizes)
@@ -174,7 +174,7 @@ assets:
 
 ### Step 4.2: Store Configuration
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: configure
 settings:
   - Pricing
@@ -203,7 +203,7 @@ per_platform:
 
 ### Step 5.2: Submit for Review
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: submit
 documentation:
   - Build notes
@@ -224,7 +224,7 @@ timeline:
 
 ### Step 6.1: Handle Feedback
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: respond
 scenarios:
   approved:
@@ -238,7 +238,7 @@ scenarios:
 
 ### Step 6.2: Launch Preparation
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: prepare
 launch_checklist:
   - Press kit ready

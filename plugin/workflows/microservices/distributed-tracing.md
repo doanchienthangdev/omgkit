@@ -4,7 +4,7 @@ triggers:
   - manual
   - observability:tracing
 agents:
-  - site-reliability-engineer
+  - observability-engineer
   - fullstack-developer
 ---
 
@@ -21,7 +21,7 @@ Set up end-to-end request tracing across services.
 
 ### Step 1.1: Deploy Tracing Backend
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: deploy
 options:
   - Jaeger
@@ -37,7 +37,7 @@ configuration:
 
 ### Step 1.2: Configure Sampling
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 sampling:
   type: probabilistic  # or rate_limiting, adaptive
@@ -120,7 +120,7 @@ log_correlation:
 
 ### Step 4.2: Metrics Correlation
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 metrics_correlation:
   - exemplars: trace_id_in_metrics
@@ -131,7 +131,7 @@ metrics_correlation:
 
 ### Step 5.1: Create Dashboards
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: create
 dashboards:
   - service_latency_breakdown
@@ -142,7 +142,7 @@ dashboards:
 
 ### Step 5.2: Configure Alerts
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 alerts:
   - high_latency_traces

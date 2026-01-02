@@ -5,7 +5,7 @@ triggers:
   - kafka:consumers
 agents:
   - data-engineer
-  - site-reliability-engineer
+  - observability-engineer
 ---
 
 # Consumer Group Management Workflow
@@ -78,7 +78,7 @@ commit_strategy:
 
 ### Step 3.1: Consumer Scaling
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 scaling:
   min_consumers: 1
@@ -106,7 +106,7 @@ static_membership:
 
 ### Step 4.1: Lag Monitoring
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 metrics:
   - consumer_lag_per_partition
@@ -121,7 +121,7 @@ tools:
 
 ### Step 4.2: Alerting
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 alerts:
   - consumer_lag_critical:
@@ -142,7 +142,7 @@ alerts:
 
 ### Step 5.1: Offset Management Operations
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: document
 operations:
   reset_to_earliest:
@@ -158,7 +158,7 @@ operations:
 
 ### Step 5.2: Troubleshooting Runbook
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: document
 scenarios:
   - lag_increasing:

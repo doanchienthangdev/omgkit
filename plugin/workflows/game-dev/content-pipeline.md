@@ -4,7 +4,7 @@ triggers:
   - manual
   - game:content
 agents:
-  - game-designer
+  - game-systems-designer
   - fullstack-developer
 ---
 
@@ -21,7 +21,7 @@ Create efficient pipeline for game content creation.
 
 ### Step 1.1: Identify Content Types
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: catalog
 content_types:
   - 2D_assets: Sprites, UI, textures
@@ -33,7 +33,7 @@ content_types:
 
 ### Step 1.2: Define Pipeline Flow
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: design
 flow:
   creation:
@@ -160,7 +160,7 @@ builds:
 
 ### Step 5.1: Data-Driven Content
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: design
 systems:
   - JSON/YAML game data
@@ -193,7 +193,7 @@ tools:
 
 ### Step 6.1: Content Guidelines
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: document
 guidelines:
   - Art style guide

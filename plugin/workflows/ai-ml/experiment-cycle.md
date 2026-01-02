@@ -5,7 +5,7 @@ triggers:
   - ml:experiment
 agents:
   - ml-engineer
-  - data-scientist
+  - data-engineer
 ---
 
 # Experiment Cycle Workflow

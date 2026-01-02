@@ -5,7 +5,7 @@ triggers:
   - ml:monitoring
 agents:
   - ml-engineer
-  - site-reliability-engineer
+  - observability-engineer
 ---
 
 # ML Monitoring Setup Workflow
@@ -127,7 +127,7 @@ detection:
 
 ### Step 4.1: System Metrics
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 metrics:
   - Request latency (p50, p95, p99)
@@ -140,7 +140,7 @@ metrics:
 
 ### Step 4.2: SLI/SLO Definition
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: define
 slis:
   - Availability: Successful requests / Total requests
@@ -156,7 +156,7 @@ slos:
 
 ### Step 5.1: Alert Configuration
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 alert_rules:
   - model_drift_detected:
@@ -175,7 +175,7 @@ alert_rules:
 
 ### Step 5.2: Response Playbooks
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: document
 playbooks:
   - drift_detected:
@@ -196,7 +196,7 @@ playbooks:
 
 ### Step 6.1: Create Dashboards
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: create
 dashboards:
   - model_health:

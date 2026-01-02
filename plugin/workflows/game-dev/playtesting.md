@@ -4,7 +4,7 @@ triggers:
   - manual
   - game:playtest
 agents:
-  - game-designer
+  - game-systems-designer
   - tester
 ---
 
@@ -21,7 +21,7 @@ Conduct effective playtesting to improve game quality.
 
 ### Step 1.1: Define Objectives
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: define
 objectives:
   types:
@@ -36,7 +36,7 @@ objectives:
 
 ### Step 1.2: Select Playtesters
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: select
 criteria:
   internal:
@@ -82,7 +82,7 @@ tools:
 
 ### Step 2.2: Observation Protocol
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: define
 observation:
   - Think-aloud protocol
@@ -94,7 +94,7 @@ observation:
 
 ### Step 2.3: Survey Preparation
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: prepare
 surveys:
   pre_play:
@@ -143,7 +143,7 @@ per_session:
 
 ### Step 4.1: Quantitative Analysis
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: analyze
 metrics:
   - Completion rates
@@ -159,7 +159,7 @@ visualization:
 
 ### Step 4.2: Qualitative Analysis
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: analyze
 methods:
   - Affinity mapping
@@ -171,7 +171,7 @@ methods:
 
 ### Step 4.3: Insight Synthesis
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: synthesize
 outputs:
   - Key findings summary
@@ -185,7 +185,7 @@ outputs:
 
 ### Step 5.1: Prioritize Findings
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: prioritize
 criteria:
   - Impact on player experience
@@ -201,7 +201,7 @@ categories:
 
 ### Step 5.2: Create Action Items
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: plan
 per_finding:
   - Issue description
@@ -213,7 +213,7 @@ per_finding:
 
 ### Step 5.3: Plan Follow-up Testing
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: plan
 next_playtest:
   - Verify fixes

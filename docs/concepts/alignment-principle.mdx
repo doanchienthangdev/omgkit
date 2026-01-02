@@ -1,0 +1,244 @@
+---
+title: 'Optimized Alignment Principle'
+description: 'Core architectural rule defining how OMGKIT components relate to each other'
+---
+
+# Optimized Alignment Principle (OAP)
+
+The **Optimized Alignment Principle (OAP)** is a core architectural rule that defines how OMGKIT components relate to each other. This principle ensures consistency, maintainability, and scalability across all 33 agents, 111 commands, 128 skills, 49 workflows, and MCP integrations.
+
+## Component Hierarchy
+
+OMGKIT uses a 5-level hierarchy where lower-level components are used by higher-level components:
+
+```
+Level 0: MCPs (Foundation)
+    ↓
+Level 1: Commands → use MCPs
+    ↓
+Level 2: Skills → use Commands, MCPs
+    ↓
+Level 3: Agents → use Skills, Commands, MCPs
+    ↓
+Level 4: Workflows → use Agents, Skills, Commands, MCPs
+```
+
+<Accordion title="Level Details">
+| Level | Component | Can Use | Format |
+|-------|-----------|---------|--------|
+| 0 | MCPs | - | `mcp-name` |
+| 1 | Commands | MCPs | `/namespace:command-name` |
+| 2 | Skills | Commands, MCPs | `category/skill-name` |
+| 3 | Agents | Skills, Commands, MCPs | `kebab-case` |
+| 4 | Workflows | Agents, Skills, Commands, MCPs | `category/workflow-name` |
+</Accordion>
+
+## Five Alignment Rules
+
+### Rule 1: Format Compliance
+
+All component references must use the correct format:
+
+<CodeGroup>
+```yaml Skill Reference
+# Correct
+skills:
+  - methodology/writing-plans
+  - databases/postgresql
+
+# Wrong
+skills:
+  - writing-plans  # Missing category
+  - Methodology/Writing-Plans  # Uppercase
+```
+
+```yaml Command Reference
+# Correct
+commands:
+  - /dev:feature
+  - /omega:10x
+
+# Wrong
+commands:
+  - dev:feature  # Missing /
+  - /dev/feature  # Wrong separator
+```
+
+```yaml Agent Reference
+# Correct
+agents:
+  - fullstack-developer
+  - code-reviewer
+
+# Wrong
+agents:
+  - fullstack_developer  # Underscore
+  - methodology/planner  # Has category
+```
+</CodeGroup>
+
+### Rule 2: Existence Validation
+
+All referenced components must exist:
+
+- Skills → Must exist in `/plugin/skills/<category>/<name>/SKILL.md`
+- Commands → Must exist in `/plugin/commands/<namespace>/<name>.md`
+- Agents → Must exist in `/plugin/agents/<name>.md`
+- Workflows → Must exist in `/plugin/workflows/<category>/<name>.md`
+- MCPs → Must be registered in `/plugin/mcp/`
+
+### Rule 3: No Cross-Type Confusion
+
+Components must not be confused with other types:
+
+<Warning>
+Common mistakes to avoid:
+- Agent names in `skills:` field
+- Skill names in `agents:` field
+- Commands without `/namespace:` prefix
+</Warning>
+
+### Rule 4: Hierarchical Respect
+
+Components can only reference components from their level or below:
+
+| Component | Can Reference |
+|-----------|---------------|
+| MCPs | Nothing (foundation layer) |
+| Commands | MCPs only |
+| Skills | Commands, MCPs |
+| Agents | Skills, Commands, MCPs |
+| Workflows | Agents, Skills, Commands, MCPs |
+
+### Rule 5: Optimization Requirements
+
+References should be:
+
+1. **Appropriate** - Only reference what is needed
+2. **Minimal** - Avoid redundant dependencies
+3. **Unique** - No duplicate references
+4. **Contextual** - Match the component's purpose
+
+## Frontmatter Examples
+
+### Agent Frontmatter
+
+```yaml
+---
+name: fullstack-developer
+description: Full implementation with strict file ownership
+tools: Read, Write, Edit, Bash, Glob, Grep, Task
+model: inherit
+skills:
+  - methodology/executing-plans
+  - methodology/verification-before-completion
+  - methodology/test-driven-development
+  - languages/typescript
+commands:
+  - /dev:feature
+  - /dev:fix
+  - /dev:tdd
+---
+```
+
+### Workflow Frontmatter
+
+```yaml
+---
+name: feature
+description: Complete feature development workflow
+category: development
+agents:
+  - planner
+  - fullstack-developer
+  - tester
+  - code-reviewer
+  - git-manager
+skills:
+  - methodology/writing-plans
+  - methodology/test-driven-development
+commands:
+  - /planning:plan
+  - /dev:feature
+  - /dev:test
+  - /git:pr
+---
+```
+
+## Validation
+
+The alignment principle is enforced by automated tests:
+
+```bash
+# Run alignment tests
+npm test
+
+# Tests validate:
+# - Format compliance (400+ tests)
+# - Existence validation
+# - Hierarchy rules
+# - No cross-type confusion
+# - Optimization metrics
+```
+
+All tests must pass before publishing to npm.
+
+## Registry
+
+The alignment principle is defined in the registry:
+
+```yaml
+# plugin/registry.yaml
+alignment_principle:
+  version: "1.0.0"
+  enforced: true
+  documentation: "plugin/stdrules/ALIGNMENT_PRINCIPLE.md"
+  hierarchy:
+    - level: 0
+      type: mcp
+      uses: []
+    - level: 1
+      type: command
+      uses: [mcp]
+    - level: 2
+      type: skill
+      uses: [command, mcp]
+    - level: 3
+      type: agent
+      uses: [skill, command, mcp]
+    - level: 4
+      type: workflow
+      uses: [agent, skill, command, mcp]
+```
+
+## Future: MCP Alignment
+
+When MCP support is fully implemented:
+
+1. MCPs will be registered in `/plugin/mcp/`
+2. All components can declare `mcps:` in frontmatter
+3. Tests will validate MCP references exist
+4. Registry will track MCP-component mappings
+
+## Summary
+
+The Optimized Alignment Principle ensures:
+
+<CardGroup cols={2}>
+  <Card title="Consistency" icon="check">
+    All components follow the same reference patterns
+  </Card>
+  <Card title="Validity" icon="shield">
+    All references point to existing components
+  </Card>
+  <Card title="Hierarchy" icon="layer-group">
+    Clear levels prevent circular dependencies
+  </Card>
+  <Card title="Optimization" icon="gauge-high">
+    Minimal, appropriate references
+  </Card>
+</CardGroup>
+
+---
+
+*Think Omega. Build Omega. Be Omega.*

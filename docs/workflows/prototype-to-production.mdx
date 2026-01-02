@@ -32,7 +32,7 @@ Convert rapid game prototype into maintainable production code.
 
 ### Step 1.1: Evaluate Prototype
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: assess
 evaluation:
   - Core mechanics working
@@ -44,7 +44,7 @@ evaluation:
 
 ### Step 1.2: Define Production Requirements
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: define
 requirements:
   - Target frame rate: 60fps
@@ -58,7 +58,7 @@ requirements:
 
 ### Step 2.1: Design Production Architecture
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: design
 patterns:
   - Component system (ECS or composition)
@@ -220,7 +220,7 @@ per_platform:
 
 This workflow orchestrates the following agents:
 
-- **[@game-designer](/agents/game-designer)** - Specialized agent for game designer tasks
+- **[@game-systems-designer](/agents/game-systems-designer)** - Specialized agent for game systems designer tasks
 - **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
 - **[@tester](/agents/tester)** - Specialized agent for tester tasks
 

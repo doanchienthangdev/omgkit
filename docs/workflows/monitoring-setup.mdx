@@ -138,7 +138,7 @@ detection:
 
 ### Step 4.1: System Metrics
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 metrics:
   - Request latency (p50, p95, p99)
@@ -151,7 +151,7 @@ metrics:
 
 ### Step 4.2: SLI/SLO Definition
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: define
 slis:
   - Availability: Successful requests / Total requests
@@ -167,7 +167,7 @@ slos:
 
 ### Step 5.1: Alert Configuration
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 alert_rules:
   - model_drift_detected:
@@ -186,7 +186,7 @@ alert_rules:
 
 ### Step 5.2: Response Playbooks
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: document
 playbooks:
   - drift_detected:
@@ -207,7 +207,7 @@ playbooks:
 
 ### Step 6.1: Create Dashboards
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: create
 dashboards:
   - model_health:
@@ -244,7 +244,7 @@ dashboards:
 This workflow orchestrates the following agents:
 
 - **[@ml-engineer](/agents/ml-engineer)** - Specialized agent for ml engineer tasks
-- **[@site-reliability-engineer](/agents/site-reliability-engineer)** - Specialized agent for site reliability engineer tasks
+- **[@observability-engineer](/agents/observability-engineer)** - Specialized agent for observability engineer tasks
 
 
 

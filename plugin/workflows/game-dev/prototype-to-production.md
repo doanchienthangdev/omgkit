@@ -4,7 +4,7 @@ triggers:
   - manual
   - game:production
 agents:
-  - game-designer
+  - game-systems-designer
   - fullstack-developer
   - tester
 ---
@@ -22,7 +22,7 @@ Convert rapid game prototype into maintainable production code.
 
 ### Step 1.1: Evaluate Prototype
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: assess
 evaluation:
   - Core mechanics working
@@ -34,7 +34,7 @@ evaluation:
 
 ### Step 1.2: Define Production Requirements
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: define
 requirements:
   - Target frame rate: 60fps
@@ -48,7 +48,7 @@ requirements:
 
 ### Step 2.1: Design Production Architecture
 ```yaml
-agent: game-designer
+agent: game-systems-designer
 action: design
 patterns:
   - Component system (ECS or composition)

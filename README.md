@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **AI Team System for Claude Code**
-> 33 Agents • 111 Commands • 49 Workflows • 128 Skills • 10 Modes • 14 Archetypes
+> 33 Agents • 111 Commands • 49 Workflows • 127 Skills • 10 Modes • 14 Archetypes
 > *"Think Omega. Build Omega. Be Omega."*
 
 OMGKIT transforms Claude Code into an autonomous AI development team with sprint management, specialized agents, and Omega-level thinking for 10x-1000x productivity improvements.
@@ -19,7 +19,7 @@ OMGKIT transforms Claude Code into an autonomous AI development team with sprint
 | **Agents** | 33 | Specialized AI team members |
 | **Commands** | 111 | Slash commands for every task |
 | **Workflows** | 49 | Complete development processes |
-| **Skills** | 128 | Domain expertise modules |
+| **Skills** | 127 | Domain expertise modules |
 | **Modes** | 10 | Behavioral configurations |
 | **Archetypes** | 14 | Project templates for autonomous dev |
 | **Sprint Management** | ✅ | Vision, backlog, team autonomy |
@@ -444,6 +444,42 @@ OMGKIT supports these MCP servers for enhanced capabilities:
 | Memory | Persistent knowledge graph |
 | Filesystem | Secure file operations |
 | Playwright | Browser automation |
+
+## 🏗️ Optimized Alignment Principle (OAP)
+
+OMGKIT uses a **5-level component hierarchy** ensuring consistency and maintainability:
+
+```
+Level 0: MCPs (Foundation)
+    ↓
+Level 1: Commands → use MCPs
+    ↓
+Level 2: Skills → use Commands, MCPs
+    ↓
+Level 3: Agents → use Skills, Commands, MCPs
+    ↓
+Level 4: Workflows → use Agents, Skills, Commands, MCPs
+```
+
+### Five Alignment Rules
+
+1. **Format Compliance** - Components use correct naming patterns
+2. **Existence Validation** - All references must exist
+3. **No Cross-Type Confusion** - Components not confused with other types
+4. **Hierarchical Respect** - Only reference same/lower level components
+5. **Optimization** - Minimal, appropriate, unique references
+
+### Component Formats
+
+| Component | Format | Example |
+|-----------|--------|---------|
+| MCPs | `kebab-case` | `context7` |
+| Commands | `/namespace:name` | `/dev:feature` |
+| Skills | `category/name` | `methodology/writing-plans` |
+| Agents | `kebab-case` | `fullstack-developer` |
+| Workflows | `category/name` | `development/feature` |
+
+All alignment rules are enforced by 400+ automated tests. See [full documentation](https://omgkit.mintlify.app/concepts/alignment-principle).
 
 ## 📄 License
 

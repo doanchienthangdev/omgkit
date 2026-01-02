@@ -5,7 +5,7 @@ triggers:
   - ml:deploy
 agents:
   - ml-engineer
-  - site-reliability-engineer
+  - observability-engineer
 ---
 
 # Model Deployment Workflow
@@ -79,7 +79,7 @@ base_images:
 
 ### Step 3.1: Deploy to Staging
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: deploy
 environment: staging
 infrastructure:
@@ -105,7 +105,7 @@ tests:
 
 ### Step 4.1: Canary Deployment
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: deploy
 strategy: canary
 configuration:
@@ -119,7 +119,7 @@ configuration:
 
 ### Step 4.2: Shadow Deployment (Optional)
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: deploy
 strategy: shadow
 configuration:
@@ -131,7 +131,7 @@ configuration:
 
 ### Step 4.3: Full Rollout
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: promote
 after:
   - Canary success
@@ -147,7 +147,7 @@ steps:
 
 ### Step 5.1: Configure Monitoring
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 monitoring:
   - Prediction latency
@@ -163,7 +163,7 @@ dashboards:
 
 ### Step 5.2: Configure Alerts
 ```yaml
-agent: site-reliability-engineer
+agent: observability-engineer
 action: configure
 alerts:
   - High error rate

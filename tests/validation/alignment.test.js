@@ -347,4 +347,112 @@ describe('Architecture Alignment', () => {
       }
     });
   });
+
+  describe('Optimized Alignment Principle (OAP)', () => {
+    it('should have alignment principle defined in registry', () => {
+      expect(registry.alignment_principle).toBeDefined();
+      expect(registry.alignment_principle.version).toBeDefined();
+      expect(registry.alignment_principle.enforced).toBe(true);
+    });
+
+    it('should have 5-level hierarchy defined', () => {
+      const hierarchy = registry.alignment_principle.hierarchy;
+      expect(hierarchy).toBeDefined();
+      expect(hierarchy.length).toBe(5);
+
+      // Verify hierarchy levels
+      expect(hierarchy[0].type).toBe('mcp');
+      expect(hierarchy[1].type).toBe('command');
+      expect(hierarchy[2].type).toBe('skill');
+      expect(hierarchy[3].type).toBe('agent');
+      expect(hierarchy[4].type).toBe('workflow');
+    });
+
+    it('should have MCP servers defined', () => {
+      expect(registry.mcp_servers).toBeDefined();
+      expect(Object.keys(registry.mcp_servers).length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('should have ALIGNMENT_PRINCIPLE.md rule file', () => {
+      const rulePath = join(PLUGIN_DIR, 'stdrules/ALIGNMENT_PRINCIPLE.md');
+      expect(existsSync(rulePath)).toBe(true);
+
+      const content = readFileSync(rulePath, 'utf-8');
+      expect(content).toContain('Optimized Alignment Principle');
+      expect(content).toContain('Component Hierarchy');
+      expect(content).toContain('Alignment Rules');
+    });
+
+    it('all components should follow OAP hierarchy', () => {
+      // Verify agents only reference skills and commands (Level 3 → Level 2, 1)
+      const agentsDir = join(PLUGIN_DIR, 'agents');
+      const agentFiles = getMarkdownFiles(agentsDir);
+
+      for (const filePath of agentFiles) {
+        const content = readFileSync(filePath, 'utf-8');
+        const fm = parseFrontmatter(content);
+
+        if (fm) {
+          // Agents should not have 'workflows' field (can't reference Level 4)
+          expect(fm.workflows).toBeUndefined();
+
+          // Skills should be valid format
+          if (fm.skills && Array.isArray(fm.skills)) {
+            for (const skill of fm.skills) {
+              expect(skill).toMatch(/^[a-z-]+\/[a-z-]+$/);
+            }
+          }
+        }
+      }
+    });
+
+    it('documentation reference should be valid', () => {
+      const docPath = registry.alignment_principle.documentation;
+      expect(docPath).toBe('plugin/stdrules/ALIGNMENT_PRINCIPLE.md');
+
+      const fullPath = join(PLUGIN_DIR, '..', docPath);
+      expect(existsSync(fullPath)).toBe(true);
+    });
+  });
+
+  describe('Command Validation', () => {
+    it('should have at least 80 commands', () => {
+      expect(allCommandIds.size).toBeGreaterThanOrEqual(80);
+    });
+
+    it('all command IDs should use /namespace:command format', () => {
+      for (const cmdId of allCommandIds) {
+        expect(cmdId).toMatch(/^\/[a-z]+:[a-z0-9-]+$/);
+      }
+    });
+
+    it('should have required command namespaces', () => {
+      const requiredNamespaces = ['dev', 'git', 'planning', 'omega', 'sprint'];
+      const commandsDir = join(PLUGIN_DIR, 'commands');
+
+      for (const namespace of requiredNamespaces) {
+        const nsPath = join(commandsDir, namespace);
+        expect(existsSync(nsPath), `Namespace "${namespace}" should exist`).toBe(true);
+      }
+    });
+  });
+
+  describe('MCP Alignment (Future-Ready)', () => {
+    it('should have MCP servers registered', () => {
+      expect(registry.mcp_servers).toBeDefined();
+    });
+
+    it('registered MCPs should have required fields', () => {
+      for (const [name, def] of Object.entries(registry.mcp_servers)) {
+        expect(def.description, `MCP "${name}" should have description`).toBeDefined();
+        expect(def.status, `MCP "${name}" should have status`).toBeDefined();
+      }
+    });
+
+    it('MCP level should be 0 in hierarchy', () => {
+      const mcpLevel = registry.alignment_principle.hierarchy.find(h => h.type === 'mcp');
+      expect(mcpLevel.level).toBe(0);
+      expect(mcpLevel.uses).toEqual([]);
+    });
+  });
 });
