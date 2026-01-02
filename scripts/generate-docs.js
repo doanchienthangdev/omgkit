@@ -995,9 +995,12 @@ async function generateCommandDocs() {
         // Escape angle brackets for MDX compatibility (they get interpreted as HTML tags)
         const rawHint = frontmatter['argument-hint'] || '<your input>';
         const argumentHint = rawHint.replace(/</g, '\\<').replace(/>/g, '\\>');
+        // Also escape for HTML entities in Info block
+        const argumentHintHtml = rawHint.replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const processedBody = body
           .replace(/\$ARGUMENTS/g, argumentHint)
-          .replace(/\$\{ARGUMENTS\}/g, argumentHint);
+          .replace(/\$\{ARGUMENTS\}/g, argumentHint)
+          .replace(/<(\d)/g, '&lt;$1');  // Escape < followed by digit for MDX compatibility
 
         // Generate individual command page with enhanced structure
         // Use colon separator for command naming: category:command
