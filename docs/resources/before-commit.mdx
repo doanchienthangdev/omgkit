@@ -1,15 +1,31 @@
 ---
 title: "Before-Commit Checklist"
-description: "Comprehensive validation rules and quality standards for OMGKIT contributions"
+description: "Comprehensive validation rules and quality standards for OMGKIT and projects"
 ---
 
 # Before-Commit Checklist
 
-This guide defines all validation rules and quality standards that must be met before committing changes to OMGKIT.
+OMGKIT provides two types of before-commit rules:
 
-## Quick Validation
+1. **OMGKIT Internal Rules** - For contributing to OMGKIT itself
+2. **Project Rules** - For projects developed with OMGKIT
 
-Run the full test suite before any commit:
+---
+
+## Rules Location
+
+| Rule Type | Location | Purpose |
+|-----------|----------|---------|
+| **OMGKIT Internal** | `plugin/stdrules/omgkit/` | OMGKIT development only |
+| **Project Rules** | `.omgkit/stdrules/BEFORE_COMMIT.md` | User projects |
+
+---
+
+## For OMGKIT Contributors
+
+If you're contributing to OMGKIT itself, follow the internal rules.
+
+### Quick Validation
 
 ```bash
 npm test
@@ -17,118 +33,46 @@ npm test
 
 All 4800+ tests must pass before committing.
 
-## 1. Test & Validation Requirements
+### Internal Rule Files
 
-### 1.1 Test Execution
-- All unit tests must pass
-- All integration tests must pass
-- All validation tests must pass
-- No skipped tests without documented reason
+- `plugin/stdrules/omgkit/ALIGNMENT_PRINCIPLE.md` - Component hierarchy rules
+- `plugin/stdrules/omgkit/OMGKIT_BEFORE_COMMIT_RULES.md` - Commit validation rules
 
-### 1.2 Build Verification
-```bash
-npm run build
-npm run lint
-```
+### Documentation Quality Standards
 
-## 2. Documentation Quality Standards
-
-### 2.1 Agent Documentation
-**Minimum Requirements:**
+#### Agent Documentation
 - 50+ lines of content
-- Valid YAML frontmatter with:
-  - `name`: Agent identifier
-  - `description`: 10-200 word description
-  - `tools`: List of allowed tools
-  - `skills`: Array of skill references
-  - `commands`: Array of command references
+- Valid YAML frontmatter with: `name`, `description`, `tools`, `skills`, `commands`
 
-### 2.2 Command Documentation
-**Minimum Requirements:**
+#### Command Documentation
 - 15+ lines of content
-- Valid YAML frontmatter with:
-  - `description`: Clear purpose statement
-  - `allowed-tools`: List of tools the command can use
-  - `argument-hint`: Usage example (optional)
+- Valid YAML frontmatter with: `description`, `allowed-tools`
 
-### 2.3 Skill Documentation
-**Minimum Requirements:**
+#### Skill Documentation
 - 30+ lines of content
-- YAML frontmatter (recommended) with:
-  - `name`: Skill identifier
-  - `description`: Purpose and usage
+- YAML frontmatter with: `name`, `description`
 
-### 2.4 Workflow Documentation
-**Minimum Requirements:**
+#### Workflow Documentation
 - 50+ lines of content
-- Valid YAML frontmatter with:
-  - `description`: Workflow purpose
-  - `agents`: Array of required agents
-  - `triggers`: Event triggers (optional)
+- Valid YAML frontmatter with: `description`, `agents`
 
-## 3. Command Registration
-
-### 3.1 Slash Command Requirements
+### Command Registration
 
 Every command MUST be registered as a Claude Code slash command:
 
-**File Location:**
 ```
 plugin/commands/<namespace>/<command-name>.md
 ```
 
-**Format Requirements:**
-- Command ID: `/namespace:command-name`
-- All lowercase, hyphens for word separation
-- Namespace registered in `registry.yaml` under `command_namespaces`
+Format: `/namespace:command-name` (lowercase, hyphens for word separation)
 
-### 3.2 Registered Namespaces
-All commands must belong to one of these registered namespaces:
-- `git` - Version control operations
-- `planning` - Task planning and documentation
-- `development` - Code development tasks
-- `quality` - Code quality and testing
-- `sprint` - Sprint management
-- `omega` - Omega-level operations
-- `sre` - Site reliability engineering
-- `design` - UI/UX design commands
-- `ml` - Machine learning operations
-- `game` - Game development
-- `iot` - IoT device management
-- `architecture` - System architecture
-- `autonomous` - Autonomous development
-- `context` - Context management
-- `research` - Research workflows
-- `database` - Database operations
-- `security` - Security operations
-- `workflow` - Workflow triggers
-- `infra` - Infrastructure management
-- `ai` - AI engineering commands
+### Registry Integrity
 
-## 4. Registry Integrity
+- Version must match `package.json`
+- Minimum: 30+ agents, 100+ commands, 100+ skills, 40+ workflows
+- All cross-references must exist
 
-### 4.1 Version Sync
-```yaml
-# registry.yaml
-version: "X.Y.Z"
-```
-Must match `package.json` version.
-
-### 4.2 Component Counts
-Minimum requirements:
-- 30+ agents
-- 100+ commands
-- 100+ skills
-- 40+ workflows
-
-### 4.3 Cross-Reference Validation
-- All skill references in agents must exist
-- All command references in agents must exist
-- All agent references in workflows must exist
-
-## 5. Prohibited Content
-
-These patterns are NOT allowed in production files:
+### Prohibited Content
 
 | Pattern | Description |
 |---------|-------------|
@@ -138,51 +82,84 @@ These patterns are NOT allowed in production files:
 | `[INSERT ...]` | Placeholder brackets |
 | `[PLACEHOLDER]` | Placeholder markers |
 
-**Note:** Documenting these terms (e.g., "check for TODO markers") is allowed.
-
-## 6. Dependency Graph
-
-### 6.1 Forward References
-All `dependsOn` references must resolve to existing components.
-
-### 6.2 No Circular Dependencies
-The dependency graph must be acyclic.
-
-## 7. Final Verification
-
-Before committing, verify:
-
-```bash
-# Run all tests
-npm test
-
-# Check documentation
-npm run docs:generate
-
-# Verify build
-npm run build
-```
-
-## Validation Test Files
-
-The following test files enforce these rules:
+### Validation Test Files
 
 | File | Purpose |
 |------|---------|
 | `tests/validation/before-commit.test.js` | Master validation suite |
-| `tests/validation/doc-quality.test.js` | Documentation quality checks |
-| `tests/validation/command-registration.test.js` | Slash command validation |
+| `tests/validation/doc-quality.test.js` | Documentation quality |
+| `tests/validation/command-registration.test.js` | Slash commands |
 | `tests/validation/registry-sync.test.js` | Registry consistency |
-| `tests/validation/hierarchy.test.js` | Component hierarchy |
-| `tests/validation/docs-links.test.js` | Documentation link validation |
+| `tests/validation/alignment.test.js` | Alignment principle |
+
+---
+
+## For Project Developers
+
+If you're developing a project with OMGKIT, use the project rules.
+
+### Getting Started
+
+When you initialize a project with `omgkit init`, a `BEFORE_COMMIT.md` file is created in `.omgkit/stdrules/`.
+
+### Project Rule Categories
+
+1. **Code Quality**
+   - Tests pass
+   - No linting errors
+   - Build succeeds
+
+2. **Git Standards**
+   - Conventional commits
+   - Meaningful messages
+   - Clean branch hygiene
+
+3. **Security**
+   - No secrets in code
+   - Dependencies audited
+   - Input validation
+
+4. **Documentation**
+   - README updated
+   - CHANGELOG maintained
+   - API docs current
+
+5. **Performance**
+   - No regressions
+   - Assets optimized
+
+6. **Review Checklist**
+   - Self-review done
+   - Edge cases covered
+   - Error handling in place
+
+### Quick Project Check
+
+```bash
+npm test && npm run lint && npm run build
+```
+
+### Customization
+
+The `.omgkit/stdrules/BEFORE_COMMIT.md` file includes a section for project-specific rules. Add your custom requirements there.
+
+---
 
 ## Commit Standards
 
-When all validations pass:
+Both OMGKIT and projects should use conventional commits:
 
 ```bash
-git add .
 git commit -m "type(scope): description"
 ```
 
-Use conventional commits: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
+| Type | Description |
+|------|-------------|
+| `feat` | New feature |
+| `fix` | Bug fix |
+| `docs` | Documentation |
+| `chore` | Maintenance |
+| `refactor` | Code restructuring |
+| `test` | Adding tests |
+| `perf` | Performance |
+| `ci` | CI/CD changes |

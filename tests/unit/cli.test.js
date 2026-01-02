@@ -206,6 +206,7 @@ describe('CLI Core Functions', () => {
       expect(existsSync(join(TEST_PROJECT, '.omgkit/devlogs/README.md'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules/README.md'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules/SKILL_STANDARDS.md'))).toBe(true);
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules/BEFORE_COMMIT.md'))).toBe(true);
     });
 
     it('should not overwrite existing files', () => {

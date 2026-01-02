@@ -9,7 +9,7 @@ version: "2.17.0"
 # OPTIMIZED ALIGNMENT PRINCIPLE (OAP)
 # =============================================================================
 # Core architectural rule defining component relationships.
-# See: plugin/stdrules/ALIGNMENT_PRINCIPLE.md for full documentation.
+# See: plugin/stdrules/omgkit/ALIGNMENT_PRINCIPLE.md for full documentation.
 #
 # Hierarchy (lower levels are used by higher levels):
 #   Level 0: MCPs       → Foundation layer
@@ -29,7 +29,7 @@ version: "2.17.0"
 alignment_principle:
   version: "1.0.0"
   enforced: true
-  documentation: "plugin/stdrules/ALIGNMENT_PRINCIPLE.md"
+  documentation: "plugin/stdrules/omgkit/ALIGNMENT_PRINCIPLE.md"
   hierarchy:
     - level: 0
       type: mcp

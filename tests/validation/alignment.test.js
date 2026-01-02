@@ -373,8 +373,8 @@ describe('Architecture Alignment', () => {
       expect(Object.keys(registry.mcp_servers).length).toBeGreaterThanOrEqual(3);
     });
 
-    it('should have ALIGNMENT_PRINCIPLE.md rule file', () => {
-      const rulePath = join(PLUGIN_DIR, 'stdrules/ALIGNMENT_PRINCIPLE.md');
+    it('should have ALIGNMENT_PRINCIPLE.md rule file in omgkit folder', () => {
+      const rulePath = join(PLUGIN_DIR, 'stdrules/omgkit/ALIGNMENT_PRINCIPLE.md');
       expect(existsSync(rulePath)).toBe(true);
 
       const content = readFileSync(rulePath, 'utf-8');
@@ -408,7 +408,7 @@ describe('Architecture Alignment', () => {
 
     it('documentation reference should be valid', () => {
       const docPath = registry.alignment_principle.documentation;
-      expect(docPath).toBe('plugin/stdrules/ALIGNMENT_PRINCIPLE.md');
+      expect(docPath).toBe('plugin/stdrules/omgkit/ALIGNMENT_PRINCIPLE.md');
 
       const fullPath = join(PLUGIN_DIR, '..', docPath);
       expect(existsSync(fullPath)).toBe(true);

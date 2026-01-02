@@ -426,13 +426,18 @@ omgkit help         # Show help
 
 ## ✅ Before-Commit Validation
 
-OMGKIT enforces strict quality standards with **4800+ automated tests**:
+OMGKIT provides two types of before-commit rules:
+
+| Rule Type | Location | Purpose |
+|-----------|----------|---------|
+| **OMGKIT Internal** | `plugin/stdrules/omgkit/` | For OMGKIT contributors |
+| **Project Rules** | `.omgkit/stdrules/BEFORE_COMMIT.md` | For your projects |
+
+### For OMGKIT Contributors
 
 ```bash
-npm test    # Run all validation tests before commit
+npm test    # Run all 4800+ validation tests
 ```
-
-### Quality Gates
 
 | Category | Requirement |
 |----------|-------------|
@@ -440,10 +445,15 @@ npm test    # Run all validation tests before commit
 | **Commands** | 15+ lines, description, registered as slash command |
 | **Skills** | 30+ lines, name/description if frontmatter present |
 | **Workflows** | 50+ lines, description, agents array |
-| **Registry** | Version sync, cross-reference validation |
-| **Content** | No placeholder text (TODO:, FIXME:, etc.) |
 
-All commands must be registered in `registry.yaml` under valid namespaces.
+### For Project Developers
+
+When you run `omgkit init`, a comprehensive `BEFORE_COMMIT.md` is created with:
+- Code quality checks
+- Git commit standards
+- Security guidelines
+- Documentation requirements
+
 See [full documentation](https://omgkit.mintlify.app/resources/before-commit).
 
 ## 📁 Project Structure
@@ -463,6 +473,7 @@ your-project/
 │   ├── logs/            # Activity logs
 │   ├── devlogs/         # Development logs, planning, tracking (git-ignored)
 │   └── stdrules/        # Standards & rules for the project
+│       ├── BEFORE_COMMIT.md   # Before-commit checklist
 │       └── SKILL_STANDARDS.md
 └── OMEGA.md             # Project context
 ```
