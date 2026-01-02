@@ -1077,7 +1077,7 @@ For best results, be specific in your descriptions and include relevant file pat
   <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all ${graphStats.commands} commands
   </Card>
-  <Card title="${category.charAt(0).toUpperCase() + category.slice(1)} Commands" icon="${catMeta.icon}" href="/commands/all-commands#${category}">
+  <Card title="${category.charAt(0).toUpperCase() + category.slice(1)} Commands" icon="${catMeta.icon}" href="/commands/overview#${category}">
     More ${category} commands
   </Card>
 </CardGroup>
