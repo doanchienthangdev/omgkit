@@ -666,7 +666,7 @@ ${generateAgentDependencySection(slug)}
 
 <CardGroup cols={2}>
   <Card title="All Agents" icon="robot" href="/agents/overview">
-    See all 23 specialized agents
+    See all ${graphStats.agents} specialized agents
   </Card>
   <Card title="AI Team" icon="users" href="/concepts/ai-team">
     Learn how agents collaborate
@@ -702,22 +702,26 @@ ${generateAgentDependencySection(slug)}
     'Omega Exclusive': 'wand-magic-sparkles'
   };
 
+  // Calculate dynamic counts
+  const totalAgents = graphStats.agents;
+  const totalCategories = categoryOrder.filter(cat => (agentsByCategory[cat] || []).length > 0).length;
+
   // Generate overview page with comprehensive structure
   const overviewDoc = `---
 title: "Agents Overview"
-description: "23 specialized AI agents for every development task"
+description: "${totalAgents} specialized AI agents for every development task"
 icon: "robot"
 ---
 
-OMGKIT includes **23 specialized agents**, each an expert in their domain. Agents work independently or collaborate as a team under the Sprint Master's orchestration.
+OMGKIT includes **${totalAgents} specialized agents**, each an expert in their domain. Agents work independently or collaborate as a team under the Sprint Master's orchestration.
 
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="23" icon="robot">
+  <Card title="${totalAgents}" icon="robot">
     Specialized Agents
   </Card>
-  <Card title="5" icon="folder">
+  <Card title="${totalCategories}" icon="folder">
     Categories
   </Card>
   <Card title="∞" icon="arrows-spin">
@@ -731,21 +735,14 @@ OMGKIT includes **23 specialized agents**, each an expert in their domain. Agent
 ## Agent Categories
 
 <CardGroup cols={2}>
-  <Card title="Core Development" icon="code" href="#core-development">
-    **6 agents** - Planning, research, debugging, testing, review, exploration
-  </Card>
-  <Card title="Operations" icon="gears" href="#operations">
-    **5 agents** - Git, docs, project management, database, UI/UX
-  </Card>
-  <Card title="Extended" icon="puzzle-piece" href="#extended">
-    **6 agents** - Fullstack, CI/CD, security, API design, pipelines
-  </Card>
-  <Card title="Creative" icon="palette" href="#creative">
-    **3 agents** - Copy, brainstorming, journaling
-  </Card>
-  <Card title="Omega Exclusive" icon="wand-magic-sparkles" href="#omega-exclusive">
-    **3 agents** - Oracle, architect, sprint master
-  </Card>
+${categoryOrder.map(cat => {
+  const agents = agentsByCategory[cat] || [];
+  if (agents.length === 0) return '';
+  const catIcon = categoryIcons[cat] || 'folder';
+  return `  <Card title="${cat}" icon="${catIcon}" href="#${cat.toLowerCase().replace(/\s+/g, '-')}">
+    **${agents.length} agents** - ${agents.slice(0, 3).map(a => a.name).join(', ')}${agents.length > 3 ? '...' : ''}
+  </Card>`;
+}).filter(Boolean).join('\n')}
 </CardGroup>
 
 ## Choosing the Right Agent
@@ -1068,7 +1065,7 @@ OMGKIT provides **${totalCommands} slash commands** covering the entire developm
   <Card title="${totalAgents}" icon="robot">
     Backing Agents
   </Card>
-  <Card title="10" icon="sliders">
+  <Card title="${graphStats.modes}" icon="sliders">
     Mode-Aware
   </Card>
 </CardGroup>
@@ -1363,7 +1360,7 @@ OMGKIT detects and activates this skill when it finds:
 
 <CardGroup cols={2}>
   <Card title="All Skills" icon="brain" href="/skills/overview">
-    See all 43 skills
+    See all ${graphStats.skills} skills
   </Card>
   <Card title="${category.charAt(0).toUpperCase() + category.slice(1)}" icon="${catMeta.icon}" href="/skills/overview#${category}">
     More ${category} skills
@@ -1665,10 +1662,15 @@ You can temporarily switch modes for specific commands, then switch back to your
 
   const categoryOrder = ['Standard', 'Creative', 'Efficiency', 'Omega'];
 
+  // Calculate dynamic counts
+  const totalModes = graphStats.modes;
+  const modeCategories = ['Standard', 'Creative', 'Efficiency', 'Omega'];
+  const totalModeCategories = modeCategories.filter(cat => (modesByCategory[cat] || []).length > 0).length;
+
   // Generate overview page with enhanced structure
   const overviewDoc = `---
 title: "Modes Overview"
-description: "10 behavioral modes for different development contexts"
+description: "${totalModes} behavioral modes for different development contexts"
 icon: "sliders"
 ---
 
@@ -1677,10 +1679,10 @@ Modes change how OMGKIT behaves. Switch modes to **optimize for different tasks*
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="10" icon="sliders">
+  <Card title="${totalModes}" icon="sliders">
     Total Modes
   </Card>
-  <Card title="4" icon="folder">
+  <Card title="${totalModeCategories}" icon="folder">
     Categories
   </Card>
   <Card title="Instant" icon="bolt">
@@ -1977,7 +1979,7 @@ Provide detailed context in your workflow description. Include specific requirem
 
 <CardGroup cols={2}>
   <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
-    See all 29 workflows
+    See all ${graphStats.workflows} workflows
   </Card>
   <Card title="${formatCategoryName(category)}" icon="${catMeta.icon}" href="/workflows/overview#${category}">
     More ${category} workflows
@@ -2003,10 +2005,14 @@ Provide detailed context in your workflow description. Include specific requirem
 
   const categoryOrder = ['development', 'ai-engineering', 'ai-ml', 'omega', 'sprint', 'security', 'database', 'api', 'fullstack', 'content', 'research', 'quality', 'microservices', 'event-driven', 'game-dev'];
 
+  // Calculate dynamic counts
+  const totalWorkflows = graphStats.workflows;
+  const totalWorkflowCategories = categoryOrder.filter(cat => (workflowsByCategory[cat] || []).length > 0).length;
+
   // Generate overview page with comprehensive structure
   const overviewDoc = `---
 title: "Workflows Overview"
-description: "29 orchestrated workflows for complete development processes"
+description: "${totalWorkflows} orchestrated workflows for complete development processes"
 icon: "diagram-project"
 ---
 
@@ -2015,13 +2021,13 @@ Workflows are **orchestrated sequences** of agents, commands, and skills that gu
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="29" icon="diagram-project">
+  <Card title="${totalWorkflows}" icon="diagram-project">
     Total Workflows
   </Card>
-  <Card title="11" icon="folder">
+  <Card title="${totalWorkflowCategories}" icon="folder">
     Categories
   </Card>
-  <Card title="23" icon="robot">
+  <Card title="${graphStats.agents}" icon="robot">
     Agents Used
   </Card>
   <Card title="100%" icon="check">

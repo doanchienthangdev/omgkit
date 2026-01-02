@@ -305,14 +305,25 @@ function buildReverseReferences(graph) {
 }
 
 /**
+ * Count mode files
+ */
+async function countModes() {
+  const modesDir = join(PLUGIN_DIR, 'modes');
+  if (!existsSync(modesDir)) return 0;
+  const files = await readdir(modesDir);
+  return files.filter(f => f.endsWith('.md')).length;
+}
+
+/**
  * Build complete dependency graph
  */
 export async function buildDependencyGraph() {
-  const [agents, workflows, skills, commands] = await Promise.all([
+  const [agents, workflows, skills, commands, modes] = await Promise.all([
     extractAgentDependencies(),
     extractWorkflowDependencies(),
     extractSkillDependencies(),
-    extractCommandDependencies()
+    extractCommandDependencies(),
+    countModes()
   ]);
 
   const graph = { agents, workflows, skills, commands };
@@ -326,6 +337,7 @@ export async function buildDependencyGraph() {
     workflows: Object.keys(workflows).length,
     skills: Object.keys(skills).length,
     commands: Object.keys(commands).length,
+    modes: modes,
     totalSkillRefs: Object.values(agents).reduce((sum, a) => sum + a.dependsOn.skills.length, 0) +
                     Object.values(workflows).reduce((sum, w) => sum + w.dependsOn.skills.length, 0),
     totalCommandRefs: Object.values(agents).reduce((sum, a) => sum + a.dependsOn.commands.length, 0) +
