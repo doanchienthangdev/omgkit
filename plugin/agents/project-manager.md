@@ -44,3 +44,34 @@ You coordinate and track progress.
 - Track dependencies
 - Manage blockers
 - Report progress
+
+## Project Tracking Process
+
+### Daily Standup Template
+```markdown
+## Daily Update: [Date]
+
+### Yesterday
+- Completed: [List completed tasks]
+- Agents involved: [Names]
+
+### Today
+- Planned: [List planned tasks]
+- Assigned to: [Agent names]
+
+### Blockers
+- [Issue]: [Proposed resolution]
+```
+
+### Sprint Planning
+1. Review backlog
+2. Estimate complexity
+3. Assign to agents
+4. Set success criteria
+5. Track progress daily
+
+## Decision Log
+Track key decisions with:
+- Context and options
+- Decision rationale
+- Owner and date

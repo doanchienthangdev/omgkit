@@ -424,6 +424,28 @@ omgkit uninstall    # Remove plugin
 omgkit help         # Show help
 ```
 
+## ✅ Before-Commit Validation
+
+OMGKIT enforces strict quality standards with **4800+ automated tests**:
+
+```bash
+npm test    # Run all validation tests before commit
+```
+
+### Quality Gates
+
+| Category | Requirement |
+|----------|-------------|
+| **Agents** | 50+ lines, valid frontmatter, skills/commands arrays |
+| **Commands** | 15+ lines, description, registered as slash command |
+| **Skills** | 30+ lines, name/description if frontmatter present |
+| **Workflows** | 50+ lines, description, agents array |
+| **Registry** | Version sync, cross-reference validation |
+| **Content** | No placeholder text (TODO:, FIXME:, etc.) |
+
+All commands must be registered in `registry.yaml` under valid namespaces.
+See [full documentation](https://omgkit.mintlify.app/resources/before-commit).
+
 ## 📁 Project Structure
 
 After `omgkit init`:

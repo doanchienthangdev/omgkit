@@ -7,7 +7,11 @@ allowed-tools: Bash
 
 Quick conventional commit for staged changes.
 
+## Usage
+
 ```bash
 git add -A
 git commit -m "type(scope): message"
 ```
+
+Follow conventional commit format: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`.

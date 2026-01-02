@@ -1,6 +1,6 @@
 ---
 name: brainstormer
-description: Creative exploration, ideation, option generation. Use for brainstorming.
+description: Creative exploration agent specialized for ideation, brainstorming sessions, and systematic option generation for complex problems.
 tools: Read, WebSearch, Glob
 model: inherit
 skills:

@@ -1,0 +1,188 @@
+---
+title: "Before-Commit Checklist"
+description: "Comprehensive validation rules and quality standards for OMGKIT contributions"
+---
+
+# Before-Commit Checklist
+
+This guide defines all validation rules and quality standards that must be met before committing changes to OMGKIT.
+
+## Quick Validation
+
+Run the full test suite before any commit:
+
+```bash
+npm test
+```
+
+All 4800+ tests must pass before committing.
+
+## 1. Test & Validation Requirements
+
+### 1.1 Test Execution
+- All unit tests must pass
+- All integration tests must pass
+- All validation tests must pass
+- No skipped tests without documented reason
+
+### 1.2 Build Verification
+```bash
+npm run build
+npm run lint
+```
+
+## 2. Documentation Quality Standards
+
+### 2.1 Agent Documentation
+**Minimum Requirements:**
+- 50+ lines of content
+- Valid YAML frontmatter with:
+  - `name`: Agent identifier
+  - `description`: 10-200 word description
+  - `tools`: List of allowed tools
+  - `skills`: Array of skill references
+  - `commands`: Array of command references
+
+### 2.2 Command Documentation
+**Minimum Requirements:**
+- 15+ lines of content
+- Valid YAML frontmatter with:
+  - `description`: Clear purpose statement
+  - `allowed-tools`: List of tools the command can use
+  - `argument-hint`: Usage example (optional)
+
+### 2.3 Skill Documentation
+**Minimum Requirements:**
+- 30+ lines of content
+- YAML frontmatter (recommended) with:
+  - `name`: Skill identifier
+  - `description`: Purpose and usage
+
+### 2.4 Workflow Documentation
+**Minimum Requirements:**
+- 50+ lines of content
+- Valid YAML frontmatter with:
+  - `description`: Workflow purpose
+  - `agents`: Array of required agents
+  - `triggers`: Event triggers (optional)
+
+## 3. Command Registration
+
+### 3.1 Slash Command Requirements
+
+Every command MUST be registered as a Claude Code slash command:
+
+**File Location:**
+```
+plugin/commands/<namespace>/<command-name>.md
+```
+
+**Format Requirements:**
+- Command ID: `/namespace:command-name`
+- All lowercase, hyphens for word separation
+- Namespace registered in `registry.yaml` under `command_namespaces`
+
+### 3.2 Registered Namespaces
+All commands must belong to one of these registered namespaces:
+- `git` - Version control operations
+- `planning` - Task planning and documentation
+- `development` - Code development tasks
+- `quality` - Code quality and testing
+- `sprint` - Sprint management
+- `omega` - Omega-level operations
+- `sre` - Site reliability engineering
+- `design` - UI/UX design commands
+- `ml` - Machine learning operations
+- `game` - Game development
+- `iot` - IoT device management
+- `architecture` - System architecture
+- `autonomous` - Autonomous development
+- `context` - Context management
+- `research` - Research workflows
+- `database` - Database operations
+- `security` - Security operations
+- `workflow` - Workflow triggers
+- `infra` - Infrastructure management
+- `ai` - AI engineering commands
+
+## 4. Registry Integrity
+
+### 4.1 Version Sync
+```yaml
+# registry.yaml
+version: "X.Y.Z"
+```
+Must match `package.json` version.
+
+### 4.2 Component Counts
+Minimum requirements:
+- 30+ agents
+- 100+ commands
+- 100+ skills
+- 40+ workflows
+
+### 4.3 Cross-Reference Validation
+- All skill references in agents must exist
+- All command references in agents must exist
+- All agent references in workflows must exist
+
+## 5. Prohibited Content
+
+These patterns are NOT allowed in production files:
+
+| Pattern | Description |
+|---------|-------------|
+| `TODO:` | Actual placeholder at line start |
+| `FIXME:` | Actual placeholder at line start |
+| `HACK:` | Actual placeholder at line start |
+| `[INSERT ...]` | Placeholder brackets |
+| `[PLACEHOLDER]` | Placeholder markers |
+
+**Note:** Documenting these terms (e.g., "check for TODO markers") is allowed.
+
+## 6. Dependency Graph
+
+### 6.1 Forward References
+All `dependsOn` references must resolve to existing components.
+
+### 6.2 No Circular Dependencies
+The dependency graph must be acyclic.
+
+## 7. Final Verification
+
+Before committing, verify:
+
+```bash
+# Run all tests
+npm test
+
+# Check documentation
+npm run docs:generate
+
+# Verify build
+npm run build
+```
+
+## Validation Test Files
+
+The following test files enforce these rules:
+
+| File | Purpose |
+|------|---------|
+| `tests/validation/before-commit.test.js` | Master validation suite |
+| `tests/validation/doc-quality.test.js` | Documentation quality checks |
+| `tests/validation/command-registration.test.js` | Slash command validation |
+| `tests/validation/registry-sync.test.js` | Registry consistency |
+| `tests/validation/hierarchy.test.js` | Component hierarchy |
+| `tests/validation/docs-links.test.js` | Documentation link validation |
+
+## Commit Standards
+
+When all validations pass:
+
+```bash
+git add .
+git commit -m "type(scope): description"
+```
+
+Use conventional commits: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`

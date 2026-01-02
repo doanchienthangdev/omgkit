@@ -1,7 +1,7 @@
 ---
 description: Create new sprint
 allowed-tools: Task, Read, Write, Grep, Glob
-argument-hint: [name] [--propose]
+argument-hint: "[name] [--propose]"
 ---
 
 # 🏃 Sprint New: $ARGUMENTS
