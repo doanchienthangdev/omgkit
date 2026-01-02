@@ -74,16 +74,16 @@ Development commands for building features and fixing bugs
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/dev:feature`](/commands/feature) | Full feature development with planning, ... | `/dev:feature <feature description>` |
-| [`/dev:fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/dev:fix-ci <github-action-url>` |
-| [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/dev:fix-fast <bug>` |
-| [`/dev:fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation | `/dev:fix-hard <complex bug>` |
+| [`/dev:feature`](/commands/feature) | Full feature development with planning, ... | `/dev:feature &lt;feature description&gt;` |
+| [`/dev:fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/dev:fix-ci &lt;github-action-url&gt;` |
+| [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/dev:fix-fast &lt;bug&gt;` |
+| [`/dev:fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation | `/dev:fix-hard &lt;complex bug&gt;` |
 | [`/dev:fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues | `/dev:fix-logs` |
 | [`/dev:fix-test`](/commands/fix-test) | Fix failing tests | `/dev:fix-test` |
-| [`/dev:fix`](/commands/fix) | Debug and fix bugs | `/dev:fix <error or issue>` |
+| [`/dev:fix`](/commands/fix) | Debug and fix bugs | `/dev:fix &lt;error or issue&gt;` |
 | [`/dev:review`](/commands/review) | Code review with security and quality fo... | `/dev:review [file or directory]` |
-| [`/dev:tdd`](/commands/tdd) | Test-driven development workflow | `/dev:tdd <feature>` |
-| [`/dev:test`](/commands/test) | Generate and run tests | `/dev:test <scope>` |
+| [`/dev:tdd`](/commands/tdd) | Test-driven development workflow | `/dev:tdd &lt;feature&gt;` |
+| [`/dev:test`](/commands/test) | Generate and run tests | `/dev:test &lt;scope&gt;` |
 
 
 ## Planning
@@ -92,14 +92,14 @@ Planning and research commands for strategic work
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/planning:ask`](/commands/ask) | Quick question with codebase context | `/planning:ask <question>` |
-| [`/planning:brainstorm`](/commands/brainstorm) | Interactive brainstorming session | `/planning:brainstorm <topic>` |
-| [`/planning:doc`](/commands/doc) | Generate documentation | `/planning:doc <target>` |
-| [`/planning:execute-plan`](/commands/execute-plan) | Execute existing plan with subagents | `/planning:execute-plan <plan-file>` |
-| [`/planning:plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks | `/planning:plan-detailed <task>` |
-| [`/planning:plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy | `/planning:plan-parallel <task>` |
-| [`/planning:plan`](/commands/plan) | Create implementation plan | `/planning:plan <task>` |
-| [`/planning:research`](/commands/research) | Research technology or topic | `/planning:research <topic>` |
+| [`/planning:ask`](/commands/ask) | Quick question with codebase context | `/planning:ask &lt;question&gt;` |
+| [`/planning:brainstorm`](/commands/brainstorm) | Interactive brainstorming session | `/planning:brainstorm &lt;topic&gt;` |
+| [`/planning:doc`](/commands/doc) | Generate documentation | `/planning:doc &lt;target&gt;` |
+| [`/planning:execute-plan`](/commands/execute-plan) | Execute existing plan with subagents | `/planning:execute-plan &lt;plan-file&gt;` |
+| [`/planning:plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks | `/planning:plan-detailed &lt;task&gt;` |
+| [`/planning:plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy | `/planning:plan-parallel &lt;task&gt;` |
+| [`/planning:plan`](/commands/plan) | Create implementation plan | `/planning:plan &lt;task&gt;` |
+| [`/planning:research`](/commands/research) | Research technology or topic | `/planning:research &lt;topic&gt;` |
 
 
 ## Git
@@ -122,10 +122,10 @@ Quality and security commands for code health
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/quality:api-gen`](/commands/api-gen) | Generate API code from spec | `/quality:api-gen <resource>` |
+| [`/quality:api-gen`](/commands/api-gen) | Generate API code from spec | `/quality:api-gen &lt;resource&gt;` |
 | [`/quality:lint`](/commands/lint) | Run linting | `/quality:lint` |
-| [`/quality:optimize`](/commands/optimize) | Performance optimization | `/quality:optimize <file>` |
-| [`/quality:refactor`](/commands/refactor) | Improve code structure | `/quality:refactor <file or directory>` |
+| [`/quality:optimize`](/commands/optimize) | Performance optimization | `/quality:optimize &lt;file&gt;` |
+| [`/quality:refactor`](/commands/refactor) | Improve code structure | `/quality:refactor &lt;file or directory&gt;` |
 | [`/quality:security-scan`](/commands/security-scan) | Scan for security vulnerabilities | `/quality:security-scan` |
 
 
@@ -135,12 +135,12 @@ Context and session management commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/context:checkpoint`](/commands/checkpoint) | Save or restore session state | `/context:checkpoint <save|restore|list>` |
+| [`/context:checkpoint`](/commands/checkpoint) | Save or restore session state | `/context:checkpoint &lt;save|restore|list&gt;` |
 | [`/context:context-index`](/commands/context-index) | Generate project index | `/context:context-index` |
-| [`/context:load`](/commands/load) | Load project context | `/context:load <component>` |
-| [`/context:mode`](/commands/mode) | Switch behavioral mode | `/context:mode <mode-name>` |
+| [`/context:load`](/commands/load) | Load project context | `/context:load &lt;component&gt;` |
+| [`/context:mode`](/commands/mode) | Switch behavioral mode | `/context:mode &lt;mode-name&gt;` |
 | [`/context:spawn-collect`](/commands/spawn-collect) | Collect results from parallel tasks | `/context:spawn-collect` |
-| [`/context:spawn`](/commands/spawn) | Launch parallel background task | `/context:spawn <task description>` |
+| [`/context:spawn`](/commands/spawn) | Launch parallel background task | `/context:spawn &lt;task description&gt;` |
 
 
 ## Design
@@ -149,11 +149,11 @@ Design and UI/UX commands for visual work
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/design:cro`](/commands/cro) | CRO-focused content/design | `/design:cro <page>` |
-| [`/design:enhance`](/commands/enhance) | Enhance existing content/design | `/design:enhance <target>` |
-| [`/design:fast`](/commands/fast) | Quick UI implementation | `/design:fast <UI description>` |
-| [`/design:good`](/commands/good) | High-quality UI with polish | `/design:good <UI description>` |
-| [`/design:screenshot`](/commands/screenshot) | Implement UI from screenshot | `/design:screenshot <screenshot reference>` |
+| [`/design:cro`](/commands/cro) | CRO-focused content/design | `/design:cro &lt;page&gt;` |
+| [`/design:enhance`](/commands/enhance) | Enhance existing content/design | `/design:enhance &lt;target&gt;` |
+| [`/design:fast`](/commands/fast) | Quick UI implementation | `/design:fast &lt;UI description&gt;` |
+| [`/design:good`](/commands/good) | High-quality UI with polish | `/design:good &lt;UI description&gt;` |
+| [`/design:screenshot`](/commands/screenshot) | Implement UI from screenshot | `/design:screenshot &lt;screenshot reference&gt;` |
 
 
 ## Omega
@@ -162,9 +162,9 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omega:1000x`](/commands/1000x) | Find 1000x moonshot path | `/omega:1000x <topic>` |
-| [`/omega:100x`](/commands/100x) | Find 100x paradigm shift | `/omega:100x <topic>` |
-| [`/omega:10x`](/commands/10x) | Find 10x improvement path | `/omega:10x <topic>` |
+| [`/omega:1000x`](/commands/1000x) | Find 1000x moonshot path | `/omega:1000x &lt;topic&gt;` |
+| [`/omega:100x`](/commands/100x) | Find 100x paradigm shift | `/omega:100x &lt;topic&gt;` |
+| [`/omega:10x`](/commands/10x) | Find 10x improvement path | `/omega:10x &lt;topic&gt;` |
 | [`/omega:dimensions`](/commands/dimensions) | Display 10 Omega Dimensions | `/omega:dimensions` |
 | [`/omega:principles`](/commands/principles) | Display 7 Omega Principles | `/omega:principles` |
 
@@ -175,7 +175,7 @@ Sprint and team management commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/sprint:backlog-add`](/commands/backlog-add) | Add task to backlog | `/sprint:backlog-add <task> [--type TYPE] [--priority N]` |
+| [`/sprint:backlog-add`](/commands/backlog-add) | Add task to backlog | `/sprint:backlog-add &lt;task&gt; [--type TYPE] [--priority N]` |
 | [`/sprint:backlog-prioritize`](/commands/backlog-prioritize) | AI-powered backlog prioritization | `/sprint:backlog-prioritize` |
 | [`/sprint:backlog-show`](/commands/backlog-show) | Display backlog | `/sprint:backlog-show` |
 | [`/sprint:init`](/commands/init) | Initialize OMGKIT in project | `/sprint:init` |
@@ -183,7 +183,7 @@ Sprint and team management commands
 | [`/sprint:sprint-end`](/commands/sprint-end) | End sprint with retrospective | `/sprint:sprint-end` |
 | [`/sprint:sprint-new`](/commands/sprint-new) | Create new sprint | `/sprint:sprint-new "[name] [--propose]"` |
 | [`/sprint:sprint-start`](/commands/sprint-start) | Start current sprint | `/sprint:sprint-start` |
-| [`/sprint:team-ask`](/commands/team-ask) | Ask the AI team a question | `/sprint:team-ask <question>` |
+| [`/sprint:team-ask`](/commands/team-ask) | Ask the AI team a question | `/sprint:team-ask &lt;question&gt;` |
 | [`/sprint:team-run`](/commands/team-run) | Run AI team on sprint tasks | `/sprint:team-run [--mode MODE]` |
 | [`/sprint:team-status`](/commands/team-status) | Show AI team activity | `/sprint:team-status` |
 | [`/sprint:vision-set`](/commands/vision-set) | Set product vision interactively | `/sprint:vision-set` |

@@ -1178,7 +1178,10 @@ ${catMeta.description}
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-${cmds.map(c => `| [\`/${cat}:${c.slug}\`](/commands/${c.slug}) | ${c.description.slice(0, 40)}${c.description.length > 40 ? '...' : ''} | \`/${cat}:${c.slug}${c.argumentHint ? ' ' + c.argumentHint : ''}\` |`).join('\n')}
+${cmds.map(c => {
+  const escapedHint = c.argumentHint ? c.argumentHint.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+  return `| [\`/${cat}:${c.slug}\`](/commands/${c.slug}) | ${c.description.slice(0, 40)}${c.description.length > 40 ? '...' : ''} | \`/${cat}:${c.slug}${escapedHint ? ' ' + escapedHint : ''}\` |`;
+}).join('\n')}
 `;
 }).join('\n')}
 
