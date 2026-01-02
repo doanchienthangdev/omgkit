@@ -1008,7 +1008,7 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 58 commands
+    See all ${graphStats.commands} commands
   </Card>
   <Card title="${category.charAt(0).toUpperCase() + category.slice(1)} Commands" icon="${catMeta.icon}" href="/commands/overview#${category}">
     More ${category} commands
@@ -1044,24 +1044,28 @@ For best results, be specific in your descriptions and include relevant file pat
     sprint: 'Team and sprint management'
   };
 
+  const totalCommands = graphStats.commands;
+  const totalCategories = Object.keys(commandsByCategory).length;
+  const totalAgents = graphStats.agents;
+
   const overviewDoc = `---
 title: "Commands Overview"
-description: "58 slash commands for every development task"
+description: "${totalCommands} slash commands for every development task"
 icon: "terminal"
 ---
 
-OMGKIT provides **58 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
+OMGKIT provides **${totalCommands} slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
 
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="58" icon="terminal">
+  <Card title="${totalCommands}" icon="terminal">
     Total Commands
   </Card>
-  <Card title="8" icon="folder">
+  <Card title="${totalCategories}" icon="folder">
     Categories
   </Card>
-  <Card title="23" icon="robot">
+  <Card title="${totalAgents}" icon="robot">
     Backing Agents
   </Card>
   <Card title="10" icon="sliders">
