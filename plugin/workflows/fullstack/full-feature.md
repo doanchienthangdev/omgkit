@@ -14,10 +14,10 @@ agents:
   - code-reviewer
   - git-manager
 skills:
-  - writing-plans
-  - database-schema-design
-  - api-architecture
-  - frontend-design
+  - methodology/writing-plans
+  - databases/database-schema-design
+  - backend/api-architecture
+  - frontend/frontend-design
 commands:
   - /planning:plan-detailed
   - /dev:feature

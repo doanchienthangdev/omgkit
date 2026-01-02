@@ -3,6 +3,12 @@ name: pipeline-architect
 description: Pipeline optimization, workflow design, automation architecture. Use for pipeline design.
 tools: Read, Write, Bash, Glob
 model: inherit
+skills:
+  - devops/github-actions
+  - ai-ml/ml-pipelines
+  - devops/docker
+commands:
+  - /data:pipeline
 ---
 
 # 🏗️ Pipeline Architect Agent

@@ -9,7 +9,7 @@ agents:
   - project-manager
   - journal-writer
 skills:
-  - omega-sprint
+  - omega/omega-sprint
 commands:
   - /sprint:sprint-end
   - /planning:doc

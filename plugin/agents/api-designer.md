@@ -3,6 +3,11 @@ name: api-designer
 description: API design, OpenAPI specs, REST best practices. Use for API design.
 tools: Read, Write, Glob
 model: inherit
+skills:
+  - backend/api-architecture
+commands:
+  - /quality:api-gen
+  - /workflow:api-design
 ---
 
 # 🔌 API Designer Agent

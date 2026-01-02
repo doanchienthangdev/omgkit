@@ -3,6 +3,12 @@ name: domain-decomposer
 description: Domain-Driven Design specialist for breaking down complex business domains into bounded contexts, aggregates, and service boundaries.
 tools: Read, Grep, Glob, Task
 model: inherit
+skills:
+  - microservices/service-discovery
+  - microservices/api-gateway-patterns
+commands:
+  - /domain:analyze
+  - /domain:map
 ---
 
 # Domain Decomposer Agent

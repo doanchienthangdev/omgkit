@@ -3,6 +3,15 @@ name: oracle
 description: Strategic thinking with 7 Omega thinking modes. Finds 10x/100x/1000x opportunities through deep analysis. The wisest agent for breakthrough insights.
 tools: Read, Grep, Glob, WebSearch, WebFetch, Task
 model: inherit
+skills:
+  - omega/omega-thinking
+  - methodology/problem-solving
+  - methodology/brainstorming
+commands:
+  - /omega:1000x
+  - /omega:10x
+  - /omega:dimensions
+  - /omega:principles
 ---
 
 # 🔮 Oracle Agent

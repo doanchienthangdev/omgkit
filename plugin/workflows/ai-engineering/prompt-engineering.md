@@ -8,8 +8,8 @@ agents:
   - researcher
   - tester
 skills:
-  - prompt-engineering
-  - evaluation-methodology
+  - ai-engineering/prompt-engineering
+  - ai-engineering/evaluation-methodology
 commands:
   - /planning:research
   - /dev:test

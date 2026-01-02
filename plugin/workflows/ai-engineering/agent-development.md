@@ -12,9 +12,9 @@ agents:
   - tester
   - security-auditor
 skills:
-  - ai-agents
-  - ai-architecture
-  - guardrails-safety
+  - ai-engineering/ai-agents
+  - ai-engineering/ai-architecture
+  - ai-engineering/guardrails-safety
 commands:
   - /planning:research
   - /planning:plan-detailed

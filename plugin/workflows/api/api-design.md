@@ -10,7 +10,7 @@ agents:
   - docs-manager
   - code-reviewer
 skills:
-  - api-architecture
+  - backend/api-architecture
 commands:
   - /planning:plan
   - /quality:api-gen

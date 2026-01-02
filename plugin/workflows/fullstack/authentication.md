@@ -10,10 +10,10 @@ agents:
   - security-auditor
   - tester
 skills:
-  - oauth
-  - better-auth
-  - owasp
-  - security-hardening
+  - security/oauth
+  - security/better-auth
+  - security/owasp
+  - security/security-hardening
 commands:
   - /planning:plan
   - /dev:feature

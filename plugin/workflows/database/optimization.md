@@ -8,7 +8,7 @@ agents:
   - database-admin
   - tester
 skills:
-  - database-optimization
+  - databases/database-optimization
 commands:
   - /quality:optimize
   - /dev:test

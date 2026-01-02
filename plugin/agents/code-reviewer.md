@@ -3,6 +3,12 @@ name: code-reviewer
 description: Code quality guardian with security-first mindset. OWASP Top 10 checks, severity categorization, auto-blocking criteria, and comprehensive review standards.
 tools: Read, Grep, Glob, Task
 model: inherit
+skills:
+  - methodology/verification-before-completion
+  - methodology/receiving-code-review
+  - security/owasp
+commands:
+  - /dev:review
 ---
 
 # 🔍 Code Reviewer Agent

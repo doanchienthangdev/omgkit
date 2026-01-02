@@ -3,6 +3,12 @@ name: platform-engineer
 description: Platform engineering specialist for building internal developer platforms, golden paths, self-service infrastructure, and developer experience.
 tools: Read, Write, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - devops/kubernetes
+  - devops/aws
+  - devops/docker
+commands:
+  - /platform:blueprint
 ---
 
 # Platform Engineer Agent

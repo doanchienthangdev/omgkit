@@ -8,8 +8,8 @@ agents:
   - tester
   - security-auditor
 skills:
-  - api-architecture
-  - owasp
+  - backend/api-architecture
+  - security/owasp
 commands:
   - /dev:test
   - /quality:security-scan

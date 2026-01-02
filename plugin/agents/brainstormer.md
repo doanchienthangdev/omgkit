@@ -3,6 +3,10 @@ name: brainstormer
 description: Creative exploration, ideation, option generation. Use for brainstorming.
 tools: Read, WebSearch, Glob
 model: inherit
+skills:
+  - methodology/brainstorming
+commands:
+  - /planning:brainstorm
 ---
 
 # 💡 Brainstormer Agent

@@ -3,6 +3,11 @@ name: observability-engineer
 description: Observability engineering specialist for monitoring, alerting, SLOs, distributed tracing, and incident response to ensure system reliability.
 tools: Read, Write, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - devops/observability
+  - devops/performance-profiling
+commands:
+  - /sre:dashboard
 ---
 
 # Observability Engineer Agent

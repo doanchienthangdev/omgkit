@@ -2,6 +2,35 @@
 
 All notable changes to OMGKIT will be documented in this file.
 
+## [2.15.0] - 2026-01-02
+
+### Changed
+- **Architecture Alignment**: Fixed misalignment between agents, skills, commands, and workflows
+- All agents now declare their skills and commands in frontmatter
+- All workflow skills use proper `category/skill-name` format (e.g., `methodology/writing-plans`)
+- Skill count updated to 128
+
+### Added
+- `plugin/registry.yaml` - Central registry for component mappings (Single Source of Truth)
+- `tests/validation/alignment.test.js` - 212 validation tests for architecture alignment
+- Agent frontmatter now includes `skills` and `commands` fields
+
+### Fixed
+- Workflows no longer confuse agents with skills in the `skills:` field
+- All skill references now use correct `category/skill-name` paths
+- All command references use proper `/namespace:command` format
+
+---
+
+## [2.14.0] - 2026-01-01
+
+### Added
+- Comprehensive gap analysis implementation
+- New specialized workflows for microservices, event-driven, AI-ML, and game development
+- Extended skill coverage to 128 skills
+
+---
+
 ## [1.0.0] - 2024
 
 ### Added

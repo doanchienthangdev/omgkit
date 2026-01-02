@@ -11,10 +11,10 @@ agents:
   - fullstack-developer
   - tester
 skills:
-  - rag-systems
-  - dataset-engineering
-  - evaluation-methodology
-  - ai-architecture
+  - ai-engineering/rag-systems
+  - ai-engineering/dataset-engineering
+  - ai-engineering/evaluation-methodology
+  - ai-engineering/ai-architecture
 commands:
   - /planning:research
   - /planning:plan

@@ -9,9 +9,9 @@ agents:
   - planner
   - tester
 skills:
-  - ai-system-evaluation
-  - evaluation-methodology
-  - dataset-engineering
+  - ai-engineering/ai-system-evaluation
+  - ai-engineering/evaluation-methodology
+  - ai-engineering/dataset-engineering
 commands:
   - /planning:plan
   - /dev:test

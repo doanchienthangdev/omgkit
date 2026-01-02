@@ -10,8 +10,8 @@ agents:
   - tester
   - git-manager
 skills:
-  - verification-before-completion
-  - test-driven-development
+  - methodology/verification-before-completion
+  - methodology/test-driven-development
 commands:
   - /quality:refactor
   - /dev:test

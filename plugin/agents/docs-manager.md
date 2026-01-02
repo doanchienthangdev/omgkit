@@ -3,6 +3,10 @@ name: docs-manager
 description: Documentation architect with API docs, architecture guides, and automated doc generation. Maintains documentation coverage and quality standards.
 tools: Read, Write, Glob, Grep, Bash
 model: inherit
+skills:
+  - methodology/writing-plans
+commands:
+  - /planning:doc
 ---
 
 # 📚 Docs Manager Agent

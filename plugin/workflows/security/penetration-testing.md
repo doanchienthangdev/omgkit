@@ -9,9 +9,9 @@ agents:
   - vulnerability-scanner
   - researcher
 skills:
-  - owasp
-  - defense-in-depth
-  - security-hardening
+  - security/owasp
+  - methodology/defense-in-depth
+  - security/security-hardening
 commands:
   - /quality:security-scan
   - /planning:research

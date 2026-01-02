@@ -3,6 +3,13 @@ name: embedded-systems
 description: Embedded systems specialist for firmware development, real-time systems, hardware interfaces, and IoT device programming.
 tools: Read, Write, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - iot/edge-computing
+  - iot/device-provisioning
+  - iot/mqtt-deep
+  - iot/ota-updates
+commands:
+  - /iot:provision
 ---
 
 # Embedded Systems Agent

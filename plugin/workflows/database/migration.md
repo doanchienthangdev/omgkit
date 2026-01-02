@@ -9,7 +9,7 @@ agents:
   - planner
   - tester
 skills:
-  - database-migration
+  - databases/database-migration
 commands:
   - /planning:plan
   - /dev:test

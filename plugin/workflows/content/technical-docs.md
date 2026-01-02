@@ -10,7 +10,7 @@ agents:
   - copywriter
   - code-reviewer
 skills:
-  - writing-plans
+  - methodology/writing-plans
 commands:
   - /planning:doc
   - /dev:review

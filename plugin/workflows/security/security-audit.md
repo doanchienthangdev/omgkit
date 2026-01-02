@@ -11,9 +11,9 @@ agents:
   - fullstack-developer
   - docs-manager
 skills:
-  - owasp
-  - security-hardening
-  - defense-in-depth
+  - security/owasp
+  - security/security-hardening
+  - methodology/defense-in-depth
 commands:
   - /quality:security-scan
   - /dev:fix

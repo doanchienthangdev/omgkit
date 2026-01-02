@@ -9,7 +9,7 @@ agents:
   - planner
   - project-manager
 skills:
-  - omega-sprint
+  - omega/omega-sprint
 commands:
   - /sprint:vision-set
   - /sprint:backlog-add

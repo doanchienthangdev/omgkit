@@ -3,6 +3,14 @@ name: performance-engineer
 description: Performance engineering specialist for load testing, profiling, optimization, and capacity planning to ensure systems meet requirements.
 tools: Read, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - devops/performance-profiling
+  - databases/database-optimization
+  - ai-engineering/inference-optimization
+commands:
+  - /perf:benchmark
+  - /perf:profile
+  - /quality:optimize
 ---
 
 # Performance Engineer Agent

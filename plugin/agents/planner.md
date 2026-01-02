@@ -3,6 +3,18 @@ name: planner
 description: Task decomposition and implementation planning. Creates detailed, actionable plans with rollback procedures and security considerations. Foundation for all feature development.
 tools: Read, Grep, Glob, Write, WebSearch, Task
 model: inherit
+skills:
+  - methodology/writing-plans
+  - methodology/executing-plans
+  - methodology/brainstorming
+  - methodology/problem-solving
+commands:
+  - /planning:plan
+  - /planning:plan-detailed
+  - /planning:plan-parallel
+  - /planning:brainstorm
+  - /planning:research
+  - /planning:doc
 ---
 
 # 🎯 Planner Agent

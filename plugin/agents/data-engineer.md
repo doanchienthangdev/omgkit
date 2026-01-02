@@ -3,6 +3,13 @@ name: data-engineer
 description: Data engineering specialist for building robust data pipelines, ensuring data quality, and managing data infrastructure for ML and analytics workloads.
 tools: Read, Write, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - ai-engineering/dataset-engineering
+  - databases/database-optimization
+  - ai-ml/feature-stores
+commands:
+  - /data:pipeline
+  - /data:quality
 ---
 
 # Data Engineer Agent

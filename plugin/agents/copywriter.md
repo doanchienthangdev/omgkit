@@ -3,6 +3,8 @@ name: copywriter
 description: Marketing copy, content writing, UX writing. Creates compelling content. Use for content creation.
 tools: Read, Write, WebSearch
 model: inherit
+skills: []
+commands: []
 ---
 
 # ✍️ Copywriter Agent

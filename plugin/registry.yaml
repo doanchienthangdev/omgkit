@@ -1,0 +1,711 @@
+# OMGKIT Component Registry
+# Single Source of Truth for Agents, Skills, Commands, and Workflows
+# Version: 1.0.0
+# Updated: 2026-01-02
+
+version: "1.0.0"
+
+# =============================================================================
+# AGENTS
+# =============================================================================
+# Each agent declares:
+# - file: Path to agent definition
+# - description: What the agent does
+# - skills: List of skill IDs (category/skill-name format)
+# - commands: List of commands this agent can trigger
+# =============================================================================
+
+agents:
+  # ---------------------------------------------------------------------------
+  # CORE DEVELOPMENT AGENTS
+  # ---------------------------------------------------------------------------
+  planner:
+    file: agents/planner.md
+    description: Task decomposition and implementation planning
+    skills:
+      - methodology/writing-plans
+      - methodology/executing-plans
+      - methodology/brainstorming
+      - methodology/problem-solving
+    commands:
+      - /planning:plan
+      - /planning:plan-detailed
+      - /planning:plan-parallel
+      - /planning:brainstorm
+      - /planning:research
+      - /planning:doc
+
+  fullstack-developer:
+    file: agents/fullstack-developer.md
+    description: Full implementation with strict file ownership
+    skills:
+      - methodology/executing-plans
+      - methodology/verification-before-completion
+      - methodology/test-driven-development
+      - languages/typescript
+      - languages/javascript
+    commands:
+      - /dev:feature
+      - /dev:fix
+      - /dev:fix-fast
+      - /dev:fix-hard
+      - /dev:tdd
+
+  tester:
+    file: agents/tester.md
+    description: Quality assurance through comprehensive testing
+    skills:
+      - methodology/test-driven-development
+      - methodology/testing-anti-patterns
+      - testing/vitest
+      - testing/playwright
+      - testing/pytest
+    commands:
+      - /dev:test
+      - /dev:tdd
+      - /dev:fix-test
+
+  code-reviewer:
+    file: agents/code-reviewer.md
+    description: Code quality guardian with security-first mindset
+    skills:
+      - methodology/verification-before-completion
+      - methodology/receiving-code-review
+      - security/owasp
+    commands:
+      - /dev:review
+
+  debugger:
+    file: agents/debugger.md
+    description: Expert bug investigator with RAPID methodology
+    skills:
+      - methodology/systematic-debugging
+      - methodology/root-cause-tracing
+      - methodology/problem-solving
+    commands:
+      - /dev:fix
+      - /dev:fix-hard
+      - /dev:fix-ci
+      - /dev:fix-logs
+      - /dev:fix-test
+
+  git-manager:
+    file: agents/git-manager.md
+    description: Version control expert with conventional commits
+    skills:
+      - methodology/finishing-development-branch
+      - devops/github-actions
+    commands:
+      - /git:commit
+      - /git:pr
+      - /git:ship
+      - /git:cm
+      - /git:cp
+      - /git:deploy
+
+  # ---------------------------------------------------------------------------
+  # ARCHITECTURE & PLANNING AGENTS
+  # ---------------------------------------------------------------------------
+  architect:
+    file: agents/architect.md
+    description: System architect applying Omega principles
+    skills:
+      - omega/omega-architecture
+      - backend/api-architecture
+      - microservices/service-discovery
+      - databases/database-schema-design
+    commands:
+      - /omega:100x
+      - /planning:plan-detailed
+
+  oracle:
+    file: agents/oracle.md
+    description: Strategic thinking with 7 Omega thinking modes
+    skills:
+      - omega/omega-thinking
+      - methodology/problem-solving
+      - methodology/brainstorming
+    commands:
+      - /omega:1000x
+      - /omega:10x
+      - /omega:dimensions
+      - /omega:principles
+
+  researcher:
+    file: agents/researcher.md
+    description: Technology research with best practices discovery
+    skills:
+      - methodology/research-validation
+      - methodology/brainstorming
+    commands:
+      - /planning:research
+
+  scout:
+    file: agents/scout.md
+    description: Expert codebase explorer with parallel search
+    skills:
+      - methodology/problem-solving
+    commands: []
+
+  brainstormer:
+    file: agents/brainstormer.md
+    description: Creative exploration and ideation
+    skills:
+      - methodology/brainstorming
+    commands:
+      - /planning:brainstorm
+
+  # ---------------------------------------------------------------------------
+  # SECURITY AGENTS
+  # ---------------------------------------------------------------------------
+  security-auditor:
+    file: agents/security-auditor.md
+    description: Security reviews and vulnerability assessment
+    skills:
+      - security/owasp
+      - security/security-hardening
+      - methodology/defense-in-depth
+    commands:
+      - /security:audit
+      - /quality:security-scan
+
+  vulnerability-scanner:
+    file: agents/vulnerability-scanner.md
+    description: Security scanning and dependency audit
+    skills:
+      - security/owasp
+      - security/security-hardening
+    commands:
+      - /security:scan
+      - /quality:security-scan
+
+  devsecops:
+    file: agents/devsecops.md
+    description: Security-focused DevOps practices
+    skills:
+      - security/security-hardening
+      - devops/github-actions
+      - devops/docker
+    commands:
+      - /security:audit
+      - /git:deploy
+
+  # ---------------------------------------------------------------------------
+  # DATABASE AGENTS
+  # ---------------------------------------------------------------------------
+  database-admin:
+    file: agents/database-admin.md
+    description: Schema design, query optimization, migrations
+    skills:
+      - databases/database-optimization
+      - databases/database-schema-design
+      - databases/database-migration
+      - databases/database-management
+      - databases/postgresql
+    commands:
+      - /quality:optimize
+      - /workflow:schema-design
+      - /workflow:migration
+
+  # ---------------------------------------------------------------------------
+  # DEVOPS & INFRASTRUCTURE AGENTS
+  # ---------------------------------------------------------------------------
+  cicd-manager:
+    file: agents/cicd-manager.md
+    description: CI/CD pipeline management and deployment automation
+    skills:
+      - devops/github-actions
+      - devops/docker
+      - devops/kubernetes
+    commands:
+      - /git:deploy
+
+  platform-engineer:
+    file: agents/platform-engineer.md
+    description: Platform engineering and infrastructure
+    skills:
+      - devops/kubernetes
+      - devops/aws
+      - devops/docker
+    commands:
+      - /platform:blueprint
+
+  observability-engineer:
+    file: agents/observability-engineer.md
+    description: Monitoring, logging, and alerting
+    skills:
+      - devops/observability
+      - devops/performance-profiling
+    commands:
+      - /sre:dashboard
+
+  performance-engineer:
+    file: agents/performance-engineer.md
+    description: Performance optimization and profiling
+    skills:
+      - devops/performance-profiling
+      - databases/database-optimization
+      - ai-engineering/inference-optimization
+    commands:
+      - /perf:benchmark
+      - /perf:profile
+      - /quality:optimize
+
+  pipeline-architect:
+    file: agents/pipeline-architect.md
+    description: Pipeline optimization and workflow design
+    skills:
+      - devops/github-actions
+      - ai-ml/ml-pipelines
+      - devops/docker
+    commands:
+      - /data:pipeline
+
+  # ---------------------------------------------------------------------------
+  # AI/ML AGENTS
+  # ---------------------------------------------------------------------------
+  ml-engineer:
+    file: agents/ml-engineer.md
+    description: Machine learning model development
+    skills:
+      - ai-engineering/finetuning
+      - ai-engineering/evaluation-methodology
+      - ai-engineering/dataset-engineering
+      - ai-ml/ml-pipelines
+      - ai-ml/model-serving
+    commands:
+      - /ml:train
+      - /ml:evaluate
+
+  data-engineer:
+    file: agents/data-engineer.md
+    description: Data pipeline and quality engineering
+    skills:
+      - ai-engineering/dataset-engineering
+      - databases/database-optimization
+      - ai-ml/feature-stores
+    commands:
+      - /data:pipeline
+      - /data:quality
+
+  # ---------------------------------------------------------------------------
+  # CONTENT & DOCUMENTATION AGENTS
+  # ---------------------------------------------------------------------------
+  docs-manager:
+    file: agents/docs-manager.md
+    description: Documentation architect and maintainer
+    skills:
+      - methodology/writing-plans
+    commands:
+      - /planning:doc
+
+  copywriter:
+    file: agents/copywriter.md
+    description: Marketing copy and content writing
+    skills: []
+    commands: []
+
+  journal-writer:
+    file: agents/journal-writer.md
+    description: Failure documentation and retrospectives
+    skills: []
+    commands: []
+
+  # ---------------------------------------------------------------------------
+  # PROJECT MANAGEMENT AGENTS
+  # ---------------------------------------------------------------------------
+  project-manager:
+    file: agents/project-manager.md
+    description: Progress tracking and coordination
+    skills:
+      - omega/omega-sprint
+    commands: []
+
+  sprint-master:
+    file: agents/sprint-master.md
+    description: AI Team orchestrator with sprint management
+    skills:
+      - omega/omega-sprint
+      - methodology/dispatching-parallel-agents
+    commands:
+      - /sprint:init
+      - /sprint:sprint-new
+      - /sprint:sprint-start
+      - /sprint:sprint-current
+      - /sprint:sprint-end
+      - /sprint:backlog-add
+      - /sprint:backlog-show
+      - /sprint:backlog-prioritize
+      - /sprint:vision-set
+      - /sprint:vision-show
+      - /sprint:team-run
+      - /sprint:team-status
+      - /sprint:team-ask
+
+  # ---------------------------------------------------------------------------
+  # DESIGN AGENTS
+  # ---------------------------------------------------------------------------
+  ui-ux-designer:
+    file: agents/ui-ux-designer.md
+    description: UI component creation and accessibility
+    skills:
+      - frontend/advanced-ui-design
+      - frontend/frontend-design
+      - frontend/accessibility
+      - frontend/responsive
+      - frontend/tailwindcss
+    commands:
+      - /design:screenshot
+      - /design:cro
+      - /design:enhance
+      - /design:fast
+      - /design:good
+
+  api-designer:
+    file: agents/api-designer.md
+    description: API design and OpenAPI specs
+    skills:
+      - backend/api-architecture
+    commands:
+      - /quality:api-gen
+      - /workflow:api-design
+
+  # ---------------------------------------------------------------------------
+  # SPECIALIZED AGENTS
+  # ---------------------------------------------------------------------------
+  autonomous-orchestrator:
+    file: agents/autonomous-orchestrator.yaml
+    description: State-driven autonomous project execution
+    skills:
+      - autonomous/project-orchestration
+    commands:
+      - /auto:init
+      - /auto:start
+      - /auto:status
+      - /auto:next
+      - /auto:approve
+      - /auto:reject
+      - /auto:verify
+      - /auto:checkpoint
+      - /auto:resume
+
+  domain-decomposer:
+    file: agents/domain-decomposer.md
+    description: Domain-driven design decomposition
+    skills:
+      - microservices/service-discovery
+      - microservices/api-gateway-patterns
+    commands:
+      - /domain:analyze
+      - /domain:map
+
+  game-systems-designer:
+    file: agents/game-systems-designer.md
+    description: Game mechanics and systems design
+    skills:
+      - game/unity-patterns
+      - game/godot-patterns
+      - game/game-networking
+    commands:
+      - /game:balance
+      - /game:optimize
+
+  embedded-systems:
+    file: agents/embedded-systems.md
+    description: IoT and embedded development
+    skills:
+      - iot/edge-computing
+      - iot/device-provisioning
+      - iot/mqtt-deep
+      - iot/ota-updates
+    commands:
+      - /iot:provision
+
+  scientific-computing:
+    file: agents/scientific-computing.md
+    description: Scientific simulation and computation
+    skills:
+      - simulation/numerical-methods
+      - simulation/parallel-computing
+      - simulation/physics-engines
+      - simulation/visualization-scientific
+    commands: []
+
+# =============================================================================
+# SKILL CATEGORIES
+# =============================================================================
+# All valid skill category prefixes
+
+skill_categories:
+  - ai-engineering
+  - ai-ml
+  - autonomous
+  - backend
+  - databases
+  - devops
+  - event-driven
+  - frameworks
+  - frontend
+  - game
+  - integrations
+  - iot
+  - languages
+  - methodology
+  - microservices
+  - mobile
+  - mobile-advanced
+  - omega
+  - security
+  - simulation
+  - testing
+  - tools
+
+# =============================================================================
+# COMMAND NAMESPACES
+# =============================================================================
+# All valid command namespace prefixes
+
+command_namespaces:
+  - auto      # Autonomous orchestration
+  - context   # Context management
+  - data      # Data engineering
+  - design    # UI/UX design
+  - dev       # Development
+  - domain    # Domain analysis
+  - game      # Game development
+  - git       # Version control
+  - iot       # IoT operations
+  - ml        # Machine learning
+  - omega     # Omega principles
+  - perf      # Performance
+  - planning  # Planning and research
+  - platform  # Platform engineering
+  - quality   # Quality and optimization
+  - security  # Security operations
+  - sprint    # Sprint management
+  - sre       # Site reliability
+  - workflow  # Workflow triggers
+
+# =============================================================================
+# WORKFLOW DEFINITIONS
+# =============================================================================
+# Quick reference for workflow-agent-skill mappings
+
+workflows:
+  # Development workflows
+  development/feature:
+    agents: [planner, fullstack-developer, tester, code-reviewer, git-manager]
+    skills:
+      - methodology/writing-plans
+      - methodology/executing-plans
+      - methodology/test-driven-development
+    commands: [/planning:plan, /dev:feature, /dev:test, /dev:review, /git:pr]
+
+  development/bug-fix:
+    agents: [debugger, fullstack-developer, tester, code-reviewer, git-manager]
+    skills:
+      - methodology/systematic-debugging
+      - methodology/root-cause-tracing
+      - methodology/test-driven-development
+    commands: [/dev:fix, /dev:fix-hard, /dev:test, /git:cm]
+
+  development/refactor:
+    agents: [architect, fullstack-developer, tester, code-reviewer, git-manager]
+    skills:
+      - methodology/verification-before-completion
+      - methodology/test-driven-development
+    commands: [/quality:refactor, /dev:test, /dev:review, /git:commit]
+
+  development/code-review:
+    agents: [code-reviewer, fullstack-developer, git-manager]
+    skills:
+      - methodology/verification-before-completion
+      - security/owasp
+    commands: [/dev:review, /dev:fix, /git:commit]
+
+  # AI Engineering workflows
+  ai-engineering/rag-development:
+    agents: [researcher, architect, fullstack-developer, tester]
+    skills:
+      - ai-engineering/rag-systems
+      - ai-engineering/dataset-engineering
+      - ai-engineering/evaluation-methodology
+      - ai-engineering/ai-architecture
+    commands: [/planning:research, /planning:plan, /dev:feature, /dev:test]
+
+  ai-engineering/agent-development:
+    agents: [researcher, architect, fullstack-developer, tester, security-auditor]
+    skills:
+      - ai-engineering/ai-agents
+      - ai-engineering/ai-architecture
+      - ai-engineering/guardrails-safety
+    commands: [/planning:research, /planning:plan-detailed, /dev:feature, /dev:test, /quality:security-scan]
+
+  ai-engineering/fine-tuning:
+    agents: [ml-engineer, data-engineer, tester]
+    skills:
+      - ai-engineering/finetuning
+      - ai-engineering/dataset-engineering
+      - ai-engineering/evaluation-methodology
+    commands: [/planning:plan, /ml:train, /ml:evaluate, /dev:test]
+
+  ai-engineering/prompt-engineering:
+    agents: [researcher, fullstack-developer, tester]
+    skills:
+      - ai-engineering/prompt-engineering
+      - ai-engineering/evaluation-methodology
+    commands: [/planning:research, /dev:feature, /dev:test]
+
+  ai-engineering/model-evaluation:
+    agents: [ml-engineer, researcher, tester]
+    skills:
+      - ai-engineering/ai-system-evaluation
+      - ai-engineering/evaluation-methodology
+      - ai-engineering/dataset-engineering
+    commands: [/planning:plan, /ml:evaluate, /dev:test]
+
+  # Security workflows
+  security/security-audit:
+    agents: [security-auditor, fullstack-developer, docs-manager]
+    skills:
+      - security/owasp
+      - security/security-hardening
+      - methodology/defense-in-depth
+    commands: [/quality:security-scan, /dev:fix, /planning:doc]
+
+  security/penetration-testing:
+    agents: [security-auditor, vulnerability-scanner, researcher]
+    skills:
+      - security/owasp
+      - methodology/defense-in-depth
+      - security/security-hardening
+    commands: [/quality:security-scan, /planning:research]
+
+  # Database workflows
+  database/schema-design:
+    agents: [database-admin, architect, fullstack-developer, tester]
+    skills:
+      - databases/database-schema-design
+      - databases/postgresql
+      - databases/mongodb
+    commands: [/planning:plan, /dev:feature, /dev:test]
+
+  database/migration:
+    agents: [database-admin, fullstack-developer, tester]
+    skills:
+      - databases/database-migration
+    commands: [/planning:plan, /dev:feature, /dev:test]
+
+  database/optimization:
+    agents: [database-admin, performance-engineer, tester]
+    skills:
+      - databases/database-optimization
+    commands: [/quality:optimize, /perf:profile, /dev:test]
+
+  # API workflows
+  api/api-design:
+    agents: [api-designer, architect, docs-manager, code-reviewer]
+    skills:
+      - backend/api-architecture
+    commands: [/planning:plan, /quality:api-gen, /planning:doc, /dev:review]
+
+  api/api-testing:
+    agents: [tester, security-auditor]
+    skills:
+      - backend/api-architecture
+      - security/owasp
+    commands: [/dev:test, /quality:security-scan]
+
+  # Omega workflows
+  omega/10x-improvement:
+    agents: [oracle, brainstormer, fullstack-developer, tester]
+    skills:
+      - omega/omega-thinking
+      - omega/omega-coding
+    commands: [/omega:10x, /planning:brainstorm, /dev:feature, /dev:test]
+
+  omega/100x-architecture:
+    agents: [oracle, architect, researcher]
+    skills:
+      - omega/omega-architecture
+      - omega/omega-thinking
+    commands: [/omega:100x, /planning:plan-detailed]
+
+  omega/1000x-innovation:
+    agents: [oracle, researcher, brainstormer]
+    skills:
+      - omega/omega-thinking
+      - omega/omega-architecture
+    commands: [/omega:1000x, /planning:research, /planning:brainstorm]
+
+  # Sprint workflows
+  sprint/sprint-setup:
+    agents: [sprint-master, planner]
+    skills:
+      - omega/omega-sprint
+    commands: [/sprint:vision-set, /sprint:backlog-add, /sprint:backlog-prioritize, /sprint:sprint-new, /sprint:sprint-start]
+
+  sprint/sprint-execution:
+    agents: [sprint-master, fullstack-developer, tester, debugger]
+    skills:
+      - omega/omega-sprint
+      - methodology/executing-plans
+    commands: [/sprint:sprint-current, /sprint:team-run, /sprint:team-status, /dev:fix, /sprint:sprint-end]
+
+  sprint/sprint-retrospective:
+    agents: [sprint-master, journal-writer, docs-manager]
+    skills:
+      - omega/omega-sprint
+    commands: [/sprint:sprint-end, /planning:doc]
+
+  # Fullstack workflows
+  fullstack/full-feature:
+    agents: [planner, architect, fullstack-developer, tester, code-reviewer, git-manager]
+    skills:
+      - methodology/writing-plans
+      - databases/database-schema-design
+      - backend/api-architecture
+      - frontend/frontend-design
+    commands: [/planning:plan-detailed, /dev:feature, /dev:test, /dev:review, /git:pr]
+
+  fullstack/authentication:
+    agents: [architect, fullstack-developer, security-auditor, tester]
+    skills:
+      - security/oauth
+      - security/better-auth
+      - security/owasp
+      - security/security-hardening
+    commands: [/planning:plan, /dev:feature, /quality:security-scan, /dev:test]
+
+  # Quality workflows
+  quality/performance-optimization:
+    agents: [performance-engineer, fullstack-developer, tester]
+    skills:
+      - ai-engineering/inference-optimization
+      - databases/database-optimization
+    commands: [/quality:optimize, /perf:profile, /dev:test]
+
+  # Research workflows
+  research/technology-research:
+    agents: [researcher, architect, docs-manager]
+    skills:
+      - methodology/research-validation
+    commands: [/planning:research, /planning:doc]
+
+  research/best-practices:
+    agents: [researcher, fullstack-developer]
+    skills:
+      - methodology/research-validation
+    commands: [/planning:research, /planning:plan, /dev:feature]
+
+  # Content workflows
+  content/technical-docs:
+    agents: [docs-manager, code-reviewer]
+    skills:
+      - methodology/writing-plans
+    commands: [/planning:doc, /dev:review]
+
+  content/marketing:
+    agents: [copywriter, researcher]
+    skills: []
+    commands: [/planning:brainstorm, /planning:research]

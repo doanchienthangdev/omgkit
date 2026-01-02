@@ -10,9 +10,9 @@ agents:
   - fullstack-developer
   - tester
 skills:
-  - finetuning
-  - dataset-engineering
-  - evaluation-methodology
+  - ai-engineering/finetuning
+  - ai-engineering/dataset-engineering
+  - ai-engineering/evaluation-methodology
 commands:
   - /planning:plan
   - /dev:feature

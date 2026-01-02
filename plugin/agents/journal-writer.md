@@ -3,6 +3,8 @@ name: journal-writer
 description: Failure documentation, lessons learned, retrospectives. Documents with brutal honesty. Use for retrospectives.
 tools: Read, Write
 model: inherit
+skills: []
+commands: []
 ---
 
 # 📝 Journal Writer Agent

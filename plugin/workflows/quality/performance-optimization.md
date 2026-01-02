@@ -8,8 +8,8 @@ agents:
   - fullstack-developer
   - tester
 skills:
-  - inference-optimization
-  - database-optimization
+  - ai-engineering/inference-optimization
+  - databases/database-optimization
 commands:
   - /quality:optimize
   - /dev:test

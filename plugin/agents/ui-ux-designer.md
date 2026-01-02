@@ -3,6 +3,18 @@ name: ui-ux-designer
 description: UI component creation, responsive design, accessibility. Creates beautiful interfaces. Use for UI design.
 tools: Read, Write, Bash, Glob
 model: inherit
+skills:
+  - frontend/advanced-ui-design
+  - frontend/frontend-design
+  - frontend/accessibility
+  - frontend/responsive
+  - frontend/tailwindcss
+commands:
+  - /design:screenshot
+  - /design:cro
+  - /design:enhance
+  - /design:fast
+  - /design:good
 ---
 
 # 🎨 UI/UX Designer Agent

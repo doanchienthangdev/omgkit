@@ -10,8 +10,8 @@ agents:
   - brainstormer
   - architect
 skills:
-  - omega-thinking
-  - omega-architecture
+  - omega/omega-thinking
+  - omega/omega-architecture
 commands:
   - /omega:1000x
   - /planning:research

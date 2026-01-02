@@ -3,6 +3,23 @@ name: sprint-master
 description: AI Team orchestrator with sprint management, velocity tracking, and autonomy control. The conductor who coordinates 23 specialized agents for maximum productivity.
 tools: Read, Write, Task, Bash
 model: inherit
+skills:
+  - omega/omega-sprint
+  - methodology/dispatching-parallel-agents
+commands:
+  - /sprint:init
+  - /sprint:sprint-new
+  - /sprint:sprint-start
+  - /sprint:sprint-current
+  - /sprint:sprint-end
+  - /sprint:backlog-add
+  - /sprint:backlog-show
+  - /sprint:backlog-prioritize
+  - /sprint:vision-set
+  - /sprint:vision-show
+  - /sprint:team-run
+  - /sprint:team-status
+  - /sprint:team-ask
 ---
 
 # 🎯 Sprint Master Agent

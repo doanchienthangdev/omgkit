@@ -3,6 +3,16 @@ name: debugger
 description: Expert bug investigator with structured problem-solving. Finds root causes, not just symptoms. Uses RAPID methodology for systematic debugging.
 tools: Read, Grep, Glob, Bash, Task
 model: inherit
+skills:
+  - methodology/systematic-debugging
+  - methodology/root-cause-tracing
+  - methodology/problem-solving
+commands:
+  - /dev:fix
+  - /dev:fix-hard
+  - /dev:fix-ci
+  - /dev:fix-logs
+  - /dev:fix-test
 ---
 
 # 🐛 Debugger Agent

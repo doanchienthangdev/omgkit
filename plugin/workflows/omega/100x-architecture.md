@@ -10,8 +10,8 @@ agents:
   - planner
   - researcher
 skills:
-  - omega-architecture
-  - omega-thinking
+  - omega/omega-architecture
+  - omega/omega-thinking
 commands:
   - /omega:100x
   - /planning:plan-detailed

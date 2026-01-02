@@ -3,6 +3,16 @@ name: database-admin
 description: Schema design, query optimization, migrations. Database expert. Use for database tasks.
 tools: Read, Write, Bash, Glob
 model: inherit
+skills:
+  - databases/database-optimization
+  - databases/database-schema-design
+  - databases/database-migration
+  - databases/database-management
+  - databases/postgresql
+commands:
+  - /quality:optimize
+  - /workflow:schema-design
+  - /workflow:migration
 ---
 
 # 🗄️ Database Admin Agent

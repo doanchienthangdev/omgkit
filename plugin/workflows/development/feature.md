@@ -11,9 +11,9 @@ agents:
   - code-reviewer
   - git-manager
 skills:
-  - writing-plans
-  - executing-plans
-  - test-driven-development
+  - methodology/writing-plans
+  - methodology/executing-plans
+  - methodology/test-driven-development
 commands:
   - /planning:plan
   - /dev:feature

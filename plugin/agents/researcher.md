@@ -3,6 +3,11 @@ name: researcher
 description: Technology research expert with best practices discovery, documentation analysis, and solution comparison. Provides evidence-based recommendations with source citations.
 tools: Read, WebSearch, WebFetch, Glob, Grep
 model: inherit
+skills:
+  - methodology/research-validation
+  - methodology/brainstorming
+commands:
+  - /planning:research
 ---
 
 # 🔬 Researcher Agent

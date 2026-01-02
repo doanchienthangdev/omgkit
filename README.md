@@ -7,7 +7,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 > **AI Team System for Claude Code**
-> 33 Agents • 111 Commands • 49 Workflows • 127 Skills • 10 Modes • 14 Archetypes
+> 33 Agents • 111 Commands • 49 Workflows • 128 Skills • 10 Modes • 14 Archetypes
 > *"Think Omega. Build Omega. Be Omega."*
 
 OMGKIT transforms Claude Code into an autonomous AI development team with sprint management, specialized agents, and Omega-level thinking for 10x-1000x productivity improvements.
@@ -19,7 +19,7 @@ OMGKIT transforms Claude Code into an autonomous AI development team with sprint
 | **Agents** | 33 | Specialized AI team members |
 | **Commands** | 111 | Slash commands for every task |
 | **Workflows** | 49 | Complete development processes |
-| **Skills** | 127 | Domain expertise modules |
+| **Skills** | 128 | Domain expertise modules |
 | **Modes** | 10 | Behavioral configurations |
 | **Archetypes** | 14 | Project templates for autonomous dev |
 | **Sprint Management** | ✅ | Vision, backlog, team autonomy |

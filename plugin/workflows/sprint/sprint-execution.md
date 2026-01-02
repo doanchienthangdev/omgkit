@@ -11,8 +11,8 @@ agents:
   - debugger
   - project-manager
 skills:
-  - omega-sprint
-  - executing-plans
+  - omega/omega-sprint
+  - methodology/executing-plans
 commands:
   - /sprint:sprint-current
   - /sprint:team-run

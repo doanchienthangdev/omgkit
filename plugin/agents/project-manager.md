@@ -3,6 +3,9 @@ name: project-manager
 description: Progress tracking, coordination, status reports. Manages development workflow. Use for project management.
 tools: Read, Write, Glob
 model: inherit
+skills:
+  - omega/omega-sprint
+commands: []
 ---
 
 # 📋 Project Manager Agent

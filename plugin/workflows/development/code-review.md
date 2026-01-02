@@ -9,7 +9,8 @@ agents:
   - fullstack-developer
   - git-manager
 skills:
-  - verification-before-completion
+  - methodology/verification-before-completion
+  - security/owasp
 commands:
   - /dev:review
   - /dev:fix

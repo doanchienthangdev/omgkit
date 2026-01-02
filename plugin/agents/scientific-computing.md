@@ -3,6 +3,12 @@ name: scientific-computing
 description: Scientific computing specialist for numerical methods, simulations, high-performance computing, and validation of computational models.
 tools: Read, Write, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - simulation/numerical-methods
+  - simulation/parallel-computing
+  - simulation/physics-engines
+  - simulation/visualization-scientific
+commands: []
 ---
 
 # Scientific Computing Agent

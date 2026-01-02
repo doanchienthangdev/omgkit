@@ -3,6 +3,14 @@ name: architect
 description: System architect applying Omega principles. Designs systems that scale 1000x with leverage multiplication and transcendent abstraction. Creates ADRs and technical blueprints.
 tools: Read, Write, Grep, Glob, Task
 model: inherit
+skills:
+  - omega/omega-architecture
+  - backend/api-architecture
+  - microservices/service-discovery
+  - databases/database-schema-design
+commands:
+  - /omega:100x
+  - /planning:plan-detailed
 ---
 
 # 🏗️ Architect Agent

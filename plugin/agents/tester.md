@@ -3,6 +3,16 @@ name: tester
 description: Quality assurance through comprehensive testing. Framework-specific expertise, coverage analysis, mutation testing, and build verification. Ensures code works as intended.
 tools: Read, Write, Bash, Glob, Grep, Task
 model: inherit
+skills:
+  - methodology/test-driven-development
+  - methodology/testing-anti-patterns
+  - testing/vitest
+  - testing/playwright
+  - testing/pytest
+commands:
+  - /dev:test
+  - /dev:tdd
+  - /dev:fix-test
 ---
 
 # 🧪 Tester Agent

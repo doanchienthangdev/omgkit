@@ -3,6 +3,18 @@ name: fullstack-developer
 description: Full implementation with strict file ownership. Writes clean, tested, production-ready code. Primary agent for feature development with parallel execution safety.
 tools: Read, Write, Edit, Bash, Glob, Grep, Task
 model: inherit
+skills:
+  - methodology/executing-plans
+  - methodology/verification-before-completion
+  - methodology/test-driven-development
+  - languages/typescript
+  - languages/javascript
+commands:
+  - /dev:feature
+  - /dev:fix
+  - /dev:fix-fast
+  - /dev:fix-hard
+  - /dev:tdd
 ---
 
 # ⚡ Fullstack Developer Agent

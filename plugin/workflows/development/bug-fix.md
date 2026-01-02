@@ -10,9 +10,9 @@ agents:
   - tester
   - git-manager
 skills:
-  - systematic-debugging
-  - root-cause-tracing
-  - test-driven-development
+  - methodology/systematic-debugging
+  - methodology/root-cause-tracing
+  - methodology/test-driven-development
 commands:
   - /dev:fix
   - /dev:fix-hard

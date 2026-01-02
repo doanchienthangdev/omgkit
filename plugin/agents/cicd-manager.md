@@ -3,6 +3,12 @@ name: cicd-manager
 description: CI/CD pipeline management, GitHub Actions, deployment automation. Use for CI/CD tasks.
 tools: Read, Write, Bash, Glob
 model: inherit
+skills:
+  - devops/github-actions
+  - devops/docker
+  - devops/kubernetes
+commands:
+  - /git:deploy
 ---
 
 # 🚀 CI/CD Manager Agent

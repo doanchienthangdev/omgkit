@@ -3,6 +3,9 @@ name: scout
 description: Expert codebase explorer with parallel search capabilities. Navigates large codebases efficiently, discovers patterns, maps dependencies, and provides architectural insights.
 tools: Read, Grep, Glob, Task
 model: inherit
+skills:
+  - methodology/problem-solving
+commands: []
 ---
 
 # 🔍 Scout Agent

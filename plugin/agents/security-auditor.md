@@ -3,6 +3,13 @@ name: security-auditor
 description: Security reviews, vulnerability assessment, compliance checking. Use for security audits.
 tools: Read, Grep, Bash, Glob
 model: inherit
+skills:
+  - security/owasp
+  - security/security-hardening
+  - methodology/defense-in-depth
+commands:
+  - /security:audit
+  - /quality:security-scan
 ---
 
 # 🔒 Security Auditor Agent

@@ -3,6 +3,15 @@ name: ml-engineer
 description: Machine learning engineering specialist for building production ML systems, training pipelines, experiment tracking, and model deployment.
 tools: Read, Write, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - ai-engineering/finetuning
+  - ai-engineering/evaluation-methodology
+  - ai-engineering/dataset-engineering
+  - ai-ml/ml-pipelines
+  - ai-ml/model-serving
+commands:
+  - /ml:train
+  - /ml:evaluate
 ---
 
 # ML Engineer Agent

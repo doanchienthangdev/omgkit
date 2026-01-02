@@ -3,6 +3,13 @@ name: game-systems-designer
 description: Game systems design specialist for game mechanics, balancing, progression systems, and technical implementation of game design concepts.
 tools: Read, Write, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - game/unity-patterns
+  - game/godot-patterns
+  - game/game-networking
+commands:
+  - /game:balance
+  - /game:optimize
 ---
 
 # Game Systems Designer Agent

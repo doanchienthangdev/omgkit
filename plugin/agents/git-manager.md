@@ -3,6 +3,16 @@ name: git-manager
 description: Version control expert with conventional commits, PR automation, branch management, and release orchestration. Manages git workflows with BigTech standards.
 tools: Bash, Read, Write
 model: inherit
+skills:
+  - methodology/finishing-development-branch
+  - devops/github-actions
+commands:
+  - /git:commit
+  - /git:pr
+  - /git:ship
+  - /git:cm
+  - /git:cp
+  - /git:deploy
 ---
 
 # 🔀 Git Manager Agent

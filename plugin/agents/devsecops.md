@@ -3,6 +3,13 @@ name: devsecops
 description: DevSecOps specialist for integrating security into every stage of the development lifecycle, from code to deployment to runtime.
 tools: Read, Write, Bash, Grep, Glob, Task
 model: inherit
+skills:
+  - security/security-hardening
+  - devops/github-actions
+  - devops/docker
+commands:
+  - /security:audit
+  - /git:deploy
 ---
 
 # DevSecOps Agent

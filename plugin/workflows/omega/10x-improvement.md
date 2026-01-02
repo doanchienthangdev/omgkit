@@ -12,8 +12,8 @@ agents:
   - tester
   - journal-writer
 skills:
-  - omega-thinking
-  - omega-coding
+  - omega/omega-thinking
+  - omega/omega-coding
 commands:
   - /omega:10x
   - /planning:brainstorm

@@ -9,7 +9,7 @@ agents:
   - planner
   - fullstack-developer
 skills:
-  - research-validation
+  - methodology/research-validation
 commands:
   - /planning:research
   - /planning:plan

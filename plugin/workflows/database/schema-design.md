@@ -9,9 +9,9 @@ agents:
   - planner
   - tester
 skills:
-  - database-schema-design
-  - postgresql
-  - mongodb
+  - databases/database-schema-design
+  - databases/postgresql
+  - databases/mongodb
 commands:
   - /planning:plan
   - /dev:feature

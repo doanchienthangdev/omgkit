@@ -9,7 +9,7 @@ agents:
   - oracle
   - docs-manager
 skills:
-  - research-validation
+  - methodology/research-validation
 commands:
   - /planning:research
   - /planning:doc
