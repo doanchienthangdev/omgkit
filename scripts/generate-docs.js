@@ -474,6 +474,63 @@ const AGENT_METADATA = {
     worksWellWith: ['data-engineer', 'ml-engineer', 'performance-engineer'],
     triggersCommands: [],
     bestFor: 'Numerical methods, simulations, parallel computing, visualization'
+  },
+  // AI/ML Specialist Agents
+  'ai-architect-agent': {
+    icon: 'brain',
+    category: 'AI/ML',
+    worksWellWith: ['ml-engineer', 'data-scientist-agent', 'architect'],
+    triggersCommands: [],
+    bestFor: 'AI system architecture, model selection, ML infrastructure design'
+  },
+  'data-scientist-agent': {
+    icon: 'chart-pie',
+    category: 'AI/ML',
+    worksWellWith: ['data-engineer', 'ml-engineer-agent', 'experiment-analyst-agent'],
+    triggersCommands: [],
+    bestFor: 'Data analysis, statistical modeling, hypothesis testing, insights'
+  },
+  'experiment-analyst-agent': {
+    icon: 'flask',
+    category: 'AI/ML',
+    worksWellWith: ['data-scientist-agent', 'ml-engineer-agent', 'research-scientist-agent'],
+    triggersCommands: [],
+    bestFor: 'A/B testing, experiment design, statistical significance, analysis'
+  },
+  'ml-engineer-agent': {
+    icon: 'robot',
+    category: 'AI/ML',
+    worksWellWith: ['data-engineer', 'mlops-engineer-agent', 'model-optimizer-agent'],
+    triggersCommands: [],
+    bestFor: 'ML model development, training pipelines, feature engineering'
+  },
+  'mlops-engineer-agent': {
+    icon: 'gears',
+    category: 'AI/ML',
+    worksWellWith: ['ml-engineer-agent', 'production-engineer-agent', 'cicd-manager'],
+    triggersCommands: [],
+    bestFor: 'ML deployment, model monitoring, pipeline automation, MLOps'
+  },
+  'model-optimizer-agent': {
+    icon: 'gauge-high',
+    category: 'AI/ML',
+    worksWellWith: ['ml-engineer-agent', 'performance-engineer', 'production-engineer-agent'],
+    triggersCommands: [],
+    bestFor: 'Model optimization, quantization, pruning, inference acceleration'
+  },
+  'production-engineer-agent': {
+    icon: 'server',
+    category: 'AI/ML',
+    worksWellWith: ['mlops-engineer-agent', 'platform-engineer', 'observability-engineer'],
+    triggersCommands: [],
+    bestFor: 'ML production systems, scaling, reliability, serving infrastructure'
+  },
+  'research-scientist-agent': {
+    icon: 'microscope',
+    category: 'AI/ML',
+    worksWellWith: ['data-scientist-agent', 'ml-engineer-agent', 'experiment-analyst-agent'],
+    triggersCommands: [],
+    bestFor: 'Research papers, novel algorithms, academic methodology, citations'
   }
 };
 
@@ -693,13 +750,26 @@ ${generateAgentDependencySection(slug)}
     agentsByCategory[cat].push(agent);
   }
 
-  const categoryOrder = ['Core Development', 'Operations', 'Extended', 'Creative', 'Omega Exclusive'];
+  const categoryOrder = [
+    'Core Development', 'Operations', 'Extended', 'Creative', 'Omega Exclusive',
+    'AI/ML', 'Data & ML', 'Architecture', 'Security', 'Performance',
+    'Platform', 'Game Development', 'Embedded & IoT', 'Scientific'
+  ];
   const categoryIcons = {
     'Core Development': 'code',
     'Operations': 'gears',
     'Extended': 'puzzle-piece',
     'Creative': 'palette',
-    'Omega Exclusive': 'wand-magic-sparkles'
+    'Omega Exclusive': 'wand-magic-sparkles',
+    'AI/ML': 'brain',
+    'Data & ML': 'database',
+    'Architecture': 'sitemap',
+    'Security': 'shield-halved',
+    'Performance': 'gauge-high',
+    'Platform': 'server',
+    'Game Development': 'gamepad',
+    'Embedded & IoT': 'microchip',
+    'Scientific': 'atom'
   };
 
   // Calculate dynamic counts
