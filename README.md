@@ -430,7 +430,7 @@ OMGKIT provides two types of before-commit rules:
 
 | Rule Type | Location | Purpose |
 |-----------|----------|---------|
-| **OMGKIT Internal** | `plugin/stdrules/omgkit/` | For OMGKIT contributors |
+| **OMGKIT Internal** | `plugin/stdrules/` | For OMGKIT contributors |
 | **Project Rules** | `.omgkit/stdrules/BEFORE_COMMIT.md` | For your projects |
 
 ### For OMGKIT Contributors

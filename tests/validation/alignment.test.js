@@ -373,14 +373,32 @@ describe('Architecture Alignment', () => {
       expect(Object.keys(registry.mcp_servers).length).toBeGreaterThanOrEqual(3);
     });
 
-    it('should have ALIGNMENT_PRINCIPLE.md rule file in omgkit folder', () => {
-      const rulePath = join(PLUGIN_DIR, 'stdrules/omgkit/ALIGNMENT_PRINCIPLE.md');
+    it('should have ALIGNMENT_PRINCIPLE.md rule file in stdrules', () => {
+      const rulePath = join(PLUGIN_DIR, 'stdrules/ALIGNMENT_PRINCIPLE.md');
       expect(existsSync(rulePath)).toBe(true);
 
       const content = readFileSync(rulePath, 'utf-8');
       expect(content).toContain('Optimized Alignment Principle');
       expect(content).toContain('Component Hierarchy');
       expect(content).toContain('Alignment Rules');
+    });
+
+    it('should have OMGKIT_BEFORE_COMMIT_RULES.md in stdrules', () => {
+      const rulePath = join(PLUGIN_DIR, 'stdrules/OMGKIT_BEFORE_COMMIT_RULES.md');
+      expect(existsSync(rulePath)).toBe(true);
+
+      const content = readFileSync(rulePath, 'utf-8');
+      expect(content).toContain('Before-Commit');
+      expect(content).toContain('OMGKIT');
+    });
+
+    it('should have SKILL_STANDARDS.md in stdrules', () => {
+      const rulePath = join(PLUGIN_DIR, 'stdrules/SKILL_STANDARDS.md');
+      expect(existsSync(rulePath)).toBe(true);
+
+      const content = readFileSync(rulePath, 'utf-8');
+      expect(content).toContain('Skill');
+      expect(content).toContain('Standards');
     });
 
     it('all components should follow OAP hierarchy', () => {
@@ -408,7 +426,7 @@ describe('Architecture Alignment', () => {
 
     it('documentation reference should be valid', () => {
       const docPath = registry.alignment_principle.documentation;
-      expect(docPath).toBe('plugin/stdrules/omgkit/ALIGNMENT_PRINCIPLE.md');
+      expect(docPath).toBe('plugin/stdrules/ALIGNMENT_PRINCIPLE.md');
 
       const fullPath = join(PLUGIN_DIR, '..', docPath);
       expect(existsSync(fullPath)).toBe(true);
