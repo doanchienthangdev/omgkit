@@ -203,6 +203,7 @@
       "group": "Development",
       "pages": [
         "commands/all",
+        "commands/overview",
         "commands/feature",
         "commands/fix",
         "commands/fix-fast",
@@ -246,7 +247,54 @@
         "commands/api-gen",
         "commands/refactor",
         "commands/optimize",
-        "commands/lint"
+        "commands/lint",
+        "commands/quality"
+      ]
+    },
+    {
+      "group": "Alignment",
+      "pages": [
+        "commands/deps",
+        "commands/health"
+      ]
+    },
+    {
+      "group": "Autonomous",
+      "pages": [
+        "commands/start",
+        "commands/status",
+        "commands/next",
+        "commands/approve",
+        "commands/reject",
+        "commands/resume",
+        "commands/verify"
+      ]
+    },
+    {
+      "group": "Domain",
+      "pages": [
+        "commands/analyze",
+        "commands/map"
+      ]
+    },
+    {
+      "group": "Performance",
+      "pages": [
+        "commands/benchmark",
+        "commands/profile"
+      ]
+    },
+    {
+      "group": "Platform",
+      "pages": [
+        "commands/blueprint"
+      ]
+    },
+    {
+      "group": "Security",
+      "pages": [
+        "commands/audit",
+        "commands/scan"
       ]
     },
     {
