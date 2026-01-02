@@ -731,7 +731,7 @@ ${generateAgentDependencySection(slug)}
   <Card title="${metadata.category}" icon="${metadata.icon}" href="/agents/overview#${metadata.category.toLowerCase().replace(' ', '-')}">
     More ${metadata.category} agents
   </Card>
-  <Card title="Commands" icon="terminal" href="/commands/all-commands">
+  <Card title="Commands" icon="terminal" href="/commands/overview">
     Commands that use this agent
   </Card>
 </CardGroup>
@@ -933,7 +933,7 @@ Agents communicate through:
   <Card title="AI Team Concepts" icon="users" href="/concepts/ai-team">
     Deep dive into how agents collaborate
   </Card>
-  <Card title="Commands Reference" icon="terminal" href="/commands/all-commands">
+  <Card title="Commands Reference" icon="terminal" href="/commands/overview">
     ${graphStats.commands} commands that utilize agents
   </Card>
   <Card title="Sprint Management" icon="calendar-days" href="/concepts/sprint-management">
@@ -1074,7 +1074,7 @@ For best results, be specific in your descriptions and include relevant file pat
 ## Related Commands
 
 <CardGroup cols={2}>
-  <Card title="All Commands" icon="terminal" href="/commands/all-commands">
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
     See all ${graphStats.commands} commands
   </Card>
   <Card title="${category.charAt(0).toUpperCase() + category.slice(1)} Commands" icon="${catMeta.icon}" href="/commands/all-commands#${category}">
@@ -1298,7 +1298,7 @@ Switch modes with \`/context:mode <mode-name>\` or use the shorthand \`/mode:<mo
 </CardGroup>
 `;
 
-  await writeFile(join(outputDir, 'all-commands.mdx'), overviewDoc);
+  await writeFile(join(outputDir, 'overview.mdx'), overviewDoc);
   console.log(`Generated ${allCommands.length} command docs with enhanced structure`);
 }
 
@@ -1584,7 +1584,7 @@ skills:
   <Card title="Configuration" icon="gear" href="/getting-started/configuration">
     Configure skill preferences
   </Card>
-  <Card title="Commands" icon="terminal" href="/commands/all-commands">
+  <Card title="Commands" icon="terminal" href="/commands/overview">
     ${graphStats.commands} commands available
   </Card>
   <Card title="Modes" icon="sliders" href="/modes/overview">
@@ -1875,7 +1875,7 @@ mode: omega  # Your preferred default mode
   <Card title="Configuration" icon="gear" href="/getting-started/configuration">
     Set your default mode
   </Card>
-  <Card title="Commands" icon="terminal" href="/commands/all-commands">
+  <Card title="Commands" icon="terminal" href="/commands/overview">
     Commands affected by modes
   </Card>
   <Card title="Agents" icon="robot" href="/agents/overview">
@@ -2234,7 +2234,7 @@ Every workflow includes quality gates that ensure:
   <Card title="Agents" icon="robot" href="/agents/overview">
     ${graphStats.agents} agents that power workflows
   </Card>
-  <Card title="Commands" icon="terminal" href="/commands/all-commands">
+  <Card title="Commands" icon="terminal" href="/commands/overview">
     ${graphStats.commands} commands used in workflows
   </Card>
   <Card title="Skills" icon="brain" href="/skills/overview">

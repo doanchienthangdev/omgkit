@@ -74,9 +74,9 @@ const STATIC_CONFIG = {
     "raiseIssue": true
   },
   "redirects": [
-    { "source": "/commands", "destination": "/commands/all-commands" },
-    { "source": "/commands/all", "destination": "/commands/all-commands" },
-    { "source": "/commands/overview", "destination": "/commands/all-commands" },
+    { "source": "/commands", "destination": "/commands/overview" },
+    { "source": "/commands/all", "destination": "/commands/overview" },
+    { "source": "/commands/all-commands", "destination": "/commands/overview" },
     { "source": "/skills", "destination": "/skills/overview" },
     { "source": "/skills/all", "destination": "/skills/overview" },
     { "source": "/workflows", "destination": "/workflows/overview" }
@@ -323,7 +323,7 @@ async function generateCommandsNavigation() {
   // Commands overview
   navigation.push({
     "group": "Commands Overview",
-    "pages": ["commands/all-commands"]
+    "pages": ["commands/overview"]
   });
 
   // Group by category

@@ -599,7 +599,7 @@ describe('Documentation Count Consistency', () => {
     }
 
     // Read commands overview
-    const overviewPath = join(DOCS_DIR, 'commands', 'all-commands.mdx');
+    const overviewPath = join(DOCS_DIR, 'commands', 'overview.mdx');
     const content = await readFile(overviewPath, 'utf-8');
     const counts = extractCountsFromContent(content);
 
