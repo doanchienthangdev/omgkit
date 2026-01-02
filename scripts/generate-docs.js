@@ -867,7 +867,7 @@ Agents communicate through:
     Deep dive into how agents collaborate
   </Card>
   <Card title="Commands Reference" icon="terminal" href="/commands/overview">
-    54 commands that utilize agents
+    ${graphStats.commands} commands that utilize agents
   </Card>
   <Card title="Sprint Management" icon="calendar-days" href="/concepts/sprint-management">
     Manage agents across sprints
@@ -1209,13 +1209,13 @@ Switch modes with \`/context:mode <mode-name>\` or use the shorthand \`/mode:<mo
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/agents/overview">
-    23 agents that power these commands
+    ${graphStats.agents} agents that power these commands
   </Card>
   <Card title="Modes" icon="sliders" href="/modes/overview">
     10 behavioral modes
   </Card>
   <Card title="Skills" icon="brain" href="/skills/overview">
-    88 domain expertise modules
+    ${graphStats.skills} domain expertise modules
   </Card>
   <Card title="Quick Start" icon="rocket" href="/getting-started/quickstart">
     Get started in 5 minutes
@@ -1382,7 +1382,7 @@ OMGKIT detects and activates this skill when it finds:
     skillsByCategory[skill.category].push(skill);
   }
 
-  const categoryOrder = ['ai-engineering', 'ai-ml', 'autonomous', 'languages', 'frameworks', 'backend', 'databases', 'frontend', 'mobile', 'mobile-advanced', 'devops', 'security', 'testing', 'tools', 'integrations', 'methodology', 'omega', 'microservices', 'event-driven', 'game', 'iot', 'simulation'];
+  const categoryOrder = ['ai-engineering', 'ai-ml', 'ml-systems', 'autonomous', 'languages', 'frameworks', 'backend', 'databases', 'frontend', 'mobile', 'mobile-advanced', 'devops', 'security', 'testing', 'tools', 'integrations', 'methodology', 'omega', 'microservices', 'event-driven', 'game', 'iot', 'simulation'];
 
   const overviewDoc = `---
 title: "Skills Overview"
@@ -1504,13 +1504,13 @@ skills:
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/agents/overview">
-    23 agents that use skills
+    ${graphStats.agents} agents that use skills
   </Card>
   <Card title="Configuration" icon="gear" href="/getting-started/configuration">
     Configure skill preferences
   </Card>
   <Card title="Commands" icon="terminal" href="/commands/overview">
-    54 commands available
+    ${graphStats.commands} commands available
   </Card>
   <Card title="Modes" icon="sliders" href="/modes/overview">
     10 behavioral modes
@@ -2148,13 +2148,13 @@ Every workflow includes quality gates that ensure:
 
 <CardGroup cols={2}>
   <Card title="Agents" icon="robot" href="/agents/overview">
-    23 agents that power workflows
+    ${graphStats.agents} agents that power workflows
   </Card>
   <Card title="Commands" icon="terminal" href="/commands/overview">
-    58 commands used in workflows
+    ${graphStats.commands} commands used in workflows
   </Card>
   <Card title="Skills" icon="brain" href="/skills/overview">
-    88 skills applied in workflows
+    ${graphStats.skills} skills applied in workflows
   </Card>
   <Card title="Sprint Management" icon="calendar-days" href="/concepts/sprint-management">
     Manage workflows across sprints
