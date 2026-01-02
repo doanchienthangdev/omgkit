@@ -74,6 +74,8 @@ const STATIC_CONFIG = {
     "raiseIssue": true
   },
   "redirects": [
+    { "source": "/commands", "destination": "/commands/overview" },
+    { "source": "/commands/all", "destination": "/commands/overview" },
     { "source": "/skills", "destination": "/skills/overview" },
     { "source": "/skills/all", "destination": "/skills/overview" },
     { "source": "/workflows", "destination": "/workflows/overview" }

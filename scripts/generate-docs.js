@@ -2182,6 +2182,47 @@ async function generateMintJson() {
 /**
  * Main
  */
+/**
+ * Update introduction.mdx with dynamic counts
+ * This ensures the homepage always shows correct statistics
+ */
+async function updateIntroductionCounts() {
+  const introPath = join(DOCS_DIR, 'introduction.mdx');
+
+  try {
+    let content = await readFile(introPath, 'utf-8');
+
+    // Update agent count
+    content = content.replace(
+      /title="(\d+) Specialized Agents"/,
+      `title="${graphStats.agents} Specialized Agents"`
+    );
+
+    // Update command count
+    content = content.replace(
+      /title="(\d+) Slash Commands"/,
+      `title="${graphStats.commands} Slash Commands"`
+    );
+
+    // Update workflow count
+    content = content.replace(
+      /title="(\d+) Workflows"/,
+      `title="${graphStats.workflows} Workflows"`
+    );
+
+    // Update skill count
+    content = content.replace(
+      /title="(\d+) Domain Skills"/,
+      `title="${graphStats.skills} Domain Skills"`
+    );
+
+    await writeFile(introPath, content);
+    console.log('Updated introduction.mdx with dynamic counts');
+  } catch (error) {
+    console.warn('Warning: Could not update introduction.mdx:', error.message);
+  }
+}
+
 async function main() {
   console.log('OMGKIT Documentation Generator');
   console.log('==============================\n');
@@ -2197,6 +2238,9 @@ async function main() {
     await generateSkillDocs();
     await generateModeDocs();
     await generateWorkflowDocs();
+
+    // Update introduction.mdx with correct counts
+    await updateIntroductionCounts();
 
     // Generate mint.json from docs structure
     await generateMintJson();
