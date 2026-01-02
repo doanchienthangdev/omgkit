@@ -2167,6 +2167,19 @@ Every workflow includes quality gates that ensure:
 }
 
 /**
+ * Generate mint.json from docs structure
+ */
+async function generateMintJson() {
+  try {
+    const { generateMintJson: generate } = await import('./generate-mint-json.js');
+    console.log('\nGenerating mint.json...');
+    await generate();
+  } catch (error) {
+    console.error('Warning: Could not generate mint.json:', error.message);
+  }
+}
+
+/**
  * Main
  */
 async function main() {
@@ -2184,6 +2197,9 @@ async function main() {
     await generateSkillDocs();
     await generateModeDocs();
     await generateWorkflowDocs();
+
+    // Generate mint.json from docs structure
+    await generateMintJson();
 
     console.log('\n✓ Documentation generated successfully!');
     console.log(`  Output: ${DOCS_DIR}`);

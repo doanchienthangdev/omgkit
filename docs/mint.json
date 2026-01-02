@@ -1,7 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
   "name": "OMGKIT Documentation",
-  "version": "2.18.0",
   "logo": {
     "dark": "/logo/dark.svg",
     "light": "/logo/light.svg"
@@ -56,6 +55,29 @@
       "url": "https://github.com/doanchienthangdev/omgkit/discussions"
     }
   ],
+  "footerSocials": {
+    "github": "https://github.com/doanchienthangdev/omgkit"
+  },
+  "feedback": {
+    "thumbsRating": true,
+    "suggestEdit": true,
+    "raiseIssue": true
+  },
+  "redirects": [
+    {
+      "source": "/skills",
+      "destination": "/skills/overview"
+    },
+    {
+      "source": "/skills/all",
+      "destination": "/skills/overview"
+    },
+    {
+      "source": "/workflows",
+      "destination": "/workflows/overview"
+    }
+  ],
+  "version": "2.21.1",
   "navigation": [
     {
       "group": "Get Started",
@@ -182,7 +204,15 @@
       "group": "Data & ML",
       "pages": [
         "agents/data-engineer",
-        "agents/ml-engineer"
+        "agents/ml-engineer",
+        "agents/data-scientist-agent",
+        "agents/experiment-analyst-agent",
+        "agents/ml-engineer-agent",
+        "agents/mlops-engineer-agent",
+        "agents/model-optimizer-agent",
+        "agents/production-engineer-agent",
+        "agents/research-scientist-agent",
+        "agents/ai-architect-agent"
       ]
     },
     {
@@ -200,55 +230,58 @@
       ]
     },
     {
+      "group": "Commands Overview",
+      "pages": [
+        "commands/overview"
+      ]
+    },
+    {
       "group": "Development",
       "pages": [
-        "commands/all",
-        "commands/overview",
         "commands/feature",
         "commands/fix",
+        "commands/fix-ci",
         "commands/fix-fast",
         "commands/fix-hard",
-        "commands/fix-test",
-        "commands/fix-ci",
         "commands/fix-logs",
+        "commands/fix-test",
         "commands/review",
-        "commands/test",
-        "commands/tdd"
+        "commands/tdd",
+        "commands/test"
       ]
     },
     {
       "group": "Planning",
       "pages": [
+        "commands/ask",
+        "commands/brainstorm",
+        "commands/doc",
+        "commands/execute-plan",
         "commands/plan",
         "commands/plan-detailed",
         "commands/plan-parallel",
-        "commands/brainstorm",
-        "commands/execute-plan",
-        "commands/research",
-        "commands/doc",
-        "commands/ask"
+        "commands/research"
       ]
     },
     {
       "group": "Git & Deploy",
       "pages": [
-        "commands/commit",
-        "commands/ship",
-        "commands/pr",
-        "commands/deploy",
         "commands/cm",
-        "commands/cp"
+        "commands/commit",
+        "commands/cp",
+        "commands/deploy",
+        "commands/pr",
+        "commands/ship"
       ]
     },
     {
       "group": "Quality",
       "pages": [
-        "commands/security-scan",
         "commands/api-gen",
-        "commands/refactor",
-        "commands/optimize",
         "commands/lint",
-        "commands/quality"
+        "commands/optimize",
+        "commands/refactor",
+        "commands/security-scan"
       ]
     },
     {
@@ -261,12 +294,14 @@
     {
       "group": "Autonomous",
       "pages": [
-        "commands/start",
-        "commands/status",
-        "commands/next",
         "commands/approve",
+        "commands/checkpoint",
+        "commands/init",
+        "commands/next",
         "commands/reject",
         "commands/resume",
+        "commands/start",
+        "commands/status",
         "commands/verify"
       ]
     },
@@ -300,10 +335,9 @@
     {
       "group": "Context",
       "pages": [
-        "commands/mode",
         "commands/index",
         "commands/load",
-        "commands/checkpoint",
+        "commands/mode",
         "commands/spawn",
         "commands/spawn-collect"
       ]
@@ -311,53 +345,51 @@
     {
       "group": "Design",
       "pages": [
-        "commands/screenshot",
+        "commands/cro",
+        "commands/enhance",
         "commands/fast",
         "commands/good",
-        "commands/cro",
-        "commands/enhance"
+        "commands/screenshot"
       ]
     },
     {
       "group": "Omega",
       "pages": [
-        "commands/10x",
-        "commands/100x",
         "commands/1000x",
-        "commands/principles",
-        "commands/dimensions"
+        "commands/100x",
+        "commands/10x",
+        "commands/dimensions",
+        "commands/principles"
       ]
     },
     {
       "group": "Sprint",
       "pages": [
-        "commands/init",
-        "commands/vision-set",
-        "commands/vision-show",
-        "commands/sprint-new",
-        "commands/sprint-start",
+        "commands/backlog-add",
+        "commands/backlog-prioritize",
+        "commands/backlog-show",
         "commands/sprint-current",
         "commands/sprint-end",
-        "commands/backlog-add",
-        "commands/backlog-show",
-        "commands/backlog-prioritize",
+        "commands/sprint-new",
+        "commands/sprint-start",
+        "commands/team-ask",
         "commands/team-run",
         "commands/team-status",
-        "commands/team-ask"
+        "commands/vision-set",
+        "commands/vision-show"
       ]
     },
     {
       "group": "SRE",
       "pages": [
-        "commands/dashboard",
-        "commands/pipeline"
+        "commands/dashboard"
       ]
     },
     {
       "group": "ML Commands",
       "pages": [
-        "commands/train",
-        "commands/evaluate"
+        "commands/evaluate",
+        "commands/train"
       ]
     },
     {
@@ -373,35 +405,97 @@
       ]
     },
     {
+      "group": "Data",
+      "pages": [
+        "commands/pipeline",
+        "commands/quality"
+      ]
+    },
+    {
       "group": "Workflow Commands",
       "pages": [
-        "commands/bug-fix",
-        "commands/code-review",
-        "commands/rag-development",
-        "commands/model-evaluation",
-        "commands/prompt-engineering",
-        "commands/agent-development",
-        "commands/fine-tuning",
-        "commands/10x-improvement",
-        "commands/100x-architecture",
         "commands/1000x-innovation",
-        "commands/sprint-setup",
-        "commands/sprint-execution",
-        "commands/sprint-retrospective",
-        "commands/security-audit",
-        "commands/penetration-testing",
-        "commands/schema-design",
-        "commands/migration",
-        "commands/optimization",
+        "commands/100x-architecture",
+        "commands/10x-improvement",
+        "commands/agent-development",
         "commands/api-design",
         "commands/api-testing",
-        "commands/full-feature",
         "commands/authentication",
-        "commands/technical-docs",
-        "commands/marketing",
-        "commands/technology-research",
         "commands/best-practices",
-        "commands/performance-optimization"
+        "commands/bug-fix",
+        "commands/code-review",
+        "commands/fine-tuning",
+        "commands/full-feature",
+        "commands/marketing",
+        "commands/migration",
+        "commands/model-evaluation",
+        "commands/optimization",
+        "commands/penetration-testing",
+        "commands/performance-optimization",
+        "commands/prompt-engineering",
+        "commands/rag-development",
+        "commands/schema-design",
+        "commands/security-audit",
+        "commands/sprint-execution",
+        "commands/sprint-retrospective",
+        "commands/sprint-setup",
+        "commands/technical-docs",
+        "commands/technology-research"
+      ]
+    },
+    {
+      "group": "OMGDATA",
+      "pages": [
+        "commands/augment",
+        "commands/collect",
+        "commands/label",
+        "commands/split",
+        "commands/validate",
+        "commands/version"
+      ]
+    },
+    {
+      "group": "OMGFEATURE",
+      "pages": [
+        "commands/embed",
+        "commands/extract",
+        "commands/select",
+        "commands/store"
+      ]
+    },
+    {
+      "group": "OMGTRAIN",
+      "pages": [
+        "commands/baseline",
+        "commands/compare",
+        "commands/tune"
+      ]
+    },
+    {
+      "group": "OMGOPTIM",
+      "pages": [
+        "commands/distill",
+        "commands/prune",
+        "commands/quantize"
+      ]
+    },
+    {
+      "group": "OMGDEPLOY",
+      "pages": [
+        "commands/ab",
+        "commands/cloud",
+        "commands/edge",
+        "commands/package",
+        "commands/serve"
+      ]
+    },
+    {
+      "group": "OMGOPS",
+      "pages": [
+        "commands/drift",
+        "commands/monitor",
+        "commands/registry",
+        "commands/retrain"
       ]
     },
     {
@@ -413,24 +507,24 @@
     {
       "group": "Languages",
       "pages": [
+        "skills/javascript",
         "skills/python",
-        "skills/typescript",
-        "skills/javascript"
+        "skills/typescript"
       ]
     },
     {
       "group": "Frameworks",
       "pages": [
-        "skills/nextjs",
-        "skills/react",
-        "skills/vue",
-        "skills/express",
-        "skills/nestjs",
-        "skills/fastapi",
         "skills/django",
+        "skills/express",
+        "skills/fastapi",
+        "skills/laravel",
+        "skills/nestjs",
+        "skills/nextjs",
         "skills/rails",
+        "skills/react",
         "skills/spring",
-        "skills/laravel"
+        "skills/vue"
       ]
     },
     {
@@ -445,27 +539,27 @@
     {
       "group": "Databases",
       "pages": [
-        "skills/postgresql",
-        "skills/mongodb",
-        "skills/redis",
-        "skills/prisma",
-        "skills/supabase",
-        "skills/database-schema-design",
-        "skills/database-migration",
         "skills/database-management",
-        "skills/database-optimization"
+        "skills/database-migration",
+        "skills/database-optimization",
+        "skills/database-schema-design",
+        "skills/mongodb",
+        "skills/postgresql",
+        "skills/prisma",
+        "skills/redis",
+        "skills/supabase"
       ]
     },
     {
       "group": "Frontend",
       "pages": [
-        "skills/tailwindcss",
-        "skills/shadcn-ui",
+        "skills/accessibility",
+        "skills/advanced-ui-design",
         "skills/frontend-design",
         "skills/responsive",
-        "skills/accessibility",
-        "skills/threejs",
-        "skills/advanced-ui-design"
+        "skills/shadcn-ui",
+        "skills/tailwindcss",
+        "skills/threejs"
       ]
     },
     {
@@ -477,20 +571,20 @@
     {
       "group": "Mobile Advanced",
       "pages": [
-        "skills/react-native-deep",
         "skills/mobile-ci-cd",
         "skills/mobile-security",
         "skills/offline-first",
-        "skills/push-notifications"
+        "skills/push-notifications",
+        "skills/react-native-deep"
       ]
     },
     {
       "group": "DevOps",
       "pages": [
-        "skills/docker",
-        "skills/kubernetes",
-        "skills/github-actions",
         "skills/aws",
+        "skills/docker",
+        "skills/github-actions",
+        "skills/kubernetes",
         "skills/monorepo-management",
         "skills/observability",
         "skills/performance-profiling"
@@ -499,18 +593,18 @@
     {
       "group": "Security",
       "pages": [
-        "skills/owasp",
         "skills/better-auth",
         "skills/oauth",
+        "skills/owasp",
         "skills/security-hardening"
       ]
     },
     {
       "group": "Testing",
       "pages": [
+        "skills/playwright",
         "skills/pytest",
-        "skills/vitest",
-        "skills/playwright"
+        "skills/vitest"
       ]
     },
     {
@@ -518,8 +612,8 @@
       "pages": [
         "skills/document-processing",
         "skills/image-processing",
-        "skills/media-processing",
-        "skills/mcp-development"
+        "skills/mcp-development",
+        "skills/media-processing"
       ]
     },
     {
@@ -533,48 +627,48 @@
       "group": "Methodology",
       "pages": [
         "skills/brainstorming",
-        "skills/writing-plans",
-        "skills/executing-plans",
-        "skills/test-driven-development",
-        "skills/verification-before-completion",
-        "skills/testing-anti-patterns",
-        "skills/systematic-debugging",
-        "skills/root-cause-tracing",
         "skills/defense-in-depth",
         "skills/dispatching-parallel-agents",
-        "skills/requesting-code-review",
-        "skills/receiving-code-review",
+        "skills/executing-plans",
         "skills/finishing-development-branch",
-        "skills/token-optimization",
-        "skills/sequential-thinking",
         "skills/problem-solving",
-        "skills/research-validation"
+        "skills/receiving-code-review",
+        "skills/requesting-code-review",
+        "skills/research-validation",
+        "skills/root-cause-tracing",
+        "skills/sequential-thinking",
+        "skills/systematic-debugging",
+        "skills/test-driven-development",
+        "skills/testing-anti-patterns",
+        "skills/token-optimization",
+        "skills/verification-before-completion",
+        "skills/writing-plans"
       ]
     },
     {
       "group": "Omega Skills",
       "pages": [
-        "skills/omega-coding",
-        "skills/omega-thinking",
-        "skills/omega-testing",
         "skills/omega-architecture",
-        "skills/omega-sprint"
+        "skills/omega-coding",
+        "skills/omega-sprint",
+        "skills/omega-testing",
+        "skills/omega-thinking"
       ]
     },
     {
       "group": "AI Engineering",
       "pages": [
-        "skills/foundation-models",
-        "skills/evaluation-methodology",
+        "skills/ai-agents",
+        "skills/ai-architecture",
         "skills/ai-system-evaluation",
+        "skills/dataset-engineering",
+        "skills/evaluation-methodology",
+        "skills/finetuning",
+        "skills/foundation-models",
+        "skills/guardrails-safety",
+        "skills/inference-optimization",
         "skills/prompt-engineering",
         "skills/rag-systems",
-        "skills/ai-agents",
-        "skills/finetuning",
-        "skills/dataset-engineering",
-        "skills/inference-optimization",
-        "skills/ai-architecture",
-        "skills/guardrails-safety",
         "skills/user-feedback"
       ]
     },
@@ -583,10 +677,33 @@
       "pages": [
         "skills/experiment-tracking",
         "skills/feature-stores",
-        "skills/model-serving",
+        "skills/llm-ops",
         "skills/ml-pipelines",
         "skills/model-monitoring",
-        "skills/llm-ops"
+        "skills/model-serving"
+      ]
+    },
+    {
+      "group": "ML Systems",
+      "pages": [
+        "skills/ai-accelerators",
+        "skills/data-eng",
+        "skills/deep-learning-primer",
+        "skills/deployment-paradigms",
+        "skills/dnn-architectures",
+        "skills/edge-deployment",
+        "skills/efficient-ai",
+        "skills/feature-engineering",
+        "skills/ml-frameworks",
+        "skills/ml-serving-optimization",
+        "skills/ml-systems-fundamentals",
+        "skills/ml-workflow",
+        "skills/mlops",
+        "skills/model-deployment",
+        "skills/model-dev",
+        "skills/model-optimization",
+        "skills/robust-ai",
+        "skills/training-data"
       ]
     },
     {
@@ -600,18 +717,18 @@
       "pages": [
         "skills/api-gateway-patterns",
         "skills/circuit-breaker-patterns",
-        "skills/service-mesh",
+        "skills/contract-testing",
         "skills/distributed-tracing",
         "skills/service-discovery",
-        "skills/contract-testing"
+        "skills/service-mesh"
       ]
     },
     {
       "group": "Event-Driven",
       "pages": [
-        "skills/kafka-deep",
-        "skills/event-sourcing",
         "skills/cqrs-patterns",
+        "skills/event-sourcing",
+        "skills/kafka-deep",
         "skills/saga-orchestration",
         "skills/schema-registry",
         "skills/stream-processing"
@@ -620,31 +737,31 @@
     {
       "group": "Game Development",
       "pages": [
-        "skills/unity-patterns",
-        "skills/godot-patterns",
-        "skills/game-networking",
         "skills/game-audio",
-        "skills/shader-programming"
+        "skills/game-networking",
+        "skills/godot-patterns",
+        "skills/shader-programming",
+        "skills/unity-patterns"
       ]
     },
     {
       "group": "IoT",
       "pages": [
-        "skills/mqtt-deep",
-        "skills/edge-computing",
         "skills/device-provisioning",
-        "skills/ota-updates",
-        "skills/industrial-protocols"
+        "skills/edge-computing",
+        "skills/industrial-protocols",
+        "skills/mqtt-deep",
+        "skills/ota-updates"
       ]
     },
     {
       "group": "Simulation",
       "pages": [
         "skills/numerical-methods",
-        "skills/physics-engines",
         "skills/parallel-computing",
-        "skills/visualization-scientific",
-        "skills/validation-verification"
+        "skills/physics-engines",
+        "skills/validation-verification",
+        "skills/visualization-scientific"
       ]
     },
     {
@@ -656,20 +773,20 @@
     {
       "group": "Development",
       "pages": [
-        "workflows/feature",
         "workflows/bug-fix",
-        "workflows/refactor",
-        "workflows/code-review"
+        "workflows/code-review",
+        "workflows/feature",
+        "workflows/refactor"
       ]
     },
     {
       "group": "AI Engineering",
       "pages": [
-        "workflows/rag-development",
+        "workflows/agent-development",
+        "workflows/fine-tuning",
         "workflows/model-evaluation",
         "workflows/prompt-engineering",
-        "workflows/agent-development",
-        "workflows/fine-tuning"
+        "workflows/rag-development"
       ]
     },
     {
@@ -677,40 +794,57 @@
       "pages": [
         "workflows/data-pipeline",
         "workflows/experiment-cycle",
+        "workflows/feature-engineering",
         "workflows/model-deployment",
-        "workflows/monitoring-setup",
-        "workflows/feature-engineering"
+        "workflows/monitoring-setup"
+      ]
+    },
+    {
+      "group": "ML Systems Workflows",
+      "pages": [
+        "workflows/data-preparation-workflow",
+        "workflows/edge-deployment-workflow",
+        "workflows/full-ml-lifecycle-workflow",
+        "workflows/hyperparameter-tuning-workflow",
+        "workflows/mlops-pipeline-workflow",
+        "workflows/model-deployment-workflow",
+        "workflows/model-development-workflow",
+        "workflows/model-evaluation-workflow",
+        "workflows/model-optimization-workflow",
+        "workflows/monitoring-drift-workflow",
+        "workflows/retraining-workflow",
+        "workflows/training-pipeline-workflow"
       ]
     },
     {
       "group": "Omega",
       "pages": [
-        "workflows/10x-improvement",
+        "workflows/1000x-innovation",
         "workflows/100x-architecture",
-        "workflows/1000x-innovation"
+        "workflows/10x-improvement"
       ]
     },
     {
       "group": "Sprint",
       "pages": [
-        "workflows/sprint-setup",
         "workflows/sprint-execution",
-        "workflows/sprint-retrospective"
+        "workflows/sprint-retrospective",
+        "workflows/sprint-setup"
       ]
     },
     {
       "group": "Security",
       "pages": [
-        "workflows/security-audit",
-        "workflows/penetration-testing"
+        "workflows/penetration-testing",
+        "workflows/security-audit"
       ]
     },
     {
       "group": "Database",
       "pages": [
-        "workflows/schema-design",
         "workflows/migration",
-        "workflows/optimization"
+        "workflows/optimization",
+        "workflows/schema-design"
       ]
     },
     {
@@ -723,22 +857,22 @@
     {
       "group": "Full Stack",
       "pages": [
-        "workflows/full-feature",
-        "workflows/authentication"
+        "workflows/authentication",
+        "workflows/full-feature"
       ]
     },
     {
       "group": "Content",
       "pages": [
-        "workflows/technical-docs",
-        "workflows/marketing"
+        "workflows/marketing",
+        "workflows/technical-docs"
       ]
     },
     {
       "group": "Research",
       "pages": [
-        "workflows/technology-research",
-        "workflows/best-practices"
+        "workflows/best-practices",
+        "workflows/technology-research"
       ]
     },
     {
@@ -750,54 +884,32 @@
     {
       "group": "Microservices Workflows",
       "pages": [
-        "workflows/domain-decomposition",
-        "workflows/service-scaffolding",
         "workflows/contract-first",
+        "workflows/distributed-tracing",
+        "workflows/domain-decomposition",
         "workflows/integration-testing",
         "workflows/service-mesh-setup",
-        "workflows/distributed-tracing"
+        "workflows/service-scaffolding"
       ]
     },
     {
       "group": "Event-Driven Workflows",
       "pages": [
+        "workflows/consumer-groups",
         "workflows/event-storming",
-        "workflows/schema-evolution",
-        "workflows/saga-implementation",
         "workflows/replay-testing",
-        "workflows/consumer-groups"
+        "workflows/saga-implementation",
+        "workflows/schema-evolution"
       ]
     },
     {
       "group": "Game Development Workflows",
       "pages": [
-        "workflows/prototype-to-production",
         "workflows/content-pipeline",
+        "workflows/platform-submission",
         "workflows/playtesting",
-        "workflows/platform-submission"
+        "workflows/prototype-to-production"
       ]
-    }
-  ],
-  "footerSocials": {
-    "github": "https://github.com/doanchienthangdev/omgkit"
-  },
-  "feedback": {
-    "thumbsRating": true,
-    "suggestEdit": true,
-    "raiseIssue": true
-  },
-  "redirects": [
-    {
-      "source": "/skills",
-      "destination": "/skills/overview"
-    },
-    {
-      "source": "/skills/all",
-      "destination": "/skills/overview"
-    },
-    {
-      "source": "/workflows",
-      "destination": "/workflows/overview"
     }
   ]
 }

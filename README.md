@@ -681,9 +681,41 @@ omgkit help         # Show help
 
 ---
 
+## Documentation Sync Automation
+
+OMGKIT uses a **self-healing documentation system** that ensures docs are always synchronized with code:
+
+### How It Works
+
+1. **Code is Single Source of Truth**: All component metadata lives in plugin files
+2. **Auto-Discovery**: Categories and counts are discovered dynamically, not hardcoded
+3. **Auto-Generation**: mint.json navigation is generated from docs structure
+4. **Validation Tests**: 23 tests verify docs-plugin sync before every release
+
+### Documentation Commands
+
+```bash
+npm run docs:generate   # Generate docs from plugin source
+npm run docs:mint       # Generate mint.json navigation
+npm run docs:validate   # Run docs sync validation tests
+npm run docs:sync       # Generate + validate (recommended)
+```
+
+### Pre-Release Protection
+
+The `preversion` hook automatically runs `docs:sync` before version bumps:
+
+```bash
+npm version patch       # Runs docs:sync automatically
+```
+
+If any sync issue is detected (missing pages, wrong counts, broken links), the version bump fails.
+
+---
+
 ## Validation & Testing
 
-OMGKIT has 5600+ automated tests ensuring system integrity.
+OMGKIT has 5700+ automated tests ensuring system integrity.
 
 ### Run Tests
 
@@ -691,6 +723,7 @@ OMGKIT has 5600+ automated tests ensuring system integrity.
 npm test                           # All tests
 npm test -- tests/validation/      # Validation tests only
 npm test -- tests/unit/            # Unit tests only
+npm run test:docs                  # Documentation sync tests
 ```
 
 ### Test Categories
@@ -700,6 +733,7 @@ npm test -- tests/unit/            # Unit tests only
 | Registry Sync | ~200 | Verify registry matches files |
 | Alignment | ~400 | Component hierarchy validation |
 | Documentation | ~500 | Quality and format checks |
+| Docs Sync | 23 | Plugin-to-docs mapping validation |
 | Format | ~300 | Naming convention compliance |
 | Dependency Graph | ~600 | Reference integrity |
 

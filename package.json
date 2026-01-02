@@ -1,7 +1,7 @@
 {
   "name": "omgkit",
   "version": "2.21.1",
-  "description": "Omega-Level Development Kit - AI Team System for Claude Code. 33 agents, 113 commands, 128 skills, 49 workflows.",
+  "description": "Omega-Level Development Kit - AI Team System for Claude Code. 41 agents, 144 commands, 145 skills, 61 workflows.",
   "keywords": [
     "claude-code",
     "ai",
@@ -43,10 +43,17 @@
     "test:unit": "vitest run tests/unit",
     "test:validation": "vitest run tests/validation",
     "test:integration": "vitest run tests/integration",
+    "test:docs": "vitest run tests/validation/docs-sync.test.js",
     "lint": "eslint .",
     "docs:generate": "node scripts/generate-docs.js",
+    "docs:mint": "node scripts/generate-mint-json.js",
+    "docs:validate": "npm run test:docs",
+    "docs:sync": "npm run docs:generate && npm run docs:validate",
     "docs:dev": "cd docs && mintlify dev",
-    "docs:build": "npm run docs:generate"
+    "docs:build": "npm run docs:generate",
+    "preversion": "npm run docs:sync && npm test",
+    "version": "node -e \"const fs=require('fs');const r=require('./plugin/registry.yaml','utf8');\" || true",
+    "postversion": "echo 'Version bumped. Run: git push && npm publish'"
   },
   "engines": {
     "node": ">=18.0.0"
