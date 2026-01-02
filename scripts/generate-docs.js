@@ -905,7 +905,11 @@ async function generateCommandDocs() {
       for (const file of mdFiles) {
         const content = await readFile(join(categoryPath, file), 'utf-8');
         const { frontmatter, body } = parseFrontmatter(content);
-        const slug = basename(file, '.md');
+        let slug = basename(file, '.md');
+        // Avoid Mintlify reserved name conflict: index.mdx is treated as folder landing page
+        if (slug === 'index') {
+          slug = 'context-index';
+        }
         const catMeta = COMMAND_CATEGORIES[category] || { icon: 'terminal', description: '' };
 
         allCommands.push({

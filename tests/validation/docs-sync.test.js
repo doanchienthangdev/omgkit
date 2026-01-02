@@ -155,7 +155,12 @@ describe('Documentation Sync Validation', () => {
       for (const cat of categories) {
         const catDir = join(pluginCommandsDir, cat);
         const files = await getMdFiles(catDir);
-        pluginCommands.push(...files.map(f => basename(f, '.md')));
+        pluginCommands.push(...files.map(f => {
+          let name = basename(f, '.md');
+          // Mintlify reserved name: index.mdx -> context-index.mdx
+          if (name === 'index') name = 'context-index';
+          return name;
+        }));
       }
 
       const docsCommands = await getMdxFiles(docsCommandsDir);

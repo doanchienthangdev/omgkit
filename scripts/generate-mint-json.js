@@ -331,7 +331,14 @@ async function generateCommandsNavigation() {
     const catDir = join(pluginCommandsDir, cat);
     try {
       const files = await readdir(catDir);
-      const mdFiles = files.filter(f => f.endsWith('.md')).map(f => basename(f, '.md'));
+      const mdFiles = files.filter(f => f.endsWith('.md')).map(f => {
+        let name = basename(f, '.md');
+        // Avoid Mintlify reserved name conflict
+        if (name === 'index') {
+          name = 'context-index';
+        }
+        return name;
+      });
       if (mdFiles.length > 0) {
         commandsByCategory[cat] = mdFiles.filter(cmd => allCommands.includes(cmd));
       }
