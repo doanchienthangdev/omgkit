@@ -1102,16 +1102,36 @@ For best results, be specific in your descriptions and include relevant file pat
     commandsByCategory[cmd.category].push(cmd);
   }
 
-  const categoryOrder = ['dev', 'planning', 'git', 'quality', 'context', 'design', 'omega', 'sprint'];
+  // Get all categories dynamically from the commands, sorted alphabetically
+  const categoryOrder = Object.keys(commandsByCategory).sort();
   const categoryDescriptions = {
-    dev: 'Build features and fix bugs',
-    planning: 'Plan and research before coding',
-    git: 'Version control and deployment',
-    quality: 'Ensure code health and security',
+    alignment: 'Code alignment and formatting',
+    auto: 'Automated development tasks',
     context: 'Manage session and codebase context',
+    data: 'Data processing and transformation',
     design: 'UI/UX and visual design',
+    dev: 'Build features and fix bugs',
+    domain: 'Domain-driven design commands',
+    game: 'Game development commands',
+    git: 'Version control and deployment',
+    iot: 'IoT and embedded systems',
+    ml: 'Machine learning operations',
     omega: 'Strategic 10x/100x/1000x thinking',
-    sprint: 'Team and sprint management'
+    omgdata: 'Data engineering and pipelines',
+    omgdeploy: 'Model deployment and serving',
+    omgfeature: 'Feature engineering for ML',
+    omgml: 'ML model development',
+    omgops: 'ML operations and monitoring',
+    omgoptim: 'Model optimization and compression',
+    omgtrain: 'Model training and fine-tuning',
+    perf: 'Performance optimization',
+    planning: 'Plan and research before coding',
+    platform: 'Platform engineering commands',
+    quality: 'Ensure code health and security',
+    security: 'Security scanning and auditing',
+    sprint: 'Team and sprint management',
+    sre: 'Site reliability engineering',
+    workflow: 'Workflow automation'
   };
 
   const totalCommands = graphStats.commands;
