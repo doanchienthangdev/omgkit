@@ -30,7 +30,7 @@ describe('Documentation Generator', () => {
 
     it('should have commands documentation', () => {
       expect(existsSync(join(DOCS_DIR, 'commands'))).toBe(true);
-      expect(existsSync(join(DOCS_DIR, 'commands/overview.mdx'))).toBe(true);
+      expect(existsSync(join(DOCS_DIR, 'commands/all-commands.mdx'))).toBe(true);
       expect(existsSync(join(DOCS_DIR, 'commands/feature.mdx'))).toBe(true);
     });
 
@@ -106,7 +106,7 @@ describe('Documentation Generator', () => {
     });
 
     it('command docs should not contain invalid JSX expressions', () => {
-      const commandOverview = join(DOCS_DIR, 'commands/overview.mdx');
+      const commandOverview = join(DOCS_DIR, 'commands/all-commands.mdx');
       const content = readFileSync(commandOverview, 'utf8');
 
       expect(content).not.toMatch(/\{#\w+\}/);
@@ -159,7 +159,7 @@ describe('Documentation Generator', () => {
     });
 
     it('should generate docs for all command categories', () => {
-      const commandOverview = readFileSync(join(DOCS_DIR, 'commands/overview.mdx'), 'utf8');
+      const commandOverview = readFileSync(join(DOCS_DIR, 'commands/all-commands.mdx'), 'utf8');
       expect(commandOverview).toContain('dev');
       expect(commandOverview).toContain('planning');
       expect(commandOverview).toContain('git');

@@ -74,8 +74,9 @@ const STATIC_CONFIG = {
     "raiseIssue": true
   },
   "redirects": [
-    { "source": "/commands", "destination": "/commands/overview" },
-    { "source": "/commands/all", "destination": "/commands/overview" },
+    { "source": "/commands", "destination": "/commands/all-commands" },
+    { "source": "/commands/all", "destination": "/commands/all-commands" },
+    { "source": "/commands/overview", "destination": "/commands/all-commands" },
     { "source": "/skills", "destination": "/skills/overview" },
     { "source": "/skills/all", "destination": "/skills/overview" },
     { "source": "/workflows", "destination": "/workflows/overview" }
@@ -322,7 +323,7 @@ async function generateCommandsNavigation() {
   // Commands overview
   navigation.push({
     "group": "Commands Overview",
-    "pages": ["commands/overview"]
+    "pages": ["commands/all-commands"]
   });
 
   // Group by category
@@ -404,7 +405,7 @@ async function generateCommandsNavigation() {
   // Add any uncategorized commands
   const categorizedCommands = new Set(Object.values(commandsByCategory).flat());
   const uncategorized = allCommands.filter(c =>
-    c !== 'overview' && c !== 'all' && !categorizedCommands.has(c)
+    c !== 'overview' && c !== 'all' && c !== 'all-commands' && !categorizedCommands.has(c)
   );
 
   if (uncategorized.length > 0) {

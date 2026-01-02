@@ -386,7 +386,7 @@ describe('Documentation Sync Validation', () => {
 
       const docsCommandsDir = join(DOCS_DIR, 'commands');
       const docsCommands = (await getMdxFiles(docsCommandsDir))
-        .filter(c => c !== 'overview' && c !== 'all');
+        .filter(c => c !== 'overview' && c !== 'all' && c !== 'all-commands');
 
       expect(uniqueCommands.size).toBe(docsCommands.length);
     });

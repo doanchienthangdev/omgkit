@@ -66,11 +66,15 @@
   "redirects": [
     {
       "source": "/commands",
-      "destination": "/commands/overview"
+      "destination": "/commands/all-commands"
     },
     {
       "source": "/commands/all",
-      "destination": "/commands/overview"
+      "destination": "/commands/all-commands"
+    },
+    {
+      "source": "/commands/overview",
+      "destination": "/commands/all-commands"
     },
     {
       "source": "/skills",
@@ -240,7 +244,7 @@
     {
       "group": "Commands Overview",
       "pages": [
-        "commands/overview"
+        "commands/all-commands"
       ]
     },
     {
