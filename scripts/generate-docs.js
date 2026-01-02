@@ -595,6 +595,35 @@ function parseFrontmatter(content) {
 }
 
 /**
+ * Parse full YAML file as frontmatter (for .yaml workflow files)
+ * Extracts key-value pairs from YAML and returns body as description
+ */
+function parseYamlFrontmatter(content) {
+  const frontmatter = {};
+  const lines = content.split('\n');
+
+  for (const line of lines) {
+    // Skip comments and empty lines
+    if (line.trim().startsWith('#') || line.trim() === '') continue;
+
+    const colonIndex = line.indexOf(':');
+    if (colonIndex > 0 && !line.trim().startsWith('-')) {
+      const key = line.slice(0, colonIndex).trim();
+      let value = line.slice(colonIndex + 1).trim();
+      // Remove quotes if present
+      if ((value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+      frontmatter[key] = value;
+    }
+  }
+
+  // Use description as body if available
+  return { frontmatter, body: frontmatter.description || '' };
+}
+
+/**
  * Generate agent documentation with enhanced structure
  */
 async function generateAgentDocs() {
@@ -1630,6 +1659,8 @@ const WORKFLOW_CATEGORIES = {
   development: { icon: 'code', description: 'Core development workflows for features, bugs, and reviews' },
   'ai-engineering': { icon: 'microchip', description: 'AI/ML system development workflows' },
   'ai-ml': { icon: 'brain-circuit', description: 'MLOps and model lifecycle workflows' },
+  'ml-systems': { icon: 'brain', description: 'ML infrastructure and system workflows' },
+  autonomous: { icon: 'robot', description: 'Autonomous agent and automation workflows' },
   omega: { icon: 'wand-magic-sparkles', description: 'Strategic thinking and improvement workflows' },
   sprint: { icon: 'calendar-days', description: 'Sprint management and team coordination' },
   security: { icon: 'shield-halved', description: 'Security auditing and penetration testing' },
@@ -1978,12 +2009,14 @@ async function generateWorkflowDocs() {
 
     try {
       const files = await readdir(categoryPath);
-      const mdFiles = files.filter(f => f.endsWith('.md'));
+      // Support both .md and .yaml workflow files
+      const workflowFiles = files.filter(f => f.endsWith('.md') || f.endsWith('.yaml'));
 
-      for (const file of mdFiles) {
+      for (const file of workflowFiles) {
         const content = await readFile(join(categoryPath, file), 'utf-8');
-        const { frontmatter, body } = parseFrontmatter(content);
-        const slug = basename(file, '.md');
+        const isYaml = file.endsWith('.yaml');
+        const { frontmatter, body } = isYaml ? parseYamlFrontmatter(content) : parseFrontmatter(content);
+        const slug = basename(file, isYaml ? '.yaml' : '.md');
         const catMeta = WORKFLOW_CATEGORIES[category] || { icon: 'diagram-project', description: '' };
 
         // Parse array fields from content
@@ -2099,11 +2132,12 @@ Provide detailed context in your workflow description. Include specific requirem
     workflowsByCategory[wf.category].push(wf);
   }
 
-  const categoryOrder = ['development', 'ai-engineering', 'ai-ml', 'omega', 'sprint', 'security', 'database', 'api', 'fullstack', 'content', 'research', 'quality', 'microservices', 'event-driven', 'game-dev'];
+  // Get all categories dynamically from the workflows, sorted alphabetically
+  const categoryOrder = Object.keys(workflowsByCategory).sort();
 
   // Calculate dynamic counts
   const totalWorkflows = graphStats.workflows;
-  const totalWorkflowCategories = categoryOrder.filter(cat => (workflowsByCategory[cat] || []).length > 0).length;
+  const totalWorkflowCategories = categoryOrder.length;
 
   // Generate overview page with comprehensive structure
   const overviewDoc = `---

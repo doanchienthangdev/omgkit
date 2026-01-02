@@ -47,6 +47,16 @@ async function getMdFiles(dir) {
   }
 }
 
+// Get workflow files (.md and .yaml)
+async function getWorkflowFiles(dir) {
+  try {
+    const files = await readdir(dir);
+    return files.filter(f => f.endsWith('.md') || f.endsWith('.yaml'));
+  } catch {
+    return [];
+  }
+}
+
 // Recursively count all .md files in directory tree
 async function countMdFilesRecursive(dir) {
   let count = 0;
@@ -295,8 +305,9 @@ describe('Documentation Sync Validation', () => {
 
       for (const cat of categories) {
         const catDir = join(pluginWorkflowsDir, cat);
-        const files = await getMdFiles(catDir);
-        pluginWorkflows.push(...files.map(f => basename(f, '.md')));
+        // Count both .md and .yaml workflow files
+        const files = await getWorkflowFiles(catDir);
+        pluginWorkflows.push(...files.map(f => basename(f, f.endsWith('.yaml') ? '.yaml' : '.md')));
       }
 
       const docsWorkflows = await getMdxFiles(docsWorkflowsDir);
@@ -439,7 +450,8 @@ describe('Documentation Sync Validation', () => {
       let pluginCount = 0;
       for (const cat of categories) {
         const catDir = join(pluginWorkflowsDir, cat);
-        const files = await getMdFiles(catDir);
+        // Count both .md and .yaml workflow files
+        const files = await getWorkflowFiles(catDir);
         pluginCount += files.length;
       }
 
@@ -638,7 +650,8 @@ describe('Documentation Count Consistency', () => {
     for (const cat of categories) {
       const catPath = join(workflowsDir, cat);
       if (await isDirectory(catPath)) {
-        const files = await getMdFiles(catPath);
+        // Count both .md and .yaml workflow files
+        const files = await getWorkflowFiles(catPath);
         actualWorkflowCount += files.length;
       }
     }
@@ -691,7 +704,8 @@ describe('Documentation Count Consistency', () => {
     for (const cat of workflowCats) {
       const catPath = join(PLUGIN_DIR, 'workflows', cat);
       if (await isDirectory(catPath)) {
-        workflowCount += (await getMdFiles(catPath)).length;
+        // Count both .md and .yaml workflow files
+        workflowCount += (await getWorkflowFiles(catPath)).length;
       }
     }
 
@@ -741,7 +755,8 @@ describe('Documentation Count Consistency', () => {
     for (const cat of workflowCats) {
       const catPath = join(PLUGIN_DIR, 'workflows', cat);
       if (await isDirectory(catPath)) {
-        workflowCount += (await getMdFiles(catPath)).length;
+        // Count both .md and .yaml workflow files
+        workflowCount += (await getWorkflowFiles(catPath)).length;
       }
     }
 

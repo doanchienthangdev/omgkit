@@ -69,6 +69,56 @@ function parseFrontmatter(content) {
 }
 
 /**
+ * Parse a full YAML file (not frontmatter, the entire file is YAML)
+ */
+function parseYamlFile(content) {
+  const result = {};
+  let currentKey = null;
+  let currentArray = null;
+
+  for (const line of content.split('\n')) {
+    // Skip comments and empty lines
+    if (line.trim().startsWith('#') || line.trim() === '') continue;
+
+    // Check for array item
+    if (line.match(/^\s+-\s+/)) {
+      if (currentKey && currentArray !== null) {
+        const value = line.replace(/^\s+-\s+/, '').trim();
+        currentArray.push(value);
+      }
+      continue;
+    }
+
+    // Check for key: value
+    const colonIndex = line.indexOf(':');
+    if (colonIndex > 0 && !line.trim().startsWith('-')) {
+      const key = line.slice(0, colonIndex).trim();
+      let value = line.slice(colonIndex + 1).trim();
+
+      // Remove quotes if present
+      if ((value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+
+      if (value === '' || value === '[]') {
+        // Start of array or empty array
+        currentKey = key;
+        currentArray = [];
+        result[key] = currentArray;
+      } else {
+        // Simple value
+        result[key] = value;
+        currentKey = null;
+        currentArray = null;
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Get all files in a directory recursively
  */
 async function getFiles(dir, extension = '.md') {
@@ -134,12 +184,17 @@ async function extractWorkflowDependencies() {
     const stats = await stat(categoryPath).catch(() => null);
     if (!stats?.isDirectory()) continue;
 
-    const files = await getFiles(categoryPath, '.md');
+    // Support both .md and .yaml workflow files
+    const mdFiles = await getFiles(categoryPath, '.md');
+    const yamlFiles = await getFiles(categoryPath, '.yaml');
+    const files = [...mdFiles, ...yamlFiles];
 
     for (const file of files) {
       const content = await readFile(file, 'utf-8');
-      const fm = parseFrontmatter(content);
-      const name = basename(file, '.md');
+      const isYaml = file.endsWith('.yaml');
+      const fm = isYaml ? parseYamlFile(content) : parseFrontmatter(content);
+      const ext = isYaml ? '.yaml' : '.md';
+      const name = basename(file, ext);
       const fullName = `${category}/${name}`;
 
       workflows[fullName] = {

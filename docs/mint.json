@@ -922,6 +922,14 @@
         "workflows/playtesting",
         "workflows/prototype-to-production"
       ]
+    },
+    {
+      "group": "Other",
+      "pages": [
+        "workflows/discovery",
+        "workflows/execution",
+        "workflows/planning"
+      ]
     }
   ]
 }
