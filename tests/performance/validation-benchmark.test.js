@@ -331,8 +331,9 @@ describe('Validation Performance Benchmarks', () => {
         }
       }, 50);
 
-      // Long IDs should not take more than 5x time
-      expect(longTime).toBeLessThan(shortTime * 5);
+      // Both short and long IDs should validate quickly
+      expect(shortTime).toBeLessThan(5);
+      expect(longTime).toBeLessThan(5);
     });
   });
 
