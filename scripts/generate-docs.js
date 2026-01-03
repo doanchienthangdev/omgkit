@@ -1231,8 +1231,9 @@ ${catMeta.description}
 | Command | Description | Usage |
 |---------|-------------|-------|
 ${cmds.map(c => {
-  // Escape angle brackets for MDX compatibility (\< and \> render as literal < >)
-  const hint = (c.argumentHint || '').replace(/</g, '\\<').replace(/>/g, '\\>');
+  // Replace angle brackets with square brackets for MDX compatibility
+  // <arg> becomes [arg] - a common CLI documentation convention
+  const hint = (c.argumentHint || '').replace(/</g, '[').replace(/>/g, ']');
   return `| [\`/${cat}:${c.slug}\`](/commands/${c.slug}) | ${c.description.slice(0, 40)}${c.description.length > 40 ? '...' : ''} | \`/${cat}:${c.slug}${hint ? ' ' + hint : ''}\` |`;
 }).join('\n')}
 `;
