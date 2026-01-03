@@ -1,7 +1,7 @@
 {
   "name": "omgkit",
   "version": "2.21.7",
-  "description": "Omega-Level Development Kit - AI Team System for Claude Code. 41 agents, 144 commands, 145 skills, 64 workflows.",
+  "description": "Omega-Level Development Kit - AI Team System for Claude Code. 41 agents, 150 commands, 151 skills, 67 workflows.",
   "keywords": [
     "claude-code",
     "ai",
@@ -43,7 +43,15 @@
     "test:unit": "vitest run tests/unit",
     "test:validation": "vitest run tests/validation",
     "test:integration": "vitest run tests/integration",
+    "test:autonomous": "vitest run tests/autonomous",
+    "test:security": "vitest run tests/security",
+    "test:property": "vitest run tests/property",
+    "test:behavioral": "vitest run tests/behavioral",
+    "test:performance": "vitest run tests/performance",
+    "test:mutation": "stryker run",
+    "test:omega": "npm run test && npm run test:mutation",
     "test:docs": "vitest run tests/validation/docs-sync.test.js",
+    "test:benchmark": "vitest bench",
     "lint": "eslint .",
     "docs:generate": "node scripts/generate-docs.js",
     "docs:mint": "node scripts/generate-mint-json.js",
@@ -59,7 +67,10 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.4.0",
+    "@stryker-mutator/vitest-runner": "^9.4.0",
     "@vitest/coverage-v8": "^4.0.16",
+    "fast-check": "^4.5.3",
     "js-yaml": "^4.1.1",
     "vitest": "^4.0.16"
   }

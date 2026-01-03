@@ -1,0 +1,162 @@
+---
+title: "/quality:test-chaos"
+description: "Run chaos engineering tests including fault injection, failure simulation, and resilience verification"
+icon: "shield-check"
+---
+
+<Info>
+  **Category:** Quality
+
+  **Syntax:** `/quality:test-chaos`
+</Info>
+
+## Overview
+
+Run chaos engineering tests including fault injection, failure simulation, and resilience verification
+
+## Quick Start
+
+```bash
+/quality:test-chaos
+```
+
+
+# /quality:test-chaos
+
+Run chaos engineering tests for system resilience.
+
+## Usage
+
+```bash
+/quality:test-chaos
+/quality:test-chaos --fault network
+/quality:test-chaos --blast-radius small
+```
+
+## Fault Types
+
+### Network Faults
+- Latency injection
+- Connection timeouts
+- Partial failures
+- DNS resolution failures
+
+### Service Faults
+- Service unavailability
+- Circuit breaker testing
+- Fallback verification
+- Retry behavior
+
+### Resource Faults
+- Memory pressure
+- CPU saturation
+- Disk full simulation
+- Connection pool exhaustion
+
+### Clock Faults
+- Clock skew simulation
+- Timezone issues
+- Leap second handling
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| --fault | Fault type to inject | all |
+| --blast-radius | Scope: small, medium, large | small |
+| --probability | Fault injection rate | 10% |
+| --duration | Test duration | 60s |
+| --kill-switch | Auto-rollback on critical failure | true |
+
+## Experiment Template
+
+```yaml
+experiment:
+  name: "API Latency Injection"
+  hypothesis: "System should handle 2s latency gracefully"
+  steady-state:
+    - metric: error_rate
+      value: < 1%
+    - metric: response_time_p95
+      value: < 200ms
+  method:
+    - type: latency
+      target: api-gateway
+      delay: 2000ms
+      probability: 0.3
+  rollback:
+    - type: restore
+      target: api-gateway
+```
+
+## Safety Guidelines
+
+1. **Start Small**: Begin with low probability, limited scope
+2. **Monitor Everything**: Watch all metrics during experiments
+3. **Kill Switch**: Always have rollback mechanism ready
+4. **Game Days**: Schedule chaos tests, notify teams
+5. **Progressive Expansion**: Gradually increase blast radius
+
+## Output
+
+- Resilience score
+- Recovery time metrics
+- Failure cascade analysis
+- Recommended improvements
+
+## Related
+
+- testing/chaos-testing
+- testing/comprehensive-testing
+- devops/observability
+
+
+
+
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/quality:test-chaos
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/quality:test-chaos
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 150 commands
+  </Card>
+  <Card title="Quality Commands" icon="shield-check" href="/commands/overview#quality">
+    More quality commands
+  </Card>
+</CardGroup>

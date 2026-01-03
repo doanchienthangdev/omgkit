@@ -1,0 +1,132 @@
+---
+title: "/quality:test-property"
+description: "Generate and run property-based tests using Fast-Check for invariant verification"
+icon: "shield-check"
+---
+
+<Info>
+  **Category:** Quality
+
+  **Syntax:** `/quality:test-property`
+</Info>
+
+## Overview
+
+Generate and run property-based tests using Fast-Check for invariant verification
+
+## Quick Start
+
+```bash
+/quality:test-property
+```
+
+
+# /quality:test-property
+
+Generate and run property-based tests for comprehensive edge case coverage.
+
+## Usage
+
+```bash
+/quality:test-property
+/quality:test-property --file src/utils.js
+/quality:test-property --numRuns 1000
+```
+
+## Properties Tested
+
+### Roundtrip Properties
+- Serialize/deserialize equality
+- Encode/decode reversibility
+- Parse/format consistency
+
+### Invariant Properties
+- Length preservation
+- Type preservation
+- Range constraints
+
+### Mathematical Properties
+- Commutativity
+- Associativity
+- Idempotence
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| --file | Target file to test | All files |
+| --numRuns | Number of random inputs | 100 |
+| --seed | Random seed for reproducibility | Random |
+| --verbose | Show all tested inputs | false |
+
+## Output
+
+- Generated test cases
+- Shrunk counterexamples on failure
+- Coverage of input space
+- Property success rates
+
+## Related
+
+- testing/property-testing
+- testing/comprehensive-testing
+- methodology/tdd
+
+
+
+
+## Usage Graph
+
+### Available In Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/comprehensive-testing](/workflows/comprehensive-testing) | Comprehensive Omega testing workflow covering all 4 dimensio... |
+| [testing/test-driven-development](/workflows/test-driven-development) | Test-Driven Development workflow with red-green-refactor cyc... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/quality:test-property
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/quality:test-property
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 150 commands
+  </Card>
+  <Card title="Quality Commands" icon="shield-check" href="/commands/overview#quality">
+    More quality commands
+  </Card>
+</CardGroup>

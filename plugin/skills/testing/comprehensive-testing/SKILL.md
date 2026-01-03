@@ -1,0 +1,248 @@
+---
+name: testing/comprehensive-testing
+description: Comprehensive 4D testing methodology covering Accuracy, Performance, Security, and Accessibility for production-ready quality assurance
+category: testing
+tags:
+  - testing
+  - quality
+  - omega
+  - comprehensive
+  - methodology
+related_skills:
+  - testing/vitest
+  - testing/property-testing
+  - testing/security-testing
+  - testing/performance-testing
+  - methodology/omega
+---
+
+# Omega Testing
+
+Comprehensive 4-Dimensional testing methodology for production-ready quality assurance.
+
+## Quick Start
+
+```javascript
+// Run comprehensive Omega tests
+npm run test:omega
+
+// Or run individual dimensions
+npm run test:accuracy     // Unit, integration, E2E
+npm run test:performance  // Load, stress, benchmarks
+npm run test:security     // Vulnerability, injection, auth
+npm run test:a11y         // WCAG, keyboard, screen reader
+```
+
+## The 4 Dimensions
+
+### 1. Accuracy Testing
+Ensures correctness of functionality.
+
+```javascript
+// Unit Tests - Isolated function testing
+describe('calculateTotal', () => {
+  it('calculates sum correctly', () => {
+    expect(calculateTotal([10, 20, 30])).toBe(60);
+  });
+
+  it('handles empty array', () => {
+    expect(calculateTotal([])).toBe(0);
+  });
+
+  it('handles negative numbers', () => {
+    expect(calculateTotal([-10, 20])).toBe(10);
+  });
+});
+
+// Integration Tests - Component interaction
+describe('OrderService', () => {
+  it('creates order with payment', async () => {
+    const order = await orderService.create(cart, payment);
+    expect(order.status).toBe('confirmed');
+    expect(paymentService.charge).toHaveBeenCalled();
+  });
+});
+
+// E2E Tests - Full user flows
+test('user can complete checkout', async ({ page }) => {
+  await page.goto('/products');
+  await page.click('[data-testid="add-to-cart"]');
+  await page.click('[data-testid="checkout"]');
+  await page.fill('#email', 'user@example.com');
+  await page.click('[data-testid="place-order"]');
+  await expect(page.locator('.order-confirmation')).toBeVisible();
+});
+```
+
+### 2. Performance Testing
+Ensures speed and resource efficiency.
+
+```javascript
+// Benchmark Tests
+describe('Performance Benchmarks', () => {
+  it('responds under 100ms', async () => {
+    const start = performance.now();
+    await api.fetch('/users');
+    const duration = performance.now() - start;
+    expect(duration).toBeLessThan(100);
+  });
+
+  it('handles 1000 concurrent requests', async () => {
+    const requests = Array(1000).fill().map(() => api.fetch('/users'));
+    const results = await Promise.all(requests);
+    expect(results.every(r => r.status === 200)).toBe(true);
+  });
+});
+
+// Memory Tests
+it('does not leak memory', async () => {
+  const before = process.memoryUsage().heapUsed;
+  for (let i = 0; i < 1000; i++) {
+    await processData(largeDataset);
+  }
+  global.gc();
+  const after = process.memoryUsage().heapUsed;
+  expect(after - before).toBeLessThan(10 * 1024 * 1024); // 10MB
+});
+```
+
+### 3. Security Testing
+Ensures protection against vulnerabilities.
+
+```javascript
+// Injection Tests
+describe('SQL Injection Prevention', () => {
+  const maliciousInputs = [
+    "'; DROP TABLE users; --",
+    "1' OR '1'='1",
+    "admin'--",
+  ];
+
+  maliciousInputs.forEach(input => {
+    it(`blocks injection: ${input.slice(0, 20)}...`, async () => {
+      const result = await db.query(
+        'SELECT * FROM users WHERE name = ?',
+        [input]
+      );
+      expect(result).toEqual([]);
+    });
+  });
+});
+
+// Authentication Tests
+describe('Authentication', () => {
+  it('rejects expired tokens', async () => {
+    const expiredToken = generateToken({ exp: Date.now() - 1000 });
+    const response = await api.get('/protected', {
+      headers: { Authorization: `Bearer ${expiredToken}` },
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it('prevents brute force', async () => {
+    for (let i = 0; i < 10; i++) {
+      await api.post('/login', { password: 'wrong' });
+    }
+    const response = await api.post('/login', { password: 'correct' });
+    expect(response.status).toBe(429); // Rate limited
+  });
+});
+```
+
+### 4. Accessibility Testing
+Ensures usability for all users.
+
+```javascript
+// WCAG Compliance
+describe('Accessibility', () => {
+  it('has proper heading hierarchy', async () => {
+    const headings = await page.$$eval('h1, h2, h3, h4, h5, h6', els =>
+      els.map(el => ({ level: parseInt(el.tagName[1]), text: el.textContent }))
+    );
+
+    for (let i = 1; i < headings.length; i++) {
+      const skip = headings[i].level - headings[i-1].level;
+      expect(skip).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('images have alt text', async () => {
+    const images = await page.$$('img');
+    for (const img of images) {
+      const alt = await img.getAttribute('alt');
+      expect(alt).toBeTruthy();
+    }
+  });
+
+  it('is keyboard navigable', async () => {
+    await page.keyboard.press('Tab');
+    const focused = await page.evaluate(() => document.activeElement.tagName);
+    expect(['A', 'BUTTON', 'INPUT']).toContain(focused);
+  });
+});
+
+// Screen Reader Testing
+it('announces dynamic content', async () => {
+  await page.click('#load-more');
+  const liveRegion = await page.$('[aria-live="polite"]');
+  expect(await liveRegion.textContent()).toContain('Loaded');
+});
+```
+
+## Coverage Requirements
+
+| Dimension | Minimum | Target | Excellent |
+|-----------|---------|--------|-----------|
+| Accuracy (Unit) | 80% | 90% | 95% |
+| Accuracy (Integration) | 60% | 75% | 85% |
+| Performance | Pass SLAs | <100ms p95 | <50ms p95 |
+| Security | No critical | No high | No medium |
+| Accessibility | AA | AAA | Full AAA |
+
+## Test Organization
+
+```
+tests/
+├── accuracy/
+│   ├── unit/           # Isolated unit tests
+│   ├── integration/    # Component integration
+│   └── e2e/            # End-to-end flows
+├── performance/
+│   ├── benchmarks/     # Speed benchmarks
+│   ├── load/           # Load testing
+│   └── stress/         # Stress testing
+├── security/
+│   ├── injection/      # Injection tests
+│   ├── auth/           # Authentication
+│   └── vulnerabilities/# Known vulns
+└── accessibility/
+    ├── wcag/           # WCAG compliance
+    ├── keyboard/       # Keyboard nav
+    └── screen-reader/  # SR compatibility
+```
+
+## F.I.R.S.T. Principles
+
+- **Fast**: Tests run quickly (< 1ms for unit, < 100ms for integration)
+- **Independent**: Tests don't depend on each other
+- **Repeatable**: Same results every time
+- **Self-Validating**: Pass or fail, no manual inspection
+- **Timely**: Write tests before or with code
+
+## Anti-Patterns to Avoid
+
+1. **Testing Implementation**: Test behavior, not internals
+2. **Flaky Tests**: Eliminate randomness and timing issues
+3. **Over-Mocking**: Don't mock everything
+4. **Ignoring Edge Cases**: Test boundaries and errors
+5. **Copy-Paste Tests**: Use parameterized tests
+6. **No Assertions**: Every test must assert something
+7. **Testing Third-Party Code**: Focus on your code
+
+## When to Use
+
+- Starting a new project with quality focus
+- Improving existing test coverage
+- Preparing for production deployment
+- Meeting compliance requirements (SOC2, GDPR)
+- Building critical infrastructure

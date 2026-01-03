@@ -1,0 +1,341 @@
+---
+name: testing/property-testing
+description: Property-based testing with Fast-Check for finding edge cases through automated input generation and invariant verification
+category: testing
+tags:
+  - testing
+  - property-based
+  - fast-check
+  - invariants
+  - generative
+related_skills:
+  - testing/comprehensive-testing
+  - testing/vitest
+  - methodology/tdd
+---
+
+# Property-Based Testing
+
+Generate thousands of test cases automatically by defining properties that must always hold.
+
+## Quick Start
+
+```bash
+# Install Fast-Check
+npm install -D fast-check
+
+# Run property tests
+npm test -- tests/property/
+```
+
+## Core Concept
+
+Instead of writing specific examples, define **properties** (invariants) that should hold for any valid input.
+
+```javascript
+import * as fc from 'fast-check';
+
+// Traditional test: specific examples
+it('sorts [3, 1, 2] to [1, 2, 3]', () => {
+  expect(sort([3, 1, 2])).toEqual([1, 2, 3]);
+});
+
+// Property test: any array
+it('sorted array is ordered', () => {
+  fc.assert(fc.property(fc.array(fc.integer()), (arr) => {
+    const sorted = sort(arr);
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] < sorted[i - 1]) return false;
+    }
+    return true;
+  }));
+});
+```
+
+## Common Properties
+
+### 1. Roundtrip (Encode/Decode)
+
+```javascript
+// JSON roundtrip
+it('JSON parse/stringify roundtrips', () => {
+  fc.assert(fc.property(fc.jsonValue(), (value) => {
+    const json = JSON.stringify(value);
+    const parsed = JSON.parse(json);
+    return deepEqual(parsed, value);
+  }));
+});
+
+// URL encoding roundtrip
+it('URL encode/decode roundtrips', () => {
+  fc.assert(fc.property(fc.string(), (str) => {
+    return decodeURIComponent(encodeURIComponent(str)) === str;
+  }));
+});
+
+// Base64 roundtrip
+it('base64 encode/decode roundtrips', () => {
+  fc.assert(fc.property(fc.string(), (str) => {
+    const encoded = Buffer.from(str).toString('base64');
+    const decoded = Buffer.from(encoded, 'base64').toString();
+    return decoded === str;
+  }));
+});
+```
+
+### 2. Idempotence
+
+```javascript
+// Formatting is idempotent
+it('formatting twice equals formatting once', () => {
+  fc.assert(fc.property(fc.string(), (input) => {
+    const once = format(input);
+    const twice = format(format(input));
+    return once === twice;
+  }));
+});
+
+// Sorting is idempotent
+it('sorting twice equals sorting once', () => {
+  fc.assert(fc.property(fc.array(fc.integer()), (arr) => {
+    const once = sort(arr);
+    const twice = sort(sort(arr));
+    return deepEqual(once, twice);
+  }));
+});
+```
+
+### 3. Invariants
+
+```javascript
+// Length preserved
+it('map preserves array length', () => {
+  fc.assert(fc.property(
+    fc.array(fc.integer()),
+    fc.func(fc.integer()),
+    (arr, fn) => {
+      return arr.map(fn).length === arr.length;
+    }
+  ));
+});
+
+// Filter never increases length
+it('filter never increases length', () => {
+  fc.assert(fc.property(
+    fc.array(fc.integer()),
+    fc.func(fc.boolean()),
+    (arr, predicate) => {
+      return arr.filter(predicate).length <= arr.length;
+    }
+  ));
+});
+
+// Sum is non-negative for non-negative inputs
+it('sum of non-negatives is non-negative', () => {
+  fc.assert(fc.property(
+    fc.array(fc.nat()),
+    (arr) => sum(arr) >= 0
+  ));
+});
+```
+
+### 4. Commutativity
+
+```javascript
+// Addition is commutative
+it('a + b = b + a', () => {
+  fc.assert(fc.property(fc.integer(), fc.integer(), (a, b) => {
+    return add(a, b) === add(b, a);
+  }));
+});
+
+// Set union is commutative
+it('A ∪ B = B ∪ A', () => {
+  fc.assert(fc.property(
+    fc.array(fc.integer()),
+    fc.array(fc.integer()),
+    (a, b) => {
+      const setA = new Set(a);
+      const setB = new Set(b);
+      const unionAB = new Set([...setA, ...setB]);
+      const unionBA = new Set([...setB, ...setA]);
+      return setsEqual(unionAB, unionBA);
+    }
+  ));
+});
+```
+
+### 5. Associativity
+
+```javascript
+// String concat is associative
+it('(a + b) + c = a + (b + c)', () => {
+  fc.assert(fc.property(
+    fc.string(),
+    fc.string(),
+    fc.string(),
+    (a, b, c) => {
+      return (a + b) + c === a + (b + c);
+    }
+  ));
+});
+```
+
+## Arbitraries (Generators)
+
+### Built-in Arbitraries
+
+```javascript
+// Primitives
+fc.boolean()                    // true, false
+fc.integer()                    // -2^31 to 2^31-1
+fc.integer({ min: 0, max: 100 }) // 0 to 100
+fc.nat()                        // Non-negative integers
+fc.float()                      // Floating point
+fc.string()                     // Any string
+fc.string({ minLength: 1, maxLength: 10 })
+
+// Collections
+fc.array(fc.integer())          // Array of integers
+fc.array(fc.string(), { minLength: 1, maxLength: 5 })
+fc.set(fc.integer())            // Set of integers
+fc.dictionary(fc.string(), fc.integer()) // Object
+
+// Complex
+fc.date()                       // Date objects
+fc.json()                       // Valid JSON strings
+fc.jsonValue()                  // JSON-compatible values
+fc.uuid()                       // UUID strings
+fc.emailAddress()               // Email addresses
+fc.webUrl()                     // Web URLs
+```
+
+### Custom Arbitraries
+
+```javascript
+// User object generator
+const userArb = fc.record({
+  id: fc.uuid(),
+  name: fc.string({ minLength: 1, maxLength: 50 }),
+  email: fc.emailAddress(),
+  age: fc.integer({ min: 0, max: 150 }),
+  roles: fc.array(fc.constantFrom('admin', 'user', 'guest')),
+});
+
+// Order with constraints
+const orderArb = fc.record({
+  id: fc.uuid(),
+  items: fc.array(
+    fc.record({
+      productId: fc.uuid(),
+      quantity: fc.integer({ min: 1, max: 100 }),
+      price: fc.float({ min: 0.01, max: 10000 }),
+    }),
+    { minLength: 1, maxLength: 20 }
+  ),
+  status: fc.constantFrom('pending', 'shipped', 'delivered'),
+});
+
+// Use in tests
+it('order total is positive', () => {
+  fc.assert(fc.property(orderArb, (order) => {
+    const total = calculateTotal(order);
+    return total > 0;
+  }));
+});
+```
+
+## Framework-Specific Patterns
+
+### Vitest
+
+```javascript
+import { describe, it, expect } from 'vitest';
+import * as fc from 'fast-check';
+
+describe('StringUtils', () => {
+  it('reverse is own inverse', () => {
+    fc.assert(fc.property(fc.string(), (str) => {
+      return reverse(reverse(str)) === str;
+    }));
+  });
+});
+```
+
+### Jest
+
+```javascript
+import * as fc from 'fast-check';
+
+describe('MathUtils', () => {
+  it('abs is always non-negative', () => {
+    fc.assert(fc.property(fc.float(), (n) => {
+      return Math.abs(n) >= 0;
+    }));
+  });
+});
+```
+
+## Debugging Failed Properties
+
+```javascript
+// When a property fails, Fast-Check shows:
+// - The failing input
+// - A shrunken (minimal) counterexample
+
+// Configure for more examples on failure
+fc.assert(
+  fc.property(fc.integer(), (n) => n > 0),
+  { numRuns: 1000, verbose: true }
+);
+
+// Seed for reproducibility
+fc.assert(
+  fc.property(fc.string(), myProperty),
+  { seed: 42 }
+);
+```
+
+## Test Configuration
+
+```javascript
+// Global settings
+fc.configureGlobal({
+  numRuns: 100,        // Number of test runs
+  maxSkipsPerRun: 100, // Max skipped values
+  timeout: 1000,       // Timeout per property
+  verbose: false,      // Show all examples
+});
+
+// Per-property settings
+fc.assert(
+  fc.property(fc.array(fc.integer()), (arr) => {
+    return sort(arr).length === arr.length;
+  }),
+  { numRuns: 1000, seed: 12345 }
+);
+```
+
+## When to Use Property Testing
+
+### Good Candidates
+- Pure functions with clear invariants
+- Serialization/deserialization
+- Data transformations
+- Mathematical operations
+- Parsers and formatters
+- State machines
+
+### When to Prefer Example-Based
+- UI behavior tests
+- Integration tests with external systems
+- Tests requiring specific business scenarios
+- Performance-critical tests
+
+## Anti-Patterns
+
+1. **Reimplementing the Function**: Don't test `sort(arr) === mySort(arr)`
+2. **Weak Properties**: Ensure properties are meaningful
+3. **Too Many Constraints**: Keep generators realistic
+4. **Ignoring Shrinking**: Use shrunk examples for debugging
+5. **Testing Third-Party Code**: Focus on your code

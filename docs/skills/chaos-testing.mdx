@@ -1,0 +1,433 @@
+---
+title: "testing/chaos-testing"
+description: "Chaos engineering and fault injection patterns for testing system resilience, failure recovery, and graceful degradation"
+icon: "flask-vial"
+---
+
+<Info>
+  **Category:** Testing
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Chaos engineering and fault injection patterns for testing system resilience, failure recovery, and graceful degradation
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Chaos Testing
+
+Build resilient systems by intentionally introducing failures and verifying recovery.
+
+## Quick Start
+
+```bash
+# Run chaos tests
+npm test -- tests/chaos/
+
+# Run with chaos monkey enabled
+CHAOS_ENABLED=true npm start
+
+# Simulate network failures
+npm run chaos:network
+```
+
+## Core Principles
+
+1. **Hypothesis-Driven**: Define expected behavior before experiments
+2. **Minimize Blast Radius**: Start small, expand gradually
+3. **Automate Rollback**: Always have a kill switch
+4. **Monitor Everything**: Observe system behavior during chaos
+
+## Fault Injection Patterns
+
+### 1. Network Failures
+
+```javascript
+describe('Network Resilience', () => {
+  it('handles API timeout gracefully', async () => {
+    // Simulate slow API
+    server.delay('/api/users', 10000);
+
+    const start = Date.now();
+    const result = await fetchWithTimeout('/api/users', 3000);
+    const duration = Date.now() - start;
+
+    expect(duration).toBeLessThan(4000);
+    expect(result.fallback).toBe(true);
+  });
+
+  it('retries on network failure', async () => {
+    let attempts = 0;
+
+    server.intercept('/api/data', () => {
+      attempts++;
+      if (attempts < 3) throw new Error('Network error');
+      return { data: 'success' };
+    });
+
+    const result = await fetchWithRetry('/api/data');
+
+    expect(attempts).toBe(3);
+    expect(result.data).toBe('success');
+  });
+
+  it('handles partial responses', async () => {
+    server.intercept('/api/large', (req, res) => {
+      res.write('{\"data\":');
+      res.destroy(); // Simulate connection drop
+    });
+
+    const result = await fetchWithRecovery('/api/large');
+    expect(result.error).toBe('incomplete_response');
+  });
+});
+```
+
+### 2. Service Failures
+
+```javascript
+describe('Service Resilience', () => {
+  it('falls back when primary service fails', async () => {
+    // Kill primary service
+    await killService('payment-primary');
+
+    const result = await processPayment({ amount: 100 });
+
+    expect(result.provider).toBe('fallback');
+    expect(result.success).toBe(true);
+  });
+
+  it('circuit breaker opens after failures', async () => {
+    const breaker = new CircuitBreaker(unreliableService, {
+      failureThreshold: 3,
+      resetTimeout: 1000,
+    });
+
+    // Trigger failures
+    for (let i = 0; i < 5; i++) {
+      await breaker.call().catch(() => {});
+    }
+
+    expect(breaker.state).toBe('open');
+
+    // Fast fail while open
+    const start = Date.now();
+    await breaker.call().catch(() => {});
+    expect(Date.now() - start).toBeLessThan(10);
+  });
+
+  it('recovers after circuit breaker resets', async () => {
+    const breaker = new CircuitBreaker(service, { resetTimeout: 100 });
+
+    // Open the breaker
+    await triggerCircuitOpen(breaker);
+    expect(breaker.state).toBe('open');
+
+    // Wait for reset
+    await sleep(150);
+
+    // Should be half-open, allowing a test request
+    service.mockImplementation(() => ({ success: true }));
+    const result = await breaker.call();
+
+    expect(breaker.state).toBe('closed');
+    expect(result.success).toBe(true);
+  });
+});
+```
+
+### 3. Database Failures
+
+```javascript
+describe('Database Resilience', () => {
+  it('handles connection pool exhaustion', async () => {
+    // Exhaust connection pool
+    const connections = [];
+    for (let i = 0; i < db.maxConnections; i++) {
+      connections.push(await db.getConnection());
+    }
+
+    // New request should wait or fail gracefully
+    const start = Date.now();
+    const result = await db.query('SELECT 1').catch(e => e);
+
+    expect(result.message).toMatch(/timeout|pool exhausted/);
+    expect(Date.now() - start).toBeLessThan(6000);
+
+    // Cleanup
+    await Promise.all(connections.map(c => c.release()));
+  });
+
+  it('handles replica lag', async () => {
+    // Write to primary
+    await db.primary.insert('users', { name: 'test' });
+
+    // Read from replica immediately (may not have replicated)
+    const result = await db.replica.query('SELECT * FROM users WHERE name = ?', ['test']);
+
+    // System should handle missing data
+    if (result.length === 0) {
+      // Fallback to primary read
+      const fallback = await db.primary.query('SELECT * FROM users WHERE name = ?', ['test']);
+      expect(fallback.length).toBe(1);
+    }
+  });
+
+  it('handles deadlocks', async () => {
+    const ops = [
+      async () => {
+        await db.transaction(async (tx) => {
+          await tx.update('accounts', { id: 1 }, { balance: 100 });
+          await sleep(50);
+          await tx.update('accounts', { id: 2 }, { balance: 200 });
+        });
+      },
+      async () => {
+        await db.transaction(async (tx) => {
+          await tx.update('accounts', { id: 2 }, { balance: 300 });
+          await sleep(50);
+          await tx.update('accounts', { id: 1 }, { balance: 400 });
+        });
+      },
+    ];
+
+    const results = await Promise.allSettled(ops.map(op => op()));
+    const retried = results.filter(r =>
+      r.status === 'fulfilled' || r.reason.retried
+    );
+
+    expect(retried.length).toBeGreaterThan(0);
+  });
+});
+```
+
+### 4. Resource Exhaustion
+
+```javascript
+describe('Resource Exhaustion', () => {
+  it('handles disk full', async () => {
+    // Simulate disk full
+    fs.mockImplementation('writeFile', () => {
+      throw new Error('ENOSPC: no space left on device');
+    });
+
+    const result = await saveData({ large: 'data' });
+
+    expect(result.error).toBe('storage_full');
+    expect(result.cached).toBe(true);
+  });
+
+  it('handles memory pressure', async () => {
+    const originalHeap = process.memoryUsage().heapUsed;
+
+    // Allocate significant memory
+    const allocations = [];
+    for (let i = 0; i < 10; i++) {
+      allocations.push(new Array(10000000).fill('x'));
+    }
+
+    // System should still respond
+    const result = await healthCheck();
+    expect(result.status).toBe('degraded');
+
+    // Cleanup
+    allocations.length = 0;
+    if (global.gc) global.gc();
+  });
+
+  it('handles CPU saturation', async () => {
+    // Saturate CPU
+    const workers = [];
+    for (let i = 0; i < 4; i++) {
+      workers.push(cpuIntensiveTask());
+    }
+
+    // Critical endpoint should still respond
+    const start = Date.now();
+    const result = await api.get('/health');
+    const duration = Date.now() - start;
+
+    expect(result.status).toBe(200);
+    expect(duration).toBeLessThan(5000);
+
+    await Promise.all(workers);
+  });
+});
+```
+
+### 5. Clock Skew
+
+```javascript
+describe('Clock Resilience', () => {
+  it('handles clock skew between services', () => {
+    // Simulate 5-minute clock difference
+    const serverTime = Date.now() - 5 * 60 * 1000;
+
+    const token = jwt.sign({ exp: serverTime + 3600000 }, secret);
+    const result = validateToken(token, { clockTolerance: 300 });
+
+    expect(result.valid).toBe(true);
+  });
+
+  it('handles leap seconds', () => {
+    // Simulate time going backward
+    MockDate.set(new Date('2024-06-30T23:59:60Z'));
+
+    const result = processScheduledTask();
+
+    expect(result.error).toBeUndefined();
+    MockDate.reset();
+  });
+});
+```
+
+## Chaos Monkey Implementation
+
+```javascript
+class ChaosMonkey {
+  constructor(options = {}) {
+    this.enabled = options.enabled ?? false;
+    this.probability = options.probability ?? 0.1;
+    this.faults = options.faults ?? ['latency', 'error', 'timeout'];
+  }
+
+  maybeInjectFault() {
+    if (!this.enabled) return null;
+    if (Math.random() > this.probability) return null;
+
+    const fault = this.faults[Math.floor(Math.random() * this.faults.length)];
+
+    switch (fault) {
+      case 'latency':
+        return { type: 'latency', delay: 1000 + Math.random() * 4000 };
+      case 'error':
+        return { type: 'error', code: 500, message: 'Chaos error' };
+      case 'timeout':
+        return { type: 'timeout', duration: 30000 };
+      default:
+        return null;
+    }
+  }
+
+  wrap(fn) {
+    return async (...args) => {
+      const fault = this.maybeInjectFault();
+
+      if (fault) {
+        switch (fault.type) {
+          case 'latency':
+            await new Promise(r => setTimeout(r, fault.delay));
+            break;
+          case 'error':
+            throw new Error(fault.message);
+          case 'timeout':
+            await new Promise(() => {}); // Never resolves
+        }
+      }
+
+      return fn(...args);
+    };
+  }
+}
+
+// Usage
+const chaos = new ChaosMonkey({
+  enabled: process.env.CHAOS_ENABLED === 'true',
+  probability: 0.05,
+});
+
+const fetchUsers = chaos.wrap(async () => {
+  return api.get('/users');
+});
+```
+
+## Game Day Scenarios
+
+```javascript
+describe('Game Day: Total Service Failure', () => {
+  it('survives primary database failure', async () => {
+    // Kill primary database
+    await killDatabase('primary');
+
+    // Application should failover
+    const result = await api.get('/users');
+    expect(result.status).toBe(200);
+    expect(result.headers['x-database']).toBe('replica');
+
+    // Restore
+    await restoreDatabase('primary');
+  });
+
+  it('survives region failure', async () => {
+    // Simulate region failure
+    await disableRegion('us-east-1');
+
+    // Traffic should route to backup region
+    const result = await api.get('/health');
+    expect(result.region).toBe('us-west-2');
+
+    // Restore
+    await enableRegion('us-east-1');
+  });
+});
+```
+
+## When to Use
+
+- Before major deployments
+- After significant architecture changes
+- Periodically in production (carefully!)
+- During reliability engineering efforts
+- When building distributed systems
+
+## Anti-Patterns
+
+1. **No Kill Switch**: Always have rollback mechanism
+2. **Testing in Production Without Prep**: Start in staging
+3. **No Observability**: Monitor during experiments
+4. **Large Blast Radius**: Start small
+5. **No Hypothesis**: Define expected behavior first
+
+
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  chaos-testing:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 151 skills
+  </Card>
+  <Card title="Testing" icon="flask-vial" href="/skills/overview#testing">
+    More testing skills
+  </Card>
+</CardGroup>

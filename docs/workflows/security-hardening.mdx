@@ -1,0 +1,268 @@
+---
+title: "testing/security-hardening"
+description: "Security hardening workflow with vulnerability assessment, penetration testing, and remediation"
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Testing
+
+  **Complexity:** 🟠 High
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:security-hardening "your description here"
+```
+
+
+# Security Hardening Workflow
+
+Comprehensive security testing and hardening workflow.
+
+## Overview
+
+This workflow provides systematic security assessment and hardening through:
+1. Vulnerability scanning and assessment
+2. Penetration testing simulation
+3. Security test development
+4. Remediation and verification
+
+## Steps
+
+1. **Inventory**: Identify assets, endpoints, and data flows
+2. **Scan**: Run vulnerability and dependency scanning
+3. **Test**: Execute OWASP Top 10 test suite
+4. **Penetrate**: Simulate attacker perspective
+5. **Remediate**: Fix vulnerabilities by severity
+6. **Verify**: Re-run tests and confirm fixes
+7. **Document**: Update security documentation
+
+## Workflow Phases
+
+### Phase 1: Asset Inventory
+1. Identify all endpoints and entry points
+2. Map authentication/authorization flows
+3. Catalog sensitive data handling
+4. Document third-party dependencies
+
+### Phase 2: Vulnerability Assessment
+1. Run dependency vulnerability scan
+2. Perform static analysis (SAST)
+3. Execute dynamic analysis (DAST)
+4. Review security configurations
+
+```bash
+# Dependency scanning
+npm audit
+npx snyk test
+
+# Static analysis
+npx eslint --plugin security .
+
+# Configuration review
+npx audit-ci
+```
+
+### Phase 3: OWASP Top 10 Testing
+
+#### A01: Injection
+- SQL injection tests
+- Command injection tests
+- XSS tests
+- YAML/XML injection tests
+
+#### A02: Broken Authentication
+- Password policy tests
+- Session management tests
+- Token validation tests
+- Brute force protection tests
+
+#### A03: Sensitive Data Exposure
+- Encryption at rest tests
+- Encryption in transit tests
+- PII handling tests
+- Secret exposure tests
+
+#### A04: Access Control
+- Horizontal escalation tests
+- Vertical escalation tests
+- Resource ownership tests
+- CORS configuration tests
+
+#### A05: Security Misconfiguration
+- Default credential tests
+- Debug mode tests
+- Error handling tests
+- Security header tests
+
+#### A06: Vulnerable Components
+- Dependency audit
+- Known CVE checks
+- Outdated package detection
+
+#### A07: Auth Failures
+- Login flow tests
+- Password reset tests
+- MFA bypass attempts
+- Session fixation tests
+
+#### A08: Data Integrity
+- Input validation tests
+- File upload tests
+- Deserialization tests
+
+#### A09: Logging Failures
+- Audit log tests
+- Log injection tests
+- Sensitive data in logs tests
+
+#### A10: SSRF
+- URL validation tests
+- Internal network access tests
+- Redirect tests
+
+### Phase 4: Penetration Testing
+1. Simulate attacker perspective
+2. Test attack chains
+3. Verify defense in depth
+4. Document exploitation paths
+
+### Phase 5: Remediation
+1. Prioritize by severity and exploitability
+2. Develop fixes for each vulnerability
+3. Write tests to prevent regression
+4. Review and approve fixes
+
+### Phase 6: Verification
+1. Re-run all security tests
+2. Verify fixes are effective
+3. Ensure no new vulnerabilities
+4. Update security documentation
+
+## Severity Levels
+
+| Level | Response Time | Examples |
+|-------|---------------|----------|
+| Critical | 24 hours | RCE, auth bypass, data breach |
+| High | 1 week | SQL injection, XSS, CSRF |
+| Medium | 1 month | Info disclosure, weak crypto |
+| Low | Next release | Minor misconfigs, best practices |
+
+## Security Headers Checklist
+
+```
+Content-Security-Policy: default-src 'self'
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Strict-Transport-Security: max-age=31536000
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: geolocation=()
+```
+
+## Agent Responsibilities
+
+| Agent | Responsibility |
+|-------|----------------|
+| security-auditor | Overall security assessment, OWASP review |
+| vulnerability-scanner | Automated scanning, CVE detection |
+| tester | Security test development |
+| fullstack-developer | Remediation implementation |
+
+## Quality Gates
+
+- No critical vulnerabilities
+- No high vulnerabilities in new code
+- All OWASP categories tested
+- Security headers configured
+- Dependencies up to date
+- Secrets not exposed
+
+## Success Criteria
+
+- All critical/high vulnerabilities resolved
+- Security test suite comprehensive
+- No regression in security posture
+- Documentation updated
+- Team security awareness increased
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@security-auditor](/agents/security-auditor)** - Specialized agent for security auditor tasks
+- **[@vulnerability-scanner](/agents/vulnerability-scanner)** - Specialized agent for vulnerability scanner tasks
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+
+
+
+## Skills Applied
+
+- **[testing/security-testing](/skills/testing/security-testing)** - Domain expertise
+- **[security/owasp](/skills/security/owasp)** - Domain expertise
+- **[security/security-hardening](/skills/security/security-hardening)** - Domain expertise
+- **[testing/comprehensive-testing](/skills/testing/comprehensive-testing)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/quality:test-security`
+- `/security:scan`
+- `/quality:security-scan`
+
+
+
+
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
+| [vulnerability-scanner](/agents/vulnerability-scanner) | security/owasp, security/security-hardening | /security:scan, /quality:security-scan |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [testing/security-testing](/skills/security-testing) | Security testing patterns covering OWASP Top 10, injection p... |
+| [security/owasp](/skills/owasp) | Claude applies OWASP security best practices to web applicat... |
+| [security/security-hardening](/skills/security-hardening) | Advanced security patterns including zero-trust architecture... |
+| [testing/comprehensive-testing](/skills/comprehensive-testing) | Comprehensive 4D testing methodology covering Accuracy, Perf... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/quality:test-security`](/commands/quality-test-security) | Run comprehensive security testing covering OWASP Top 10, in... |
+| [`/security:scan`](/commands/security-scan) | Run security scans including SAST, SCA, and secrets detectio... |
+| [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 67 workflows
+  </Card>
+  <Card title="Testing" icon="diagram-project" href="/workflows/overview#testing">
+    More testing workflows
+  </Card>
+</CardGroup>

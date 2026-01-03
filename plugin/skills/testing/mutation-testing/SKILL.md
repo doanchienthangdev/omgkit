@@ -1,0 +1,335 @@
+---
+name: testing/mutation-testing
+description: Mutation testing with Stryker to verify test quality by introducing code mutations and measuring detection rates
+category: testing
+tags:
+  - testing
+  - mutation
+  - stryker
+  - quality
+  - coverage
+related_skills:
+  - testing/comprehensive-testing
+  - testing/vitest
+  - methodology/quality-gates
+---
+
+# Mutation Testing
+
+Measure test quality by introducing bugs (mutations) and verifying your tests catch them.
+
+## Quick Start
+
+```bash
+# Install Stryker
+npm install -D @stryker-mutator/core @stryker-mutator/vitest-runner
+
+# Initialize configuration
+npx stryker init
+
+# Run mutation testing
+npm run test:mutation
+```
+
+## Core Concept
+
+Mutation testing introduces small changes (mutations) to your code and runs your tests. If tests still pass, they're too weak.
+
+```javascript
+// Original code
+function isAdult(age) {
+  return age >= 18;
+}
+
+// Mutations Stryker creates:
+function isAdult(age) { return age > 18; }   // >= to >
+function isAdult(age) { return age <= 18; }  // >= to <=
+function isAdult(age) { return false; }      // return false
+function isAdult(age) { return true; }       // return true
+```
+
+A good test catches all mutations:
+
+```javascript
+describe('isAdult', () => {
+  it('returns true for age 18', () => {
+    expect(isAdult(18)).toBe(true);  // Catches >= to >
+  });
+
+  it('returns false for age 17', () => {
+    expect(isAdult(17)).toBe(false); // Catches >= to <=
+  });
+
+  it('returns true for age 100', () => {
+    expect(isAdult(100)).toBe(true); // Catches return false
+  });
+});
+```
+
+## Configuration
+
+### stryker.config.json
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "mutate": [
+    "src/**/*.js",
+    "src/**/*.ts",
+    "!src/**/*.test.js",
+    "!src/**/*.spec.ts"
+  ],
+  "reporters": [
+    "progress",
+    "clear-text",
+    "html",
+    "json"
+  ],
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  },
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 50
+  },
+  "concurrency": 4,
+  "timeoutMS": 60000
+}
+```
+
+## Mutation Operators
+
+### Arithmetic Operators
+```javascript
+// Original: a + b
+a - b    // Plus to Minus
+a * b    // Plus to Times
+a / b    // Plus to Divide
+```
+
+### Comparison Operators
+```javascript
+// Original: a > b
+a >= b   // Greater to GreaterOrEqual
+a < b    // Greater to Less
+a <= b   // Greater to LessOrEqual
+a == b   // Greater to Equal
+```
+
+### Logical Operators
+```javascript
+// Original: a && b
+a || b   // And to Or
+
+// Original: !a
+a        // Negate removal
+```
+
+### Boundary Mutations
+```javascript
+// Original: i < 10
+i <= 10  // Less to LessOrEqual
+i < 11   // Boundary change
+i < 9    // Boundary change
+```
+
+### Return Value Mutations
+```javascript
+// Original: return value
+return undefined;  // Remove return
+return !value;     // Negate return
+return "";         // Empty string
+return 0;          // Zero
+return null;       // Null
+```
+
+## Understanding Results
+
+### Mutation States
+
+| State | Description | Action |
+|-------|-------------|--------|
+| **Killed** | Test failed = mutation caught | Good! |
+| **Survived** | Tests passed = mutation missed | Add tests |
+| **Timeout** | Tests took too long | Check infinite loops |
+| **No Coverage** | No tests cover this code | Add tests |
+| **Compile Error** | Mutation broke compilation | Ignore |
+
+### Mutation Score
+
+```
+Mutation Score = (Killed / Total) * 100%
+```
+
+- **80%+**: Excellent test quality
+- **60-80%**: Good, room for improvement
+- **40-60%**: Weak tests, many gaps
+- **<40%**: Critical test deficiency
+
+## Improving Mutation Score
+
+### 1. Boundary Testing
+
+```javascript
+// Weak: Only tests middle values
+it('validates age', () => {
+  expect(isValidAge(25)).toBe(true);
+});
+
+// Strong: Tests boundaries
+it('validates age boundaries', () => {
+  expect(isValidAge(0)).toBe(true);    // Min boundary
+  expect(isValidAge(-1)).toBe(false);  // Below min
+  expect(isValidAge(150)).toBe(true);  // Max boundary
+  expect(isValidAge(151)).toBe(false); // Above max
+});
+```
+
+### 2. Condition Coverage
+
+```javascript
+// Original
+function process(a, b) {
+  if (a > 0 && b > 0) {
+    return 'both positive';
+  }
+  return 'not both positive';
+}
+
+// Weak: Only tests one path
+it('processes positive', () => {
+  expect(process(1, 1)).toBe('both positive');
+});
+
+// Strong: Tests all conditions
+it('processes various combinations', () => {
+  expect(process(1, 1)).toBe('both positive');
+  expect(process(-1, 1)).toBe('not both positive'); // a negative
+  expect(process(1, -1)).toBe('not both positive'); // b negative
+  expect(process(0, 1)).toBe('not both positive');  // a zero
+});
+```
+
+### 3. Return Value Testing
+
+```javascript
+// Weak: Only tests truthy
+it('checks admin', () => {
+  expect(isAdmin(adminUser)).toBeTruthy();
+});
+
+// Strong: Tests exact values
+it('checks admin status', () => {
+  expect(isAdmin(adminUser)).toBe(true);
+  expect(isAdmin(regularUser)).toBe(false);
+  expect(isAdmin(null)).toBe(false);
+});
+```
+
+## Incremental Mutation Testing
+
+For large codebases, run mutations on changed files only:
+
+```bash
+# Only mutate changed files
+git diff --name-only origin/main | xargs npx stryker run --mutate
+```
+
+## CI Integration
+
+### GitHub Actions
+
+```yaml
+name: Mutation Testing
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Run Mutation Tests
+        run: npm run test:mutation
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-report
+          path: reports/mutation/
+```
+
+## Performance Optimization
+
+### Reduce Mutation Scope
+
+```json
+{
+  "mutate": [
+    "src/core/**/*.js",
+    "!src/core/**/*.test.js",
+    "!src/core/generated/**"
+  ]
+}
+```
+
+### Increase Parallelism
+
+```json
+{
+  "concurrency": 8,
+  "testRunner": "vitest"
+}
+```
+
+### Filter Mutators
+
+```json
+{
+  "mutator": {
+    "excludedMutations": [
+      "StringLiteral",
+      "ObjectLiteral"
+    ]
+  }
+}
+```
+
+## When to Use
+
+### Good Candidates
+- Critical business logic
+- Security-sensitive code
+- Mathematical calculations
+- State machines
+- Validation logic
+
+### When to Skip
+- Generated code
+- Configuration files
+- Third-party wrappers
+- UI components
+- Test utilities
+
+## Anti-Patterns
+
+1. **Chasing 100%**: Diminishing returns above 90%
+2. **Ignoring Timeouts**: Fix infinite loop mutations
+3. **Testing Everything**: Focus on critical paths
+4. **No Baseline**: Establish baseline before improving
+5. **Infrequent Runs**: Run on every PR

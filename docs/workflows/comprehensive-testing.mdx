@@ -1,0 +1,205 @@
+---
+title: "testing/comprehensive-testing"
+description: "Comprehensive Omega testing workflow covering all 4 dimensions - Accuracy, Performance, Security, and Accessibility"
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Testing
+
+  **Complexity:** 🟠 High
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:comprehensive-testing "your description here"
+```
+
+
+# Omega Testing Workflow
+
+Comprehensive testing workflow that covers all 4 dimensions of software quality.
+
+## Overview
+
+This workflow orchestrates comprehensive testing across:
+1. **Accuracy** - Correctness of functionality
+2. **Performance** - Speed and resource efficiency
+3. **Security** - Protection against vulnerabilities
+4. **Accessibility** - Usability for all users
+
+## Steps
+
+1. **Plan**: Define testing dimensions and coverage targets
+2. **Accuracy**: Run unit, integration, and E2E tests
+3. **Performance**: Execute benchmarks and load tests
+4. **Security**: Run OWASP and vulnerability tests
+5. **Accessibility**: Check WCAG compliance
+6. **Mutation**: Verify test quality with mutations
+7. **Report**: Generate quality dashboard
+
+## Workflow Phases
+
+### Phase 1: Test Planning
+1. Analyze codebase for testable components
+2. Identify critical paths and risk areas
+3. Define coverage targets per dimension
+4. Establish SLAs and thresholds
+
+### Phase 2: Accuracy Testing
+1. Run unit tests with property-based tests
+2. Execute integration tests
+3. Run E2E tests for critical flows
+4. Measure code coverage
+
+### Phase 3: Performance Testing
+1. Run benchmarks for key operations
+2. Execute load tests for APIs
+3. Perform memory leak detection
+4. Compare against performance budget
+
+### Phase 4: Security Testing
+1. Run OWASP Top 10 tests
+2. Execute injection tests
+3. Verify authentication/authorization
+4. Scan for vulnerabilities
+
+### Phase 5: Accessibility Testing
+1. Run WCAG compliance checks
+2. Test keyboard navigation
+3. Verify screen reader compatibility
+4. Check color contrast and focus indicators
+
+### Phase 6: Mutation Testing
+1. Generate code mutations
+2. Verify test quality
+3. Identify weak assertions
+4. Improve mutation score
+
+### Phase 7: Reporting
+1. Aggregate test results
+2. Generate quality dashboard
+3. Create action items for failures
+4. Document lessons learned
+
+## Quality Gates
+
+| Dimension | Minimum | Target | Excellent |
+|-----------|---------|--------|-----------|
+| Unit Coverage | 80% | 90% | 95% |
+| Integration Coverage | 60% | 75% | 85% |
+| Performance SLA | Pass | <100ms p95 | <50ms p95 |
+| Security | No critical | No high | No medium |
+| Accessibility | AA | AAA partial | Full AAA |
+| Mutation Score | 50% | 75% | 85% |
+
+## Triggers
+
+- Pre-commit (fast tests only)
+- Pre-merge (full suite)
+- Scheduled (comprehensive + performance)
+- Release (all + security audit)
+
+## Agent Responsibilities
+
+| Agent | Responsibility |
+|-------|----------------|
+| tester | Unit, integration, E2E, property tests |
+| security-auditor | Security tests, vulnerability scanning |
+| performance-engineer | Benchmarks, load tests, profiling |
+| code-reviewer | Test quality review, coverage analysis |
+
+## Success Criteria
+
+- All tests pass
+- Coverage meets thresholds
+- No security vulnerabilities
+- Performance within SLAs
+- Accessibility compliant
+- Mutation score above threshold
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+- **[@security-auditor](/agents/security-auditor)** - Specialized agent for security auditor tasks
+- **[@performance-engineer](/agents/performance-engineer)** - Specialized agent for performance engineer tasks
+- **[@code-reviewer](/agents/code-reviewer)** - Specialized agent for code reviewer tasks
+
+
+
+## Skills Applied
+
+- **[testing/comprehensive-testing](/skills/testing/comprehensive-testing)** - Domain expertise
+- **[testing/property-testing](/skills/testing/property-testing)** - Domain expertise
+- **[testing/mutation-testing](/skills/testing/mutation-testing)** - Domain expertise
+- **[testing/security-testing](/skills/testing/security-testing)** - Domain expertise
+- **[testing/performance-testing](/skills/testing/performance-testing)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/quality:test-omega`
+- `/quality:test-property`
+- `/quality:test-mutate`
+- `/quality:test-security`
+- `/quality:test-performance`
+
+
+
+
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
+| [performance-engineer](/agents/performance-engineer) | devops/performance-profiling, databases/database-optimization... | /perf:benchmark, /perf:profile... |
+| [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [testing/comprehensive-testing](/skills/comprehensive-testing) | Comprehensive 4D testing methodology covering Accuracy, Perf... |
+| [testing/property-testing](/skills/property-testing) | Property-based testing with Fast-Check for finding edge case... |
+| [testing/mutation-testing](/skills/mutation-testing) | Mutation testing with Stryker to verify test quality by intr... |
+| [testing/security-testing](/skills/security-testing) | Security testing patterns covering OWASP Top 10, injection p... |
+| [testing/performance-testing](/skills/performance-testing) | Performance testing patterns including load testing, stress ... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/quality:test-omega`](/commands/quality-test-omega) | Run comprehensive 4-dimensional Omega testing covering accur... |
+| [`/quality:test-property`](/commands/quality-test-property) | Generate and run property-based tests using Fast-Check for i... |
+| [`/quality:test-mutate`](/commands/quality-test-mutate) | Run mutation testing with Stryker to verify test quality by ... |
+| [`/quality:test-security`](/commands/quality-test-security) | Run comprehensive security testing covering OWASP Top 10, in... |
+| [`/quality:test-performance`](/commands/quality-test-performance) | Run performance testing including benchmarks, load tests, an... |
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 67 workflows
+  </Card>
+  <Card title="Testing" icon="diagram-project" href="/workflows/overview#testing">
+    More testing workflows
+  </Card>
+</CardGroup>

@@ -1,0 +1,135 @@
+---
+title: "/quality:test-mutate"
+description: "Run mutation testing with Stryker to verify test quality by introducing code mutations"
+icon: "shield-check"
+---
+
+<Info>
+  **Category:** Quality
+
+  **Syntax:** `/quality:test-mutate`
+</Info>
+
+## Overview
+
+Run mutation testing with Stryker to verify test quality by introducing code mutations
+
+## Quick Start
+
+```bash
+/quality:test-mutate
+```
+
+
+# /quality:test-mutate
+
+Run mutation testing to verify test suite quality.
+
+## Usage
+
+```bash
+/quality:test-mutate
+/quality:test-mutate --file src/core.js
+/quality:test-mutate --threshold 75
+```
+
+## How It Works
+
+1. **Mutate**: Stryker introduces small changes (mutations) to your code
+2. **Test**: Runs your test suite against each mutation
+3. **Score**: Calculates percentage of mutations caught
+
+## Mutation Types
+
+- **Arithmetic**: `+` to `-`, `*` to `/`
+- **Comparison**: `>` to `>=`, `==` to `!=`
+- **Logical**: `&&` to `||`, `!` removal
+- **Return Values**: `true` to `false`, empty returns
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| --file | Target file to mutate | All src files |
+| --threshold | Minimum mutation score | 75% |
+| --concurrency | Parallel test runs | 4 |
+| --timeout | Timeout per mutation | 60s |
+
+## Interpreting Results
+
+| Mutation Score | Quality Level | Action |
+|----------------|---------------|--------|
+| 80%+ | Excellent | Maintain |
+| 60-80% | Good | Improve boundary tests |
+| 40-60% | Fair | Add more assertions |
+| Below 40% | Poor | Major test improvements needed |
+
+## Output
+
+- HTML report in `reports/mutation/`
+- JSON summary for CI integration
+- List of surviving mutations
+
+## Related
+
+- testing/mutation-testing
+- testing/comprehensive-testing
+- methodology/quality-gates
+
+
+
+
+## Usage Graph
+
+### Available In Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/comprehensive-testing](/workflows/comprehensive-testing) | Comprehensive Omega testing workflow covering all 4 dimensio... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/quality:test-mutate
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/quality:test-mutate
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 150 commands
+  </Card>
+  <Card title="Quality Commands" icon="shield-check" href="/commands/overview#quality">
+    More quality commands
+  </Card>
+</CardGroup>

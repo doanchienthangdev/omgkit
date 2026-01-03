@@ -293,7 +293,13 @@
         "commands/lint",
         "commands/optimize",
         "commands/refactor",
-        "commands/security-scan"
+        "commands/security-scan",
+        "commands/test-chaos",
+        "commands/test-mutate",
+        "commands/test-omega",
+        "commands/test-performance",
+        "commands/test-property",
+        "commands/test-security"
       ]
     },
     {
@@ -614,8 +620,14 @@
     {
       "group": "Testing",
       "pages": [
+        "skills/chaos-testing",
+        "skills/comprehensive-testing",
+        "skills/mutation-testing",
+        "skills/performance-testing",
         "skills/playwright",
+        "skills/property-testing",
         "skills/pytest",
+        "skills/security-testing",
         "skills/vitest"
       ]
     },
@@ -921,6 +933,14 @@
         "workflows/platform-submission",
         "workflows/playtesting",
         "workflows/prototype-to-production"
+      ]
+    },
+    {
+      "group": "Testing",
+      "pages": [
+        "workflows/comprehensive-testing",
+        "workflows/security-hardening",
+        "workflows/test-driven-development"
       ]
     },
     {

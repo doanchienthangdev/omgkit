@@ -1,0 +1,412 @@
+---
+title: "testing/performance-testing"
+description: "Performance testing patterns including load testing, stress testing, benchmarking, and profiling for optimal application performance"
+icon: "flask-vial"
+---
+
+<Info>
+  **Category:** Testing
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Performance testing patterns including load testing, stress testing, benchmarking, and profiling for optimal application performance
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Performance Testing
+
+Comprehensive performance testing for speed, scalability, and resource efficiency.
+
+## Quick Start
+
+```bash
+# Run benchmarks
+npm run test:performance
+
+# Profile with Node.js
+node --prof app.js
+node --prof-process isolate-*.log > profile.txt
+
+# Load testing with k6
+k6 run load-test.js
+```
+
+## Types of Performance Tests
+
+### 1. Benchmark Tests
+
+Measure execution time of specific operations.
+
+```javascript
+import { describe, it, expect } from 'vitest';
+
+describe('Performance Benchmarks', () => {
+  function timeExecution(fn, iterations = 1000) {
+    const start = performance.now();
+    for (let i = 0; i < iterations; i++) {
+      fn();
+    }
+    const end = performance.now();
+    return (end - start) / iterations;
+  }
+
+  it('sorts 1000 items under 1ms', () => {
+    const data = Array(1000).fill().map(() => Math.random());
+    const time = timeExecution(() => [...data].sort((a, b) => a - b), 100);
+    expect(time).toBeLessThan(1);
+  });
+
+  it('hashes string under 0.1ms', () => {
+    const time = timeExecution(() => hashString('test-string'), 10000);
+    expect(time).toBeLessThan(0.1);
+  });
+
+  it('parses JSON under 0.5ms', () => {
+    const json = JSON.stringify({ users: Array(100).fill({ name: 'test' }) });
+    const time = timeExecution(() => JSON.parse(json), 1000);
+    expect(time).toBeLessThan(0.5);
+  });
+});
+```
+
+### 2. Load Tests
+
+Simulate concurrent users to test scalability.
+
+```javascript
+// k6 load test script
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  stages: [
+    { duration: '1m', target: 50 },   // Ramp up to 50 users
+    { duration: '3m', target: 50 },   // Stay at 50 users
+    { duration: '1m', target: 100 },  // Ramp up to 100
+    { duration: '3m', target: 100 },  // Stay at 100
+    { duration: '1m', target: 0 },    // Ramp down
+  ],
+  thresholds: {
+    http_req_duration: ['p(95)<200'], // 95% under 200ms
+    http_req_failed: ['rate<0.01'],   // Error rate < 1%
+  },
+};
+
+export default function () {
+  const res = http.get('https://api.example.com/users');
+
+  check(res, {
+    'status is 200': (r) => r.status === 200,
+    'response time < 200ms': (r) => r.timings.duration < 200,
+  });
+
+  sleep(1);
+}
+```
+
+### 3. Stress Tests
+
+Push system beyond normal limits.
+
+```javascript
+describe('Stress Tests', () => {
+  it('handles 10000 concurrent connections', async () => {
+    const connections = Array(10000).fill().map(async () => {
+      const ws = new WebSocket('ws://localhost:3000');
+      return new Promise((resolve, reject) => {
+        ws.onopen = () => resolve(ws);
+        ws.onerror = reject;
+        setTimeout(() => reject(new Error('timeout')), 5000);
+      });
+    });
+
+    const results = await Promise.allSettled(connections);
+    const successful = results.filter(r => r.status === 'fulfilled');
+    expect(successful.length).toBeGreaterThan(9000);
+  });
+
+  it('recovers after memory pressure', async () => {
+    const allocations = [];
+
+    // Allocate memory
+    for (let i = 0; i < 100; i++) {
+      allocations.push(new Array(1000000).fill('x'));
+    }
+
+    // Force GC and clear
+    allocations.length = 0;
+    if (global.gc) global.gc();
+
+    // System should still function
+    const result = await api.get('/health');
+    expect(result.status).toBe(200);
+  });
+});
+```
+
+### 4. Memory Tests
+
+Detect memory leaks and inefficiencies.
+
+```javascript
+describe('Memory Tests', () => {
+  it('does not leak memory on repeated operations', async () => {
+    const before = process.memoryUsage().heapUsed;
+
+    for (let i = 0; i < 10000; i++) {
+      await processRequest({ data: 'test' });
+    }
+
+    if (global.gc) global.gc();
+    await new Promise(r => setTimeout(r, 100));
+
+    const after = process.memoryUsage().heapUsed;
+    const leaked = after - before;
+
+    expect(leaked).toBeLessThan(10 * 1024 * 1024); // 10MB
+  });
+
+  it('releases event listeners', () => {
+    const emitter = new EventEmitter();
+    const before = emitter.listenerCount('event');
+
+    for (let i = 0; i < 100; i++) {
+      const handler = () => {};
+      emitter.on('event', handler);
+      emitter.off('event', handler);
+    }
+
+    const after = emitter.listenerCount('event');
+    expect(after).toBe(before);
+  });
+});
+```
+
+## API Response Time Tests
+
+```javascript
+describe('API Performance', () => {
+  const SLA = {
+    p50: 50,   // 50th percentile under 50ms
+    p95: 200,  // 95th percentile under 200ms
+    p99: 500,  // 99th percentile under 500ms
+  };
+
+  it('meets response time SLA', async () => {
+    const times = [];
+
+    for (let i = 0; i < 1000; i++) {
+      const start = performance.now();
+      await api.get('/users');
+      times.push(performance.now() - start);
+    }
+
+    times.sort((a, b) => a - b);
+
+    const p50 = times[Math.floor(times.length * 0.50)];
+    const p95 = times[Math.floor(times.length * 0.95)];
+    const p99 = times[Math.floor(times.length * 0.99)];
+
+    expect(p50).toBeLessThan(SLA.p50);
+    expect(p95).toBeLessThan(SLA.p95);
+    expect(p99).toBeLessThan(SLA.p99);
+  });
+});
+```
+
+## Database Performance Tests
+
+```javascript
+describe('Database Performance', () => {
+  it('query executes under 10ms', async () => {
+    const start = performance.now();
+    await db.query('SELECT * FROM users WHERE id = ?', [1]);
+    const duration = performance.now() - start;
+    expect(duration).toBeLessThan(10);
+  });
+
+  it('handles 100 concurrent queries', async () => {
+    const queries = Array(100).fill().map(() =>
+      db.query('SELECT * FROM users LIMIT 10')
+    );
+
+    const start = performance.now();
+    await Promise.all(queries);
+    const duration = performance.now() - start;
+
+    expect(duration).toBeLessThan(1000);
+  });
+
+  it('insert batch is efficient', async () => {
+    const records = Array(1000).fill().map((_, i) => ({
+      name: `User ${i}`,
+      email: `user${i}@test.com`,
+    }));
+
+    const start = performance.now();
+    await db.batchInsert('users', records);
+    const duration = performance.now() - start;
+
+    expect(duration).toBeLessThan(500);
+  });
+});
+```
+
+## Profiling Patterns
+
+### CPU Profiling
+
+```javascript
+const v8Profiler = require('v8-profiler-next');
+
+async function profileCPU(fn, name) {
+  v8Profiler.startProfiling(name);
+
+  await fn();
+
+  const profile = v8Profiler.stopProfiling(name);
+  profile.export((error, result) => {
+    fs.writeFileSync(`${name}.cpuprofile`, result);
+  });
+}
+```
+
+### Memory Profiling
+
+```javascript
+function takeHeapSnapshot(name) {
+  const snapshot = v8.writeHeapSnapshot();
+  console.log(`Heap snapshot written to ${snapshot}`);
+}
+
+// In test
+it('memory usage is stable', async () => {
+  takeHeapSnapshot('before');
+
+  for (let i = 0; i < 10000; i++) {
+    await processData();
+  }
+
+  if (global.gc) global.gc();
+  takeHeapSnapshot('after');
+});
+```
+
+## Performance Budgets
+
+```javascript
+const budgets = {
+  'First Contentful Paint': 1500,
+  'Time to Interactive': 3500,
+  'Total Bundle Size': 250 * 1024,
+  'API Response Time': 200,
+};
+
+describe('Performance Budgets', () => {
+  it('bundle size within budget', async () => {
+    const stats = require('./dist/stats.json');
+    const totalSize = stats.assets
+      .filter(a => a.name.endsWith('.js'))
+      .reduce((sum, a) => sum + a.size, 0);
+
+    expect(totalSize).toBeLessThan(budgets['Total Bundle Size']);
+  });
+});
+```
+
+## Continuous Performance Testing
+
+### GitHub Actions
+
+```yaml
+name: Performance Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci
+      - run: npm run test:performance
+
+      - name: Compare with baseline
+        run: |
+          npm run benchmark:compare -- --baseline main
+```
+
+## When to Use
+
+- Before major releases
+- After performance-critical changes
+- During capacity planning
+- When SLA monitoring shows degradation
+- As part of CI/CD pipeline
+
+## Anti-Patterns
+
+1. **Testing on Development Hardware**: Use production-like environment
+2. **Ignoring Warmup**: JIT compilation affects first runs
+3. **Single Metric Focus**: Monitor multiple dimensions
+4. **No Baseline**: Always compare against baseline
+5. **Flaky Thresholds**: Use percentiles, not averages
+
+
+## Usage Graph
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/comprehensive-testing](/workflows/comprehensive-testing) | Comprehensive Omega testing workflow covering all 4 dimensio... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  performance-testing:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 151 skills
+  </Card>
+  <Card title="Testing" icon="flask-vial" href="/skills/overview#testing">
+    More testing skills
+  </Card>
+</CardGroup>

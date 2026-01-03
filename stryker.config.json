@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "testRunner": "vitest",
+  "mutate": [
+    "lib/**/*.js",
+    "bin/**/*.js",
+    "!lib/**/*.test.js",
+    "!bin/**/*.test.js"
+  ],
+  "ignorePatterns": [
+    "node_modules",
+    "dist",
+    "docs",
+    "plugin",
+    "coverage",
+    ".devlogs",
+    "tests"
+  ],
+  "reporters": [
+    "progress",
+    "clear-text",
+    "html",
+    "json"
+  ],
+  "htmlReporter": {
+    "fileName": "reports/mutation/html/index.html"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation/mutation-report.json"
+  },
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 50
+  },
+  "concurrency": 4,
+  "timeoutMS": 60000,
+  "timeoutFactor": 2.5,
+  "cleanTempDir": "always",
+  "tempDirName": ".stryker-tmp",
+  "disableTypeChecks": "{test,lib,bin}/**/*.{ts,tsx,js,jsx}"
+}

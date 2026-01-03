@@ -1,0 +1,252 @@
+---
+title: "testing/test-driven-development"
+description: "Test-Driven Development workflow with red-green-refactor cycle and continuous test feedback"
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Testing
+
+  **Complexity:** 🟡 Medium
+
+  **Estimated Time:** Varies
+</Info>
+
+## Quick Start
+
+```bash
+/workflow:test-driven-development "your description here"
+```
+
+
+# Test-Driven Development Workflow
+
+Systematic TDD workflow following the red-green-refactor cycle.
+
+## Overview
+
+This workflow implements Test-Driven Development where:
+1. **Red** - Write a failing test first
+2. **Green** - Write minimal code to pass
+3. **Refactor** - Improve code while tests pass
+
+## Steps
+
+1. **Analyze**: Break down feature into testable behaviors
+2. **Red**: Write a failing test first
+3. **Green**: Write minimal code to pass the test
+4. **Refactor**: Improve code while tests pass
+5. **Iterate**: Add more tests and repeat
+6. **Integrate**: Run full test suite and commit
+
+## Workflow Phases
+
+### Phase 1: Requirement Analysis
+1. Break down feature into testable behaviors
+2. Identify edge cases and error conditions
+3. Define expected inputs and outputs
+4. Prioritize test cases by importance
+
+### Phase 2: Red Phase - Write Failing Test
+1. Write the simplest test that fails
+2. Verify test fails for the right reason
+3. Ensure test is readable and descriptive
+4. Add assertions for expected behavior
+
+```javascript
+// Example: Red phase
+describe('calculateDiscount', () => {
+  it('applies 10% discount for orders over $100', () => {
+    const order = { total: 150 };
+    expect(calculateDiscount(order)).toBe(15);
+  });
+});
+// Run: Test should fail (function doesn't exist yet)
+```
+
+### Phase 3: Green Phase - Make Test Pass
+1. Write minimal code to pass the test
+2. Don't worry about elegance yet
+3. Focus on correctness only
+4. Verify test passes
+
+```javascript
+// Example: Green phase
+function calculateDiscount(order) {
+  if (order.total > 100) {
+    return order.total * 0.1;
+  }
+  return 0;
+}
+// Run: Test should pass now
+```
+
+### Phase 4: Refactor Phase - Improve Code
+1. Clean up implementation
+2. Remove duplication
+3. Improve naming and structure
+4. Verify tests still pass
+
+```javascript
+// Example: Refactor phase
+const DISCOUNT_THRESHOLD = 100;
+const DISCOUNT_RATE = 0.1;
+
+function calculateDiscount(order) {
+  return order.total > DISCOUNT_THRESHOLD
+    ? order.total * DISCOUNT_RATE
+    : 0;
+}
+// Run: Tests should still pass
+```
+
+### Phase 5: Add More Tests
+1. Add edge cases
+2. Add error handling tests
+3. Add property-based tests
+4. Repeat red-green-refactor
+
+```javascript
+// Additional tests
+it('returns 0 for orders exactly $100', () => {
+  expect(calculateDiscount({ total: 100 })).toBe(0);
+});
+
+it('returns 0 for orders under $100', () => {
+  expect(calculateDiscount({ total: 50 })).toBe(0);
+});
+
+it('handles negative totals', () => {
+  expect(calculateDiscount({ total: -10 })).toBe(0);
+});
+```
+
+### Phase 6: Integration
+1. Run full test suite
+2. Check coverage metrics
+3. Update documentation
+4. Commit with test evidence
+
+## TDD Best Practices
+
+### Do
+- Write tests before implementation
+- Keep tests focused and simple
+- Test one thing at a time
+- Use descriptive test names
+- Refactor only when green
+
+### Don't
+- Skip the red phase
+- Write multiple tests at once
+- Over-engineer in green phase
+- Refactor while tests fail
+- Ignore edge cases
+
+## F.I.R.S.T. Principles
+
+| Principle | Description |
+|-----------|-------------|
+| **Fast** | Tests run in milliseconds |
+| **Independent** | No test depends on another |
+| **Repeatable** | Same result every time |
+| **Self-Validating** | Pass or fail, no manual check |
+| **Timely** | Written before or with code |
+
+## Agent Responsibilities
+
+| Agent | Responsibility |
+|-------|----------------|
+| tester | Write failing tests, verify coverage |
+| fullstack-developer | Implement to pass tests |
+| code-reviewer | Review test quality, suggest improvements |
+
+## Quality Gates
+
+- All tests pass
+- Coverage above 80%
+- No skipped tests
+- Property tests included for pure functions
+- Edge cases documented
+
+## Success Criteria
+
+- Feature implemented with full test coverage
+- All edge cases handled
+- Code is refactored and clean
+- Tests serve as documentation
+
+
+
+## Agents Used
+
+This workflow orchestrates the following agents:
+
+- **[@tester](/agents/tester)** - Specialized agent for tester tasks
+- **[@fullstack-developer](/agents/fullstack-developer)** - Specialized agent for fullstack developer tasks
+- **[@code-reviewer](/agents/code-reviewer)** - Specialized agent for code reviewer tasks
+
+
+
+## Skills Applied
+
+- **[methodology/test-driven-development](/skills/methodology/test-driven-development)** - Domain expertise
+- **[testing/comprehensive-testing](/skills/testing/comprehensive-testing)** - Domain expertise
+- **[testing/property-testing](/skills/testing/property-testing)** - Domain expertise
+- **[testing/vitest](/skills/testing/vitest)** - Domain expertise
+
+
+
+## Commands Triggered
+
+- `/dev:test`
+- `/dev:feature`
+- `/quality:test-property`
+
+
+
+
+## Orchestration Graph
+
+### Agents Orchestrated
+
+| Agent | Skills | Commands |
+|-------|--------|----------|
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
+
+### Skills Applied
+
+| Skill | Description |
+|-------|-------------|
+| [methodology/test-driven-development](/skills/test-driven-development) | AI agent practices test-first development with the Red-Green... |
+| [testing/comprehensive-testing](/skills/comprehensive-testing) | Comprehensive 4D testing methodology covering Accuracy, Perf... |
+| [testing/property-testing](/skills/property-testing) | Property-based testing with Fast-Check for finding edge case... |
+| [testing/vitest](/skills/vitest) | Claude writes fast, reliable tests using Vitest for TypeScri... |
+
+### Commands Available
+
+| Command | Description |
+|---------|-------------|
+| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
+| [`/quality:test-property`](/commands/quality-test-property) | Generate and run property-based tests using Fast-Check for i... |
+
+
+## Tips for Best Results
+
+<Note>
+Provide detailed context in your workflow description. Include specific requirements, constraints, and expected outcomes for optimal agent performance.
+</Note>
+
+## Related Workflows
+
+<CardGroup cols={2}>
+  <Card title="All Workflows" icon="diagram-project" href="/workflows/overview">
+    See all 67 workflows
+  </Card>
+  <Card title="Testing" icon="diagram-project" href="/workflows/overview#testing">
+    More testing workflows
+  </Card>
+</CardGroup>

