@@ -12,9 +12,20 @@ This project uses **OMGKIT** - an AI Team System for Claude Code with 23 Agents,
 ├── sprints/          # Sprint management files
 │   ├── vision.yaml   # Product vision and goals
 │   └── backlog.yaml  # Product backlog items
+├── stdrules/         # Standards and rules (MUST READ)
+│   ├── TESTING_STANDARDS.md   # Testing methodology
+│   └── BEFORE_COMMIT.md       # Pre-commit checklist
 ├── devlogs/          # Development logs (git-ignored)
 └── settings.json     # Local settings
 ```
+
+## MANDATORY: Read Before Tasks
+
+| Task Type | Read First |
+|-----------|------------|
+| Writing Tests | `.omgkit/stdrules/TESTING_STANDARDS.md` |
+| Before Commit | `.omgkit/stdrules/BEFORE_COMMIT.md` |
+| New Feature | `.omgkit/config.yaml` for project settings |
 
 ## Development Workflow Rules
 
