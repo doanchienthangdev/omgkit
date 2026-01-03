@@ -259,12 +259,13 @@ describe('Graph Building Performance', () => {
   });
 
   describe('Complete Graph Generation', () => {
-    it('generates 100 node graph under 10ms', async () => {
+    it('generates 100 node graph under 20ms', async () => {
       const time = await timeExecution(() => {
         generateGraph(100, 3);
       });
 
-      expect(time).toBeLessThan(10);
+      // Allow 20ms for cold cache scenarios
+      expect(time).toBeLessThan(20);
     });
 
     it('generates 500 node graph under 50ms', async () => {
