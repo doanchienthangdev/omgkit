@@ -1672,7 +1672,8 @@ const WORKFLOW_CATEGORIES = {
   quality: { icon: 'gauge-high', description: 'Performance and quality optimization' },
   microservices: { icon: 'cubes', description: 'Microservices architecture and distributed systems' },
   'event-driven': { icon: 'bolt', description: 'Event-driven architecture and streaming' },
-  'game-dev': { icon: 'gamepad', description: 'Game development lifecycle and optimization' }
+  'game-dev': { icon: 'gamepad', description: 'Game development lifecycle and optimization' },
+  testing: { icon: 'flask-vial', description: 'Comprehensive testing, TDD, and security hardening workflows' }
 };
 
 /**
