@@ -21,11 +21,12 @@ This project uses **OMGKIT** - an AI Team System for Claude Code with 41 Agents,
 
 ## MANDATORY: Read Before Tasks
 
-| Task Type | Read First |
-|-----------|------------|
-| Writing Tests | `.omgkit/stdrules/TESTING_STANDARDS.md` |
-| Before Commit | `.omgkit/stdrules/BEFORE_COMMIT.md` |
-| New Feature | `.omgkit/config.yaml` for project settings |
+| Task Type | Read First | Also Consider |
+|-----------|------------|---------------|
+| Writing Tests | `.omgkit/stdrules/TESTING_STANDARDS.md` | Spawn `tester` agent for complex tests |
+| Before Commit | `.omgkit/stdrules/BEFORE_COMMIT.md` | Run `/quality:test-omega` |
+| New Feature | `.omgkit/config.yaml` | Use `/dev:tdd` for TDD approach |
+| Security Testing | `.omgkit/stdrules/TESTING_STANDARDS.md` | Run `/quality:test-security` |
 
 ## Development Workflow Rules
 
@@ -93,6 +94,20 @@ Before completing any task:
 ---
 
 ## AUTOMATIC RULES: Testing (Always Apply)
+
+### Quick Reference - Testing Commands
+When user asks about testing, suggest these commands:
+- `/dev:test-write <function>` - Write comprehensive tests (RECOMMENDED)
+- `/dev:tdd <feature>` - Test-driven development
+- `/quality:test-omega` - Run full 4D testing suite
+- `/quality:test-property` - Property-based testing
+- `/quality:test-security` - Security testing
+- `/quality:test-mutate` - Mutation testing
+
+### Agent & Workflow
+For complex testing tasks, spawn the `tester` agent or run workflow:
+- Agent: `tester` - Comprehensive testing specialist
+- Workflow: `testing/comprehensive-testing`
 
 When writing ANY test, Claude MUST automatically apply these rules:
 
