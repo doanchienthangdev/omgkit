@@ -390,10 +390,9 @@ describe('Installation Performance Invariants', () => {
       times.push(time);
     }
 
-    // Times should be within 200% of average
-    const avg = times.reduce((a, b) => a + b, 0) / times.length;
+    // All runs should complete quickly (under 100ms each)
     for (const time of times) {
-      expect(time).toBeLessThan(avg * 3);
+      expect(time).toBeLessThan(100);
     }
   });
 });

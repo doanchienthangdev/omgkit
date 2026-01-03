@@ -60,7 +60,7 @@
     "docs:dev": "cd docs && mintlify dev",
     "docs:build": "npm run docs:generate",
     "preversion": "npm run docs:sync && npm test",
-    "version": "node -e \"const fs=require('fs');const r=require('./plugin/registry.yaml','utf8');\" || true",
+    "version": "node scripts/sync-version.js && npm run docs:generate && git add .",
     "postversion": "echo 'Version bumped. Run: git push && npm publish'"
   },
   "engines": {
