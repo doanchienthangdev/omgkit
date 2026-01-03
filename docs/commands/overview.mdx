@@ -131,7 +131,7 @@ OMGKIT provides **150 slash commands** covering the entire development lifecycle
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/alignment:deps`](/commands/deps) | Show the dependency graph tree for any O... | `/alignment:deps &lt;type:name&gt;` |
+| [`/alignment:deps`](/commands/deps) | Show the dependency graph tree for any O... | `/alignment:deps <type:name>` |
 | [`/alignment:health`](/commands/health) | Check the alignment health status of the... | `/alignment:health` |
 
 
@@ -141,15 +141,15 @@ OMGKIT provides **150 slash commands** covering the entire development lifecycle
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/auto:approve`](/commands/approve) | Approve checkpoint or pending decision t... | `/auto:approve "[checkpoint | decision &lt;id&gt;] [--all]"` |
-| [`/auto:checkpoint`](/commands/checkpoint) | Force a checkpoint for review | `/auto:checkpoint "[&lt;reason&gt;]"` |
-| [`/auto:init`](/commands/init) | Initialize autonomous project with guide... | `/auto:init &lt;project idea or name&gt;` |
+| [`/auto:approve`](/commands/approve) | Approve checkpoint or pending decision t... | `/auto:approve "[checkpoint | decision <id>] [--all]"` |
+| [`/auto:checkpoint`](/commands/checkpoint) | Force a checkpoint for review | `/auto:checkpoint "[<reason>]"` |
+| [`/auto:init`](/commands/init) | Initialize autonomous project with guide... | `/auto:init <project idea or name>` |
 | [`/auto:next`](/commands/next) | Preview and execute the next autonomous ... | `/auto:next "[--preview | --execute | --skip]"` |
-| [`/auto:reject`](/commands/reject) | Reject checkpoint or decision with feedb... | `/auto:reject "&lt;reason&gt; [--checkpoint | --decision &lt;id&gt;]"` |
-| [`/auto:resume`](/commands/resume) | Resume autonomous execution from saved s... | `/auto:resume "[--retry | --skip | --from &lt;step&gt;]"` |
-| [`/auto:start`](/commands/start) | Start autonomous execution from current ... | `/auto:start "[--from-phase &lt;phase&gt;]"` |
+| [`/auto:reject`](/commands/reject) | Reject checkpoint or decision with feedb... | `/auto:reject "<reason> [--checkpoint | --decision <id>]"` |
+| [`/auto:resume`](/commands/resume) | Resume autonomous execution from saved s... | `/auto:resume "[--retry | --skip | --from <step>]"` |
+| [`/auto:start`](/commands/start) | Start autonomous execution from current ... | `/auto:start "[--from-phase <phase>]"` |
 | [`/auto:status`](/commands/status) | Show autonomous project status and progr... | `/auto:status "[--verbose]"` |
-| [`/auto:verify`](/commands/verify) | Run verification checks on autonomous pr... | `/auto:verify "[--full | --quick | --phase &lt;phase&gt;]"` |
+| [`/auto:verify`](/commands/verify) | Run verification checks on autonomous pr... | `/auto:verify "[--full | --quick | --phase <phase>]"` |
 
 
 ## Context
@@ -158,12 +158,12 @@ Context and session management commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/context:checkpoint`](/commands/checkpoint) | Save or restore session state | `/context:checkpoint &lt;save|restore|list&gt;` |
+| [`/context:checkpoint`](/commands/checkpoint) | Save or restore session state | `/context:checkpoint <save|restore|list>` |
 | [`/context:context-index`](/commands/context-index) | Generate project index | `/context:context-index` |
-| [`/context:load`](/commands/load) | Load project context | `/context:load &lt;component&gt;` |
-| [`/context:mode`](/commands/mode) | Switch behavioral mode | `/context:mode &lt;mode-name&gt;` |
+| [`/context:load`](/commands/load) | Load project context | `/context:load <component>` |
+| [`/context:mode`](/commands/mode) | Switch behavioral mode | `/context:mode <mode-name>` |
 | [`/context:spawn-collect`](/commands/spawn-collect) | Collect results from parallel tasks | `/context:spawn-collect` |
-| [`/context:spawn`](/commands/spawn) | Launch parallel background task | `/context:spawn &lt;task description&gt;` |
+| [`/context:spawn`](/commands/spawn) | Launch parallel background task | `/context:spawn <task description>` |
 
 
 ## Data
@@ -172,8 +172,8 @@ Context and session management commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/data:pipeline`](/commands/pipeline) | Design and implement data pipeline with ... | `/data:pipeline &lt;pipeline description or data source&gt;` |
-| [`/data:quality`](/commands/quality) | Analyze and implement data quality check... | `/data:quality &lt;dataset or table name&gt;` |
+| [`/data:pipeline`](/commands/pipeline) | Design and implement data pipeline with ... | `/data:pipeline <pipeline description or data source>` |
+| [`/data:quality`](/commands/quality) | Analyze and implement data quality check... | `/data:quality <dataset or table name>` |
 
 
 ## Design
@@ -182,11 +182,11 @@ Design and UI/UX commands for visual work
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/design:cro`](/commands/cro) | CRO-focused content/design | `/design:cro &lt;page&gt;` |
-| [`/design:enhance`](/commands/enhance) | Enhance existing content/design | `/design:enhance &lt;target&gt;` |
-| [`/design:fast`](/commands/fast) | Quick UI implementation | `/design:fast &lt;UI description&gt;` |
-| [`/design:good`](/commands/good) | High-quality UI with polish | `/design:good &lt;UI description&gt;` |
-| [`/design:screenshot`](/commands/screenshot) | Implement UI from screenshot | `/design:screenshot &lt;screenshot reference&gt;` |
+| [`/design:cro`](/commands/cro) | CRO-focused content/design | `/design:cro <page>` |
+| [`/design:enhance`](/commands/enhance) | Enhance existing content/design | `/design:enhance <target>` |
+| [`/design:fast`](/commands/fast) | Quick UI implementation | `/design:fast <UI description>` |
+| [`/design:good`](/commands/good) | High-quality UI with polish | `/design:good <UI description>` |
+| [`/design:screenshot`](/commands/screenshot) | Implement UI from screenshot | `/design:screenshot <screenshot reference>` |
 
 
 ## Dev
@@ -195,16 +195,16 @@ Development commands for building features and fixing bugs
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/dev:feature`](/commands/feature) | Full feature development with planning, ... | `/dev:feature &lt;feature description&gt;` |
-| [`/dev:fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/dev:fix-ci &lt;github-action-url&gt;` |
-| [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/dev:fix-fast &lt;bug&gt;` |
-| [`/dev:fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation | `/dev:fix-hard &lt;complex bug&gt;` |
+| [`/dev:feature`](/commands/feature) | Full feature development with planning, ... | `/dev:feature <feature description>` |
+| [`/dev:fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/dev:fix-ci <github-action-url>` |
+| [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/dev:fix-fast <bug>` |
+| [`/dev:fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation | `/dev:fix-hard <complex bug>` |
 | [`/dev:fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues | `/dev:fix-logs` |
 | [`/dev:fix-test`](/commands/fix-test) | Fix failing tests | `/dev:fix-test` |
-| [`/dev:fix`](/commands/fix) | Debug and fix bugs | `/dev:fix &lt;error or issue&gt;` |
+| [`/dev:fix`](/commands/fix) | Debug and fix bugs | `/dev:fix <error or issue>` |
 | [`/dev:review`](/commands/review) | Code review with security and quality fo... | `/dev:review [file or directory]` |
-| [`/dev:tdd`](/commands/tdd) | Test-driven development workflow | `/dev:tdd &lt;feature&gt;` |
-| [`/dev:test`](/commands/test) | Generate and run tests | `/dev:test &lt;scope&gt;` |
+| [`/dev:tdd`](/commands/tdd) | Test-driven development workflow | `/dev:tdd <feature>` |
+| [`/dev:test`](/commands/test) | Generate and run tests | `/dev:test <scope>` |
 
 
 ## Domain
@@ -213,8 +213,8 @@ Development commands for building features and fixing bugs
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/domain:analyze`](/commands/analyze) | Analyze domain and identify bounded cont... | `/domain:analyze &lt;domain or codebase area&gt;` |
-| [`/domain:map`](/commands/map) | Create visual bounded context map and in... | `/domain:map &lt;bounded contexts or system&gt;` |
+| [`/domain:analyze`](/commands/analyze) | Analyze domain and identify bounded cont... | `/domain:analyze <domain or codebase area>` |
+| [`/domain:map`](/commands/map) | Create visual bounded context map and in... | `/domain:map <bounded contexts or system>` |
 
 
 ## Game
@@ -223,8 +223,8 @@ Game development and optimization commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/game:balance`](/commands/balance) | Analyze and balance game mechanics using... | `/game:balance &lt;game system or mechanic&gt;` |
-| [`/game:optimize`](/commands/optimize) | Optimize game performance for target pla... | `/game:optimize &lt;game component or platform&gt;` |
+| [`/game:balance`](/commands/balance) | Analyze and balance game mechanics using... | `/game:balance <game system or mechanic>` |
+| [`/game:optimize`](/commands/optimize) | Optimize game performance for target pla... | `/game:optimize <game component or platform>` |
 
 
 ## Git
@@ -247,7 +247,7 @@ IoT device management and provisioning commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/iot:provision`](/commands/provision) | Provision and configure IoT devices with... | `/iot:provision &lt;device type or fleet&gt;` |
+| [`/iot:provision`](/commands/provision) | Provision and configure IoT devices with... | `/iot:provision <device type or fleet>` |
 
 
 ## Ml
@@ -256,8 +256,8 @@ Machine learning workflow commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/ml:evaluate`](/commands/evaluate) | Evaluate ML model performance with compr... | `/ml:evaluate &lt;model name or path&gt;` |
-| [`/ml:train`](/commands/train) | Train ML model with experiment tracking ... | `/ml:train &lt;model type or training task&gt;` |
+| [`/ml:evaluate`](/commands/evaluate) | Evaluate ML model performance with compr... | `/ml:evaluate <model name or path>` |
+| [`/ml:train`](/commands/train) | Train ML model with experiment tracking ... | `/ml:train <model type or training task>` |
 
 
 ## Omega
@@ -266,9 +266,9 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omega:1000x`](/commands/1000x) | Find 1000x moonshot path | `/omega:1000x &lt;topic&gt;` |
-| [`/omega:100x`](/commands/100x) | Find 100x paradigm shift | `/omega:100x &lt;topic&gt;` |
-| [`/omega:10x`](/commands/10x) | Find 10x improvement path | `/omega:10x &lt;topic&gt;` |
+| [`/omega:1000x`](/commands/1000x) | Find 1000x moonshot path | `/omega:1000x <topic>` |
+| [`/omega:100x`](/commands/100x) | Find 100x paradigm shift | `/omega:100x <topic>` |
+| [`/omega:10x`](/commands/10x) | Find 10x improvement path | `/omega:10x <topic>` |
 | [`/omega:dimensions`](/commands/dimensions) | Display 10 Omega Dimensions | `/omega:dimensions` |
 | [`/omega:principles`](/commands/principles) | Display 7 Omega Principles | `/omega:principles` |
 
@@ -279,12 +279,12 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omgdata:augment`](/commands/augment) | Augment data to increase diversity and q... | `/omgdata:augment &lt;data_type&gt; [--techniques &lt;techniques&gt;] [--factor &lt;factor&gt;]` |
-| [`/omgdata:collect`](/commands/collect) | Collect data from multiple sources inclu... | `/omgdata:collect &lt;source_type&gt; [--config &lt;config_file&gt;]` |
-| [`/omgdata:label`](/commands/label) | Label data using manual annotation, weak... | `/omgdata:label &lt;strategy&gt; [--config &lt;config&gt;]` |
-| [`/omgdata:split`](/commands/split) | Split data into train/validation/test se... | `/omgdata:split "[--strategy &lt;strategy&gt;] [--ratios &lt;ratios&gt;]"` |
-| [`/omgdata:validate`](/commands/validate) | Validate data quality with schema checks... | `/omgdata:validate &lt;data_path&gt; [--schema &lt;schema&gt;] [--rules &lt;rules&gt;]` |
-| [`/omgdata:version`](/commands/version) | Version data with DVC for reproducibilit... | `/omgdata:version &lt;action&gt; [--message &lt;message&gt;]` |
+| [`/omgdata:augment`](/commands/augment) | Augment data to increase diversity and q... | `/omgdata:augment <data_type> [--techniques <techniques>] [--factor <factor>]` |
+| [`/omgdata:collect`](/commands/collect) | Collect data from multiple sources inclu... | `/omgdata:collect <source_type> [--config <config_file>]` |
+| [`/omgdata:label`](/commands/label) | Label data using manual annotation, weak... | `/omgdata:label <strategy> [--config <config>]` |
+| [`/omgdata:split`](/commands/split) | Split data into train/validation/test se... | `/omgdata:split "[--strategy <strategy>] [--ratios <ratios>]"` |
+| [`/omgdata:validate`](/commands/validate) | Validate data quality with schema checks... | `/omgdata:validate <data_path> [--schema <schema>] [--rules <rules>]` |
+| [`/omgdata:version`](/commands/version) | Version data with DVC for reproducibilit... | `/omgdata:version <action> [--message <message>]` |
 
 
 ## Omgdeploy
@@ -293,11 +293,11 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omgdeploy:ab`](/commands/ab) | Setup A/B testing between model versions... | `/omgdeploy:ab "[--models &lt;models&gt;] [--traffic_split &lt;split&gt;]"` |
-| [`/omgdeploy:cloud`](/commands/cloud) | Deploy model to cloud platforms with aut... | `/omgdeploy:cloud &lt;provider&gt; [--config &lt;config&gt;]` |
-| [`/omgdeploy:edge`](/commands/edge) | Deploy model to edge devices including T... | `/omgdeploy:edge &lt;target&gt; [--model &lt;path&gt;] [--optimize]` |
-| [`/omgdeploy:package`](/commands/package) | Package model for deployment in TorchSer... | `/omgdeploy:package &lt;format&gt; [--model &lt;path&gt;]` |
-| [`/omgdeploy:serve`](/commands/serve) | Deploy model serving endpoint on local, ... | `/omgdeploy:serve &lt;platform&gt; [--config &lt;config&gt;]` |
+| [`/omgdeploy:ab`](/commands/ab) | Setup A/B testing between model versions... | `/omgdeploy:ab "[--models <models>] [--traffic_split <split>]"` |
+| [`/omgdeploy:cloud`](/commands/cloud) | Deploy model to cloud platforms with aut... | `/omgdeploy:cloud <provider> [--config <config>]` |
+| [`/omgdeploy:edge`](/commands/edge) | Deploy model to edge devices including T... | `/omgdeploy:edge <target> [--model <path>] [--optimize]` |
+| [`/omgdeploy:package`](/commands/package) | Package model for deployment in TorchSer... | `/omgdeploy:package <format> [--model <path>]` |
+| [`/omgdeploy:serve`](/commands/serve) | Deploy model serving endpoint on local, ... | `/omgdeploy:serve <platform> [--config <config>]` |
 
 
 ## Omgfeature
@@ -306,10 +306,10 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omgfeature:embed`](/commands/embed) | Create embeddings for text, images, and ... | `/omgfeature:embed &lt;data_type&gt; [--model &lt;model&gt;]` |
-| [`/omgfeature:extract`](/commands/extract) | Extract features from numerical, categor... | `/omgfeature:extract &lt;feature_type&gt; [--config &lt;config&gt;]` |
-| [`/omgfeature:select`](/commands/select) | Select most important features using fil... | `/omgfeature:select &lt;method&gt; [--n_features &lt;n&gt;]` |
-| [`/omgfeature:store`](/commands/store) | Feature store operations - register, mat... | `/omgfeature:store &lt;action&gt; [--feature_view &lt;view&gt;]` |
+| [`/omgfeature:embed`](/commands/embed) | Create embeddings for text, images, and ... | `/omgfeature:embed <data_type> [--model <model>]` |
+| [`/omgfeature:extract`](/commands/extract) | Extract features from numerical, categor... | `/omgfeature:extract <feature_type> [--config <config>]` |
+| [`/omgfeature:select`](/commands/select) | Select most important features using fil... | `/omgfeature:select <method> [--n_features <n>]` |
+| [`/omgfeature:store`](/commands/store) | Feature store operations - register, mat... | `/omgfeature:store <action> [--feature_view <view>]` |
 
 
 ## Omgml
@@ -318,7 +318,7 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omgml:init`](/commands/init) | Initialize ML project with standard stru... | `/omgml:init &lt;project_type&gt; [--template &lt;template&gt;]` |
+| [`/omgml:init`](/commands/init) | Initialize ML project with standard stru... | `/omgml:init <project_type> [--template <template>]` |
 | [`/omgml:status`](/commands/status) | Display comprehensive ML project status ... | `/omgml:status "[--detailed]"` |
 
 
@@ -328,11 +328,11 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omgops:drift`](/commands/drift) | Detect and analyze data drift, label dri... | `/omgops:drift &lt;drift_type&gt; [--reference &lt;ref&gt;] [--current &lt;current&gt;]` |
-| [`/omgops:monitor`](/commands/monitor) | Setup ML monitoring and alerting for dat... | `/omgops:monitor "[--metrics &lt;metrics&gt;] [--alerts &lt;alerts&gt;]"` |
-| [`/omgops:pipeline`](/commands/pipeline) | Create CI/CD pipeline for ML using GitHu... | `/omgops:pipeline &lt;platform&gt; [--template &lt;template&gt;]` |
-| [`/omgops:registry`](/commands/registry) | Model registry operations - register, li... | `/omgops:registry &lt;action&gt; [--model &lt;model&gt;] [--version &lt;version&gt;]` |
-| [`/omgops:retrain`](/commands/retrain) | Trigger model retraining with full, incr... | `/omgops:retrain &lt;strategy&gt; [--trigger &lt;trigger&gt;]` |
+| [`/omgops:drift`](/commands/drift) | Detect and analyze data drift, label dri... | `/omgops:drift <drift_type> [--reference <ref>] [--current <current>]` |
+| [`/omgops:monitor`](/commands/monitor) | Setup ML monitoring and alerting for dat... | `/omgops:monitor "[--metrics <metrics>] [--alerts <alerts>]"` |
+| [`/omgops:pipeline`](/commands/pipeline) | Create CI/CD pipeline for ML using GitHu... | `/omgops:pipeline <platform> [--template <template>]` |
+| [`/omgops:registry`](/commands/registry) | Model registry operations - register, li... | `/omgops:registry <action> [--model <model>] [--version <version>]` |
+| [`/omgops:retrain`](/commands/retrain) | Trigger model retraining with full, incr... | `/omgops:retrain <strategy> [--trigger <trigger>]` |
 
 
 ## Omgoptim
@@ -341,10 +341,10 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omgoptim:distill`](/commands/distill) | Knowledge distillation from teacher mode... | `/omgoptim:distill "[--teacher &lt;path&gt;] [--student_config &lt;config&gt;]"` |
-| [`/omgoptim:profile`](/commands/profile) | Profile model performance including late... | `/omgoptim:profile &lt;model_path&gt; [--input_shape &lt;shape&gt;]` |
-| [`/omgoptim:prune`](/commands/prune) | Prune model weights using magnitude, str... | `/omgoptim:prune &lt;method&gt; [--sparsity &lt;sparsity&gt;]` |
-| [`/omgoptim:quantize`](/commands/quantize) | Quantize model using dynamic, static, or... | `/omgoptim:quantize &lt;method&gt; [--calibration_data &lt;path&gt;]` |
+| [`/omgoptim:distill`](/commands/distill) | Knowledge distillation from teacher mode... | `/omgoptim:distill "[--teacher <path>] [--student_config <config>]"` |
+| [`/omgoptim:profile`](/commands/profile) | Profile model performance including late... | `/omgoptim:profile <model_path> [--input_shape <shape>]` |
+| [`/omgoptim:prune`](/commands/prune) | Prune model weights using magnitude, str... | `/omgoptim:prune <method> [--sparsity <sparsity>]` |
+| [`/omgoptim:quantize`](/commands/quantize) | Quantize model using dynamic, static, or... | `/omgoptim:quantize <method> [--calibration_data <path>]` |
 
 
 ## Omgtrain
@@ -353,11 +353,11 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/omgtrain:baseline`](/commands/baseline) | Train baseline models for comparison inc... | `/omgtrain:baseline &lt;task_type&gt; [--models &lt;models&gt;]` |
-| [`/omgtrain:compare`](/commands/compare) | Compare multiple experiments and models ... | `/omgtrain:compare &lt;experiments&gt; [--metric &lt;metric&gt;]` |
-| [`/omgtrain:evaluate`](/commands/evaluate) | Evaluate model comprehensively including... | `/omgtrain:evaluate &lt;model_path&gt; [--test_data &lt;path&gt;]` |
-| [`/omgtrain:train`](/commands/train) | Train ML model with full pipeline includ... | `/omgtrain:train &lt;model_type&gt; [--config &lt;config&gt;] [--experiment &lt;name&gt;]` |
-| [`/omgtrain:tune`](/commands/tune) | Hyperparameter tuning with Optuna using ... | `/omgtrain:tune "[--n_trials &lt;n&gt;] [--method &lt;method&gt;]"` |
+| [`/omgtrain:baseline`](/commands/baseline) | Train baseline models for comparison inc... | `/omgtrain:baseline <task_type> [--models <models>]` |
+| [`/omgtrain:compare`](/commands/compare) | Compare multiple experiments and models ... | `/omgtrain:compare <experiments> [--metric <metric>]` |
+| [`/omgtrain:evaluate`](/commands/evaluate) | Evaluate model comprehensively including... | `/omgtrain:evaluate <model_path> [--test_data <path>]` |
+| [`/omgtrain:train`](/commands/train) | Train ML model with full pipeline includ... | `/omgtrain:train <model_type> [--config <config>] [--experiment <name>]` |
+| [`/omgtrain:tune`](/commands/tune) | Hyperparameter tuning with Optuna using ... | `/omgtrain:tune "[--n_trials <n>] [--method <method>]"` |
 
 
 ## Perf
@@ -366,8 +366,8 @@ Omega-level strategic thinking commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/perf:benchmark`](/commands/benchmark) | Run performance benchmarks and generate ... | `/perf:benchmark &lt;component or endpoint&gt;` |
-| [`/perf:profile`](/commands/profile) | Profile application performance and iden... | `/perf:profile &lt;application or component&gt;` |
+| [`/perf:benchmark`](/commands/benchmark) | Run performance benchmarks and generate ... | `/perf:benchmark <component or endpoint>` |
+| [`/perf:profile`](/commands/profile) | Profile application performance and iden... | `/perf:profile <application or component>` |
 
 
 ## Planning
@@ -376,14 +376,14 @@ Planning and research commands for strategic work
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/planning:ask`](/commands/ask) | Quick question with codebase context | `/planning:ask &lt;question&gt;` |
-| [`/planning:brainstorm`](/commands/brainstorm) | Interactive brainstorming session | `/planning:brainstorm &lt;topic&gt;` |
-| [`/planning:doc`](/commands/doc) | Generate documentation | `/planning:doc &lt;target&gt;` |
-| [`/planning:execute-plan`](/commands/execute-plan) | Execute existing plan with subagents | `/planning:execute-plan &lt;plan-file&gt;` |
-| [`/planning:plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks | `/planning:plan-detailed &lt;task&gt;` |
-| [`/planning:plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy | `/planning:plan-parallel &lt;task&gt;` |
-| [`/planning:plan`](/commands/plan) | Create implementation plan | `/planning:plan &lt;task&gt;` |
-| [`/planning:research`](/commands/research) | Research technology or topic | `/planning:research &lt;topic&gt;` |
+| [`/planning:ask`](/commands/ask) | Quick question with codebase context | `/planning:ask <question>` |
+| [`/planning:brainstorm`](/commands/brainstorm) | Interactive brainstorming session | `/planning:brainstorm <topic>` |
+| [`/planning:doc`](/commands/doc) | Generate documentation | `/planning:doc <target>` |
+| [`/planning:execute-plan`](/commands/execute-plan) | Execute existing plan with subagents | `/planning:execute-plan <plan-file>` |
+| [`/planning:plan-detailed`](/commands/plan-detailed) | Detailed plan with 2-5 min tasks | `/planning:plan-detailed <task>` |
+| [`/planning:plan-parallel`](/commands/plan-parallel) | Plan with parallel execution strategy | `/planning:plan-parallel <task>` |
+| [`/planning:plan`](/commands/plan) | Create implementation plan | `/planning:plan <task>` |
+| [`/planning:research`](/commands/research) | Research technology or topic | `/planning:research <topic>` |
 
 
 ## Platform
@@ -392,7 +392,7 @@ Planning and research commands for strategic work
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/platform:blueprint`](/commands/blueprint) | Create internal developer platform bluep... | `/platform:blueprint &lt;platform capability or service&gt;` |
+| [`/platform:blueprint`](/commands/blueprint) | Create internal developer platform bluep... | `/platform:blueprint <platform capability or service>` |
 
 
 ## Quality
@@ -401,10 +401,10 @@ Quality and security commands for code health
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/quality:api-gen`](/commands/api-gen) | Generate API code from spec | `/quality:api-gen &lt;resource&gt;` |
+| [`/quality:api-gen`](/commands/api-gen) | Generate API code from spec | `/quality:api-gen <resource>` |
 | [`/quality:lint`](/commands/lint) | Run linting | `/quality:lint` |
-| [`/quality:optimize`](/commands/optimize) | Performance optimization | `/quality:optimize &lt;file&gt;` |
-| [`/quality:refactor`](/commands/refactor) | Improve code structure | `/quality:refactor &lt;file or directory&gt;` |
+| [`/quality:optimize`](/commands/optimize) | Performance optimization | `/quality:optimize <file>` |
+| [`/quality:refactor`](/commands/refactor) | Improve code structure | `/quality:refactor <file or directory>` |
 | [`/quality:security-scan`](/commands/security-scan) | Scan for security vulnerabilities | `/quality:security-scan` |
 | [`/quality:test-chaos`](/commands/test-chaos) | Run chaos engineering tests including fa... | `/quality:test-chaos` |
 | [`/quality:test-mutate`](/commands/test-mutate) | Run mutation testing with Stryker to ver... | `/quality:test-mutate` |
@@ -420,8 +420,8 @@ Quality and security commands for code health
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/security:audit`](/commands/audit) | Comprehensive security audit with OWASP ... | `/security:audit &lt;application or system&gt;` |
-| [`/security:scan`](/commands/scan) | Run security scans including SAST, SCA, ... | `/security:scan &lt;path or scope&gt;` |
+| [`/security:audit`](/commands/audit) | Comprehensive security audit with OWASP ... | `/security:audit <application or system>` |
+| [`/security:scan`](/commands/scan) | Run security scans including SAST, SCA, ... | `/security:scan <path or scope>` |
 
 
 ## Sprint
@@ -430,7 +430,7 @@ Sprint and team management commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/sprint:backlog-add`](/commands/backlog-add) | Add task to backlog | `/sprint:backlog-add &lt;task&gt; [--type TYPE] [--priority N]` |
+| [`/sprint:backlog-add`](/commands/backlog-add) | Add task to backlog | `/sprint:backlog-add <task> [--type TYPE] [--priority N]` |
 | [`/sprint:backlog-prioritize`](/commands/backlog-prioritize) | AI-powered backlog prioritization | `/sprint:backlog-prioritize` |
 | [`/sprint:backlog-show`](/commands/backlog-show) | Display backlog | `/sprint:backlog-show` |
 | [`/sprint:init`](/commands/init) | Initialize OMGKIT in project | `/sprint:init` |
@@ -438,7 +438,7 @@ Sprint and team management commands
 | [`/sprint:sprint-end`](/commands/sprint-end) | End sprint with retrospective | `/sprint:sprint-end` |
 | [`/sprint:sprint-new`](/commands/sprint-new) | Create new sprint | `/sprint:sprint-new "[name] [--propose]"` |
 | [`/sprint:sprint-start`](/commands/sprint-start) | Start current sprint | `/sprint:sprint-start` |
-| [`/sprint:team-ask`](/commands/team-ask) | Ask the AI team a question | `/sprint:team-ask &lt;question&gt;` |
+| [`/sprint:team-ask`](/commands/team-ask) | Ask the AI team a question | `/sprint:team-ask <question>` |
 | [`/sprint:team-run`](/commands/team-run) | Run AI team on sprint tasks | `/sprint:team-run [--mode MODE]` |
 | [`/sprint:team-status`](/commands/team-status) | Show AI team activity | `/sprint:team-status` |
 | [`/sprint:vision-set`](/commands/vision-set) | Set product vision interactively | `/sprint:vision-set` |
@@ -451,7 +451,7 @@ Site reliability and observability commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/sre:dashboard`](/commands/dashboard) | Design and configure SRE observability d... | `/sre:dashboard &lt;service or system&gt;` |
+| [`/sre:dashboard`](/commands/dashboard) | Design and configure SRE observability d... | `/sre:dashboard <service or system>` |
 
 
 ## Workflow
@@ -460,35 +460,35 @@ Site reliability and observability commands
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/workflow:1000x-innovation`](/commands/1000x-innovation) | Industry-transforming innovation workflo... | `/workflow:1000x-innovation &lt;innovation area&gt;` |
-| [`/workflow:100x-architecture`](/commands/100x-architecture) | System redesign for 100x improvements | `/workflow:100x-architecture &lt;system to redesign&gt;` |
-| [`/workflow:10x-improvement`](/commands/10x-improvement) | Find 10x tactical improvements using Ome... | `/workflow:10x-improvement &lt;area to improve&gt;` |
-| [`/workflow:agent-development`](/commands/agent-development) | Build AI agents with tool use and planni... | `/workflow:agent-development &lt;agent description&gt;` |
-| [`/workflow:api-design`](/commands/api-design) | Design RESTful or GraphQL APIs | `/workflow:api-design &lt;API description&gt;` |
-| [`/workflow:api-testing`](/commands/api-testing) | Comprehensive API testing workflow | `/workflow:api-testing &lt;API to test&gt;` |
-| [`/workflow:authentication`](/commands/authentication) | Implement secure authentication system | `/workflow:authentication &lt;auth requirements&gt;` |
-| [`/workflow:best-practices`](/commands/best-practices) | Research and document best practices | `/workflow:best-practices &lt;topic for best practices&gt;` |
-| [`/workflow:bug-fix`](/commands/bug-fix) | Systematic debugging and bug resolution ... | `/workflow:bug-fix &lt;bug description&gt;` |
-| [`/workflow:code-review`](/commands/code-review) | Comprehensive code review workflow | `/workflow:code-review &lt;file or directory to review&gt;` |
-| [`/workflow:feature`](/commands/feature) | Complete feature development from planni... | `/workflow:feature &lt;feature description&gt;` |
-| [`/workflow:fine-tuning`](/commands/fine-tuning) | Model fine-tuning workflow | `/workflow:fine-tuning &lt;fine-tuning objective&gt;` |
-| [`/workflow:full-feature`](/commands/full-feature) | Complex full-stack feature development | `/workflow:full-feature &lt;full-stack feature&gt;` |
-| [`/workflow:marketing`](/commands/marketing) | Create marketing content and materials | `/workflow:marketing &lt;marketing goal&gt;` |
-| [`/workflow:migration`](/commands/migration) | Safe database migration workflow | `/workflow:migration &lt;migration description&gt;` |
-| [`/workflow:model-evaluation`](/commands/model-evaluation) | AI model evaluation and benchmarking wor... | `/workflow:model-evaluation &lt;model or system to evaluate&gt;` |
-| [`/workflow:optimization`](/commands/optimization) | Database performance optimization workfl... | `/workflow:optimization &lt;optimization target&gt;` |
-| [`/workflow:penetration-testing`](/commands/penetration-testing) | Penetration testing workflow | `/workflow:penetration-testing &lt;target system&gt;` |
-| [`/workflow:performance-optimization`](/commands/performance-optimization) | Application performance optimization wor... | `/workflow:performance-optimization &lt;optimization target&gt;` |
-| [`/workflow:prompt-engineering`](/commands/prompt-engineering) | Systematic prompt optimization workflow | `/workflow:prompt-engineering &lt;prompt optimization goal&gt;` |
-| [`/workflow:rag-development`](/commands/rag-development) | Build Retrieval-Augmented Generation sys... | `/workflow:rag-development &lt;RAG system description&gt;` |
-| [`/workflow:refactor`](/commands/refactor) | Code refactoring and improvement workflo... | `/workflow:refactor &lt;refactor scope&gt;` |
-| [`/workflow:schema-design`](/commands/schema-design) | Design production-grade database schemas | `/workflow:schema-design &lt;data model description&gt;` |
-| [`/workflow:security-audit`](/commands/security-audit) | Comprehensive security audit workflow | `/workflow:security-audit &lt;scope of audit&gt;` |
+| [`/workflow:1000x-innovation`](/commands/1000x-innovation) | Industry-transforming innovation workflo... | `/workflow:1000x-innovation <innovation area>` |
+| [`/workflow:100x-architecture`](/commands/100x-architecture) | System redesign for 100x improvements | `/workflow:100x-architecture <system to redesign>` |
+| [`/workflow:10x-improvement`](/commands/10x-improvement) | Find 10x tactical improvements using Ome... | `/workflow:10x-improvement <area to improve>` |
+| [`/workflow:agent-development`](/commands/agent-development) | Build AI agents with tool use and planni... | `/workflow:agent-development <agent description>` |
+| [`/workflow:api-design`](/commands/api-design) | Design RESTful or GraphQL APIs | `/workflow:api-design <API description>` |
+| [`/workflow:api-testing`](/commands/api-testing) | Comprehensive API testing workflow | `/workflow:api-testing <API to test>` |
+| [`/workflow:authentication`](/commands/authentication) | Implement secure authentication system | `/workflow:authentication <auth requirements>` |
+| [`/workflow:best-practices`](/commands/best-practices) | Research and document best practices | `/workflow:best-practices <topic for best practices>` |
+| [`/workflow:bug-fix`](/commands/bug-fix) | Systematic debugging and bug resolution ... | `/workflow:bug-fix <bug description>` |
+| [`/workflow:code-review`](/commands/code-review) | Comprehensive code review workflow | `/workflow:code-review <file or directory to review>` |
+| [`/workflow:feature`](/commands/feature) | Complete feature development from planni... | `/workflow:feature <feature description>` |
+| [`/workflow:fine-tuning`](/commands/fine-tuning) | Model fine-tuning workflow | `/workflow:fine-tuning <fine-tuning objective>` |
+| [`/workflow:full-feature`](/commands/full-feature) | Complex full-stack feature development | `/workflow:full-feature <full-stack feature>` |
+| [`/workflow:marketing`](/commands/marketing) | Create marketing content and materials | `/workflow:marketing <marketing goal>` |
+| [`/workflow:migration`](/commands/migration) | Safe database migration workflow | `/workflow:migration <migration description>` |
+| [`/workflow:model-evaluation`](/commands/model-evaluation) | AI model evaluation and benchmarking wor... | `/workflow:model-evaluation <model or system to evaluate>` |
+| [`/workflow:optimization`](/commands/optimization) | Database performance optimization workfl... | `/workflow:optimization <optimization target>` |
+| [`/workflow:penetration-testing`](/commands/penetration-testing) | Penetration testing workflow | `/workflow:penetration-testing <target system>` |
+| [`/workflow:performance-optimization`](/commands/performance-optimization) | Application performance optimization wor... | `/workflow:performance-optimization <optimization target>` |
+| [`/workflow:prompt-engineering`](/commands/prompt-engineering) | Systematic prompt optimization workflow | `/workflow:prompt-engineering <prompt optimization goal>` |
+| [`/workflow:rag-development`](/commands/rag-development) | Build Retrieval-Augmented Generation sys... | `/workflow:rag-development <RAG system description>` |
+| [`/workflow:refactor`](/commands/refactor) | Code refactoring and improvement workflo... | `/workflow:refactor <refactor scope>` |
+| [`/workflow:schema-design`](/commands/schema-design) | Design production-grade database schemas | `/workflow:schema-design <data model description>` |
+| [`/workflow:security-audit`](/commands/security-audit) | Comprehensive security audit workflow | `/workflow:security-audit <scope of audit>` |
 | [`/workflow:sprint-execution`](/commands/sprint-execution) | Execute sprint tasks with AI team | `/workflow:sprint-execution [optional focus area]` |
 | [`/workflow:sprint-retrospective`](/commands/sprint-retrospective) | Sprint review and retrospective workflow | `/workflow:sprint-retrospective [optional sprint name]` |
-| [`/workflow:sprint-setup`](/commands/sprint-setup) | Initialize and plan a new sprint | `/workflow:sprint-setup &lt;sprint name&gt;` |
-| [`/workflow:technical-docs`](/commands/technical-docs) | Create comprehensive technical documenta... | `/workflow:technical-docs &lt;documentation scope&gt;` |
-| [`/workflow:technology-research`](/commands/technology-research) | Research new technologies systematically | `/workflow:technology-research &lt;technology to research&gt;` |
+| [`/workflow:sprint-setup`](/commands/sprint-setup) | Initialize and plan a new sprint | `/workflow:sprint-setup <sprint name>` |
+| [`/workflow:technical-docs`](/commands/technical-docs) | Create comprehensive technical documenta... | `/workflow:technical-docs <documentation scope>` |
+| [`/workflow:technology-research`](/commands/technology-research) | Research new technologies systematically | `/workflow:technology-research <technology to research>` |
 
 
 ---

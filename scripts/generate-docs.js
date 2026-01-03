@@ -1231,8 +1231,9 @@ ${catMeta.description}
 | Command | Description | Usage |
 |---------|-------------|-------|
 ${cmds.map(c => {
-  const escapedHint = c.argumentHint ? c.argumentHint.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
-  return `| [\`/${cat}:${c.slug}\`](/commands/${c.slug}) | ${c.description.slice(0, 40)}${c.description.length > 40 ? '...' : ''} | \`/${cat}:${c.slug}${escapedHint ? ' ' + escapedHint : ''}\` |`;
+  // No escaping needed - content is inside backticks (code formatting)
+  const hint = c.argumentHint || '';
+  return `| [\`/${cat}:${c.slug}\`](/commands/${c.slug}) | ${c.description.slice(0, 40)}${c.description.length > 40 ? '...' : ''} | \`/${cat}:${c.slug}${hint ? ' ' + hint : ''}\` |`;
 }).join('\n')}
 `;
 }).join('\n')}
