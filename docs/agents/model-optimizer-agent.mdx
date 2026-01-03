@@ -256,7 +256,7 @@ class DistillationTrainer:
 Assuming a standard BERT-base (110M params):
 - Model size: ~440 MB (FP32)
 - Latency: 50ms (your measurement)
-- Target: under 10ms (5x speedup needed)
+- Target: <10ms (5x speedup needed)
 
 **Optimization Strategy**
 
@@ -264,7 +264,7 @@ For a 5x speedup, I recommend this progression:
 
 | Technique | Expected Speedup | Accuracy Impact |
 |-----------|-----------------|-----------------|
-| FP16 | 2x | under 0.1% |
+| FP16 | 2x | <0.1% |
 | INT8 + TensorRT | 3-4x | 1-2% |
 | Pruning (50%) | 1.5-2x | 1-3% |
 | DistilBERT | 2x | 3-5% |
