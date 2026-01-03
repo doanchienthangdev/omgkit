@@ -86,6 +86,36 @@ jobs:
       - name: Validate all plugin files
         run: npm run test:validation
 
+  validate-docs:
+    name: Validate Documentation Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Regenerate documentation
+        run: npm run docs:generate
+
+      - name: Check for uncommitted doc changes
+        run: |
+          if [[ -n $(git status --porcelain docs/) ]]; then
+            echo "❌ Documentation is out of sync with plugin files!"
+            echo "Run 'npm run docs:generate' and commit the changes."
+            git diff --stat docs/
+            exit 1
+          fi
+          echo "✅ Documentation is in sync"
+
   integration:
     name: Integration Tests
     runs-on: ${{ matrix.os }}
