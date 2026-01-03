@@ -259,7 +259,8 @@
         "commands/fix-test",
         "commands/review",
         "commands/tdd",
-        "commands/test"
+        "commands/test",
+        "commands/test-write"
       ]
     },
     {

@@ -2,7 +2,7 @@
 
 ## OMGKIT-Powered Project
 
-This project uses **OMGKIT** - an AI Team System for Claude Code with 23 Agents, 58 Commands, 88 Skills, and 10 Modes.
+This project uses **OMGKIT** - an AI Team System for Claude Code with 41 Agents, 151 Commands, 151 Skills, and 10 Modes.
 
 ## Project Structure
 
@@ -89,6 +89,69 @@ Before completing any task:
 - [ ] No lint errors
 - [ ] No security vulnerabilities
 - [ ] Documentation updated if needed
+
+---
+
+## AUTOMATIC RULES: Testing (Always Apply)
+
+When writing ANY test, Claude MUST automatically apply these rules:
+
+### 1. Minimum Test Coverage (MANDATORY)
+Every function/component MUST have tests for:
+- ✅ Happy path (normal input)
+- ✅ Empty/null/undefined inputs
+- ✅ Boundary values (0, -1, MAX_INT, empty string, etc.)
+- ✅ Error cases (invalid input → throw/return error)
+- ✅ Security inputs (if user-facing): `"'; DROP TABLE; --"`, `"<script>alert('xss')</script>"`
+
+### 2. Test Template (ALWAYS USE)
+```javascript
+describe('functionName', () => {
+  // 1. Happy path
+  it('should handle normal input', () => {});
+
+  // 2. Edge cases (NEVER SKIP)
+  it('should handle empty input', () => {});
+  it('should handle null/undefined', () => {});
+  it('should handle boundary values', () => {});
+
+  // 3. Error handling
+  it('should throw/return error for invalid input', () => {});
+
+  // 4. Security (if user input)
+  it('should sanitize malicious input', () => {});
+});
+```
+
+### 3. Boundary Values Reference
+```javascript
+// Always test these values
+const BOUNDARIES = {
+  numbers: [0, -0, 1, -1, Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER, NaN, Infinity],
+  strings: ['', ' ', 'a'.repeat(10000), '\n\t\r', '🔮💀', '\x00'],
+  arrays: [[], [null], [undefined], new Array(10000).fill(0)]
+};
+```
+
+### 4. Security Test Inputs
+```javascript
+// ALWAYS test with these if function handles user input
+const MALICIOUS = [
+  "'; DROP TABLE users; --",
+  "<script>alert('xss')</script>",
+  "../../../etc/passwd",
+  "{{constructor.constructor('return this')()}}"
+];
+```
+
+### 5. F.I.R.S.T Principles
+- **Fast**: Unit < 1ms, Integration < 100ms
+- **Independent**: No shared state between tests
+- **Repeatable**: No random, no time-dependent
+- **Self-Validating**: Explicit assertions
+- **Timely**: Write with code
+
+> **Full documentation**: `.omgkit/stdrules/TESTING_STANDARDS.md`
 
 ---
 
