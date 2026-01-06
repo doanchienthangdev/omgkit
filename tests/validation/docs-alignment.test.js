@@ -148,8 +148,17 @@ function countPluginSkills() {
     let count = 0;
     if (!existsSync(dir)) return 0;
 
+    // Check for category-level SKILL.md (e.g., ai-engineering/SKILL.md)
+    const categorySkillFile = join(dir, 'SKILL.md');
+    if (existsSync(categorySkillFile)) {
+      count++;
+    }
+
     const items = readdirSync(dir);
     for (const item of items) {
+      // Skip SKILL.md (already counted above)
+      if (item === 'SKILL.md') continue;
+
       const fullPath = join(dir, item);
       const stat = statSync(fullPath);
       if (stat.isDirectory()) {
@@ -342,6 +351,7 @@ describe('Documentation Alignment', () => {
 
     it('all AI Engineering skill docs should exist', () => {
       const expectedDocs = [
+        'ai-engineering.mdx',  // Category-level skill
         'foundation-models.mdx', 'evaluation-methodology.mdx', 'ai-system-evaluation.mdx',
         'prompt-engineering.mdx', 'rag-systems.mdx', 'ai-agents.mdx', 'finetuning.mdx',
         'dataset-engineering.mdx', 'inference-optimization.mdx', 'ai-architecture.mdx',

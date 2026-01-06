@@ -811,6 +811,13 @@
       ]
     },
     {
+      "group": "Other",
+      "pages": [
+        "skills/ai-engineering",
+        "skills/ml-systems"
+      ]
+    },
+    {
       "group": "Workflows Overview",
       "pages": [
         "workflows/overview"

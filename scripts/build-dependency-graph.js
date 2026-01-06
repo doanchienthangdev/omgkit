@@ -230,9 +230,34 @@ async function extractSkillDependencies() {
     const stats = await stat(categoryPath).catch(() => null);
     if (!stats?.isDirectory()) continue;
 
+    // Check for category-level SKILL.md (e.g., ai-engineering/SKILL.md)
+    const categorySkillFile = join(categoryPath, 'SKILL.md');
+    if (existsSync(categorySkillFile)) {
+      const content = await readFile(categorySkillFile, 'utf-8');
+      const fm = parseFrontmatter(content);
+
+      skills[category] = {
+        file: `skills/${category}/SKILL.md`,
+        name: fm.name || category,
+        category,
+        description: fm.description || '',
+        dependsOn: {
+          commands: Array.isArray(fm.commands) ? fm.commands : [],
+          mcps: Array.isArray(fm.mcps) ? fm.mcps : []
+        },
+        usedBy: {
+          agents: [],
+          workflows: []
+        }
+      };
+    }
+
     const skillDirs = await readdir(categoryPath).catch(() => []);
 
     for (const skillDir of skillDirs) {
+      // Skip SKILL.md file (already processed above)
+      if (skillDir === 'SKILL.md') continue;
+
       const skillPath = join(categoryPath, skillDir);
       const skillStats = await stat(skillPath).catch(() => null);
       if (!skillStats?.isDirectory()) continue;

@@ -428,6 +428,14 @@ describe('Documentation Sync Validation', () => {
       let pluginCount = 0;
       for (const cat of categories) {
         const catDir = join(pluginSkillsDir, cat);
+
+        // Count category-level SKILL.md (e.g., ai-engineering/SKILL.md)
+        const categorySkillPath = join(catDir, 'SKILL.md');
+        if (await exists(categorySkillPath)) {
+          pluginCount++;
+        }
+
+        // Count skills in subdirectories
         const items = await getSubdirectories(catDir);
         for (const item of items) {
           const skillPath = join(catDir, item, 'SKILL.md');
@@ -488,6 +496,14 @@ describe('Documentation Sync Validation', () => {
       const pluginSkills = new Set();
       for (const cat of categories) {
         const catDir = join(pluginSkillsDir, cat);
+
+        // Check for category-level SKILL.md (e.g., ai-engineering/SKILL.md)
+        const categorySkillPath = join(catDir, 'SKILL.md');
+        if (await exists(categorySkillPath)) {
+          pluginSkills.add(cat);
+        }
+
+        // Check for skills in subdirectories
         const items = await getSubdirectories(catDir);
         for (const item of items) {
           const skillPath = join(catDir, item, 'SKILL.md');

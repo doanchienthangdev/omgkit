@@ -1418,7 +1418,92 @@ async function generateSkillDocs() {
     try {
       const items = await readdir(categoryPath);
 
+      // Check for category-level SKILL.md (e.g., ai-engineering/SKILL.md)
+      const categorySkillFile = join(categoryPath, 'SKILL.md');
+      try {
+        const content = await readFile(categorySkillFile, 'utf-8');
+        const { frontmatter, body } = parseFrontmatter(content);
+        const catMeta = SKILL_CATEGORIES[category] || { icon: 'brain', description: '' };
+
+        allSkills.push({
+          name: frontmatter.name || category,
+          description: frontmatter.description || '',
+          category,
+          slug: category,
+          icon: catMeta.icon
+        });
+
+        // Generate category-level skill page
+        const skillDoc = `---
+title: "${frontmatter.name || category}"
+description: "${frontmatter.description || ''}"
+icon: "${catMeta.icon}"
+---
+
+<Info>
+  **Category:** ${category.charAt(0).toUpperCase() + category.slice(1)}
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+${frontmatter.description || 'This skill provides domain expertise for working with ' + category + '.'}
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+${body}
+
+${generateSkillUsageSection(category)}
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+\`\`\`yaml
+# .omgkit/config.yaml
+skills:
+  ${category}:
+    enabled: true
+    # Add skill-specific settings here
+\`\`\`
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all ${graphStats.skills} skills
+  </Card>
+  <Card title="${category.charAt(0).toUpperCase() + category.slice(1)}" icon="${catMeta.icon}" href="/skills/overview#${category}">
+    More ${category} skills
+  </Card>
+</CardGroup>
+`;
+
+        await writeFile(join(outputDir, `${category}.mdx`), skillDoc);
+      } catch (e) {
+        // No category-level SKILL.md
+      }
+
       for (const item of items) {
+        // Skip if item is SKILL.md (already processed above)
+        if (item === 'SKILL.md') continue;
+
         const skillFile = join(categoryPath, item, 'SKILL.md');
         try {
           const content = await readFile(skillFile, 'utf-8');
