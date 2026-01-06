@@ -794,6 +794,38 @@ OMGKIT's upgrade system is designed with safety first:
 | **settings.json** | Version updated, structure preserved |
 | **Your files** | NEVER touched (config.yaml, sprints, artifacts, devlogs) |
 
+### Config Commands (New)
+
+Configure workflow settings via CLI:
+
+```bash
+# Get a config value
+omgkit config get testing.enforcement.level
+omgkit config get testing.coverage_gates.unit
+
+# Set a config value
+omgkit config set testing.enforcement.level strict
+omgkit config set testing.auto_generate_tasks true
+omgkit config set testing.coverage_gates.unit.minimum 90
+
+# List all config or specific section
+omgkit config list
+omgkit config list testing
+
+# Reset to default value
+omgkit config reset testing.enforcement.level
+```
+
+#### Supported Value Types
+
+| Type | Example |
+|------|---------|
+| **String** | `omgkit config set git.main_branch develop` |
+| **Boolean** | `omgkit config set testing.auto_generate_tasks true` |
+| **Number** | `omgkit config set testing.coverage_gates.unit.minimum 90` |
+
+**Note**: For arrays, edit `.omgkit/workflow.yaml` directly.
+
 ---
 
 ## Documentation Sync Automation

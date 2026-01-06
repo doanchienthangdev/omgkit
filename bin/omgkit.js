@@ -25,6 +25,10 @@ import {
   rollbackProject,
   listProjectBackups,
   getProjectVersion,
+  getConfig,
+  setConfig,
+  listConfig,
+  resetConfig,
   COLORS,
   BANNER,
   log
@@ -57,6 +61,12 @@ ${COLORS.bright}PROJECT COMMANDS${COLORS.reset}
   ${COLORS.cyan}project:backups${COLORS.reset}   List available project backups
   ${COLORS.cyan}project:version${COLORS.reset}   Show project's OMGKIT version
 
+${COLORS.bright}CONFIG COMMANDS${COLORS.reset}
+  ${COLORS.cyan}config get <key>${COLORS.reset}      Get config value (e.g., testing.enforcement.level)
+  ${COLORS.cyan}config set <key> <val>${COLORS.reset} Set config value
+  ${COLORS.cyan}config list [section]${COLORS.reset} List all config or specific section
+  ${COLORS.cyan}config reset <key>${COLORS.reset}    Reset config key to default
+
 ${COLORS.bright}UPGRADE OPTIONS${COLORS.reset}
   --dry        Show what would change without applying
   --force      Skip confirmation prompts
@@ -68,6 +78,14 @@ ${COLORS.bright}EXAMPLES${COLORS.reset}
   omgkit project:upgrade --dry # Preview upgrade changes
   omgkit project:rollback      # Rollback to last backup
   omgkit doctor                # Check status
+
+${COLORS.bright}CONFIG EXAMPLES${COLORS.reset}
+  omgkit config set testing.enforcement.level strict
+  omgkit config set testing.auto_generate_tasks true
+  omgkit config set testing.coverage_gates.unit.minimum 90
+  omgkit config get testing
+  omgkit config list testing
+  omgkit config reset testing.enforcement.level
 
 ${COLORS.bright}AFTER INSTALLATION${COLORS.reset}
   In Claude Code, type / to see all OMGKIT commands:
@@ -153,6 +171,70 @@ switch (command) {
     console.log(`Current OMGKIT version: ${omgkitVersion}`);
     if (projectVersion && projectVersion !== omgkitVersion) {
       log.info('Run: omgkit project:upgrade');
+    }
+    break;
+  }
+  case 'config': {
+    const subCommand = args[0];
+    switch (subCommand) {
+      case 'get': {
+        const key = args[1];
+        if (!key) {
+          log.error('Usage: omgkit config get <key>');
+          log.info('Example: omgkit config get testing.enforcement.level');
+          process.exit(1);
+        }
+        const result = getConfig(key);
+        if (!result.success) process.exit(1);
+        break;
+      }
+      case 'set': {
+        const key = args[1];
+        const value = args[2];
+        if (!key || value === undefined) {
+          log.error('Usage: omgkit config set <key> <value>');
+          log.info('Example: omgkit config set testing.enforcement.level strict');
+          process.exit(1);
+        }
+        const result = setConfig(key, value);
+        if (!result.success) process.exit(1);
+        break;
+      }
+      case 'list': {
+        const section = args[1];
+        const result = listConfig({ section });
+        if (!result.success) process.exit(1);
+        break;
+      }
+      case 'reset': {
+        const key = args[1];
+        if (!key) {
+          log.error('Usage: omgkit config reset <key>');
+          log.info('Example: omgkit config reset testing.enforcement.level');
+          process.exit(1);
+        }
+        const result = resetConfig(key);
+        if (!result.success) process.exit(1);
+        break;
+      }
+      default: {
+        log.error(`Unknown config subcommand: ${subCommand || '(none)'}`);
+        console.log(`
+${COLORS.bright}Config Commands:${COLORS.reset}
+  omgkit config get <key>       Get config value
+  omgkit config set <key> <val> Set config value
+  omgkit config list [section]  List all config
+  omgkit config reset <key>     Reset to default
+
+${COLORS.bright}Examples:${COLORS.reset}
+  omgkit config get testing.enforcement.level
+  omgkit config set testing.enforcement.level strict
+  omgkit config set testing.auto_generate_tasks true
+  omgkit config list testing
+  omgkit config reset testing.enforcement.level
+`);
+        process.exit(1);
+      }
     }
     break;
   }

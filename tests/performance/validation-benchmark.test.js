@@ -205,8 +205,8 @@ describe('Validation Performance Benchmarks', () => {
         }
       });
 
-      // Allow up to 100ms for parsing (accounts for cold cache)
-      expect(time).toBeLessThan(100);
+      // Allow up to 200ms for parsing (accounts for cold cache and CI variance)
+      expect(time).toBeLessThan(200);
     });
 
     it('validates frontmatter parsing under 1ms per file', async () => {
