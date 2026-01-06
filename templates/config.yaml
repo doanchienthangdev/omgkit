@@ -33,6 +33,7 @@ output:
   plans_dir: .omgkit/plans
   docs_dir: .omgkit/docs
   logs_dir: .omgkit/logs
+  artifacts_dir: .omgkit/artifacts
   verbose: false
 
 # MCP settings

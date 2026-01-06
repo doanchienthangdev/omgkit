@@ -102,7 +102,8 @@ const STATIC_NAVIGATION = [
       "concepts/omega-philosophy",
       "concepts/alignment-principle",
       "concepts/sprint-management",
-      "concepts/ai-team"
+      "concepts/ai-team",
+      "concepts/artifacts"
     ]
   },
   {

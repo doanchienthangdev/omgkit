@@ -589,17 +589,20 @@ Build complete applications from idea to deployment.
 
 ### Artifacts System
 
-Provide project context:
+Provide project context with reference documents:
 
 ```
 .omgkit/artifacts/
-├── data/       # Sample data, schemas
-├── docs/       # Requirements, user stories
-├── knowledge/  # Glossary, business rules
-├── research/   # Competitor analysis
-├── assets/     # Images, templates
-└── examples/   # Code samples
+├── README.md   # How to use artifacts
+├── data/       # Sample data, schemas, data dictionaries
+├── docs/       # Requirements, user stories, PRDs
+├── knowledge/  # Glossary, business rules, domain knowledge
+├── research/   # Competitor analysis, market research
+├── assets/     # Reference images, templates, mockups
+└── examples/   # Code samples, reference implementations
 ```
+
+**Note:** Artifacts are **reference materials only**, NOT execution instructions. They help AI understand your project context.
 
 ---
 
@@ -619,11 +622,16 @@ your-project/
 │   ├── docs/            # Generated docs
 │   ├── logs/            # Activity logs
 │   ├── devlogs/         # Development logs (git-ignored)
+│   │   └── README.md
 │   ├── stdrules/        # Project standards
+│   │   ├── README.md
 │   │   ├── BEFORE_COMMIT.md
-│   │   └── SKILL_STANDARDS.md
-│   └── artifacts/       # Project context
-└── OMEGA.md             # Project context file
+│   │   ├── SKILL_STANDARDS.md
+│   │   └── TESTING_STANDARDS.md
+│   └── artifacts/       # Project context (reference only)
+│       └── README.md
+├── OMEGA.md             # Project context file
+└── CLAUDE.md            # Claude Code instructions
 ```
 
 ---

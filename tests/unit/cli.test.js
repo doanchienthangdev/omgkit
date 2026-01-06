@@ -188,6 +188,7 @@ describe('CLI Core Functions', () => {
       expect(existsSync(join(TEST_PROJECT, '.omgkit/logs'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/devlogs'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules'))).toBe(true);
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/artifacts'))).toBe(true);
     });
 
     it('should create config files', () => {
@@ -207,6 +208,44 @@ describe('CLI Core Functions', () => {
       expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules/README.md'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules/SKILL_STANDARDS.md'))).toBe(true);
       expect(existsSync(join(TEST_PROJECT, '.omgkit/stdrules/BEFORE_COMMIT.md'))).toBe(true);
+    });
+
+    it('should create artifacts folder with README.md', () => {
+      initProject({ cwd: TEST_PROJECT, silent: true });
+
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/artifacts'))).toBe(true);
+      expect(existsSync(join(TEST_PROJECT, '.omgkit/artifacts/README.md'))).toBe(true);
+    });
+
+    it('should create artifacts README.md with correct content', () => {
+      initProject({ cwd: TEST_PROJECT, silent: true });
+
+      const content = readFileSync(join(TEST_PROJECT, '.omgkit/artifacts/README.md'), 'utf8');
+      expect(content).toContain('Project Artifacts');
+      expect(content).toContain('reference documents');
+      expect(content).toContain('data/');
+      expect(content).toContain('docs/');
+      expect(content).toContain('knowledge/');
+      expect(content).toContain('research/');
+    });
+
+    it('should not overwrite existing artifacts README.md', () => {
+      // Create existing artifacts folder and README
+      mkdirSync(join(TEST_PROJECT, '.omgkit/artifacts'), { recursive: true });
+      writeFileSync(join(TEST_PROJECT, '.omgkit/artifacts/README.md'), 'existing artifacts content');
+
+      initProject({ cwd: TEST_PROJECT, silent: true });
+
+      const content = readFileSync(join(TEST_PROJECT, '.omgkit/artifacts/README.md'), 'utf8');
+      expect(content).toBe('existing artifacts content');
+    });
+
+    it('should include artifacts_dir in config.yaml', () => {
+      initProject({ cwd: TEST_PROJECT, silent: true });
+
+      const content = readFileSync(join(TEST_PROJECT, '.omgkit/config.yaml'), 'utf8');
+      expect(content).toContain('artifacts_dir');
+      expect(content).toContain('.omgkit/artifacts');
     });
 
     it('should not overwrite existing files', () => {

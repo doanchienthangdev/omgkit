@@ -1,0 +1,158 @@
+---
+title: Artifacts
+description: 'Project context documents for AI-assisted development'
+icon: 'folder-open'
+---
+
+## What are Artifacts?
+
+Artifacts are **reference documents** that provide context for AI-assisted development. They help Claude Code and OMGKIT understand your project's background, goals, and constraints.
+
+<Note>
+Artifacts are **input context** - they inform AI decisions but are NOT execution instructions.
+</Note>
+
+## Artifacts vs Other Folders
+
+| Folder | Purpose | Git Status | AI Usage |
+|--------|---------|------------|----------|
+| **artifacts/** | Reference context (input) | Committed | Read for understanding |
+| **devlogs/** | Development work logs | Git-ignored | Internal tracking |
+| **plans/** | Formal implementation plans | Committed | Execution guidance |
+| **docs/** | Generated documentation | Committed | Output documentation |
+
+## Folder Structure
+
+```
+.omgkit/artifacts/
+├── README.md       # Instructions for using artifacts
+├── data/           # Sample data, schemas, data dictionaries
+├── docs/           # Requirements, user stories, PRDs
+├── knowledge/      # Glossary, business rules, domain knowledge
+├── research/       # Competitor analysis, market research
+├── assets/         # Reference images, templates, mockups
+└── examples/       # Code samples, reference implementations
+```
+
+## Content Types
+
+<CardGroup cols={2}>
+  <Card title="Data" icon="database">
+    - Sample JSON/CSV files
+    - Database schemas
+    - Data dictionaries
+    - API response examples
+  </Card>
+  <Card title="Documentation" icon="file-lines">
+    - Product Requirements Documents (PRDs)
+    - User stories
+    - Feature specifications
+    - Acceptance criteria
+  </Card>
+  <Card title="Knowledge" icon="brain">
+    - Business glossary
+    - Domain rules
+    - Industry standards
+    - Naming conventions
+  </Card>
+  <Card title="Research" icon="magnifying-glass">
+    - Competitor analysis
+    - Market research
+    - Technology comparisons
+    - Best practices
+  </Card>
+</CardGroup>
+
+## How AI Uses Artifacts
+
+When you run OMGKIT commands, the AI team will:
+
+1. **Read artifacts** to understand project context
+2. **Reference business rules** when making implementation decisions
+3. **Follow naming conventions** from glossary and data dictionaries
+4. **Align with requirements** in PRDs and user stories
+5. **Use examples** as reference for coding patterns
+
+## Best Practices
+
+### 1. Keep It Organized
+
+Create subfolders for different content types:
+
+```
+artifacts/
+├── data/
+│   ├── sample-users.json
+│   └── schema.sql
+├── docs/
+│   ├── prd.md
+│   └── user-stories.md
+├── knowledge/
+│   ├── glossary.md
+│   └── business-rules.md
+└── research/
+    └── competitor-analysis.md
+```
+
+### 2. Use Clear Naming
+
+- Descriptive filenames: `user-authentication-requirements.md`
+- Date prefix for versioned docs: `2024-12-prd-v2.md`
+- Keep extensions consistent: `.md` for markdown, `.json` for data
+
+### 3. Keep It Relevant
+
+- Remove outdated documents
+- Update artifacts when requirements change
+- Link related documents together
+
+### 4. Don't Put Execution Work Here
+
+Execution work belongs elsewhere:
+- Implementation plans go in `plans/`
+- Development logs go in `devlogs/`
+- Generated docs go in `docs/`
+
+## Quick Start
+
+<Steps>
+  <Step title="Copy your documents">
+    Copy project documents into appropriate subfolders in `.omgkit/artifacts/`
+  </Step>
+  <Step title="Refresh context">
+    Run `/context:index` to refresh codebase context
+  </Step>
+  <Step title="Start developing">
+    AI will automatically reference artifacts when executing commands
+  </Step>
+</Steps>
+
+## Example: Setting Up Artifacts
+
+```bash
+# Create structure
+mkdir -p .omgkit/artifacts/{data,docs,knowledge,research}
+
+# Copy your PRD
+cp ~/Documents/my-project-prd.md .omgkit/artifacts/docs/prd.md
+
+# Copy sample data
+cp ~/Downloads/sample-users.json .omgkit/artifacts/data/
+
+# Create glossary
+echo "# Glossary\n\n- **User**: ..." > .omgkit/artifacts/knowledge/glossary.md
+
+# Refresh context
+/context:index
+```
+
+## Related Concepts
+
+<CardGroup cols={2}>
+  <Card title="Sprint Management" icon="calendar" href="/concepts/sprint-management">
+    Plan and track development cycles
+  </Card>
+  <Card title="AI Team" icon="users" href="/concepts/ai-team">
+    Specialized agents that use artifacts
+  </Card>
+</CardGroup>

@@ -15,6 +15,8 @@ This project uses **OMGKIT** - an AI Team System for Claude Code with 41 Agents,
 ├── stdrules/         # Standards and rules (MUST READ)
 │   ├── TESTING_STANDARDS.md   # Testing methodology
 │   └── BEFORE_COMMIT.md       # Pre-commit checklist
+├── artifacts/        # Project context documents (reference only)
+│   └── README.md     # How to use artifacts
 ├── devlogs/          # Development logs (git-ignored)
 └── settings.json     # Local settings
 ```
@@ -38,6 +40,15 @@ This project uses **OMGKIT** - an AI Team System for Claude Code with 41 Agents,
 - Task breakdowns and analysis
 
 This folder is git-ignored and should NEVER be committed to the repository.
+
+### `.omgkit/artifacts/` Folder
+**REFERENCE CONTEXT**: This folder contains project initialization documents that provide context for development:
+- Brainstorming notes and initial plans
+- Project specs and requirements
+- Research documents and analysis
+- Sample data and schemas
+
+These are **reference materials only**, NOT execution instructions. Read them to understand project context.
 
 ### Documentation (`docs/`)
 The `docs/` folder is for public documentation only:

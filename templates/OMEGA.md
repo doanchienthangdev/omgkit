@@ -50,6 +50,16 @@ OMGKIT provides 23 specialized agents organized into teams:
 - API documentation required
 - Architecture decisions in ADRs
 
+## Project Artifacts
+
+Reference documents in `.omgkit/artifacts/` provide context:
+- **data/**: Sample data, schemas, data dictionaries
+- **docs/**: Requirements, user stories, PRDs
+- **knowledge/**: Glossary, business rules, domain knowledge
+- **research/**: Competitor analysis, market research
+
+See `.omgkit/artifacts/README.md` for details.
+
 ## Current Sprint
 
 See `.omgkit/sprints/current.yaml`
