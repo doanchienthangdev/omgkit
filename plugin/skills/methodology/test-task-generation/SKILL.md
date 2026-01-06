@@ -9,8 +9,10 @@ related_skills:
   - testing/comprehensive-testing
 related_commands:
   - /dev:feature-tested
+  - /dev:feature
   - /quality:test-plan
   - /dev:test
+  - /sprint:team-run
 ---
 
 # Test Task Generation
@@ -350,6 +352,37 @@ TEST-087-C: Accessibility tests for UserCard
 - Ignore optional test types for critical features
 - Set coverage targets below minimums
 - Create test tasks without parent reference
+
+## Configuration
+
+### Enable Auto-Generation
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  auto_generate_tasks: true
+  enforcement:
+    level: standard
+```
+
+### Via CLI
+
+```bash
+# Enable auto-generation
+omgkit config set testing.auto_generate_tasks true
+
+# Set test types for auto-generation
+omgkit config set testing.auto_generate.types "unit,integration"
+```
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--test-types <types>` | Specify test types | `/dev:feature "api" --test-types unit,integration,e2e` |
+| `--coverage <percent>` | Set coverage target | `/dev:feature-tested "auth" --coverage 95` |
+| `--tdd` | Generate test tasks first | `/dev:feature-tested "cart" --tdd` |
 
 ## Quality Gates
 

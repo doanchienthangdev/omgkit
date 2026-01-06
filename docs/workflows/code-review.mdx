@@ -158,7 +158,7 @@ This workflow orchestrates the following agents:
 | Agent | Skills | Commands |
 |-------|--------|----------|
 | [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
 | [git-manager](/agents/git-manager) | methodology/finishing-development-branch, devops/github-actions | /git:commit, /git:pr... |
 
 ### Skills Applied
@@ -173,7 +173,7 @@ This workflow orchestrates the following agents:
 | Command | Description |
 |---------|-------------|
 | [`/dev:review`](/commands/dev-review) | Code review with security and quality focus |
-| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs with regression test enforcement |
 | [`/git:commit`](/commands/git-commit) | Smart commit with conventional message |
 
 

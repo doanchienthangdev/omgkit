@@ -206,8 +206,8 @@ This workflow orchestrates the following agents:
 | Agent | Skills | Commands |
 |-------|--------|----------|
 | [sprint-master](/agents/sprint-master) | omega/omega-sprint, methodology/dispatching-parallel-agents... | /sprint:init, /sprint:sprint-new... |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 | [debugger](/agents/debugger) | methodology/systematic-debugging, methodology/root-cause-tracing... | /dev:fix, /dev:fix-hard... |
 | [project-manager](/agents/project-manager) | omega/omega-sprint |  |
 
@@ -223,9 +223,9 @@ This workflow orchestrates the following agents:
 | Command | Description |
 |---------|-------------|
 | [`/sprint:sprint-current`](/commands/sprint-sprint-current) | Show sprint progress |
-| [`/sprint:team-run`](/commands/sprint-team-run) | Run AI team on sprint tasks |
+| [`/sprint:team-run`](/commands/sprint-team-run) | Run AI team on sprint tasks with configurable test enforceme... |
 | [`/sprint:team-status`](/commands/sprint-team-status) | Show AI team activity |
-| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs with regression test enforcement |
 | [`/sprint:sprint-end`](/commands/sprint-sprint-end) | End sprint with retrospective |
 
 

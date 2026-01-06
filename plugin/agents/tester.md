@@ -5,14 +5,20 @@ tools: Read, Write, Bash, Glob, Grep, Task
 model: inherit
 skills:
   - methodology/test-driven-development
+  - methodology/test-enforcement
+  - methodology/test-task-generation
   - methodology/testing-anti-patterns
   - testing/vitest
   - testing/playwright
   - testing/pytest
 commands:
   - /dev:test
+  - /dev:test-write
   - /dev:tdd
   - /dev:fix-test
+  - /dev:feature-tested
+  - /quality:verify-done
+  - /quality:coverage-check
 ---
 
 # 🧪 Tester Agent
@@ -577,9 +583,44 @@ Before marking testing complete:
 
 ---
 
+## Test Enforcement Integration
+
+### Configuration
+
+Read testing configuration from `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard  # soft | standard | strict
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+```
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--coverage <percent>` | Override coverage minimum | `/dev:test "src/" --coverage 90` |
+| `--test-types <types>` | Specify test types | `/dev:test "api/" --test-types unit,integration` |
+| `--watch` | Run in watch mode | `/dev:test "src/" --watch` |
+| `--fail-under <percent>` | Fail if coverage below | `/dev:test "lib/" --fail-under 80` |
+
+### Enforcement Behavior
+
+When enforcement is enabled:
+- Block task completion if tests fail
+- Block if coverage below minimum
+- Warn about missing test types
+
 ## Commands
 
-- `/test [target]` - Run tests for target
-- `/test:coverage` - Run with coverage report
-- `/test:watch` - Run in watch mode
-- `/tdd [feature]` - Test-driven development workflow
+- `/dev:test [target]` - Run tests for target
+- `/dev:test-write [file]` - Write comprehensive tests
+- `/dev:tdd [feature]` - Test-driven development workflow
+- `/dev:feature-tested [desc]` - Feature with auto-generated tests
+- `/quality:verify-done` - Verify test requirements
+- `/quality:coverage-check` - Check coverage gates

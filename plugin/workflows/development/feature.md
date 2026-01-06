@@ -1,6 +1,6 @@
 ---
 name: feature
-description: Complete feature development from planning to deployment
+description: Complete feature development from planning to deployment with configurable test enforcement
 category: development
 complexity: medium
 estimated-time: 2-8 hours
@@ -14,13 +14,20 @@ skills:
   - methodology/writing-plans
   - methodology/executing-plans
   - methodology/test-driven-development
+  - methodology/test-enforcement
+  - methodology/test-task-generation
 commands:
   - /planning:plan
   - /dev:feature
+  - /dev:feature-tested
   - /dev:test
   - /dev:review
+  - /quality:verify-done
   - /git:commit
   - /git:pr
+testing:
+  default: true
+  configurable: true
 prerequisites:
   - Project initialized with omgkit
   - Git repository configured
@@ -154,14 +161,55 @@ Feature Development Progress
 - Specify the target completion timeframe
 - Include any dependencies on other features
 
+## Testing Options
+
+This workflow respects project testing configuration from `.omgkit/workflow.yaml`.
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/dev:feature "login" --no-test` |
+| `--test-level <level>` | Override enforcement level | `/dev:feature "auth" --test-level strict` |
+| `--coverage <percent>` | Override coverage minimum | `/dev:feature "api" --coverage 95` |
+
+### Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard  # soft | standard | strict
+  coverage_gates:
+    unit:
+      minimum: 80
+```
+
+### CLI Configuration
+
+```bash
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# View testing config
+omgkit config list testing
+```
+
 ## Example Usage
 
 ```bash
-# Full feature workflow
+# Full feature workflow with default testing
 /workflow:feature "user authentication with OAuth2 support"
 
-# With specific requirements
-/workflow:feature "shopping cart with persistent storage and checkout flow"
+# With strict test enforcement
+/dev:feature "payment processing" --test-level strict
+
+# With specific coverage requirement
+/dev:feature "shopping cart" --coverage 95
+
+# Skip testing for prototype (soft level required)
+/dev:feature "quick prototype" --no-test
 ```
 
 ## Related Workflows

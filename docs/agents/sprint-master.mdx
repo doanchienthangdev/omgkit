@@ -256,11 +256,14 @@ Generates:
 
 ### Configuration Loading
 
-At sprint start, read `.omgkit/workflow.yaml` for testing configuration:
+At sprint start, read `.omgkit/workflow.yaml` for testing configuration.
+
+**Via workflow.yaml:**
 
 ```yaml
 # .omgkit/workflow.yaml
 testing:
+  enabled: true
   enforcement:
     level: standard  # soft | standard | strict
   auto_generate_tasks: true
@@ -278,6 +281,27 @@ testing:
     on_test_failure: true
     on_coverage_below_minimum: true
 ```
+
+**Via CLI:**
+
+```bash
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# Enable/disable auto-generation
+omgkit config set testing.auto_generate_tasks true
+
+# View testing config
+omgkit config list testing
+```
+
+**Via Command Options:**
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/sprint:team-run --no-test` |
+| `--test-level <level>` | Override enforcement level | `/sprint:team-run --test-level strict` |
+| `--mode <mode>` | Autonomy mode | `/sprint:team-run --mode full-auto` |
 
 ### Auto Test Task Generation
 
@@ -704,7 +728,7 @@ When blocker detected:
 | [`/sprint:backlog-prioritize`](/commands/sprint-backlog-prioritize) | AI-powered backlog prioritization |
 | [`/sprint:vision-set`](/commands/sprint-vision-set) | Set product vision interactively |
 | [`/sprint:vision-show`](/commands/sprint-vision-show) | Display current vision |
-| [`/sprint:team-run`](/commands/sprint-team-run) | Run AI team on sprint tasks |
+| [`/sprint:team-run`](/commands/sprint-team-run) | Run AI team on sprint tasks with configurable test enforceme... |
 | [`/sprint:team-status`](/commands/sprint-team-status) | Show AI team activity |
 | [`/sprint:team-ask`](/commands/sprint-team-ask) | Ask the AI team a question |
 

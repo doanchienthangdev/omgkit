@@ -278,11 +278,19 @@ Commands are slash-prefixed actions organized by namespace.
 ```bash
 /dev:feature <desc>     # Full feature development
 /dev:fix <error>        # Debug and fix bugs
-/dev:fix-fast <error>   # Quick bug fix
+/dev:fix-fast <error>   # Quick bug fix (tests optional)
 /dev:fix-hard <error>   # Complex bug (deep analysis)
 /dev:test <scope>       # Generate tests
 /dev:tdd <feature>      # Test-driven development
 /dev:review [file]      # Code review
+```
+
+**Testing Options** (available on most dev commands):
+```bash
+/dev:feature "login" --no-test           # Skip test enforcement
+/dev:fix "bug" --test-level strict       # Override enforcement level
+/dev:feature-tested "auth" --coverage 90 # Custom coverage target
+/dev:fix-fast "typo" --with-test         # Opt-in to testing
 ```
 
 ### Planning (`/planning:*`)

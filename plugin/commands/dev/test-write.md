@@ -1,7 +1,17 @@
 ---
 description: Write comprehensive tests following OMGKIT Omega Testing methodology
 allowed-tools: Task, Read, Write, Bash, Glob
-argument-hint: <function-or-file>
+argument-hint: <function-or-file> [--coverage PERCENT] [--test-types TYPES]
+related_skills:
+  - methodology/test-enforcement
+  - methodology/test-task-generation
+related_commands:
+  - /dev:test
+  - /dev:tdd
+  - /quality:verify-done
+testing:
+  default: true
+  configurable: true
 ---
 
 # Write Omega-Level Tests
@@ -119,6 +129,32 @@ npm run test:coverage
 
 # Run mutation testing (if available)
 npx stryker run
+```
+
+## Testing Options
+
+This command respects project testing configuration from `.omgkit/workflow.yaml`.
+
+### Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--coverage <percent>` | Target coverage | `/dev:test-write "auth.ts" --coverage 95` |
+| `--test-types <types>` | Test categories | `/dev:test-write "api.ts" --test-types unit,security` |
+| `--4d` | Include all 4D tests | `/dev:test-write "payment.ts" --4d` |
+
+### Configuration
+
+Configure via `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard
+  coverage_gates:
+    unit:
+      minimum: 80
 ```
 
 ## Output Checklist

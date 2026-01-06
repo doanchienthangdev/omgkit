@@ -1,18 +1,18 @@
 ---
 title: "/dev:tdd"
-description: "Test-driven development workflow"
+description: "Test-driven development workflow with enforced test-first methodology"
 icon: "code"
 ---
 
 <Info>
   **Category:** Dev
 
-  **Syntax:** `/dev:tdd <feature>`
+  **Syntax:** `/dev:tdd <feature> [--coverage PERCENT] [--test-types TYPES]`
 </Info>
 
 ## Overview
 
-Test-driven development workflow
+Test-driven development workflow with enforced test-first methodology
 
 ## Quick Start
 
@@ -21,9 +21,9 @@ Test-driven development workflow
 ```
 
 
-# 🔴🟢♻️ TDD: \<feature\>
+# 🔴🟢♻️ TDD: \<feature\> [--coverage PERCENT] [--test-types TYPES]
 
-Test-driven development for: **\<feature\>**
+Test-driven development for: **\<feature\> [--coverage PERCENT] [--test-types TYPES]**
 
 ## TDD Cycle
 1. 🔴 **RED** - Write failing test
@@ -36,6 +36,23 @@ Test-driven development for: **\<feature\>**
 - Only enough code to pass test
 - Refactor only when green
 
+## Testing Options
+
+This command **always enforces testing** (TDD by definition). Testing cannot be disabled.
+
+### Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--coverage <percent>` | Set minimum coverage | `/dev:tdd "auth" --coverage 95` |
+| `--test-types <types>` | Specify test types | `/dev:tdd "api" --test-types unit,integration` |
+
+### Coverage Requirements
+
+TDD defaults to high coverage requirements:
+- **Minimum**: 90% (higher than standard commands)
+- **Target**: 95%
+
 ## Process
 For each requirement:
 1. Write test first
@@ -44,6 +61,32 @@ For each requirement:
 4. Run test (should pass)
 5. Refactor if needed
 6. Next requirement
+
+## Configuration
+
+Configure via `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  coverage_gates:
+    unit:
+      minimum: 90
+      target: 95
+```
+
+## Examples
+
+```bash
+# Standard TDD workflow
+/dev:tdd "user authentication"
+
+# TDD with specific coverage target
+/dev:tdd "payment processing" --coverage 95
+
+# TDD with specific test types
+/dev:tdd "API endpoint" --test-types unit,integration,contract
+```
 
 
 
@@ -66,6 +109,12 @@ This command uses the following tools:
 |-------|-------------|
 | [fullstack-developer](/agents/fullstack-developer) | Full implementation with strict file ownership. Writes clean... |
 | [tester](/agents/tester) | Quality assurance through comprehensive testing. Framework-s... |
+
+### Available In Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/test-driven-development](/workflows/test-driven-development) | Test-Driven Development workflow with red-green-refactor cyc... |
 
 
 ## Examples

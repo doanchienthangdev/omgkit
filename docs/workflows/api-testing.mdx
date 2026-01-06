@@ -189,7 +189,7 @@ This workflow orchestrates the following agents:
 
 | Agent | Skills | Commands |
 |-------|--------|----------|
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 | [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
 
 ### Skills Applied
@@ -203,7 +203,7 @@ This workflow orchestrates the following agents:
 
 | Command | Description |
 |---------|-------------|
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
 | [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
 
 

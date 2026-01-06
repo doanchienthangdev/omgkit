@@ -216,7 +216,7 @@ This workflow orchestrates the following agents:
 | [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
 | [vulnerability-scanner](/agents/vulnerability-scanner) | security/owasp, security/security-hardening | /security:scan, /quality:security-scan |
 | [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
 | [docs-manager](/agents/docs-manager) | methodology/writing-plans | /planning:doc |
 
 ### Skills Applied
@@ -232,7 +232,7 @@ This workflow orchestrates the following agents:
 | Command | Description |
 |---------|-------------|
 | [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
-| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs with regression test enforcement |
 | [`/planning:doc`](/commands/planning-doc) | Generate documentation |
 
 

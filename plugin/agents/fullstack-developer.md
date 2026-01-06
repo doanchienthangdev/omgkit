@@ -7,14 +7,18 @@ skills:
   - methodology/executing-plans
   - methodology/verification-before-completion
   - methodology/test-driven-development
+  - methodology/test-enforcement
   - languages/typescript
   - languages/javascript
 commands:
   - /dev:feature
+  - /dev:feature-tested
   - /dev:fix
   - /dev:fix-fast
   - /dev:fix-hard
   - /dev:tdd
+  - /quality:refactor
+  - /quality:optimize
 ---
 
 # ⚡ Fullstack Developer Agent
@@ -432,9 +436,45 @@ Before marking task complete:
 
 ---
 
+## Test Enforcement
+
+### Configuration
+
+Testing is enforced based on `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard  # soft | standard | strict
+```
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/dev:fix "typo" --no-test` |
+| `--test-level <level>` | Override enforcement level | `/dev:feature "auth" --test-level strict` |
+| `--coverage <percent>` | Override coverage minimum | `/dev:feature "api" --coverage 95` |
+
+### Behavior by Command
+
+| Command | Default | Testing Behavior |
+|---------|---------|------------------|
+| `/dev:feature` | Tests enabled | Regression + unit tests |
+| `/dev:feature-tested` | Tests enforced | Full test suite auto-generated |
+| `/dev:fix` | Tests enabled | Regression test required |
+| `/dev:fix-fast` | Tests disabled | Optional with `--with-test` |
+| `/dev:fix-hard` | Tests enabled | Comprehensive testing |
+| `/dev:tdd` | Tests enforced | Test-first development |
+
 ## Commands
 
-- `/feature [description]` - Implement a feature from plan
-- `/fix [issue]` - Fix a bug
-- `/refactor [target]` - Refactor code
-- `/test [file]` - Add tests to file
+- `/dev:feature [description]` - Implement a feature
+- `/dev:feature-tested [desc]` - Feature with auto-generated tests
+- `/dev:fix [issue]` - Fix a bug with regression test
+- `/dev:fix-fast [issue]` - Quick fix (tests optional)
+- `/dev:fix-hard [issue]` - Deep investigation with tests
+- `/dev:tdd [feature]` - Test-driven development
+- `/quality:refactor [target]` - Refactor with test verification
+- `/quality:optimize [target]` - Optimize with test verification

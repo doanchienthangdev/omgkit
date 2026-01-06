@@ -1,6 +1,6 @@
 ---
 title: "bug-fix"
-description: "Systematic debugging and issue resolution"
+description: "Systematic debugging and issue resolution with regression test enforcement"
 icon: "code"
 ---
 
@@ -135,17 +135,58 @@ Bug Fix Debug Process
 - Specify the environment (browser, OS, version)
 - Link to related issues or discussions
 
+## Testing Options
+
+This workflow respects project testing configuration from `.omgkit/workflow.yaml`.
+
+### Command Options
+
+| Command | Default | Options |
+|---------|---------|---------|
+| `/dev:fix` | Tests enabled | `--no-test`, `--test-level` |
+| `/dev:fix-fast` | Tests disabled | `--with-test`, `--test-level` |
+| `/dev:fix-hard` | Tests enabled | `--no-test`, `--test-level` |
+
+### Enforcement Levels
+
+| Level | Regression Test | Test Failure |
+|-------|-----------------|--------------|
+| `soft` | Warning | Warning |
+| `standard` | Warning | Block |
+| `strict` | Block | Block |
+
+### Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard
+```
+
+```bash
+# Set via CLI
+omgkit config set testing.enforcement.level strict
+```
+
 ## Example Usage
 
 ```bash
-# Fix with error description
-/workflow:bug-fix "TypeError: Cannot read property 'id' of undefined in UserService"
+# Fix with regression test enforcement (default)
+/dev:fix "TypeError: Cannot read property 'id' of undefined in UserService"
 
-# Fix with context
-/workflow:bug-fix "Login button not responding after page refresh"
+# Quick fix without tests (for typos)
+/dev:fix-fast "typo in error message"
+
+# Quick fix with test (optional)
+/dev:fix-fast "wrong import path" --with-test
+
+# Deep investigation with strict testing
+/dev:fix-hard "Race condition in auth" --test-level strict
 
 # Fix with issue reference
-/workflow:bug-fix "Issue #123: Payment processing fails for amounts > $1000"
+/dev:fix "Issue #123: Payment processing fails for amounts > $1000"
 ```
 
 ## Related Workflows
@@ -172,14 +213,17 @@ This workflow orchestrates the following agents:
 - **[methodology/systematic-debugging](/skills/methodology/systematic-debugging)** - Domain expertise
 - **[methodology/root-cause-tracing](/skills/methodology/root-cause-tracing)** - Domain expertise
 - **[methodology/test-driven-development](/skills/methodology/test-driven-development)** - Domain expertise
+- **[methodology/test-enforcement](/skills/methodology/test-enforcement)** - Domain expertise
 
 
 
 ## Commands Triggered
 
 - `/dev:fix`
+- `/dev:fix-fast`
 - `/dev:fix-hard`
 - `/dev:fix-test`
+- `/quality:verify-done`
 - `/git:cm`
 
 
@@ -197,8 +241,8 @@ This workflow orchestrates the following agents:
 | Agent | Skills | Commands |
 |-------|--------|----------|
 | [debugger](/agents/debugger) | methodology/systematic-debugging, methodology/root-cause-tracing... | /dev:fix, /dev:fix-hard... |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 | [git-manager](/agents/git-manager) | methodology/finishing-development-branch, devops/github-actions | /git:commit, /git:pr... |
 
 ### Skills Applied
@@ -208,14 +252,17 @@ This workflow orchestrates the following agents:
 | [methodology/systematic-debugging](/skills/systematic-debugging) | AI agent follows a 5-phase debugging process with reproducti... |
 | [methodology/root-cause-tracing](/skills/root-cause-tracing) | AI agent performs systematic root cause analysis using 5 Why... |
 | [methodology/test-driven-development](/skills/test-driven-development) | AI agent practices test-first development with the Red-Green... |
+| [methodology/test-enforcement](/skills/test-enforcement) | The agent enforces mandatory test completion before any task... |
 
 ### Commands Available
 
 | Command | Description |
 |---------|-------------|
-| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
-| [`/dev:fix-hard`](/commands/dev-fix-hard) | Complex bug fix with deep investigation |
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs with regression test enforcement |
+| [`/dev:fix-fast`](/commands/dev-fix-fast) | Quick bug fix with minimal investigation (testing optional) |
+| [`/dev:fix-hard`](/commands/dev-fix-hard) | Complex bug fix with deep investigation and comprehensive te... |
 | [`/dev:fix-test`](/commands/dev-fix-test) | Fix failing tests |
+| [`/quality:verify-done`](/commands/quality-verify-done) | Verify all test requirements are met before marking a task o... |
 | [`/git:cm`](/commands/git-cm) | Quick conventional commit |
 
 

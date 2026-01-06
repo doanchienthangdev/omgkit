@@ -437,12 +437,48 @@ Before marking task complete:
 
 ---
 
+## Test Enforcement
+
+### Configuration
+
+Testing is enforced based on `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard  # soft | standard | strict
+```
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/dev:fix "typo" --no-test` |
+| `--test-level <level>` | Override enforcement level | `/dev:feature "auth" --test-level strict` |
+| `--coverage <percent>` | Override coverage minimum | `/dev:feature "api" --coverage 95` |
+
+### Behavior by Command
+
+| Command | Default | Testing Behavior |
+|---------|---------|------------------|
+| `/dev:feature` | Tests enabled | Regression + unit tests |
+| `/dev:feature-tested` | Tests enforced | Full test suite auto-generated |
+| `/dev:fix` | Tests enabled | Regression test required |
+| `/dev:fix-fast` | Tests disabled | Optional with `--with-test` |
+| `/dev:fix-hard` | Tests enabled | Comprehensive testing |
+| `/dev:tdd` | Tests enforced | Test-first development |
+
 ## Commands
 
-- `/feature [description]` - Implement a feature from plan
-- `/fix [issue]` - Fix a bug
-- `/refactor [target]` - Refactor code
-- `/test [file]` - Add tests to file
+- `/dev:feature [description]` - Implement a feature
+- `/dev:feature-tested [desc]` - Feature with auto-generated tests
+- `/dev:fix [issue]` - Fix a bug with regression test
+- `/dev:fix-fast [issue]` - Quick fix (tests optional)
+- `/dev:fix-hard [issue]` - Deep investigation with tests
+- `/dev:tdd [feature]` - Test-driven development
+- `/quality:refactor [target]` - Refactor with test verification
+- `/quality:optimize [target]` - Optimize with test verification
 
 
 ## Integration Points
@@ -468,6 +504,7 @@ Before marking task complete:
 | [methodology/executing-plans](/skills/executing-plans) | AI agent follows implementation plans systematically with pr... |
 | [methodology/verification-before-completion](/skills/verification-before-completion) | AI agent validates work through evidence-based verification ... |
 | [methodology/test-driven-development](/skills/test-driven-development) | AI agent practices test-first development with the Red-Green... |
+| [methodology/test-enforcement](/skills/test-enforcement) | The agent enforces mandatory test completion before any task... |
 | [languages/typescript](/skills/typescript) | TypeScript development with advanced type safety, generics, ... |
 | [languages/javascript](/skills/javascript) | Writes modern JavaScript with ES2024+ features, async patter... |
 
@@ -476,10 +513,13 @@ Before marking task complete:
 | Command | Description |
 |---------|-------------|
 | [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
-| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs |
-| [`/dev:fix-fast`](/commands/dev-fix-fast) | Quick bug fix with minimal investigation |
-| [`/dev:fix-hard`](/commands/dev-fix-hard) | Complex bug fix with deep investigation |
-| [`/dev:tdd`](/commands/dev-tdd) | Test-driven development workflow |
+| [`/dev:feature-tested`](/commands/dev-feature-tested) | Create a feature with automatically generated test tasks and... |
+| [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs with regression test enforcement |
+| [`/dev:fix-fast`](/commands/dev-fix-fast) | Quick bug fix with minimal investigation (testing optional) |
+| [`/dev:fix-hard`](/commands/dev-fix-hard) | Complex bug fix with deep investigation and comprehensive te... |
+| [`/dev:tdd`](/commands/dev-tdd) | Test-driven development workflow with enforced test-first me... |
+| [`/quality:refactor`](/commands/quality-refactor) | Improve code structure with test verification |
+| [`/quality:optimize`](/commands/quality-optimize) | Performance optimization with test verification |
 
 ### Used By Workflows
 
@@ -488,9 +528,9 @@ Before marking task complete:
 | [ai-engineering/agent-development](/workflows/agent-development) | Build autonomous AI agents with tools |
 | [ai-engineering/fine-tuning](/workflows/fine-tuning) | Fine-tune foundation models for specific tasks |
 | [ai-engineering/rag-development](/workflows/rag-development) | Build Retrieval-Augmented Generation systems |
-| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution |
+| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution with regression te... |
 | [development/code-review](/workflows/code-review) | Review and improve code quality |
-| [development/feature](/workflows/feature) | Complete feature development from planning to deployment |
+| [development/feature](/workflows/feature) | Complete feature development from planning to deployment wit... |
 | [development/refactor](/workflows/refactor) | Improve code quality without changing behavior |
 | [event-driven/saga-implementation](/workflows/saga-implementation) | Implement distributed transactions using saga pattern |
 | [event-driven/schema-evolution](/workflows/schema-evolution) | Safely evolve event schemas with backward/forward compatibil... |

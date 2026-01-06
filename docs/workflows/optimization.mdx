@@ -174,7 +174,7 @@ This workflow orchestrates the following agents:
 | Agent | Skills | Commands |
 |-------|--------|----------|
 | [database-admin](/agents/database-admin) | databases/database-optimization, databases/database-schema-design... | /quality:optimize, /workflow:schema-design... |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 
 ### Skills Applied
 
@@ -186,8 +186,8 @@ This workflow orchestrates the following agents:
 
 | Command | Description |
 |---------|-------------|
-| [`/quality:optimize`](/commands/quality-optimize) | Performance optimization |
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/quality:optimize`](/commands/quality-optimize) | Performance optimization with test verification |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
 
 
 ## Tips for Best Results

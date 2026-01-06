@@ -11,6 +11,10 @@ related_commands:
   - /quality:verify-done
   - /quality:coverage-check
   - /dev:feature-tested
+  - /dev:feature
+  - /dev:fix
+  - /dev:fix-hard
+  - /sprint:team-run
 ---
 
 # Test Enforcement
@@ -52,9 +56,12 @@ Definition of Done:
 
 ## Configuration
 
+### Via workflow.yaml
+
 ```yaml
 # .omgkit/workflow.yaml
 testing:
+  enabled: true
   enforcement:
     level: standard  # soft | standard | strict
 
@@ -87,6 +94,32 @@ testing:
     require_approval: true
     log_all_overrides: true
 ```
+
+### Via CLI
+
+```bash
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# View current configuration
+omgkit config get testing.enforcement.level
+
+# List all testing config
+omgkit config list testing
+```
+
+### Via Command Options
+
+Commands support per-invocation overrides:
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/dev:fix "typo" --no-test` |
+| `--with-test` | Force test enforcement | `/dev:fix-fast "bug" --with-test` |
+| `--test-level <level>` | Override enforcement level | `/dev:feature "auth" --test-level strict` |
+| `--coverage <percent>` | Override coverage minimum | `/dev:feature "api" --coverage 95` |
+
+**Note:** `--no-test` requires `soft` enforcement level or explicit config override.
 
 ## Pre-Completion Checklist
 

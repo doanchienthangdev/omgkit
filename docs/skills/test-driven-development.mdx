@@ -146,12 +146,42 @@ REMEMBER: 100% coverage != well-tested
 | Keep cycles short (1-5 minutes) | 30+ minute cycles |
 | Mock only external dependencies | Over-mocking your own code |
 
+## Command Integration
+
+### Using TDD Command
+
+```bash
+# Start TDD workflow
+/dev:tdd "user authentication"
+
+# TDD with specific coverage
+/dev:tdd "payment processing" --coverage 95
+
+# TDD with specific test types
+/dev:tdd "API endpoint" --test-types unit,integration,contract
+```
+
+### Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  enforcement:
+    level: strict  # TDD recommends strict
+  coverage_gates:
+    unit:
+      minimum: 90
+      target: 95
+```
+
 ## Related Skills
 
-- `avoiding-testing-anti-patterns` - Avoid common test mistakes
-- `testing-with-vitest` - Vitest testing framework
-- `testing-with-playwright` - E2E testing with Playwright
-- `verifying-before-completion` - Ensure test quality
+- `methodology/test-enforcement` - Enforce test completion
+- `methodology/test-task-generation` - Auto-generate test tasks
+- `methodology/testing-anti-patterns` - Avoid common test mistakes
+- `testing/vitest` - Vitest testing framework
+- `testing/playwright` - E2E testing with Playwright
 
 
 ## Usage Graph
@@ -167,8 +197,8 @@ REMEMBER: 100% coverage != well-tested
 
 | Workflow | Description |
 |----------|-------------|
-| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution |
-| [development/feature](/workflows/feature) | Complete feature development from planning to deployment |
+| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution with regression te... |
+| [development/feature](/workflows/feature) | Complete feature development from planning to deployment wit... |
 | [development/refactor](/workflows/refactor) | Improve code quality without changing behavior |
 | [testing/test-driven-development](/workflows/test-driven-development) | Test-Driven Development workflow with red-green-refactor cyc... |
 

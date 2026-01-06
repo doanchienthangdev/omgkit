@@ -1,18 +1,18 @@
 ---
 title: "/dev:test"
-description: "Generate and run tests"
+description: "Generate and run tests with configurable coverage enforcement"
 icon: "code"
 ---
 
 <Info>
   **Category:** Dev
 
-  **Syntax:** `/dev:test <scope>`
+  **Syntax:** `/dev:test <scope> [--coverage PERCENT] [--test-types TYPES] [--watch]`
 </Info>
 
 ## Overview
 
-Generate and run tests
+Generate and run tests with configurable coverage enforcement
 
 ## Quick Start
 
@@ -21,24 +21,85 @@ Generate and run tests
 ```
 
 
-# 🧪 Test: \<scope\>
+# 🧪 Test: \<scope\> [--coverage PERCENT] [--test-types TYPES] [--watch]
 
-Generate tests for: **\<scope\>**
+Generate tests for: **\<scope\> [--coverage PERCENT] [--test-types TYPES] [--watch]**
 
 ## Test Types
 1. **Unit Tests** - Individual functions
 2. **Integration Tests** - Component interactions
 3. **E2E Tests** - User flows
 
+## Testing Options
+
+This command respects project testing configuration from `.omgkit/workflow.yaml`.
+
+### Default Behavior
+
+- **Testing**: Always enabled (this is a test command)
+- **Coverage Enforcement**: Read from `testing.enforcement.level`
+- **Coverage Targets**: Configurable via options or config
+
+### Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--coverage <percent>` | Override minimum coverage | `/dev:test "src/" --coverage 90` |
+| `--test-types <types>` | Specify test types | `/dev:test "api/" --test-types unit,integration` |
+| `--watch` | Run in watch mode | `/dev:test "src/" --watch` |
+| `--fail-under <percent>` | Fail if coverage below | `/dev:test "lib/" --fail-under 80` |
+
+### Enforcement Levels
+
+| Level | Coverage Below Min | Test Failure |
+|-------|-------------------|--------------|
+| `soft` | Warning | Warning |
+| `standard` | Block | Block |
+| `strict` | Block | Block |
+
 ## Coverage Targets
 - Unit: 80%+
 - Integration: 60%+
 - E2E: Critical paths
 
+## Configuration
+
+Configure via `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+    integration:
+      minimum: 60
+      target: 75
+```
+
 ## Output
 ```
 Tests: X passed, Y failed
 Coverage: Z%
+```
+
+## Examples
+
+```bash
+# Run tests with default settings
+/dev:test "src/services"
+
+# Run with higher coverage requirement
+/dev:test "src/auth" --coverage 95
+
+# Run specific test types
+/dev:test "src/api" --test-types unit,integration
+
+# Run in watch mode during development
+/dev:test "src/" --watch
 ```
 
 
@@ -75,7 +136,7 @@ This command uses the following tools:
 | [database/migration](/workflows/migration) | Safe database migrations with rollback |
 | [database/optimization](/workflows/optimization) | Optimize database performance |
 | [database/schema-design](/workflows/schema-design) | Design production-grade database schemas |
-| [development/feature](/workflows/feature) | Complete feature development from planning to deployment |
+| [development/feature](/workflows/feature) | Complete feature development from planning to deployment wit... |
 | [development/refactor](/workflows/refactor) | Improve code quality without changing behavior |
 | [fullstack/authentication](/workflows/authentication) | Implement authentication system |
 | [fullstack/full-feature](/workflows/full-feature) | End-to-end feature with frontend and backend |

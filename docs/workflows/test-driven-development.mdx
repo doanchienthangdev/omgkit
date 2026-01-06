@@ -1,6 +1,6 @@
 ---
 title: "testing/test-driven-development"
-description: "Test-Driven Development workflow with red-green-refactor cycle and continuous test feedback"
+description: "Test-Driven Development workflow with red-green-refactor cycle and enforced test-first methodology"
 icon: "flask-vial"
 ---
 
@@ -169,6 +169,49 @@ it('handles negative totals', () => {
 - Property tests included for pure functions
 - Edge cases documented
 
+## Testing Options
+
+TDD workflow **always enforces testing** (test-first by definition).
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--coverage <percent>` | Set coverage target | `/dev:tdd "auth" --coverage 95` |
+| `--test-types <types>` | Specify test types | `/dev:tdd "api" --test-types unit,integration` |
+
+### Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  enforcement:
+    level: strict  # TDD recommends strict
+  coverage_gates:
+    unit:
+      minimum: 90
+      target: 95
+```
+
+```bash
+# Set via CLI
+omgkit config set testing.enforcement.level strict
+```
+
+## Usage Examples
+
+```bash
+# Standard TDD workflow
+/dev:tdd "user authentication"
+
+# TDD with specific coverage
+/dev:tdd "payment processing" --coverage 95
+
+# TDD with specific test types
+/dev:tdd "API endpoint" --test-types unit,integration,contract
+```
+
 ## Success Criteria
 
 - Feature implemented with full test coverage
@@ -191,6 +234,7 @@ This workflow orchestrates the following agents:
 ## Skills Applied
 
 - **[methodology/test-driven-development](/skills/methodology/test-driven-development)** - Domain expertise
+- **[methodology/test-enforcement](/skills/methodology/test-enforcement)** - Domain expertise
 - **[testing/comprehensive-testing](/skills/testing/comprehensive-testing)** - Domain expertise
 - **[testing/property-testing](/skills/testing/property-testing)** - Domain expertise
 - **[testing/vitest](/skills/testing/vitest)** - Domain expertise
@@ -199,9 +243,11 @@ This workflow orchestrates the following agents:
 
 ## Commands Triggered
 
+- `/dev:tdd`
 - `/dev:test`
-- `/dev:feature`
-- `/quality:test-property`
+- `/dev:test-write`
+- `/dev:feature-tested`
+- `/quality:verify-done`
 
 
 
@@ -212,8 +258,8 @@ This workflow orchestrates the following agents:
 
 | Agent | Skills | Commands |
 |-------|--------|----------|
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
 | [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
 
 ### Skills Applied
@@ -221,6 +267,7 @@ This workflow orchestrates the following agents:
 | Skill | Description |
 |-------|-------------|
 | [methodology/test-driven-development](/skills/test-driven-development) | AI agent practices test-first development with the Red-Green... |
+| [methodology/test-enforcement](/skills/test-enforcement) | The agent enforces mandatory test completion before any task... |
 | [testing/comprehensive-testing](/skills/comprehensive-testing) | Comprehensive 4D testing methodology covering Accuracy, Perf... |
 | [testing/property-testing](/skills/property-testing) | Property-based testing with Fast-Check for finding edge case... |
 | [testing/vitest](/skills/vitest) | Claude writes fast, reliable tests using Vitest for TypeScri... |
@@ -229,9 +276,11 @@ This workflow orchestrates the following agents:
 
 | Command | Description |
 |---------|-------------|
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
-| [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
-| [`/quality:test-property`](/commands/quality-test-property) | Generate and run property-based tests using Fast-Check for i... |
+| [`/dev:tdd`](/commands/dev-tdd) | Test-driven development workflow with enforced test-first me... |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
+| [`/dev:test-write`](/commands/dev-test-write) | Write comprehensive tests following OMGKIT Omega Testing met... |
+| [`/dev:feature-tested`](/commands/dev-feature-tested) | Create a feature with automatically generated test tasks and... |
+| [`/quality:verify-done`](/commands/quality-verify-done) | Verify all test requirements are met before marking a task o... |
 
 
 ## Tips for Best Results

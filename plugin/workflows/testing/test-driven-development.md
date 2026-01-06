@@ -1,6 +1,6 @@
 ---
 name: testing/test-driven-development
-description: Test-Driven Development workflow with red-green-refactor cycle and continuous test feedback
+description: Test-Driven Development workflow with red-green-refactor cycle and enforced test-first methodology
 category: testing
 complexity: medium
 agents:
@@ -9,13 +9,19 @@ agents:
   - code-reviewer
 skills:
   - methodology/test-driven-development
+  - methodology/test-enforcement
   - testing/comprehensive-testing
   - testing/property-testing
   - testing/vitest
 commands:
+  - /dev:tdd
   - /dev:test
-  - /dev:feature
-  - /quality:test-property
+  - /dev:test-write
+  - /dev:feature-tested
+  - /quality:verify-done
+testing:
+  default: true
+  configurable: false
 tags:
   - testing
   - tdd
@@ -172,6 +178,49 @@ it('handles negative totals', () => {
 - No skipped tests
 - Property tests included for pure functions
 - Edge cases documented
+
+## Testing Options
+
+TDD workflow **always enforces testing** (test-first by definition).
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--coverage <percent>` | Set coverage target | `/dev:tdd "auth" --coverage 95` |
+| `--test-types <types>` | Specify test types | `/dev:tdd "api" --test-types unit,integration` |
+
+### Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  enforcement:
+    level: strict  # TDD recommends strict
+  coverage_gates:
+    unit:
+      minimum: 90
+      target: 95
+```
+
+```bash
+# Set via CLI
+omgkit config set testing.enforcement.level strict
+```
+
+## Usage Examples
+
+```bash
+# Standard TDD workflow
+/dev:tdd "user authentication"
+
+# TDD with specific coverage
+/dev:tdd "payment processing" --coverage 95
+
+# TDD with specific test types
+/dev:tdd "API endpoint" --test-types unit,integration,contract
+```
 
 ## Success Criteria
 

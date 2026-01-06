@@ -187,7 +187,7 @@ This workflow orchestrates the following agents:
 |-------|--------|----------|
 | [database-admin](/agents/database-admin) | databases/database-optimization, databases/database-schema-design... | /quality:optimize, /workflow:schema-design... |
 | [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 
 ### Skills Applied
 
@@ -203,7 +203,7 @@ This workflow orchestrates the following agents:
 |---------|-------------|
 | [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
 | [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
 
 
 ## Tips for Best Results

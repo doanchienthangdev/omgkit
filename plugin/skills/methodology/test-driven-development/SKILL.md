@@ -1,6 +1,17 @@
 ---
 name: developing-test-driven
 description: AI agent practices test-first development with the Red-Green-Refactor cycle for confident, well-designed code. Use when implementing features, fixing bugs, or establishing testing practices.
+category: methodology
+related_skills:
+  - methodology/test-enforcement
+  - methodology/test-task-generation
+  - testing/vitest
+  - testing/pytest
+related_commands:
+  - /dev:tdd
+  - /dev:feature-tested
+  - /dev:test-write
+  - /quality:verify-done
 ---
 
 # Developing Test-Driven
@@ -125,9 +136,39 @@ REMEMBER: 100% coverage != well-tested
 | Keep cycles short (1-5 minutes) | 30+ minute cycles |
 | Mock only external dependencies | Over-mocking your own code |
 
+## Command Integration
+
+### Using TDD Command
+
+```bash
+# Start TDD workflow
+/dev:tdd "user authentication"
+
+# TDD with specific coverage
+/dev:tdd "payment processing" --coverage 95
+
+# TDD with specific test types
+/dev:tdd "API endpoint" --test-types unit,integration,contract
+```
+
+### Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  enforcement:
+    level: strict  # TDD recommends strict
+  coverage_gates:
+    unit:
+      minimum: 90
+      target: 95
+```
+
 ## Related Skills
 
-- `avoiding-testing-anti-patterns` - Avoid common test mistakes
-- `testing-with-vitest` - Vitest testing framework
-- `testing-with-playwright` - E2E testing with Playwright
-- `verifying-before-completion` - Ensure test quality
+- `methodology/test-enforcement` - Enforce test completion
+- `methodology/test-task-generation` - Auto-generate test tasks
+- `methodology/testing-anti-patterns` - Avoid common test mistakes
+- `testing/vitest` - Vitest testing framework
+- `testing/playwright` - E2E testing with Playwright

@@ -1,18 +1,18 @@
 ---
 title: "/quality:optimize"
-description: "Performance optimization"
+description: "Performance optimization with test verification"
 icon: "shield-check"
 ---
 
 <Info>
   **Category:** Quality
 
-  **Syntax:** `/quality:optimize <file>`
+  **Syntax:** `/quality:optimize <file> [--no-test] [--test-level LEVEL] [--benchmark]`
 </Info>
 
 ## Overview
 
-Performance optimization
+Performance optimization with test verification
 
 ## Quick Start
 
@@ -21,9 +21,9 @@ Performance optimization
 ```
 
 
-# ⚡ Optimize: \<file\>
+# ⚡ Optimize: \<file\> [--no-test] [--test-level LEVEL] [--benchmark]
 
-Optimize performance of: **\<file\>**
+Optimize performance of: **\<file\> [--no-test] [--test-level LEVEL] [--benchmark]**
 
 ## Areas
 - Algorithm efficiency
@@ -32,12 +32,67 @@ Optimize performance of: **\<file\>**
 - Bundle size
 - Caching
 
+## Testing Options
+
+This command respects project testing configuration from `.omgkit/workflow.yaml`.
+
+### Default Behavior
+
+- **Testing**: Enabled by default (verify functionality after optimization)
+- **Enforcement Level**: Read from `testing.enforcement.level` (default: standard)
+- **Performance Tests**: Encouraged to add benchmark tests
+
+### Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test verification | `/quality:optimize "db.ts" --no-test` |
+| `--test-level <level>` | Override enforcement level | `/quality:optimize "core/" --test-level strict` |
+| `--benchmark` | Include performance benchmarks | `/quality:optimize "api/" --benchmark` |
+
+### Enforcement Levels
+
+| Level | Test Failure After Optimization |
+|-------|--------------------------------|
+| `soft` | Warning |
+| `standard` | Block |
+| `strict` | Block |
+
 ## Process
 1. Profile current performance
-2. Identify bottlenecks
-3. Apply optimizations
-4. Measure improvement
-5. Document changes
+2. **Run existing tests** (baseline)
+3. Identify bottlenecks
+4. Apply optimizations
+5. **Verify tests still pass**
+6. Measure improvement
+7. Document changes
+
+## Configuration
+
+Configure via `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard
+```
+
+## Examples
+
+```bash
+# Default: with test verification
+/quality:optimize "src/services/search.ts"
+
+# With performance benchmarks
+/quality:optimize "src/db/queries.ts" --benchmark
+
+# Skip tests for infrastructure optimization
+/quality:optimize "webpack.config.js" --no-test
+
+# Strict mode for critical paths
+/quality:optimize "src/core/engine.ts" --test-level strict
+```
 
 
 
@@ -50,6 +105,7 @@ This command uses the following tools:
 - **Write** - Enables write capabilities
 - **Bash** - Enables bash capabilities
 - **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
 
 
 ## Usage Graph
@@ -59,6 +115,7 @@ This command uses the following tools:
 | Agent | Description |
 |-------|-------------|
 | [database-admin](/agents/database-admin) | Schema design, query optimization, migrations. Database expe... |
+| [fullstack-developer](/agents/fullstack-developer) | Full implementation with strict file ownership. Writes clean... |
 | [performance-engineer](/agents/performance-engineer) | Performance engineering specialist for load testing, profili... |
 
 ### Available In Workflows

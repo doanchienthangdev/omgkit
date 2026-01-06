@@ -137,6 +137,84 @@ sprint:
   require_tests: true
 ```
 
+### Testing Configuration
+
+Configure test enforcement for development commands in `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  # Enable/disable testing enforcement globally
+  enabled: true
+
+  # Enforcement level: soft, standard, strict
+  enforcement:
+    level: standard
+
+  # Auto-generate test tasks for features
+  auto_generate_tasks: true
+
+  # Coverage requirements
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+    integration:
+      minimum: 60
+      target: 75
+    overall:
+      minimum: 75
+      target: 85
+
+  # Blocking behavior
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+```
+
+#### Enforcement Levels
+
+| Level | Test Failure | Coverage Below Min | Missing Tests |
+|-------|--------------|-------------------|---------------|
+| `soft` | Warning | Warning | Warning |
+| `standard` | Block | Block | Warning |
+| `strict` | Block | Block | Block |
+
+#### CLI Configuration
+
+Manage testing configuration with the `omgkit config` command:
+
+```bash
+# View current testing settings
+omgkit config list testing
+
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# Disable auto-generated test tasks
+omgkit config set testing.auto_generate_tasks false
+
+# Set coverage minimum
+omgkit config set testing.coverage_gates.unit.minimum 85
+```
+
+#### Command-Level Overrides
+
+Override testing settings per command:
+
+```bash
+# Skip test enforcement (soft mode only)
+/dev:fix "bug" --no-test
+
+# Force test enforcement
+/dev:feature "login" --with-test
+
+# Use strict enforcement
+/sprint:team-run --test-level strict
+
+# Set coverage target
+/dev:tdd "auth" --coverage 95
+```
+
 ### Mode Defaults
 
 ```yaml

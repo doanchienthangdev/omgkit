@@ -267,12 +267,15 @@ Coverage:
 
 ## Configuration
 
+### Via workflow.yaml
+
 Add to `.omgkit/workflow.yaml`:
 
 ```yaml
 testing:
+  enabled: true
   enforcement:
-    level: standard
+    level: standard  # soft | standard | strict
 
   auto_generate_tasks: true
 
@@ -300,6 +303,28 @@ testing:
     on_test_failure: true
     on_coverage_below_minimum: true
 ```
+
+### Via CLI
+
+```bash
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# Enable auto-generation
+omgkit config set testing.auto_generate_tasks true
+
+# View testing config
+omgkit config list testing
+```
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/dev:feature "login" --no-test` |
+| `--test-level <level>` | Override enforcement level | `/dev:feature "auth" --test-level strict` |
+| `--coverage <percent>` | Override coverage minimum | `/dev:test "src/" --coverage 95` |
+| `--test-types <types>` | Specify test types | `/dev:test "api/" --test-types unit,integration` |
 
 ---
 
@@ -415,9 +440,9 @@ This workflow orchestrates the following agents:
 | Agent | Skills | Commands |
 |-------|--------|----------|
 | [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 | [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
 
 ### Skills Applied
 
@@ -436,8 +461,8 @@ This workflow orchestrates the following agents:
 | [`/quality:test-plan`](/commands/quality-test-plan) | Generate a comprehensive test plan for a feature or task, id... |
 | [`/quality:verify-done`](/commands/quality-verify-done) | Verify all test requirements are met before marking a task o... |
 | [`/quality:coverage-check`](/commands/quality-coverage-check) | Check test coverage against configured gates and report unco... |
-| [`/dev:feature-tested`](/commands/dev-feature-tested) | Create a feature with automatically generated test tasks. En... |
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:feature-tested`](/commands/dev-feature-tested) | Create a feature with automatically generated test tasks and... |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
 
 
 ## Tips for Best Results

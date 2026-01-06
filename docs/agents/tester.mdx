@@ -584,12 +584,47 @@ Before marking testing complete:
 
 ---
 
+## Test Enforcement Integration
+
+### Configuration
+
+Read testing configuration from `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard  # soft | standard | strict
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+```
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--coverage <percent>` | Override coverage minimum | `/dev:test "src/" --coverage 90` |
+| `--test-types <types>` | Specify test types | `/dev:test "api/" --test-types unit,integration` |
+| `--watch` | Run in watch mode | `/dev:test "src/" --watch` |
+| `--fail-under <percent>` | Fail if coverage below | `/dev:test "lib/" --fail-under 80` |
+
+### Enforcement Behavior
+
+When enforcement is enabled:
+- Block task completion if tests fail
+- Block if coverage below minimum
+- Warn about missing test types
+
 ## Commands
 
-- `/test [target]` - Run tests for target
-- `/test:coverage` - Run with coverage report
-- `/test:watch` - Run in watch mode
-- `/tdd [feature]` - Test-driven development workflow
+- `/dev:test [target]` - Run tests for target
+- `/dev:test-write [file]` - Write comprehensive tests
+- `/dev:tdd [feature]` - Test-driven development workflow
+- `/dev:feature-tested [desc]` - Feature with auto-generated tests
+- `/quality:verify-done` - Verify test requirements
+- `/quality:coverage-check` - Check coverage gates
 
 
 ## Integration Points
@@ -613,6 +648,8 @@ Before marking testing complete:
 | Skill | Description |
 |-------|-------------|
 | [methodology/test-driven-development](/skills/test-driven-development) | AI agent practices test-first development with the Red-Green... |
+| [methodology/test-enforcement](/skills/test-enforcement) | The agent enforces mandatory test completion before any task... |
+| [methodology/test-task-generation](/skills/test-task-generation) | The agent automatically generates comprehensive test tasks f... |
 | [methodology/testing-anti-patterns](/skills/testing-anti-patterns) | AI agent identifies and fixes common testing anti-patterns t... |
 | [testing/vitest](/skills/vitest) | Claude writes fast, reliable tests using Vitest for TypeScri... |
 | [testing/playwright](/skills/playwright) | Claude writes reliable E2E tests using Playwright for browse... |
@@ -622,9 +659,13 @@ Before marking testing complete:
 
 | Command | Description |
 |---------|-------------|
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
-| [`/dev:tdd`](/commands/dev-tdd) | Test-driven development workflow |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
+| [`/dev:test-write`](/commands/dev-test-write) | Write comprehensive tests following OMGKIT Omega Testing met... |
+| [`/dev:tdd`](/commands/dev-tdd) | Test-driven development workflow with enforced test-first me... |
 | [`/dev:fix-test`](/commands/dev-fix-test) | Fix failing tests |
+| [`/dev:feature-tested`](/commands/dev-feature-tested) | Create a feature with automatically generated test tasks and... |
+| [`/quality:verify-done`](/commands/quality-verify-done) | Verify all test requirements are met before marking a task o... |
+| [`/quality:coverage-check`](/commands/quality-coverage-check) | Check test coverage against configured gates and report unco... |
 
 ### Used By Workflows
 
@@ -639,8 +680,8 @@ Before marking testing complete:
 | [database/migration](/workflows/migration) | Safe database migrations with rollback |
 | [database/optimization](/workflows/optimization) | Optimize database performance |
 | [database/schema-design](/workflows/schema-design) | Design production-grade database schemas |
-| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution |
-| [development/feature](/workflows/feature) | Complete feature development from planning to deployment |
+| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution with regression te... |
+| [development/feature](/workflows/feature) | Complete feature development from planning to deployment wit... |
 | [development/refactor](/workflows/refactor) | Improve code quality without changing behavior |
 | [event-driven/replay-testing](/workflows/replay-testing) | Test event-driven systems by replaying production events |
 | [event-driven/saga-implementation](/workflows/saga-implementation) | Implement distributed transactions using saga pattern |

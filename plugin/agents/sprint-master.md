@@ -259,11 +259,14 @@ Generates:
 
 ### Configuration Loading
 
-At sprint start, read `.omgkit/workflow.yaml` for testing configuration:
+At sprint start, read `.omgkit/workflow.yaml` for testing configuration.
+
+**Via workflow.yaml:**
 
 ```yaml
 # .omgkit/workflow.yaml
 testing:
+  enabled: true
   enforcement:
     level: standard  # soft | standard | strict
   auto_generate_tasks: true
@@ -281,6 +284,27 @@ testing:
     on_test_failure: true
     on_coverage_below_minimum: true
 ```
+
+**Via CLI:**
+
+```bash
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# Enable/disable auto-generation
+omgkit config set testing.auto_generate_tasks true
+
+# View testing config
+omgkit config list testing
+```
+
+**Via Command Options:**
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/sprint:team-run --no-test` |
+| `--test-level <level>` | Override enforcement level | `/sprint:team-run --test-level strict` |
+| `--mode <mode>` | Autonomy mode | `/sprint:team-run --mode full-auto` |
 
 ### Auto Test Task Generation
 

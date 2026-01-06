@@ -63,9 +63,12 @@ Definition of Done:
 
 ## Configuration
 
+### Via workflow.yaml
+
 ```yaml
 # .omgkit/workflow.yaml
 testing:
+  enabled: true
   enforcement:
     level: standard  # soft | standard | strict
 
@@ -98,6 +101,32 @@ testing:
     require_approval: true
     log_all_overrides: true
 ```
+
+### Via CLI
+
+```bash
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# View current configuration
+omgkit config get testing.enforcement.level
+
+# List all testing config
+omgkit config list testing
+```
+
+### Via Command Options
+
+Commands support per-invocation overrides:
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/dev:fix "typo" --no-test` |
+| `--with-test` | Force test enforcement | `/dev:fix-fast "bug" --with-test` |
+| `--test-level <level>` | Override enforcement level | `/dev:feature "auth" --test-level strict` |
+| `--coverage <percent>` | Override coverage minimum | `/dev:feature "api" --coverage 95` |
+
+**Note:** `--no-test` requires `soft` enforcement level or explicit config override.
 
 ## Pre-Completion Checklist
 
@@ -458,13 +487,18 @@ Complete with documented override
 
 | Agent | Description |
 |-------|-------------|
+| [fullstack-developer](/agents/fullstack-developer) | Full implementation with strict file ownership. Writes clean... |
 | [sprint-master](/agents/sprint-master) | AI Team orchestrator with sprint management, velocity tracki... |
+| [tester](/agents/tester) | Quality assurance through comprehensive testing. Framework-s... |
 
 ### Used By Workflows
 
 | Workflow | Description |
 |----------|-------------|
+| [development/bug-fix](/workflows/bug-fix) | Systematic debugging and issue resolution with regression te... |
+| [development/feature](/workflows/feature) | Complete feature development from planning to deployment wit... |
 | [testing/automated-testing](/workflows/automated-testing) | End-to-end testing automation workflow that generates test p... |
+| [testing/test-driven-development](/workflows/test-driven-development) | Test-Driven Development workflow with red-green-refactor cyc... |
 
 
 ## Configuration

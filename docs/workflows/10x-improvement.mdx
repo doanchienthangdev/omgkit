@@ -268,8 +268,8 @@ This workflow orchestrates the following agents:
 | [oracle](/agents/oracle) | omega/omega-thinking, methodology/problem-solving... | /omega:1000x, /omega:10x... |
 | [architect](/agents/architect) | omega/omega-architecture, backend/api-architecture... | /omega:100x, /planning:plan-detailed |
 | [brainstormer](/agents/brainstormer) | methodology/brainstorming | /planning:brainstorm |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 | [journal-writer](/agents/journal-writer) |  |  |
 
 ### Skills Applied
@@ -286,7 +286,7 @@ This workflow orchestrates the following agents:
 | [`/omega:10x`](/commands/omega-10x) | Find 10x improvement path |
 | [`/planning:brainstorm`](/commands/planning-brainstorm) | Interactive brainstorming session |
 | [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
 
 
 ## Tips for Best Results

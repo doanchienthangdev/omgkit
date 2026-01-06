@@ -275,12 +275,15 @@ Coverage:
 
 ## Configuration
 
+### Via workflow.yaml
+
 Add to `.omgkit/workflow.yaml`:
 
 ```yaml
 testing:
+  enabled: true
   enforcement:
-    level: standard
+    level: standard  # soft | standard | strict
 
   auto_generate_tasks: true
 
@@ -308,6 +311,28 @@ testing:
     on_test_failure: true
     on_coverage_below_minimum: true
 ```
+
+### Via CLI
+
+```bash
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# Enable auto-generation
+omgkit config set testing.auto_generate_tasks true
+
+# View testing config
+omgkit config list testing
+```
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/dev:feature "login" --no-test` |
+| `--test-level <level>` | Override enforcement level | `/dev:feature "auth" --test-level strict` |
+| `--coverage <percent>` | Override coverage minimum | `/dev:test "src/" --coverage 95` |
+| `--test-types <types>` | Specify test types | `/dev:test "api/" --test-types unit,integration` |
 
 ---
 

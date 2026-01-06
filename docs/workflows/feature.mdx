@@ -1,6 +1,6 @@
 ---
 title: "feature"
-description: "Complete feature development from planning to deployment"
+description: "Complete feature development from planning to deployment with configurable test enforcement"
 icon: "code"
 ---
 
@@ -147,14 +147,55 @@ Feature Development Progress
 - Specify the target completion timeframe
 - Include any dependencies on other features
 
+## Testing Options
+
+This workflow respects project testing configuration from `.omgkit/workflow.yaml`.
+
+### Command Options
+
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--no-test` | Skip test enforcement | `/dev:feature "login" --no-test` |
+| `--test-level <level>` | Override enforcement level | `/dev:feature "auth" --test-level strict` |
+| `--coverage <percent>` | Override coverage minimum | `/dev:feature "api" --coverage 95` |
+
+### Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard  # soft | standard | strict
+  coverage_gates:
+    unit:
+      minimum: 80
+```
+
+### CLI Configuration
+
+```bash
+# Set enforcement level
+omgkit config set testing.enforcement.level strict
+
+# View testing config
+omgkit config list testing
+```
+
 ## Example Usage
 
 ```bash
-# Full feature workflow
+# Full feature workflow with default testing
 /workflow:feature "user authentication with OAuth2 support"
 
-# With specific requirements
-/workflow:feature "shopping cart with persistent storage and checkout flow"
+# With strict test enforcement
+/dev:feature "payment processing" --test-level strict
+
+# With specific coverage requirement
+/dev:feature "shopping cart" --coverage 95
+
+# Skip testing for prototype (soft level required)
+/dev:feature "quick prototype" --no-test
 ```
 
 ## Related Workflows
@@ -182,6 +223,8 @@ This workflow orchestrates the following agents:
 - **[methodology/writing-plans](/skills/methodology/writing-plans)** - Domain expertise
 - **[methodology/executing-plans](/skills/methodology/executing-plans)** - Domain expertise
 - **[methodology/test-driven-development](/skills/methodology/test-driven-development)** - Domain expertise
+- **[methodology/test-enforcement](/skills/methodology/test-enforcement)** - Domain expertise
+- **[methodology/test-task-generation](/skills/methodology/test-task-generation)** - Domain expertise
 
 
 
@@ -189,8 +232,10 @@ This workflow orchestrates the following agents:
 
 - `/planning:plan`
 - `/dev:feature`
+- `/dev:feature-tested`
 - `/dev:test`
 - `/dev:review`
+- `/quality:verify-done`
 - `/git:commit`
 - `/git:pr`
 
@@ -209,8 +254,8 @@ This workflow orchestrates the following agents:
 | Agent | Skills | Commands |
 |-------|--------|----------|
 | [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 | [code-reviewer](/agents/code-reviewer) | methodology/verification-before-completion, methodology/receiving-code-review... | /dev:review |
 | [git-manager](/agents/git-manager) | methodology/finishing-development-branch, devops/github-actions | /git:commit, /git:pr... |
 
@@ -221,6 +266,8 @@ This workflow orchestrates the following agents:
 | [methodology/writing-plans](/skills/writing-plans) | AI agent creates structured implementation plans with task b... |
 | [methodology/executing-plans](/skills/executing-plans) | AI agent follows implementation plans systematically with pr... |
 | [methodology/test-driven-development](/skills/test-driven-development) | AI agent practices test-first development with the Red-Green... |
+| [methodology/test-enforcement](/skills/test-enforcement) | The agent enforces mandatory test completion before any task... |
+| [methodology/test-task-generation](/skills/test-task-generation) | The agent automatically generates comprehensive test tasks f... |
 
 ### Commands Available
 
@@ -228,8 +275,10 @@ This workflow orchestrates the following agents:
 |---------|-------------|
 | [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
 | [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:feature-tested`](/commands/dev-feature-tested) | Create a feature with automatically generated test tasks and... |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
 | [`/dev:review`](/commands/dev-review) | Code review with security and quality focus |
+| [`/quality:verify-done`](/commands/quality-verify-done) | Verify all test requirements are met before marking a task o... |
 | [`/git:commit`](/commands/git-commit) | Smart commit with conventional message |
 | [`/git:pr`](/commands/git-pr) | Create pull request |
 

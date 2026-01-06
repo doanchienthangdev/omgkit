@@ -1,6 +1,6 @@
 ---
 name: Feature Tested
-description: Create a feature with automatically generated test tasks. Ensures every implementation task has corresponding test coverage before the feature can be marked complete.
+description: Create a feature with automatically generated test tasks and strict test enforcement
 category: dev
 related_skills:
   - methodology/test-task-generation
@@ -12,6 +12,10 @@ related_commands:
   - /dev:feature
   - /dev:test
 allowed-tools: Task, Read, Write, Bash, Grep, Glob
+argument-hint: <feature-description> [--coverage PERCENT] [--test-types TYPES] [--tdd] [--strict]
+testing:
+  default: true
+  configurable: false
 ---
 
 # /dev:feature-tested
@@ -26,7 +30,11 @@ Build a feature with automatically generated test tasks. This command ensures co
 /dev:feature-tested "Payment processing" --test-types unit,integration,e2e
 ```
 
-## Options
+## Testing Options
+
+This command **always enforces testing** (testing cannot be disabled). This is a strict version of `/dev:feature`.
+
+### Options
 
 | Option | Description | Default |
 |--------|-------------|---------|
@@ -34,6 +42,29 @@ Build a feature with automatically generated test tasks. This command ensures co
 | `--test-types` | Required test types | unit,integration |
 | `--tdd` | Use TDD approach (tests first) | false |
 | `--strict` | Strict enforcement (no overrides) | false |
+
+### Enforcement Behavior
+
+Unlike `/dev:feature`, this command:
+- **Cannot skip tests** (no `--no-test` option)
+- **Blocks completion** until all test tasks pass
+- **Auto-generates test tasks** for every implementation task
+
+### Configuration
+
+Configure via `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: strict  # Recommended for feature-tested
+  auto_generate_tasks: true
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+```
 
 ## How It Works
 

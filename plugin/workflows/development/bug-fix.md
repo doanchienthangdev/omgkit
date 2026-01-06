@@ -1,6 +1,6 @@
 ---
 name: bug-fix
-description: Systematic debugging and issue resolution
+description: Systematic debugging and issue resolution with regression test enforcement
 category: development
 complexity: medium
 estimated-time: 30min-4 hours
@@ -13,11 +13,17 @@ skills:
   - methodology/systematic-debugging
   - methodology/root-cause-tracing
   - methodology/test-driven-development
+  - methodology/test-enforcement
 commands:
   - /dev:fix
+  - /dev:fix-fast
   - /dev:fix-hard
   - /dev:fix-test
+  - /quality:verify-done
   - /git:cm
+testing:
+  default: true
+  configurable: true
 prerequisites:
   - Issue identified and reproducible
   - Access to relevant logs/errors
@@ -139,17 +145,58 @@ Bug Fix Debug Process
 - Specify the environment (browser, OS, version)
 - Link to related issues or discussions
 
+## Testing Options
+
+This workflow respects project testing configuration from `.omgkit/workflow.yaml`.
+
+### Command Options
+
+| Command | Default | Options |
+|---------|---------|---------|
+| `/dev:fix` | Tests enabled | `--no-test`, `--test-level` |
+| `/dev:fix-fast` | Tests disabled | `--with-test`, `--test-level` |
+| `/dev:fix-hard` | Tests enabled | `--no-test`, `--test-level` |
+
+### Enforcement Levels
+
+| Level | Regression Test | Test Failure |
+|-------|-----------------|--------------|
+| `soft` | Warning | Warning |
+| `standard` | Warning | Block |
+| `strict` | Block | Block |
+
+### Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enabled: true
+  enforcement:
+    level: standard
+```
+
+```bash
+# Set via CLI
+omgkit config set testing.enforcement.level strict
+```
+
 ## Example Usage
 
 ```bash
-# Fix with error description
-/workflow:bug-fix "TypeError: Cannot read property 'id' of undefined in UserService"
+# Fix with regression test enforcement (default)
+/dev:fix "TypeError: Cannot read property 'id' of undefined in UserService"
 
-# Fix with context
-/workflow:bug-fix "Login button not responding after page refresh"
+# Quick fix without tests (for typos)
+/dev:fix-fast "typo in error message"
+
+# Quick fix with test (optional)
+/dev:fix-fast "wrong import path" --with-test
+
+# Deep investigation with strict testing
+/dev:fix-hard "Race condition in auth" --test-level strict
 
 # Fix with issue reference
-/workflow:bug-fix "Issue #123: Payment processing fails for amounts > $1000"
+/dev:fix "Issue #123: Payment processing fails for amounts > $1000"
 ```
 
 ## Related Workflows

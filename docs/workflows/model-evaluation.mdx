@@ -242,7 +242,7 @@ This workflow orchestrates the following agents:
 |-------|--------|----------|
 | [researcher](/agents/researcher) | methodology/research-validation, methodology/brainstorming | /planning:research |
 | [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 
 ### Skills Applied
 
@@ -257,7 +257,7 @@ This workflow orchestrates the following agents:
 | Command | Description |
 |---------|-------------|
 | [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
 
 
 ## Tips for Best Results

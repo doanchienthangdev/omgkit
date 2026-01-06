@@ -191,9 +191,9 @@ This workflow orchestrates the following agents:
 | Agent | Skills | Commands |
 |-------|--------|----------|
 | [planner](/agents/planner) | methodology/writing-plans, methodology/executing-plans... | /planning:plan, /planning:plan-detailed... |
-| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:fix... |
+| [fullstack-developer](/agents/fullstack-developer) | methodology/executing-plans, methodology/verification-before-completion... | /dev:feature, /dev:feature-tested... |
 | [security-auditor](/agents/security-auditor) | security/owasp, security/security-hardening... | /security:audit, /quality:security-scan |
-| [tester](/agents/tester) | methodology/test-driven-development, methodology/testing-anti-patterns... | /dev:test, /dev:tdd... |
+| [tester](/agents/tester) | methodology/test-driven-development, methodology/test-enforcement... | /dev:test, /dev:test-write... |
 
 ### Skills Applied
 
@@ -211,7 +211,7 @@ This workflow orchestrates the following agents:
 | [`/planning:plan`](/commands/planning-plan) | Create implementation plan |
 | [`/dev:feature`](/commands/dev-feature) | Full feature development with planning, testing, and review |
 | [`/quality:security-scan`](/commands/quality-security-scan) | Scan for security vulnerabilities |
-| [`/dev:test`](/commands/dev-test) | Generate and run tests |
+| [`/dev:test`](/commands/dev-test) | Generate and run tests with configurable coverage enforcemen... |
 
 
 ## Tips for Best Results

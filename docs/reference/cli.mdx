@@ -119,6 +119,47 @@ omgkit list commands  # List commands only
 
 ---
 
+### omgkit config
+
+Manage project testing configuration.
+
+```bash
+omgkit config <command> [key] [value]
+```
+
+**Subcommands:**
+| Command | Description |
+|---------|-------------|
+| `get <key>` | Get a configuration value |
+| `set <key> <value>` | Set a configuration value |
+| `list [prefix]` | List all configuration or filter by prefix |
+| `reset` | Reset to default configuration |
+
+**Example:**
+```bash
+# View testing enforcement level
+omgkit config get testing.enforcement.level
+
+# Set enforcement to strict
+omgkit config set testing.enforcement.level strict
+
+# List all testing configuration
+omgkit config list testing
+
+# Reset to defaults
+omgkit config reset
+```
+
+**Common Configuration Keys:**
+| Key | Description | Values |
+|-----|-------------|--------|
+| `testing.enabled` | Enable testing | `true`, `false` |
+| `testing.enforcement.level` | Enforcement level | `soft`, `standard`, `strict` |
+| `testing.auto_generate_tasks` | Auto-generate test tasks | `true`, `false` |
+| `testing.coverage_gates.unit.minimum` | Minimum unit coverage | `0-100` |
+
+---
+
 ### omgkit update
 
 Update the plugin to the latest version.

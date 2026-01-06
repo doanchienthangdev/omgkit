@@ -198,18 +198,18 @@ Development commands for building features and fixing bugs
 
 | Command | Description | Usage |
 |---------|-------------|-------|
-| [`/dev:feature-tested`](/commands/feature-tested) | Create a feature with automatically gene... | `/dev:feature-tested` |
-| [`/dev:feature`](/commands/feature) | Full feature development with planning, ... | `/dev:feature [feature description]` |
+| [`/dev:feature-tested`](/commands/feature-tested) | Create a feature with automatically gene... | `/dev:feature-tested [feature-description] [--coverage PERCENT] [--test-types TYPES] [--tdd] [--strict]` |
+| [`/dev:feature`](/commands/feature) | Full feature development with planning, ... | `/dev:feature [feature description] [--no-test] [--test-level LEVEL]` |
 | [`/dev:fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/dev:fix-ci [github-action-url]` |
-| [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/dev:fix-fast [bug]` |
-| [`/dev:fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation | `/dev:fix-hard [complex bug]` |
+| [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation... | `/dev:fix-fast [bug] [--with-test]` |
+| [`/dev:fix-hard`](/commands/fix-hard) | Complex bug fix with deep investigation ... | `/dev:fix-hard [complex bug] [--no-test] [--test-level LEVEL]` |
 | [`/dev:fix-logs`](/commands/fix-logs) | Auto-fetch logs and fix issues | `/dev:fix-logs` |
 | [`/dev:fix-test`](/commands/fix-test) | Fix failing tests | `/dev:fix-test` |
-| [`/dev:fix`](/commands/fix) | Debug and fix bugs | `/dev:fix [error or issue]` |
+| [`/dev:fix`](/commands/fix) | Debug and fix bugs with regression test ... | `/dev:fix [error or issue] [--no-test] [--test-level LEVEL]` |
 | [`/dev:review`](/commands/review) | Code review with security and quality fo... | `/dev:review [file or directory]` |
-| [`/dev:tdd`](/commands/tdd) | Test-driven development workflow | `/dev:tdd [feature]` |
-| [`/dev:test-write`](/commands/test-write) | Write comprehensive tests following OMGK... | `/dev:test-write [function-or-file]` |
-| [`/dev:test`](/commands/test) | Generate and run tests | `/dev:test [scope]` |
+| [`/dev:tdd`](/commands/tdd) | Test-driven development workflow with en... | `/dev:tdd [feature] [--coverage PERCENT] [--test-types TYPES]` |
+| [`/dev:test-write`](/commands/test-write) | Write comprehensive tests following OMGK... | `/dev:test-write [function-or-file] [--coverage PERCENT] [--test-types TYPES]` |
+| [`/dev:test`](/commands/test) | Generate and run tests with configurable... | `/dev:test [scope] [--coverage PERCENT] [--test-types TYPES] [--watch]` |
 
 
 ## Domain
@@ -419,8 +419,8 @@ Quality and security commands for code health
 | [`/quality:api-gen`](/commands/api-gen) | Generate API code from spec | `/quality:api-gen [resource]` |
 | [`/quality:coverage-check`](/commands/coverage-check) | Check test coverage against configured g... | `/quality:coverage-check` |
 | [`/quality:lint`](/commands/lint) | Run linting | `/quality:lint` |
-| [`/quality:optimize`](/commands/optimize) | Performance optimization | `/quality:optimize [file]` |
-| [`/quality:refactor`](/commands/refactor) | Improve code structure | `/quality:refactor [file or directory]` |
+| [`/quality:optimize`](/commands/optimize) | Performance optimization with test verif... | `/quality:optimize [file] [--no-test] [--test-level LEVEL] [--benchmark]` |
+| [`/quality:refactor`](/commands/refactor) | Improve code structure with test verific... | `/quality:refactor [file or directory] [--no-test] [--test-level LEVEL]` |
 | [`/quality:security-scan`](/commands/security-scan) | Scan for security vulnerabilities | `/quality:security-scan` |
 | [`/quality:test-chaos`](/commands/test-chaos) | Run chaos engineering tests including fa... | `/quality:test-chaos` |
 | [`/quality:test-mutate`](/commands/test-mutate) | Run mutation testing with Stryker to ver... | `/quality:test-mutate` |
@@ -457,7 +457,7 @@ Sprint and team management commands
 | [`/sprint:sprint-new`](/commands/sprint-new) | Create new sprint | `/sprint:sprint-new "[name] [--propose]"` |
 | [`/sprint:sprint-start`](/commands/sprint-start) | Start current sprint | `/sprint:sprint-start` |
 | [`/sprint:team-ask`](/commands/team-ask) | Ask the AI team a question | `/sprint:team-ask [question]` |
-| [`/sprint:team-run`](/commands/team-run) | Run AI team on sprint tasks | `/sprint:team-run [--mode MODE]` |
+| [`/sprint:team-run`](/commands/team-run) | Run AI team on sprint tasks with configu... | `/sprint:team-run "[--mode MODE] [--no-test] [--test-level LEVEL]"` |
 | [`/sprint:team-status`](/commands/team-status) | Show AI team activity | `/sprint:team-status` |
 | [`/sprint:vision-set`](/commands/vision-set) | Set product vision interactively | `/sprint:vision-set` |
 | [`/sprint:vision-show`](/commands/vision-show) | Display current vision | `/sprint:vision-show` |

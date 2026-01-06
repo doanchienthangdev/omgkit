@@ -1,23 +1,23 @@
 ---
 title: "/dev:feature-tested"
-description: "Create a feature with automatically generated test tasks. Ensures every implementation task has corresponding test coverage before the feature can be marked complete."
+description: "Create a feature with automatically generated test tasks and strict test enforcement"
 icon: "code"
 ---
 
 <Info>
   **Category:** Dev
 
-  **Syntax:** `/dev:feature-tested`
+  **Syntax:** `/dev:feature-tested <feature-description> [--coverage PERCENT] [--test-types TYPES] [--tdd] [--strict]`
 </Info>
 
 ## Overview
 
-Create a feature with automatically generated test tasks. Ensures every implementation task has corresponding test coverage before the feature can be marked complete.
+Create a feature with automatically generated test tasks and strict test enforcement
 
 ## Quick Start
 
 ```bash
-/dev:feature-tested
+/dev:feature-tested "feature-description"
 ```
 
 
@@ -33,7 +33,11 @@ Build a feature with automatically generated test tasks. This command ensures co
 /dev:feature-tested "Payment processing" --test-types unit,integration,e2e
 ```
 
-## Options
+## Testing Options
+
+This command **always enforces testing** (testing cannot be disabled). This is a strict version of `/dev:feature`.
+
+### Options
 
 | Option | Description | Default |
 |--------|-------------|---------|
@@ -41,6 +45,29 @@ Build a feature with automatically generated test tasks. This command ensures co
 | `--test-types` | Required test types | unit,integration |
 | `--tdd` | Use TDD approach (tests first) | false |
 | `--strict` | Strict enforcement (no overrides) | false |
+
+### Enforcement Behavior
+
+Unlike `/dev:feature`, this command:
+- **Cannot skip tests** (no `--no-test` option)
+- **Blocks completion** until all test tasks pass
+- **Auto-generates test tasks** for every implementation task
+
+### Configuration
+
+Configure via `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enabled: true
+  enforcement:
+    level: strict  # Recommended for feature-tested
+  auto_generate_tasks: true
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+```
 
 ## How It Works
 
@@ -230,11 +257,20 @@ This command uses the following tools:
 
 ## Usage Graph
 
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [fullstack-developer](/agents/fullstack-developer) | Full implementation with strict file ownership. Writes clean... |
+| [tester](/agents/tester) | Quality assurance through comprehensive testing. Framework-s... |
+
 ### Available In Workflows
 
 | Workflow | Description |
 |----------|-------------|
+| [development/feature](/workflows/feature) | Complete feature development from planning to deployment wit... |
 | [testing/automated-testing](/workflows/automated-testing) | End-to-end testing automation workflow that generates test p... |
+| [testing/test-driven-development](/workflows/test-driven-development) | Test-Driven Development workflow with red-green-refactor cyc... |
 
 
 ## Examples
@@ -242,7 +278,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/dev:feature-tested
+/dev:feature-tested "your input here"
 ```
 
 ### With Context
@@ -252,7 +288,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/dev:feature-tested
+/dev:feature-tested "detailed description"
 ```
 
 ## Tips
