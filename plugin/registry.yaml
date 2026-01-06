@@ -1,9 +1,9 @@
 # OMGKIT Component Registry
 # Single Source of Truth for Agents, Skills, Commands, Workflows, and MCPs
-# Version: 2.25.1
+# Version: 2.26.0
 # Updated: 2026-01-06
 
-version: "2.25.1"
+version: "2.26.0"
 
 # =============================================================================
 # OPTIMIZED ALIGNMENT PRINCIPLE (OAP)
