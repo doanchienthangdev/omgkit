@@ -160,6 +160,110 @@ omgkit config reset
 
 ---
 
+### omgkit project:upgrade
+
+Upgrade your project's `.omgkit` folder to the latest OMGKIT version.
+
+```bash
+omgkit project:upgrade [options]
+```
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `--dry` | Preview changes without applying them |
+| `--force` | Skip confirmation prompts |
+
+**Example:**
+```bash
+# Preview what will change
+omgkit project:upgrade --dry
+
+# Upgrade project
+omgkit project:upgrade
+
+# Force upgrade without prompts
+omgkit project:upgrade --force
+```
+
+**Safe Upgrade Features:**
+| Feature | Description |
+|---------|-------------|
+| **Version Tracking** | Each project tracks its OMGKIT version in settings.json |
+| **Smart Merge** | workflow.yaml uses add-only merge (never overwrites your values) |
+| **Protected Files** | config.yaml, sprints/*, artifacts/*, devlogs/* are NEVER modified |
+| **Auto-Backup** | Creates timestamped backup before any changes |
+
+**What Gets Upgraded:**
+| File Type | Behavior |
+|-----------|----------|
+| `stdrules/` | New standards added, modified ones offer 3-way merge |
+| `workflow.yaml` | Smart merge adds new sections, preserves customizations |
+| `CLAUDE.md` | Updated with new instructions |
+| `settings.json` | Version updated, structure preserved |
+| Your files | NEVER touched (config.yaml, sprints, artifacts, devlogs) |
+
+---
+
+### omgkit project:rollback
+
+Rollback to a previous backup after an upgrade.
+
+```bash
+omgkit project:rollback [backup-id]
+```
+
+**Arguments:**
+| Argument | Description |
+|----------|-------------|
+| `backup-id` | Optional: specific backup to restore (default: latest) |
+
+**Example:**
+```bash
+# Rollback to latest backup
+omgkit project:rollback
+
+# Rollback to specific backup
+omgkit project:rollback 2024-01-15-143022
+```
+
+---
+
+### omgkit project:backups
+
+List available project backups.
+
+```bash
+omgkit project:backups
+```
+
+**Example Output:**
+```
+Available Backups:
+  1. 2024-01-15-143022 (v2.25.0 → v2.26.0)
+  2. 2024-01-10-091545 (v2.24.0 → v2.25.0)
+  3. 2024-01-05-162030 (v2.23.0 → v2.24.0)
+```
+
+---
+
+### omgkit project:version
+
+Show the current OMGKIT version used by the project.
+
+```bash
+omgkit project:version
+```
+
+**Example Output:**
+```
+Project OMGKIT Version: 2.26.0
+Latest OMGKIT Version:  2.26.1
+Status: Update available
+```
+
+---
+
 ### omgkit update
 
 Update the plugin to the latest version.
