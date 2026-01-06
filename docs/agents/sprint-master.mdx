@@ -198,20 +198,20 @@ Generates:
 
 ### Task Type Routing
 
-| Task Type | Primary Agent | Support Agents |
-|-----------|---------------|----------------|
-| feature | fullstack-developer | planner, tester |
-| bugfix | debugger | scout, tester |
-| research | oracle | researcher, scout |
-| design | architect | planner |
-| security | security-auditor | vulnerability-scanner |
-| docs | docs-manager | - |
-| test | tester | debugger |
-| review | code-reviewer | - |
-| deploy | git-manager | cicd-manager |
-| refactor | fullstack-developer | scout, code-reviewer |
-| optimize | fullstack-developer | architect |
-| brainstorm | brainstormer | oracle |
+| Task Type | Primary Agent | Support Agents | Auto-Generate Tests? |
+|-----------|---------------|----------------|---------------------|
+| feature | fullstack-developer | planner, tester | ✅ Yes |
+| bugfix | debugger | scout, tester | ✅ Yes (regression) |
+| research | oracle | researcher, scout | ❌ No |
+| design | architect | planner | ❌ No |
+| security | security-auditor | vulnerability-scanner | ✅ Yes (security) |
+| docs | docs-manager | - | ❌ No |
+| test | tester | debugger | ❌ No (is test) |
+| review | code-reviewer | - | ❌ No |
+| deploy | git-manager | cicd-manager | ❌ No |
+| refactor | fullstack-developer | scout, code-reviewer | ✅ Yes |
+| optimize | fullstack-developer | architect | ✅ Yes (perf) |
+| brainstorm | brainstormer | oracle | ❌ No |
 
 ### Assignment Protocol
 
@@ -231,15 +231,201 @@ Generates:
    - Balance workload
    - Ensure coverage
 
-4. SET CONTEXT
+4. AUTO-GENERATE TEST TASKS (NEW)
+   - Read workflow.yaml testing config
+   - If auto_generate_tasks: true
+   - Create corresponding TEST-XXX tasks
+   - Assign to tester agent
+
+5. SET CONTEXT
    - Provide relevant files
    - Share dependencies
    - Define success criteria
+   - Include test requirements
 
-5. MONITOR EXECUTION
+6. MONITOR EXECUTION
    - Track progress
    - Handle blockers
    - Coordinate handoffs
+   - Enforce tests before completion
+```
+
+---
+
+## Testing Automation Integration
+
+### Configuration Loading
+
+At sprint start, read `.omgkit/workflow.yaml` for testing configuration:
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enforcement:
+    level: standard  # soft | standard | strict
+  auto_generate_tasks: true
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+    integration:
+      minimum: 60
+      target: 75
+  required_test_types:
+    - unit
+    - integration
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+```
+
+### Auto Test Task Generation
+
+When `auto_generate_tasks: true`, automatically create test tasks:
+
+```
+FEATURE TASK CREATED:
+  TASK-042: Implement user authentication
+
+AUTO-GENERATED TEST TASKS:
+  TEST-042-UNIT: Unit tests for auth service
+  TEST-042-INT: Integration tests for auth flow
+  TEST-042-SEC: Security tests for auth (if auth feature)
+
+TASK LINKING:
+  TASK-042.tests = [TEST-042-UNIT, TEST-042-INT, TEST-042-SEC]
+  TASK-042.blocked_by = TEST-042-* (all must pass)
+```
+
+### Feature Type → Test Type Mapping
+
+| Feature Type | Auto-Generated Tests |
+|--------------|---------------------|
+| API Endpoint | Unit + Integration + Contract |
+| UI Component | Unit + Snapshot + Accessibility |
+| Database | Unit + Integration + Migration |
+| Auth/Security | Unit + Integration + Security |
+| Business Logic | Unit + Property-based |
+| External Integration | Unit + Integration + Contract |
+
+### Test Task Template
+
+```markdown
+## TEST-XXX: [Test Description]
+
+**Parent Task**: TASK-XXX
+**Type**: [unit | integration | e2e | security | performance]
+**Priority**: Same as parent
+
+### Acceptance Criteria
+- [ ] All tests pass
+- [ ] Coverage ≥ minimum threshold
+- [ ] No skipped critical tests
+- [ ] Test isolation verified
+
+### Test Scope
+- Functions/components to test
+- Edge cases to cover
+- Security scenarios (if applicable)
+```
+
+### Enforcement Levels
+
+#### Soft Enforcement
+```
+- Warn when completing without tests
+- Allow override with justification
+- Log for retrospective
+- No blocking
+```
+
+#### Standard Enforcement (Default)
+```
+- Block task completion without tests
+- Require minimum coverage
+- Allow emergency override with approval
+- Create follow-up tasks for overrides
+```
+
+#### Strict Enforcement
+```
+- Block ALL completion without full test suite
+- Require coverage above target
+- No overrides allowed
+- Auto-reject PRs without tests
+```
+
+### Definition of Done (with Testing)
+
+Before marking ANY task as DONE, verify:
+
+```
+DEFINITION OF DONE CHECKLIST:
+├── Code
+│   ├── [x] Implementation complete
+│   ├── [x] Code review passed
+│   └── [x] No lint errors
+│
+├── Tests (MANDATORY)
+│   ├── [x] Test tasks created
+│   ├── [x] All tests passing
+│   ├── [x] Coverage ≥ minimum
+│   └── [x] No skipped critical tests
+│
+├── Documentation
+│   ├── [x] Code documented
+│   └── [x] API docs updated (if API)
+│
+└── Ready for merge
+```
+
+### Completion Blocking
+
+```
+User: "Mark TASK-042 as done"
+
+Sprint Master checks:
+├── Has test tasks? → Yes (TEST-042-UNIT, TEST-042-INT)
+├── TEST-042-UNIT status? → ✅ Complete
+├── TEST-042-INT status? → ❌ In Progress
+└── Block completion
+
+Response: "Cannot mark TASK-042 as done.
+          TEST-042-INT is still in progress.
+
+          Test Status:
+          ✅ TEST-042-UNIT: Passed (45 tests, 92% coverage)
+          🔄 TEST-042-INT: In Progress
+
+          Complete all test tasks first, or use /quality:verify-done for details."
+```
+
+### Override Protocol
+
+```
+User: "Override test requirement for TASK-042"
+
+Sprint Master checks:
+├── Enforcement level? → Standard
+├── Override allowed? → Yes
+├── Justification required? → Yes
+
+Response: "Override requested for TASK-042.
+
+          Please provide:
+          1. Reason for override
+          2. Risk assessment
+          3. Follow-up plan for tests
+
+          Note: This will be logged and reviewed in retrospective."
+
+User: "Hotfix for production - tests will be added in TASK-043"
+
+Sprint Master:
+├── Log override with justification
+├── Create follow-up task: TASK-043 (Add tests for TASK-042)
+├── Mark TASK-042 as done with override flag
+└── Add to retrospective items
 ```
 
 ---
@@ -464,6 +650,12 @@ When blocker detected:
 - `/spawn [agent] [task]` - Run agent in parallel
 - `/spawn:collect` - Collect parallel results
 
+### Testing Commands
+- `/quality:verify-done` - Verify test requirements before completion
+- `/quality:coverage-check` - Check coverage against gates
+- `/quality:test-plan` - Generate test plan for feature
+- `/dev:feature-tested [desc]` - Create feature with auto-generated tests
+
 ### Omega Commands
 - `/init` - Initialize Omega mode
 - `/10x [task]` - Find 10x approach
@@ -494,6 +686,9 @@ When blocker detected:
 |-------|-------------|
 | [omega/omega-sprint](/skills/omega-sprint) | Orchestrates AI-native sprint management with autonomous age... |
 | [methodology/dispatching-parallel-agents](/skills/dispatching-parallel-agents) | AI agent orchestrates parallel task execution through concur... |
+| [methodology/test-task-generation](/skills/test-task-generation) | The agent automatically generates comprehensive test tasks f... |
+| [methodology/test-enforcement](/skills/test-enforcement) | The agent enforces mandatory test completion before any task... |
+| [devops/workflow-config](/skills/workflow-config) | The agent implements a centralized workflow configuration sy... |
 
 ### Commands Triggered
 
