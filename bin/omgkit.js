@@ -56,12 +56,13 @@ ${COLORS.bright}EXAMPLES${COLORS.reset}
 ${COLORS.bright}AFTER INSTALLATION${COLORS.reset}
   In Claude Code, type / to see all OMGKIT commands:
 
-  Core: /feature, /fix, /plan, /test, /review
-  Omega: /10x, /100x, /1000x, /principles
-  Sprint: /vision:set, /sprint:new, /team:run
+  Core: /dev:feature, /dev:fix, /planning:plan, /quality:test, /dev:review
+  Omega: /omega:10x, /omega:100x, /omega:1000x, /omega:principles
+  Sprint: /sprint:vision-set, /sprint:sprint-new, /sprint:team-run
+  Workflow: /workflow:init, /workflow:status, /hooks:setup
 
 ${COLORS.bright}DOCUMENTATION${COLORS.reset}
-  https://github.com/user/omgkit
+  https://omg.mintlify.app
 `);
 }
 
