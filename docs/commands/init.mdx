@@ -1,91 +1,167 @@
 ---
-title: "/sprint:init"
-description: "Initialize OMGKIT in project"
-icon: "calendar-days"
+title: "/workflow:init"
+description: "Initialize workflow configuration with interactive setup or preset templates for trunk-based, gitflow, or github-flow development."
+icon: "terminal"
 ---
 
 <Info>
-  **Category:** Sprint
+  **Category:** Workflow
 
-  **Syntax:** `/sprint:init`
+  **Syntax:** `/workflow:init`
 </Info>
 
 ## Overview
 
-Initialize OMGKIT in project
+Initialize workflow configuration with interactive setup or preset templates for trunk-based, gitflow, or github-flow development.
 
 ## Quick Start
 
 ```bash
-/sprint:init
+/workflow:init
 ```
 
 
-# 🔮 Initialize OMGKIT
+# /workflow:init
 
-Create `.omgkit/` directory structure.
+Initialize the OMGKIT workflow configuration system in your project.
 
-## Creates
+## Usage
+
+```bash
+# Interactive setup
+/workflow:init
+
+# Use specific workflow preset
+/workflow:init --workflow=trunk-based
+/workflow:init --workflow=gitflow
+/workflow:init --workflow=github-flow
+
+# Use all defaults (trunk-based)
+/workflow:init --defaults
+
+# Force overwrite existing config
+/workflow:init --force
+```
+
+## What It Does
+
+1. **Creates `.omgkit/` directory** if not exists
+2. **Generates `workflow.yaml`** with your preferences
+3. **Sets up Git hooks** based on configuration
+4. **Validates existing setup** and suggests improvements
+
+## Interactive Setup
+
+When run without arguments, guides you through:
+
+1. **Workflow Type**
+   - Trunk-based (recommended for CI/CD)
+   - GitHub Flow (simple, PR-based)
+   - GitFlow (release-based)
+
+2. **Branch Settings**
+   - Main branch name
+   - Branch prefixes
+
+3. **Commit Conventions**
+   - Conventional commits (recommended)
+   - Scope requirements
+
+4. **PR Settings**
+   - Review requirements
+   - Auto-labeling
+
+5. **Hooks**
+   - Pre-commit actions
+   - Pre-push actions
+
+6. **Deployment**
+   - Provider (Vercel, Netlify, etc.)
+   - Auto-deploy settings
+
+## Output Files
+
 ```
 .omgkit/
-├── config.yaml
-├── settings.json
-├── sprints/
-│   ├── vision.yaml
-│   └── backlog.yaml
-├── plans/
-├── docs/
-├── logs/
-├── devlogs/
-│   └── README.md
-├── stdrules/
-│   ├── README.md
-│   ├── BEFORE_COMMIT.md
-│   ├── SKILL_STANDARDS.md
-│   └── TESTING_STANDARDS.md
-└── artifacts/
-    └── README.md
-OMEGA.md
-CLAUDE.md
+└── workflow.yaml    # Main configuration
+
+.git/hooks/
+├── pre-commit       # Lint, format, type-check
+├── commit-msg       # Validate conventional commits
+└── pre-push         # Tests, security scan
 ```
 
-## Artifacts Folder
+## Workflow Presets
 
-The `.omgkit/artifacts/` folder stores **reference documents** that provide context for AI-assisted development:
+### Trunk-Based (Default)
 
-| Subfolder | Purpose |
-|-----------|---------|
-| `data/` | Sample data, schemas, data dictionaries |
-| `docs/` | Requirements, user stories, PRDs |
-| `knowledge/` | Glossary, business rules, domain knowledge |
-| `research/` | Competitor analysis, market research |
-| `assets/` | Reference images, templates, mockups |
-| `examples/` | Code samples, reference implementations |
+Best for: Teams practicing continuous deployment.
 
-> **Note:** Artifacts are **reference materials only**, NOT execution instructions. They help AI understand your project context.
+```yaml
+git:
+  workflow: trunk-based
+  max_branch_age_days: 2
+hooks:
+  pre_commit: [lint, format, type-check]
+  pre_push: [test, security-scan]
+feature_flags:
+  provider: vercel-edge
+```
 
-## Next Steps
-1. `/vision:set` - Set your product vision
-2. `/sprint:new` - Create first sprint
-3. `/team:run` - Start AI team
+### GitHub Flow
+
+Best for: Teams with regular releases, focus on code review.
+
+```yaml
+git:
+  workflow: github-flow
+  max_branch_age_days: 7
+hooks:
+  pre_commit: [lint, format]
+  pre_push: [test]
+```
+
+### GitFlow
+
+Best for: Teams with scheduled releases, multiple environments.
+
+```yaml
+git:
+  workflow: gitflow
+  develop_branch: develop
+hooks:
+  pre_commit: [lint, format, type-check]
+  pre_push: [test, build]
+```
+
+## Examples
+
+```bash
+# Quick setup for a new project
+/workflow:init --workflow=trunk-based
+
+# Setup for enterprise project
+/workflow:init --workflow=gitflow
+
+# Reconfigure existing project
+/workflow:init --force
+```
+
+## After Initialization
+
+1. **Review generated config**: `.omgkit/workflow.yaml`
+2. **Commit config to repo**: `git add .omgkit && git commit -m "chore: add workflow config"`
+3. **Team syncs and runs**: `/hooks:setup`
+
+## Related Commands
+
+- `/workflow:status` - Check current workflow status
+- `/workflow:trunk-based` - Execute trunk-based workflow
+- `/hooks:setup` - Setup/update Git hooks
 
 
 
-## Tools Used
 
-This command uses the following tools:
-
-- **Bash** - Enables bash capabilities
-- **Write** - Enables write capabilities
-
-
-## Usage Graph
-
-### Triggered By Agents
-
-| Agent | Description |
-|-------|-------------|
-| [sprint-master](/agents/sprint-master) | AI Team orchestrator with sprint management, velocity tracki... |
 
 
 ## Examples
@@ -93,7 +169,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/sprint:init
+/workflow:init
 ```
 
 ### With Context
@@ -103,7 +179,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/sprint:init
+/workflow:init
 ```
 
 ## Tips
@@ -127,9 +203,9 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 151 commands
+    See all 156 commands
   </Card>
-  <Card title="Sprint Commands" icon="calendar-days" href="/commands/overview#sprint">
-    More sprint commands
+  <Card title="Workflow Commands" icon="terminal" href="/commands/overview#workflow">
+    More workflow commands
   </Card>
 </CardGroup>

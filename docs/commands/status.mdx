@@ -1,126 +1,150 @@
 ---
-title: "/omgml:status"
-description: "Display comprehensive ML project status including data, model, deployment, and pipeline health"
+title: "/workflow:status"
+description: "Display current workflow configuration status, branch info, and next recommended actions."
 icon: "terminal"
 ---
 
 <Info>
-  **Category:** Omgml
+  **Category:** Workflow
 
-  **Syntax:** `/omgml:status "[--detailed]"`
+  **Syntax:** `/workflow:status`
 </Info>
 
 ## Overview
 
-Display comprehensive ML project status including data, model, deployment, and pipeline health
+Display current workflow configuration status, branch info, and next recommended actions.
 
 ## Quick Start
 
 ```bash
-/omgml:status "[--detailed]"
+/workflow:status
 ```
 
 
-# ML Project Status: "[--detailed]"
+# /workflow:status
 
-Show ML project status: **"[--detailed]"**
+Check the current state of your workflow configuration and Git status.
 
-## Agent
-Uses **orchestrator-agent** for comprehensive status collection.
+## Usage
 
-## Parameters
-- **--detailed**: Show extended information for each component
+```bash
+# Full status
+/workflow:status
 
-## Status Components
+# Config only
+/workflow:status --config
 
-### Data Status
-- Training set size and last update
-- Validation/Test set sizes
-- Data version (DVC)
-- Data quality metrics
+# Branch only
+/workflow:status --branch
 
-### Model Status
-- Current model version
-- Model architecture
-- Performance metrics (accuracy, F1, etc.)
-- Last training timestamp
-
-### Deployment Status
-- Production model version
-- Staging model version
-- Endpoint health
-- Request latency
-
-### Pipeline Status
-- Last pipeline run
-- Success/failure rate
-- Next scheduled run
-- Active experiments
-
-## Example Output
-```
-ML Project Status
-═══════════════════════════════════════════════════
-
-Project: customer-churn-prediction
-Type: Classification (Binary)
-Created: 2024-01-15
-
-DATA STATUS
-├── Training: 50,000 samples (updated: 2h ago)
-├── Validation: 10,000 samples
-├── Test: 10,000 samples
-└── Data Version: v1.2.3
-
-MODEL STATUS
-├── Current: XGBoost v2.1.0
-├── Accuracy: 94.2%
-├── F1-Score: 0.89
-└── Last trained: 1d ago
-
-DEPLOYMENT STATUS
-├── Production: v2.0.0 (deployed 3d ago)
-├── Staging: v2.1.0 (testing)
-└── Endpoint: https://api.example.com/predict
-
-PIPELINE STATUS
-├── Last run: 2h ago ✅
-├── Success rate: 98.5%
-└── Next scheduled: in 22h
+# Hooks only
+/workflow:status --hooks
 ```
 
-## Progress
-- [ ] Data status collected
-- [ ] Model status collected
-- [ ] Deployment status collected
-- [ ] Pipeline status collected
-- [ ] Report generated
+## Output
 
-Provide actionable insights for project health.
+```
+OMGKIT Workflow Status
+======================
+
+Configuration
+-------------
+File: .omgkit/workflow.yaml
+Valid: Yes
+Workflow: trunk-based
+Version: 1.0
+
+Git Status
+----------
+Branch: feature/add-authentication
+Base: main
+Age: 6 hours (max: 48 hours)
+Commits ahead: 3
+Status: Clean
+
+Hooks Status
+------------
+pre-commit: Enabled (lint, format, type-check)
+commit-msg: Enabled (conventional)
+pre-push: Enabled (test, security-scan)
+
+Review Settings
+---------------
+Auto-review: Enabled
+Checks: security, performance, best-practices
+Block on critical: Yes
+
+Deploy Settings
+---------------
+Provider: vercel
+Auto-deploy: Yes
+Preview on PR: Yes
+
+Recommendations
+---------------
+✓ Branch age is within limit
+✓ All hooks are enabled
+! Consider pushing soon (3 commits pending)
+```
+
+## Validation Checks
+
+| Check | Status | Description |
+|-------|--------|-------------|
+| Config exists | ✓/✗ | `.omgkit/workflow.yaml` found |
+| Config valid | ✓/✗ | YAML parses, schema valid |
+| Hooks installed | ✓/✗ | Git hooks in place |
+| Branch age | ✓/! | Within max age limit |
+| Uncommitted changes | ✓/! | Working tree status |
+
+## Error Messages
+
+### Config Not Found
+
+```
+Warning: No workflow config found
+Run /workflow:init to create configuration
+```
+
+### Invalid Config
+
+```
+Error: Invalid workflow config
+- git.workflow: must be trunk-based, gitflow, or github-flow
+- commit.max_subject_length: must be a number
+
+Run /workflow:init --force to regenerate
+```
+
+### Hooks Not Installed
+
+```
+Warning: Git hooks not installed
+Run /hooks:setup to install hooks
+```
+
+## Examples
+
+```bash
+# Quick health check
+/workflow:status
+
+# Verify after setup
+/workflow:init && /workflow:status
+
+# Debug hooks
+/workflow:status --hooks
+```
+
+## Related Commands
+
+- `/workflow:init` - Initialize workflow config
+- `/hooks:setup` - Install Git hooks
+- `/workflow:trunk-based` - Execute workflow
 
 
 
-## Tools Used
 
-This command uses the following tools:
-
-- **Task** - Enables task capabilities
-- **Read** - Enables read capabilities
-- **Bash** - Enables bash capabilities
-- **Grep** - Enables grep capabilities
-- **Glob** - Enables glob capabilities
-
-
-## Usage Graph
-
-### Triggered By Agents
-
-| Agent | Description |
-|-------|-------------|
-| [ai-architect-agent](/agents/ai-architect-agent) | Senior AI/ML architect for designing end-to-end ML systems, ... |
-| [experiment-analyst-agent](/agents/experiment-analyst-agent) | Expert agent for analyzing ML experiments, comparing models,... |
-| [ml-engineer-agent](/agents/ml-engineer-agent) | Full-stack ML engineering agent for building end-to-end mach... |
-| [research-scientist-agent](/agents/research-scientist-agent) | AI/ML research agent for exploring novel approaches, impleme... |
 
 
 ## Examples
@@ -128,7 +152,7 @@ This command uses the following tools:
 ### Basic Usage
 
 ```bash
-/omgml:status "your input here"
+/workflow:status
 ```
 
 ### With Context
@@ -138,7 +162,7 @@ This command uses the following tools:
 /context:index
 
 # Then run the command
-/omgml:status "detailed description"
+/workflow:status
 ```
 
 ## Tips
@@ -162,9 +186,9 @@ For best results, be specific in your descriptions and include relevant file pat
 
 <CardGroup cols={2}>
   <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 151 commands
+    See all 156 commands
   </Card>
-  <Card title="Omgml Commands" icon="terminal" href="/commands/overview#omgml">
-    More omgml commands
+  <Card title="Workflow Commands" icon="terminal" href="/commands/overview#workflow">
+    More workflow commands
   </Card>
 </CardGroup>

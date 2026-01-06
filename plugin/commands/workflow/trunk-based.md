@@ -1,0 +1,175 @@
+---
+name: workflow:trunk-based
+description: Execute the complete trunk-based development workflow from branch creation to merge, with automated checks and Claude review.
+category: workflow
+---
+
+# /workflow:trunk-based
+
+Execute the complete trunk-based development workflow with guidance at each step.
+
+## Usage
+
+```bash
+# Start new feature
+/workflow:trunk-based start "feature description"
+
+# Continue workflow (auto-detects current phase)
+/workflow:trunk-based
+
+# Check workflow status
+/workflow:trunk-based status
+
+# Skip to specific phase
+/workflow:trunk-based --phase=review
+```
+
+## Workflow Phases
+
+### 1. Start Feature
+
+```bash
+/workflow:trunk-based start "add user authentication"
+```
+
+**Actions:**
+- Checkout and pull latest main
+- Create feature branch: `feature/add-user-authentication`
+- Initialize branch tracking
+
+### 2. Development
+
+```bash
+/workflow:trunk-based dev
+```
+
+**Actions:**
+- Run pre-commit hooks
+- Validate commit message format
+- Track branch age
+
+### 3. Pre-Push
+
+```bash
+/workflow:trunk-based push
+```
+
+**Actions:**
+- Run tests
+- Security scan
+- Build verification
+- Push to remote
+
+### 4. Create PR
+
+```bash
+/workflow:trunk-based pr
+```
+
+**Actions:**
+- Generate PR title from commits
+- Apply template
+- Set labels
+- Assign reviewers
+
+### 5. Review
+
+```bash
+/workflow:trunk-based review
+```
+
+**Actions:**
+- Trigger Claude auto-review
+- Check for critical issues
+- Summarize feedback
+
+### 6. Merge
+
+```bash
+/workflow:trunk-based merge
+```
+
+**Actions:**
+- Verify all checks passed
+- Squash merge to main
+- Delete feature branch
+- Trigger deployment
+
+## Auto-Detection
+
+When run without arguments, detects current phase:
+
+```bash
+/workflow:trunk-based
+
+# Output:
+# Trunk-Based Workflow Status
+# ---------------------------
+# Branch: feature/add-auth
+# Phase: review (4/6)
+# Age: 1 day (max: 2 days)
+#
+# Next steps:
+# 1. Address review feedback
+# 2. Request re-review
+# 3. Merge when approved
+```
+
+## Config Integration
+
+Reads settings from `.omgkit/workflow.yaml`:
+
+```yaml
+git:
+  workflow: trunk-based
+  max_branch_age_days: 2
+
+pr:
+  squash_merge: true
+
+review:
+  auto_review: true
+```
+
+## Examples
+
+### Complete Flow
+
+```bash
+# 1. Start feature
+/workflow:trunk-based start "add dark mode"
+
+# 2. Make changes...
+# 3. Commit
+/git:commit
+
+# 4. Push and create PR
+/workflow:trunk-based push
+/workflow:trunk-based pr
+
+# 5. Review
+/workflow:trunk-based review
+
+# 6. Merge
+/workflow:trunk-based merge
+```
+
+### Quick Status Check
+
+```bash
+/workflow:trunk-based status
+
+# Output:
+# Current Phase: development
+# Branch Age: 4 hours
+# Commits: 3
+# Tests: passing
+# Ready for: push
+```
+
+## Related Commands
+
+- `/workflow:init` - Initialize workflow config
+- `/git:commit` - Commit with conventions
+- `/git:pr` - Create pull request
+- `/dev:review` - Claude code review

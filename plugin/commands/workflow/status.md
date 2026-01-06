@@ -1,0 +1,126 @@
+---
+name: workflow:status
+description: Display current workflow configuration status, branch info, and next recommended actions.
+category: workflow
+---
+
+# /workflow:status
+
+Check the current state of your workflow configuration and Git status.
+
+## Usage
+
+```bash
+# Full status
+/workflow:status
+
+# Config only
+/workflow:status --config
+
+# Branch only
+/workflow:status --branch
+
+# Hooks only
+/workflow:status --hooks
+```
+
+## Output
+
+```
+OMGKIT Workflow Status
+======================
+
+Configuration
+-------------
+File: .omgkit/workflow.yaml
+Valid: Yes
+Workflow: trunk-based
+Version: 1.0
+
+Git Status
+----------
+Branch: feature/add-authentication
+Base: main
+Age: 6 hours (max: 48 hours)
+Commits ahead: 3
+Status: Clean
+
+Hooks Status
+------------
+pre-commit: Enabled (lint, format, type-check)
+commit-msg: Enabled (conventional)
+pre-push: Enabled (test, security-scan)
+
+Review Settings
+---------------
+Auto-review: Enabled
+Checks: security, performance, best-practices
+Block on critical: Yes
+
+Deploy Settings
+---------------
+Provider: vercel
+Auto-deploy: Yes
+Preview on PR: Yes
+
+Recommendations
+---------------
+✓ Branch age is within limit
+✓ All hooks are enabled
+! Consider pushing soon (3 commits pending)
+```
+
+## Validation Checks
+
+| Check | Status | Description |
+|-------|--------|-------------|
+| Config exists | ✓/✗ | `.omgkit/workflow.yaml` found |
+| Config valid | ✓/✗ | YAML parses, schema valid |
+| Hooks installed | ✓/✗ | Git hooks in place |
+| Branch age | ✓/! | Within max age limit |
+| Uncommitted changes | ✓/! | Working tree status |
+
+## Error Messages
+
+### Config Not Found
+
+```
+Warning: No workflow config found
+Run /workflow:init to create configuration
+```
+
+### Invalid Config
+
+```
+Error: Invalid workflow config
+- git.workflow: must be trunk-based, gitflow, or github-flow
+- commit.max_subject_length: must be a number
+
+Run /workflow:init --force to regenerate
+```
+
+### Hooks Not Installed
+
+```
+Warning: Git hooks not installed
+Run /hooks:setup to install hooks
+```
+
+## Examples
+
+```bash
+# Quick health check
+/workflow:status
+
+# Verify after setup
+/workflow:init && /workflow:status
+
+# Debug hooks
+/workflow:status --hooks
+```
+
+## Related Commands
+
+- `/workflow:init` - Initialize workflow config
+- `/hooks:setup` - Install Git hooks
+- `/workflow:trunk-based` - Execute workflow

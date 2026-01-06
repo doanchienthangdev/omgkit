@@ -1,0 +1,143 @@
+---
+name: workflow:init
+description: Initialize workflow configuration with interactive setup or preset templates for trunk-based, gitflow, or github-flow development.
+category: workflow
+---
+
+# /workflow:init
+
+Initialize the OMGKIT workflow configuration system in your project.
+
+## Usage
+
+```bash
+# Interactive setup
+/workflow:init
+
+# Use specific workflow preset
+/workflow:init --workflow=trunk-based
+/workflow:init --workflow=gitflow
+/workflow:init --workflow=github-flow
+
+# Use all defaults (trunk-based)
+/workflow:init --defaults
+
+# Force overwrite existing config
+/workflow:init --force
+```
+
+## What It Does
+
+1. **Creates `.omgkit/` directory** if not exists
+2. **Generates `workflow.yaml`** with your preferences
+3. **Sets up Git hooks** based on configuration
+4. **Validates existing setup** and suggests improvements
+
+## Interactive Setup
+
+When run without arguments, guides you through:
+
+1. **Workflow Type**
+   - Trunk-based (recommended for CI/CD)
+   - GitHub Flow (simple, PR-based)
+   - GitFlow (release-based)
+
+2. **Branch Settings**
+   - Main branch name
+   - Branch prefixes
+
+3. **Commit Conventions**
+   - Conventional commits (recommended)
+   - Scope requirements
+
+4. **PR Settings**
+   - Review requirements
+   - Auto-labeling
+
+5. **Hooks**
+   - Pre-commit actions
+   - Pre-push actions
+
+6. **Deployment**
+   - Provider (Vercel, Netlify, etc.)
+   - Auto-deploy settings
+
+## Output Files
+
+```
+.omgkit/
+└── workflow.yaml    # Main configuration
+
+.git/hooks/
+├── pre-commit       # Lint, format, type-check
+├── commit-msg       # Validate conventional commits
+└── pre-push         # Tests, security scan
+```
+
+## Workflow Presets
+
+### Trunk-Based (Default)
+
+Best for: Teams practicing continuous deployment.
+
+```yaml
+git:
+  workflow: trunk-based
+  max_branch_age_days: 2
+hooks:
+  pre_commit: [lint, format, type-check]
+  pre_push: [test, security-scan]
+feature_flags:
+  provider: vercel-edge
+```
+
+### GitHub Flow
+
+Best for: Teams with regular releases, focus on code review.
+
+```yaml
+git:
+  workflow: github-flow
+  max_branch_age_days: 7
+hooks:
+  pre_commit: [lint, format]
+  pre_push: [test]
+```
+
+### GitFlow
+
+Best for: Teams with scheduled releases, multiple environments.
+
+```yaml
+git:
+  workflow: gitflow
+  develop_branch: develop
+hooks:
+  pre_commit: [lint, format, type-check]
+  pre_push: [test, build]
+```
+
+## Examples
+
+```bash
+# Quick setup for a new project
+/workflow:init --workflow=trunk-based
+
+# Setup for enterprise project
+/workflow:init --workflow=gitflow
+
+# Reconfigure existing project
+/workflow:init --force
+```
+
+## After Initialization
+
+1. **Review generated config**: `.omgkit/workflow.yaml`
+2. **Commit config to repo**: `git add .omgkit && git commit -m "chore: add workflow config"`
+3. **Team syncs and runs**: `/hooks:setup`
+
+## Related Commands
+
+- `/workflow:status` - Check current workflow status
+- `/workflow:trunk-based` - Execute trunk-based workflow
+- `/hooks:setup` - Setup/update Git hooks

@@ -1,0 +1,100 @@
+# =============================================================================
+# OMGKIT GitHub Flow Configuration
+# =============================================================================
+# Simple workflow: main branch + feature branches + PRs.
+# Best for: Teams with regular releases, focus on code review.
+#
+# Documentation: https://omg.mintlify.app/workflows/github-flow
+# =============================================================================
+
+version: "1.0"
+
+git:
+  workflow: github-flow
+  main_branch: main
+  branch_prefix:
+    feature: "feature/"
+    fix: "fix/"
+    docs: "docs/"
+    chore: "chore/"
+  max_branch_age_days: 7
+  delete_branch_on_merge: true
+
+commit:
+  conventional: true
+  require_scope: false
+  allowed_types:
+    - feat
+    - fix
+    - docs
+    - style
+    - refactor
+    - perf
+    - test
+    - chore
+  max_subject_length: 72
+
+pr:
+  template: auto
+  require_review: true
+  min_reviewers: 1
+  draft_by_default: false
+  squash_merge: true
+  merge_commit_format: pr_title
+  labels:
+    enabled: true
+    by_path:
+      "src/api/**": ["backend"]
+      "src/ui/**": ["frontend"]
+      "src/components/**": ["components"]
+      "tests/**": ["testing"]
+      "docs/**": ["documentation"]
+    by_branch:
+      "feature/": ["enhancement"]
+      "fix/": ["bug"]
+      "docs/": ["documentation"]
+
+review:
+  auto_review: true
+  trigger: on_pr
+  checks:
+    - security
+    - performance
+    - best-practices
+  block_on_critical: true
+  strictness: standard
+
+deploy:
+  provider: vercel
+  production_branch: main
+  preview_on_pr: true
+  auto_deploy: true
+  pre_deploy_checks:
+    - test
+    - build
+
+hooks:
+  pre_commit:
+    enabled: true
+    actions:
+      - lint
+      - format
+    staged_only: true
+
+  commit_msg:
+    enabled: true
+    validate_conventional: true
+
+  pre_push:
+    enabled: true
+    actions:
+      - test
+
+feature_flags:
+  provider: none
+
+ci:
+  provider: github-actions
+  required_checks:
+    - build
+    - test

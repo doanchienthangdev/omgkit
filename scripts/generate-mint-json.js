@@ -364,6 +364,7 @@ async function generateCommandsNavigation() {
     'platform': 'Platform',
     'security': 'Security',
     'sre': 'SRE',
+    'hooks': 'Git Hooks',
     'ml': 'ML Commands',
     'game': 'Game',
     'iot': 'IoT',
@@ -379,7 +380,7 @@ async function generateCommandsNavigation() {
   };
 
   const categoryOrder = [
-    'dev', 'planning', 'git', 'quality', 'alignment', 'auto', 'domain', 'perf',
+    'dev', 'planning', 'git', 'hooks', 'quality', 'alignment', 'auto', 'domain', 'perf',
     'platform', 'security', 'context', 'design', 'omega', 'sprint', 'sre',
     'ml', 'game', 'iot', 'data', 'workflow',
     'omgml', 'omgdata', 'omgfeature', 'omgtrain', 'omgoptim', 'omgdeploy', 'omgops'

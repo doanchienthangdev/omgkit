@@ -686,6 +686,7 @@ command_namespaces:
   - domain    # Domain analysis
   - game      # Game development
   - git       # Version control
+  - hooks     # Git hooks management
   - iot       # IoT operations
   - ml        # Machine learning
   - omega     # Omega principles
@@ -703,7 +704,7 @@ command_namespaces:
   - security  # Security operations
   - sprint    # Sprint management
   - sre       # Site reliability
-  - workflow  # Workflow triggers
+  - workflow  # Workflow triggers and automation
 
 # =============================================================================
 # WORKFLOW DEFINITIONS
@@ -928,6 +929,18 @@ workflows:
     agents: [copywriter, researcher]
     skills: []
     commands: [/planning:brainstorm, /planning:research]
+
+  # ---------------------------------------------------------------------------
+  # GIT WORKFLOWS
+  # ---------------------------------------------------------------------------
+  git/trunk-based:
+    agents: [git-manager, code-reviewer, tester, fullstack-developer]
+    skills:
+      - devops/workflow-config
+      - devops/git-hooks
+      - devops/feature-flags
+      - methodology/finishing-development-branch
+    commands: [/workflow:trunk-based, /workflow:init, /workflow:status, /hooks:setup, /hooks:run, /git:commit, /git:pr, /dev:review]
 
   # ---------------------------------------------------------------------------
   # ML SYSTEMS WORKFLOWS (Harvard CS 329S + Chip Huyen)

@@ -1,0 +1,128 @@
+# =============================================================================
+# OMGKIT GitFlow Configuration
+# =============================================================================
+# Traditional workflow with develop, release, and hotfix branches.
+# Best for: Teams with scheduled releases, multiple environments.
+#
+# Documentation: https://omg.mintlify.app/workflows/gitflow
+# =============================================================================
+
+version: "1.0"
+
+git:
+  workflow: gitflow
+  main_branch: main
+  develop_branch: develop
+  branch_prefix:
+    feature: "feature/"
+    release: "release/"
+    hotfix: "hotfix/"
+    bugfix: "bugfix/"
+  max_branch_age_days: 14
+  delete_branch_on_merge: true
+
+commit:
+  conventional: true
+  require_scope: true
+  allowed_types:
+    - feat
+    - fix
+    - docs
+    - style
+    - refactor
+    - perf
+    - test
+    - chore
+    - ci
+    - build
+  max_subject_length: 72
+
+pr:
+  template: auto
+  require_review: true
+  min_reviewers: 2
+  draft_by_default: true
+  squash_merge: false
+  merge_commit_format: default
+  labels:
+    enabled: true
+    by_path:
+      "src/**": ["code-change"]
+      "tests/**": ["testing"]
+      "docs/**": ["documentation"]
+    by_branch:
+      "feature/": ["feature"]
+      "release/": ["release"]
+      "hotfix/": ["hotfix", "urgent"]
+      "bugfix/": ["bug"]
+
+review:
+  auto_review: true
+  trigger: on_pr
+  checks:
+    - security
+    - performance
+    - best-practices
+    - tests
+    - documentation
+  block_on_critical: true
+  strictness: strict
+
+deploy:
+  provider: vercel
+  production_branch: main
+  staging_branch: develop
+  preview_on_pr: true
+  auto_deploy: false
+  environments:
+    development:
+      branch: develop
+      auto_deploy: true
+    staging:
+      branch: "release/*"
+      auto_deploy: true
+    production:
+      branch: main
+      auto_deploy: false
+      require_approval: true
+
+hooks:
+  pre_commit:
+    enabled: true
+    actions:
+      - lint
+      - format
+      - type-check
+    fail_fast: true
+
+  commit_msg:
+    enabled: true
+    validate_conventional: true
+    require_scope: true
+    max_length: 72
+
+  pre_push:
+    enabled: true
+    actions:
+      - test
+      - build
+    protected_branches:
+      - main
+      - develop
+
+  post_merge:
+    enabled: true
+    actions:
+      - install
+
+feature_flags:
+  provider: none
+  default_state: false
+
+ci:
+  provider: github-actions
+  required_checks:
+    - build
+    - test
+    - lint
+    - type-check

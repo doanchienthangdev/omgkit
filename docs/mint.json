@@ -289,6 +289,13 @@
       ]
     },
     {
+      "group": "Git Hooks",
+      "pages": [
+        "commands/run",
+        "commands/setup"
+      ]
+    },
+    {
       "group": "Quality",
       "pages": [
         "commands/api-gen",
@@ -460,7 +467,8 @@
         "commands/sprint-retrospective",
         "commands/sprint-setup",
         "commands/technical-docs",
-        "commands/technology-research"
+        "commands/technology-research",
+        "commands/trunk-based"
       ]
     },
     {
@@ -605,11 +613,13 @@
         "skills/docker",
         "skills/dora-metrics",
         "skills/feature-flags",
+        "skills/git-hooks",
         "skills/github-actions",
         "skills/kubernetes",
         "skills/monorepo-management",
         "skills/observability",
-        "skills/performance-profiling"
+        "skills/performance-profiling",
+        "skills/workflow-config"
       ]
     },
     {
@@ -955,6 +965,12 @@
         "workflows/discovery",
         "workflows/execution",
         "workflows/planning"
+      ]
+    },
+    {
+      "group": "Git",
+      "pages": [
+        "workflows/trunk-based"
       ]
     }
   ]

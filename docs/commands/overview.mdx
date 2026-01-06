@@ -1,18 +1,18 @@
 ---
 title: "Commands Overview"
-description: "151 slash commands for every development task"
+description: "156 slash commands for every development task"
 icon: "terminal"
 ---
 
-OMGKIT provides **151 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
+OMGKIT provides **156 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
 
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="151" icon="terminal">
+  <Card title="156" icon="terminal">
     Total Commands
   </Card>
-  <Card title="27" icon="folder">
+  <Card title="28" icon="folder">
     Categories
   </Card>
   <Card title="41" icon="robot">
@@ -52,6 +52,9 @@ OMGKIT provides **151 slash commands** covering the entire development lifecycle
   </Card>
   <Card title="Git" icon="code-branch" href="#git">
     **6 commands** - Version control and deployment
+  </Card>
+  <Card title="Hooks" icon="terminal" href="#hooks">
+    **2 commands** - 
   </Card>
   <Card title="Iot" icon="microchip" href="#iot">
     **1 commands** - IoT and embedded systems
@@ -105,7 +108,7 @@ OMGKIT provides **151 slash commands** covering the entire development lifecycle
     **1 commands** - Site reliability engineering
   </Card>
   <Card title="Workflow" icon="terminal" href="#workflow">
-    **29 commands** - Workflow automation
+    **32 commands** - Workflow automation
   </Card>
 </CardGroup>
 
@@ -240,6 +243,16 @@ Git and deployment commands for version control
 | [`/git:deploy`](/commands/deploy) | Deploy to environment | `/git:deploy [env]` |
 | [`/git:pr`](/commands/pr) | Create pull request | `/git:pr [title]` |
 | [`/git:ship`](/commands/ship) | Commit and create PR | `/git:ship [message]` |
+
+
+## Hooks
+
+
+
+| Command | Description | Usage |
+|---------|-------------|-------|
+| [`/hooks:run`](/commands/run) | Manually run Git hook actions for testin... | `/hooks:run` |
+| [`/hooks:setup`](/commands/setup) | Install or update Git hooks based on wor... | `/hooks:setup` |
 
 
 ## Iot
@@ -474,6 +487,7 @@ Site reliability and observability commands
 | [`/workflow:feature`](/commands/feature) | Complete feature development from planni... | `/workflow:feature [feature description]` |
 | [`/workflow:fine-tuning`](/commands/fine-tuning) | Model fine-tuning workflow | `/workflow:fine-tuning [fine-tuning objective]` |
 | [`/workflow:full-feature`](/commands/full-feature) | Complex full-stack feature development | `/workflow:full-feature [full-stack feature]` |
+| [`/workflow:init`](/commands/init) | Initialize workflow configuration with i... | `/workflow:init` |
 | [`/workflow:marketing`](/commands/marketing) | Create marketing content and materials | `/workflow:marketing [marketing goal]` |
 | [`/workflow:migration`](/commands/migration) | Safe database migration workflow | `/workflow:migration [migration description]` |
 | [`/workflow:model-evaluation`](/commands/model-evaluation) | AI model evaluation and benchmarking wor... | `/workflow:model-evaluation [model or system to evaluate]` |
@@ -488,8 +502,10 @@ Site reliability and observability commands
 | [`/workflow:sprint-execution`](/commands/sprint-execution) | Execute sprint tasks with AI team | `/workflow:sprint-execution [optional focus area]` |
 | [`/workflow:sprint-retrospective`](/commands/sprint-retrospective) | Sprint review and retrospective workflow | `/workflow:sprint-retrospective [optional sprint name]` |
 | [`/workflow:sprint-setup`](/commands/sprint-setup) | Initialize and plan a new sprint | `/workflow:sprint-setup [sprint name]` |
+| [`/workflow:status`](/commands/status) | Display current workflow configuration s... | `/workflow:status` |
 | [`/workflow:technical-docs`](/commands/technical-docs) | Create comprehensive technical documenta... | `/workflow:technical-docs [documentation scope]` |
 | [`/workflow:technology-research`](/commands/technology-research) | Research new technologies systematically | `/workflow:technology-research [technology to research]` |
+| [`/workflow:trunk-based`](/commands/trunk-based) | Execute the complete trunk-based develop... | `/workflow:trunk-based` |
 
 
 ---
@@ -600,7 +616,7 @@ Switch modes with `/context:mode <mode-name>` or use the shorthand `/mode:<mode-
     10 behavioral modes
   </Card>
   <Card title="Skills" icon="brain" href="/skills/overview">
-    155 domain expertise modules
+    157 domain expertise modules
   </Card>
   <Card title="Quick Start" icon="rocket" href="/getting-started/quickstart">
     Get started in 5 minutes

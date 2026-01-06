@@ -1,0 +1,105 @@
+# =============================================================================
+# OMGKIT Trunk-Based Development Configuration
+# =============================================================================
+# Optimized for continuous deployment, short-lived branches, and feature flags.
+# Best for: Teams practicing CI/CD, small PRs, rapid iteration.
+#
+# Documentation: https://omg.mintlify.app/workflows/trunk-based
+# =============================================================================
+
+version: "1.0"
+
+git:
+  workflow: trunk-based
+  main_branch: main
+  branch_prefix:
+    feature: "feature/"
+    fix: "fix/"
+    hotfix: "hotfix/"
+  max_branch_age_days: 2
+  delete_branch_on_merge: true
+  linear_history: true
+
+commit:
+  conventional: true
+  require_scope: false
+  allowed_types:
+    - feat
+    - fix
+    - docs
+    - refactor
+    - test
+    - chore
+  max_subject_length: 72
+
+pr:
+  template: auto
+  require_review: true
+  min_reviewers: 1
+  draft_by_default: false
+  squash_merge: true
+  labels:
+    enabled: true
+    by_path:
+      "src/api/**": ["backend"]
+      "src/ui/**": ["frontend"]
+      "tests/**": ["testing"]
+    by_branch:
+      "feature/": ["enhancement"]
+      "fix/": ["bug"]
+      "hotfix/": ["critical"]
+
+review:
+  auto_review: true
+  trigger: on_pr
+  checks:
+    - security
+    - performance
+    - best-practices
+    - tests
+  block_on_critical: true
+  strictness: standard
+
+deploy:
+  provider: vercel
+  production_branch: main
+  preview_on_pr: true
+  auto_deploy: true
+  pre_deploy_checks:
+    - test
+    - build
+    - lint
+
+hooks:
+  pre_commit:
+    enabled: true
+    actions:
+      - lint
+      - format
+      - type-check
+    fail_fast: true
+    staged_only: true
+
+  commit_msg:
+    enabled: true
+    validate_conventional: true
+    max_length: 72
+
+  pre_push:
+    enabled: true
+    actions:
+      - test
+      - security-scan
+    skip_on_ci: true
+
+feature_flags:
+  provider: vercel-edge
+  default_state: false
+  require_for_wip: true
+
+ci:
+  provider: github-actions
+  required_checks:
+    - build
+    - test
+    - lint

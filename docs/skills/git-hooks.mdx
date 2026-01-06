@@ -1,0 +1,577 @@
+---
+title: "Git Hooks Integration"
+description: "The agent implements Git hooks that integrate with the workflow config system, automating pre-commit checks, commit message validation, pre-push tests, and post-merge actions."
+icon: "cloud"
+---
+
+<Info>
+  **Category:** Devops
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+The agent implements Git hooks that integrate with the workflow config system, automating pre-commit checks, commit message validation, pre-push tests, and post-merge actions.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Git Hooks Integration
+
+## Overview
+
+Git Hooks Integration provides automated enforcement of workflow rules through Git hooks. Hooks are configured in `.omgkit/workflow.yaml` and automatically installed to `.git/hooks/`. This ensures consistent code quality, commit conventions, and testing before code reaches the remote repository.
+
+## Available Hooks
+
+| Hook | Trigger | Purpose |
+|------|---------|---------|
+| `pre-commit` | Before commit | Lint, format, type-check |
+| `commit-msg` | After commit message | Validate conventional commits |
+| `pre-push` | Before push | Run tests, security scan |
+| `post-merge` | After merge/pull | Install deps, run migrations |
+| `post-checkout` | After checkout | Environment setup |
+
+## Configuration
+
+### Basic Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+hooks:
+  pre_commit:
+    enabled: true
+    actions:
+      - lint
+      - format
+
+  commit_msg:
+    enabled: true
+    validate_conventional: true
+
+  pre_push:
+    enabled: true
+    actions:
+      - test
+```
+
+### Full Configuration
+
+```yaml
+hooks:
+  # Pre-commit: runs before each commit
+  pre_commit:
+    enabled: true
+    actions:
+      - lint           # Run ESLint/Pylint/etc
+      - type-check     # TypeScript/mypy/Flow
+      - format         # Prettier/Black/gofmt
+      - secrets-check  # Detect leaked secrets
+    fail_fast: true    # Stop on first failure
+    staged_only: true  # Only check staged files
+    bypass_key: "SKIP_HOOKS"  # Env var to bypass
+
+  # Commit message validation
+  commit_msg:
+    enabled: true
+    validate_conventional: true
+    allowed_types:
+      - feat
+      - fix
+      - docs
+      - style
+      - refactor
+      - perf
+      - test
+      - chore
+      - ci
+      - build
+    require_scope: false
+    max_subject_length: 72
+    require_body: false
+    require_issue: false
+    issue_pattern: "#[0-9]+"
+
+  # Pre-push: runs before pushing
+  pre_push:
+    enabled: true
+    actions:
+      - test           # Run test suite
+      - security-scan  # npm audit / safety check
+      - build          # Verify build works
+    skip_on_ci: true   # Skip in CI environment
+    protected_branches:
+      - main
+      - develop
+    require_review_for:
+      - main
+
+  # Post-merge: runs after git pull/merge
+  post_merge:
+    enabled: false
+    actions:
+      - install        # npm install / pip install
+      - migrate        # Database migrations
+      - generate       # Code generation
+    notify: false
+
+  # Post-checkout: runs after git checkout
+  post_checkout:
+    enabled: false
+    actions:
+      - install        # Install dependencies
+      - env-check      # Verify environment
+```
+
+## Hook Actions
+
+### Pre-commit Actions
+
+| Action | Description | Command |
+|--------|-------------|---------|
+| `lint` | Run linter | Auto-detected |
+| `format` | Format code | Auto-detected |
+| `type-check` | Type checking | Auto-detected |
+| `secrets-check` | Detect secrets | git-secrets |
+| `test-staged` | Test staged files | vitest related |
+
+**Auto-detection Logic:**
+
+```yaml
+# JavaScript/TypeScript
+lint: npx eslint --fix
+format: npx prettier --write
+type-check: npx tsc --noEmit
+
+# Python
+lint: ruff check --fix
+format: black
+type-check: mypy
+
+# Go
+lint: golangci-lint run
+format: gofmt -w
+type-check: go vet
+
+# Rust
+lint: cargo clippy
+format: cargo fmt
+type-check: cargo check
+```
+
+### Pre-push Actions
+
+| Action | Description | Command |
+|--------|-------------|---------|
+| `test` | Run tests | Auto-detected |
+| `test-coverage` | With coverage | Auto-detected |
+| `security-scan` | Security audit | Auto-detected |
+| `build` | Verify build | Auto-detected |
+| `review` | Claude review | /dev:review |
+
+**Auto-detection Logic:**
+
+```yaml
+# JavaScript/TypeScript
+test: npm test
+security-scan: npm audit
+build: npm run build
+
+# Python
+test: pytest
+security-scan: safety check
+build: python -m build
+
+# Go
+test: go test ./...
+security-scan: gosec ./...
+build: go build
+```
+
+## Installation
+
+### Automatic Setup
+
+```bash
+# Setup hooks from workflow.yaml
+/hooks:setup
+
+# Output:
+# Installing Git Hooks
+# --------------------
+# Reading config from .omgkit/workflow.yaml
+# Creating pre-commit hook...
+# Creating commit-msg hook...
+# Creating pre-push hook...
+# Done! 3 hooks installed.
+```
+
+### Manual Setup
+
+Run `/hooks:setup` which creates executable scripts in `.git/hooks/`:
+
+```bash
+.git/hooks/
+├── pre-commit      # Lint, format, type-check
+├── commit-msg      # Validate commit message
+├── pre-push        # Test, security scan
+└── post-merge      # Install, migrate
+```
+
+## Hook Script Templates
+
+### Pre-commit Hook
+
+```bash
+#!/bin/bash
+# Generated by OMGKIT - Do not edit manually
+# Regenerate with: /hooks:setup
+
+set -e
+
+# Check for bypass
+if [ -n "$SKIP_HOOKS" ]; then
+  echo "Skipping pre-commit hooks (SKIP_HOOKS is set)"
+  exit 0
+fi
+
+echo "Running pre-commit checks..."
+
+# Get staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+  echo "No staged files to check"
+  exit 0
+fi
+
+# Action: lint
+echo "  Running lint..."
+if command -v npx &> /dev/null && [ -f "package.json" ]; then
+  npx eslint --fix $STAGED_FILES
+elif command -v ruff &> /dev/null; then
+  ruff check --fix $STAGED_FILES
+fi
+
+# Action: format
+echo "  Running format..."
+if command -v npx &> /dev/null && [ -f "package.json" ]; then
+  npx prettier --write $STAGED_FILES
+  git add $STAGED_FILES
+fi
+
+# Action: type-check
+echo "  Running type-check..."
+if [ -f "tsconfig.json" ]; then
+  npx tsc --noEmit
+fi
+
+echo "Pre-commit checks passed!"
+```
+
+### Commit-msg Hook
+
+```bash
+#!/bin/bash
+# Generated by OMGKIT - Do not edit manually
+
+set -e
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Conventional commit pattern
+PATTERN="^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\(.+\))?: .{1,72}$"
+
+# Check first line
+FIRST_LINE=$(echo "$COMMIT_MSG" | head -n1)
+
+if ! echo "$FIRST_LINE" | grep -qE "$PATTERN"; then
+  echo "ERROR: Invalid commit message format"
+  echo ""
+  echo "Expected format: type(scope): subject"
+  echo "  type: feat|fix|docs|style|refactor|perf|test|chore|ci|build"
+  echo "  scope: optional, in parentheses"
+  echo "  subject: max 72 characters"
+  echo ""
+  echo "Examples:"
+  echo "  feat: add user authentication"
+  echo "  fix(api): resolve null pointer exception"
+  echo "  docs(readme): update installation guide"
+  echo ""
+  echo "Your message: $FIRST_LINE"
+  exit 1
+fi
+
+# Check subject length
+SUBJECT_LENGTH=${#FIRST_LINE}
+MAX_LENGTH=72
+
+if [ $SUBJECT_LENGTH -gt $MAX_LENGTH ]; then
+  echo "ERROR: Commit subject too long ($SUBJECT_LENGTH > $MAX_LENGTH)"
+  exit 1
+fi
+
+echo "Commit message validated!"
+```
+
+### Pre-push Hook
+
+```bash
+#!/bin/bash
+# Generated by OMGKIT - Do not edit manually
+
+set -e
+
+# Skip in CI
+if [ -n "$CI" ] || [ -n "$GITHUB_ACTIONS" ]; then
+  echo "Skipping pre-push hooks (CI environment)"
+  exit 0
+fi
+
+# Check for bypass
+if [ -n "$SKIP_HOOKS" ]; then
+  echo "Skipping pre-push hooks (SKIP_HOOKS is set)"
+  exit 0
+fi
+
+echo "Running pre-push checks..."
+
+# Action: test
+echo "  Running tests..."
+if [ -f "package.json" ]; then
+  npm test
+elif [ -f "pytest.ini" ] || [ -f "pyproject.toml" ]; then
+  pytest
+elif [ -f "go.mod" ]; then
+  go test ./...
+fi
+
+# Action: security-scan
+echo "  Running security scan..."
+if [ -f "package.json" ]; then
+  npm audit --audit-level=high || true
+elif command -v safety &> /dev/null; then
+  safety check || true
+fi
+
+echo "Pre-push checks passed!"
+```
+
+## Commands
+
+### /hooks:setup
+
+Install or update Git hooks based on workflow config:
+
+```bash
+/hooks:setup
+
+# Options:
+/hooks:setup --force        # Overwrite existing hooks
+/hooks:setup --dry-run      # Show what would be created
+/hooks:setup --hook=pre-commit  # Setup specific hook only
+```
+
+### /hooks:run
+
+Manually run hook actions:
+
+```bash
+/hooks:run pre-commit       # Run pre-commit actions
+/hooks:run commit-msg       # Validate last commit message
+/hooks:run pre-push         # Run pre-push actions
+
+# Run specific action
+/hooks:run pre-commit --action=lint
+/hooks:run pre-commit --action=format
+```
+
+## Bypassing Hooks
+
+### Temporary Bypass
+
+```bash
+# Skip all hooks for one command
+SKIP_HOOKS=1 git commit -m "wip: temp commit"
+
+# Git native skip (not recommended)
+git commit --no-verify -m "emergency fix"
+```
+
+### Permanent Exclusions
+
+```yaml
+hooks:
+  pre_commit:
+    exclude_paths:
+      - "vendor/**"
+      - "node_modules/**"
+      - "*.generated.*"
+```
+
+## Troubleshooting
+
+### Hook Not Executing
+
+1. Check hook is executable:
+   ```bash
+   ls -la .git/hooks/pre-commit
+   chmod +x .git/hooks/pre-commit
+   ```
+
+2. Regenerate hooks:
+   ```bash
+   /hooks:setup --force
+   ```
+
+3. Check config:
+   ```yaml
+   hooks:
+     pre_commit:
+       enabled: true  # Must be true
+   ```
+
+### Hook Failing
+
+1. Run manually to see errors:
+   ```bash
+   /hooks:run pre-commit
+   ```
+
+2. Check staged files:
+   ```bash
+   git diff --cached --name-only
+   ```
+
+3. Bypass temporarily:
+   ```bash
+   SKIP_HOOKS=1 git commit -m "message"
+   ```
+
+### Performance Issues
+
+1. Use staged-only checking:
+   ```yaml
+   hooks:
+     pre_commit:
+       staged_only: true
+   ```
+
+2. Skip slow checks locally:
+   ```yaml
+   hooks:
+     pre_push:
+       skip_on_ci: true  # Run full checks in CI only
+   ```
+
+## Integration with CI/CD
+
+Hooks complement CI/CD but don't replace it:
+
+| Check | Local Hook | CI/CD |
+|-------|-----------|-------|
+| Lint | pre-commit | Yes |
+| Format | pre-commit | Yes |
+| Type-check | pre-commit | Yes |
+| Unit tests | pre-push | Yes |
+| Integration tests | No | Yes |
+| E2E tests | No | Yes |
+| Security scan | pre-push | Yes |
+| Build | pre-push | Yes |
+| Deploy | No | Yes |
+
+## Best Practices
+
+### Fast Pre-commit
+
+Keep pre-commit under 5 seconds:
+
+```yaml
+hooks:
+  pre_commit:
+    actions:
+      - lint        # Fast
+      - format      # Fast
+    staged_only: true
+    # Move slow checks to pre-push
+```
+
+### Comprehensive Pre-push
+
+Run thorough checks before pushing:
+
+```yaml
+hooks:
+  pre_push:
+    actions:
+      - test
+      - type-check
+      - security-scan
+      - build
+```
+
+### Team Consistency
+
+Commit `.omgkit/workflow.yaml` to ensure all team members have same hooks:
+
+```bash
+git add .omgkit/workflow.yaml
+git commit -m "chore: add workflow config"
+```
+
+## Related Skills
+
+- `devops/workflow-config` - Central configuration system
+- `devops/github-actions` - CI/CD workflows
+- `testing/comprehensive-testing` - Test strategies
+- `methodology/test-driven-development` - TDD practices
+
+
+## Usage Graph
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [git/trunk-based](/workflows/trunk-based) | Complete trunk-based development workflow from feature branc... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  git-hooks:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 157 skills
+  </Card>
+  <Card title="Devops" icon="cloud" href="/skills/overview#devops">
+    More devops skills
+  </Card>
+</CardGroup>
