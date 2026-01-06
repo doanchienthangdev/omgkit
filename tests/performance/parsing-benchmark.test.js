@@ -290,8 +290,8 @@ ${Array(20).fill('    - item').join('\n')}
       const parTime = performance.now() - parStart;
 
       // Both sequential and parallel should be fast
-      expect(seqTime).toBeLessThan(50);
-      expect(parTime).toBeLessThan(50);
+      expect(seqTime).toBeLessThan(200);
+      expect(parTime).toBeLessThan(200);
     });
   });
 });

@@ -747,6 +747,8 @@ Generated in `.omgkit/stdrules/` when you run `omgkit init`:
 
 ## CLI Commands
 
+### Global Commands
+
 ```bash
 omgkit install      # Install plugin to Claude Code
 omgkit init         # Initialize .omgkit/ in project
@@ -756,6 +758,41 @@ omgkit update       # Update plugin
 omgkit uninstall    # Remove plugin
 omgkit help         # Show help
 ```
+
+### Project Upgrade Commands (New)
+
+Keep your project up-to-date with the latest OMGKIT features:
+
+```bash
+omgkit project:upgrade     # Upgrade project to latest OMGKIT version
+omgkit project:upgrade --dry  # Preview changes without applying
+omgkit project:rollback    # Rollback to previous backup
+omgkit project:backups     # List available backups
+omgkit project:version     # Show project's OMGKIT version
+```
+
+#### Safe Upgrade System
+
+OMGKIT's upgrade system is designed with safety first:
+
+| Feature | Description |
+|---------|-------------|
+| **Version Tracking** | Each project tracks its OMGKIT version in settings.json |
+| **Smart Merge** | workflow.yaml uses add-only merge (never overwrites your values) |
+| **Protected Files** | config.yaml, sprints/*, artifacts/*, devlogs/* are NEVER modified |
+| **Auto-Backup** | Creates timestamped backup before any changes |
+| **Dry Run** | Preview all changes with `--dry` flag before applying |
+| **Rollback** | One command to restore previous state if needed |
+
+#### What Gets Upgraded
+
+| File Type | Upgrade Behavior |
+|-----------|-----------------|
+| **stdrules/** | New standards are added, modified ones offer 3-way merge |
+| **workflow.yaml** | Smart merge adds new sections, preserves your customizations |
+| **CLAUDE.md** | Updated with new instructions |
+| **settings.json** | Version updated, structure preserved |
+| **Your files** | NEVER touched (config.yaml, sprints, artifacts, devlogs) |
 
 ---
 

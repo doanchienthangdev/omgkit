@@ -1,4 +1,10 @@
 {
+  "omgkit": {
+    "version": "{{OMGKIT_VERSION}}",
+    "initialized_at": "{{INIT_DATE}}",
+    "last_upgraded": null
+  },
+  "file_checksums": {},
   "permissions": {
     "allow": [
       "Bash(npm run *)",

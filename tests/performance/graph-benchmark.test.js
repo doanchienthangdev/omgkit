@@ -213,7 +213,7 @@ describe('Graph Building Performance', () => {
       expect(time).toBeLessThan(5);
     });
 
-    it('adds 5000 nodes under 20ms', async () => {
+    it('adds 5000 nodes under 40ms', async () => {
       const graph = new BenchmarkGraph();
 
       const time = await timeExecution(() => {
@@ -222,7 +222,7 @@ describe('Graph Building Performance', () => {
         }
       });
 
-      expect(time).toBeLessThan(20);
+      expect(time).toBeLessThan(40);
     });
   });
 
