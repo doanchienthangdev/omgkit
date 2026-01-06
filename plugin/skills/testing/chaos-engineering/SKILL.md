@@ -1,0 +1,732 @@
+---
+name: Chaos Engineering and Resilience Testing
+description: The agent implements chaos engineering practices for building resilient systems. Use when testing fault tolerance, designing game days, or validating system recovery.
+category: testing
+---
+
+# Chaos Engineering and Resilience Testing
+
+## Purpose
+
+Chaos engineering is a discipline pioneered by Netflix that involves experimenting on a system to build confidence in its capability to withstand turbulent conditions in production.
+
+Netflix's philosophy: **"The best way to avoid failure is to fail constantly."**
+
+Key benefits:
+- **Discover weaknesses** before they cause outages
+- **Build confidence** in system resilience
+- **Improve incident response** through practice
+- **Validate recovery procedures** work as designed
+- **Document system behavior** under stress
+
+## Features
+
+| Feature | Description | Tools |
+|---------|-------------|-------|
+| Fault Injection | Introduce failures deliberately | Chaos Monkey, Gremlin |
+| Network Chaos | Simulate network issues | tc, Toxiproxy |
+| Resource Exhaustion | CPU, memory, disk stress | stress-ng, LitmusChaos |
+| State Chaos | Corrupt or delete data | Custom scripts |
+| Application Chaos | Kill processes, inject latency | Chaos Toolkit |
+| Game Days | Coordinated chaos exercises | Runbooks |
+
+## Chaos Engineering Principles
+
+### The Scientific Method for Chaos
+
+```
+1. DEFINE steady state (normal system behavior)
+     ↓
+2. HYPOTHESIZE that steady state continues during chaos
+     ↓
+3. INTRODUCE real-world events (faults)
+     ↓
+4. OBSERVE differences between control and experiment
+     ↓
+5. CONCLUDE whether hypothesis held
+```
+
+### Netflix Principles
+
+1. **Build a Hypothesis around Steady State Behavior**
+   - Define measurable system outputs
+   - Focus on overall system behavior, not internals
+
+2. **Vary Real-World Events**
+   - Hardware failures
+   - Network partitions
+   - Malformed requests
+   - Traffic spikes
+
+3. **Run Experiments in Production**
+   - Non-production environments differ too much
+   - Start with minimal blast radius
+
+4. **Automate Experiments to Run Continuously**
+   - Manual testing doesn't scale
+   - Continuous validation catches regressions
+
+5. **Minimize Blast Radius**
+   - Start small, expand carefully
+   - Have kill switches ready
+
+## Tools and Frameworks
+
+### Chaos Monkey (Netflix)
+
+```yaml
+# Chaos Monkey Configuration
+chaos_monkey:
+  enabled: true
+  probability: 1.0  # Always kill if selected
+  schedule:
+    start: "09:00"
+    end: "17:00"
+    timezone: "America/Los_Angeles"
+  filters:
+    - region: us-east-1
+    - cluster: production
+  exclusions:
+    - app: critical-service
+    - tag: chaos-exempt
+```
+
+### Gremlin (Enterprise)
+
+```bash
+# Gremlin CLI - CPU Attack
+gremlin attack cpu \
+  --length 300 \
+  --cores 2 \
+  --percent 80
+
+# Gremlin CLI - Network Latency
+gremlin attack network latency \
+  --length 300 \
+  --delay 500 \
+  --hosts "api.example.com"
+
+# Gremlin CLI - Process Kill
+gremlin attack process kill \
+  --length 60 \
+  --process "nginx" \
+  --interval 10
+```
+
+### LitmusChaos (Kubernetes-Native)
+
+```yaml
+# LitmusChaos Experiment - Pod Delete
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: nginx-chaos
+  namespace: default
+spec:
+  appinfo:
+    appns: default
+    applabel: "app=nginx"
+    appkind: deployment
+  chaosServiceAccount: litmus-admin
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: '30'
+            - name: CHAOS_INTERVAL
+              value: '10'
+            - name: FORCE
+              value: 'false'
+---
+# LitmusChaos Experiment - Network Partition
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: network-chaos
+spec:
+  appinfo:
+    appns: default
+    applabel: "app=backend"
+    appkind: deployment
+  experiments:
+    - name: pod-network-partition
+      spec:
+        components:
+          env:
+            - name: TOTAL_CHAOS_DURATION
+              value: '60'
+            - name: NETWORK_INTERFACE
+              value: 'eth0'
+            - name: TARGET_PODS
+              value: 'database-0'
+```
+
+### Chaos Toolkit (Open Source)
+
+```json
+{
+  "title": "Database failover should be transparent",
+  "description": "Verify that when primary DB fails, replica takes over",
+
+  "steady-state-hypothesis": {
+    "title": "Application responds normally",
+    "probes": [
+      {
+        "name": "api-responds",
+        "type": "probe",
+        "provider": {
+          "type": "http",
+          "url": "http://api.example.com/health",
+          "timeout": 3
+        },
+        "tolerance": {
+          "status": 200
+        }
+      },
+      {
+        "name": "latency-acceptable",
+        "type": "probe",
+        "provider": {
+          "type": "python",
+          "module": "chaosprobe",
+          "func": "check_p99_latency",
+          "arguments": {
+            "threshold_ms": 500
+          }
+        },
+        "tolerance": true
+      }
+    ]
+  },
+
+  "method": [
+    {
+      "name": "terminate-primary-database",
+      "type": "action",
+      "provider": {
+        "type": "python",
+        "module": "chaosaws.rds.actions",
+        "func": "failover_db_instance",
+        "arguments": {
+          "db_instance_identifier": "prod-primary"
+        }
+      },
+      "pauses": {
+        "after": 30
+      }
+    }
+  ],
+
+  "rollbacks": [
+    {
+      "name": "ensure-db-available",
+      "type": "action",
+      "provider": {
+        "type": "python",
+        "module": "chaosaws.rds.actions",
+        "func": "wait_for_db_instance_available",
+        "arguments": {
+          "db_instance_identifier": "prod-primary"
+        }
+      }
+    }
+  ]
+}
+```
+
+## Experiment Types
+
+### 1. Infrastructure Chaos
+
+```bash
+#!/bin/bash
+# Infrastructure chaos experiments
+
+# Kill random EC2 instance
+kill_random_instance() {
+  INSTANCE=$(aws ec2 describe-instances \
+    --filters "Name=tag:Environment,Values=prod" \
+    --query 'Reservations[].Instances[?State.Name==`running`].InstanceId' \
+    --output text | shuf -n 1)
+
+  echo "Terminating instance: $INSTANCE"
+  aws ec2 terminate-instances --instance-ids $INSTANCE
+}
+
+# Detach EBS volume
+detach_volume() {
+  VOLUME=$1
+  aws ec2 detach-volume --volume-id $VOLUME --force
+}
+
+# Simulate AZ failure
+simulate_az_failure() {
+  AZ=$1
+  # Update security groups to block all traffic to/from AZ
+  aws ec2 create-network-acl-entry \
+    --network-acl-id $NACL_ID \
+    --rule-number 1 \
+    --protocol -1 \
+    --rule-action deny \
+    --cidr-block $AZ_CIDR
+}
+```
+
+### 2. Application Chaos
+
+```python
+# Application chaos experiments
+import random
+import time
+from functools import wraps
+
+class ChaosMiddleware:
+    """Inject chaos into application requests"""
+
+    def __init__(self, app, config):
+        self.app = app
+        self.config = config
+
+    def __call__(self, environ, start_response):
+        # Random latency injection
+        if random.random() < self.config.get('latency_probability', 0):
+            delay = random.uniform(
+                self.config.get('latency_min_ms', 100),
+                self.config.get('latency_max_ms', 1000)
+            ) / 1000
+            time.sleep(delay)
+
+        # Random error injection
+        if random.random() < self.config.get('error_probability', 0):
+            start_response('500 Internal Server Error', [])
+            return [b'Chaos error injected']
+
+        # Random timeout
+        if random.random() < self.config.get('timeout_probability', 0):
+            time.sleep(self.config.get('timeout_seconds', 30))
+
+        return self.app(environ, start_response)
+
+# Decorator for chaos injection
+def inject_chaos(failure_rate=0.01, latency_ms=0):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Inject failure
+            if random.random() < failure_rate:
+                raise Exception("Chaos failure injected")
+
+            # Inject latency
+            if latency_ms > 0:
+                time.sleep(latency_ms / 1000)
+
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+# Usage
+@inject_chaos(failure_rate=0.05, latency_ms=100)
+def external_api_call():
+    return requests.get("https://api.external.com/data")
+```
+
+### 3. Network Chaos
+
+```yaml
+# Toxiproxy configuration
+proxies:
+  - name: redis
+    listen: "0.0.0.0:6380"
+    upstream: "redis:6379"
+    enabled: true
+
+  - name: postgres
+    listen: "0.0.0.0:5433"
+    upstream: "postgres:5432"
+    enabled: true
+
+toxics:
+  # Add 500ms latency to Redis
+  - name: redis_latency
+    proxy: redis
+    type: latency
+    attributes:
+      latency: 500
+      jitter: 100
+
+  # Drop 10% of Postgres connections
+  - name: postgres_timeout
+    proxy: postgres
+    type: timeout
+    attributes:
+      timeout: 5000
+
+  # Limit bandwidth to 1KB/s
+  - name: slow_bandwidth
+    proxy: redis
+    type: bandwidth
+    attributes:
+      rate: 1024
+```
+
+```bash
+# Linux Traffic Control (tc) for network chaos
+# Add 100ms latency with 20ms jitter
+tc qdisc add dev eth0 root netem delay 100ms 20ms
+
+# Add 5% packet loss
+tc qdisc add dev eth0 root netem loss 5%
+
+# Add packet corruption
+tc qdisc add dev eth0 root netem corrupt 1%
+
+# Combine effects
+tc qdisc add dev eth0 root netem delay 50ms 10ms loss 1% corrupt 0.1%
+
+# Remove chaos
+tc qdisc del dev eth0 root
+```
+
+### 4. Resource Exhaustion
+
+```bash
+#!/bin/bash
+# Resource exhaustion experiments
+
+# CPU stress
+stress_cpu() {
+  CORES=$1
+  DURATION=$2
+  stress-ng --cpu $CORES --timeout ${DURATION}s
+}
+
+# Memory stress
+stress_memory() {
+  PERCENT=$1
+  DURATION=$2
+  stress-ng --vm 1 --vm-bytes ${PERCENT}% --timeout ${DURATION}s
+}
+
+# Disk I/O stress
+stress_disk() {
+  stress-ng --hdd 2 --hdd-bytes 1G --timeout 60s
+}
+
+# Fill disk
+fill_disk() {
+  TARGET_DIR=$1
+  dd if=/dev/zero of=${TARGET_DIR}/chaos-fill bs=1M count=10000
+}
+
+# Fork bomb (careful!)
+fork_bomb() {
+  :(){ :|:& };:
+}
+```
+
+## Game Day Planning
+
+### Game Day Runbook Template
+
+```markdown
+# Game Day: [Name]
+**Date:** [Date]
+**Duration:** [X hours]
+**Participants:** [Team members]
+
+## Objectives
+1. Validate [system] handles [failure type]
+2. Test incident response procedures
+3. Document recovery time
+
+## Prerequisites
+- [ ] Monitoring dashboards ready
+- [ ] Communication channel established
+- [ ] Rollback procedures documented
+- [ ] Stakeholders notified
+
+## Steady State Definition
+- API latency p99 < 500ms
+- Error rate < 0.1%
+- All health checks passing
+
+## Experiment Schedule
+
+| Time | Action | Owner | Expected Impact |
+|------|--------|-------|-----------------|
+| 10:00 | Begin experiment | Lead | None |
+| 10:05 | Kill primary DB | DB Admin | Failover starts |
+| 10:10 | Verify failover | SRE | Latency spike |
+| 10:15 | Restore primary | DB Admin | None |
+| 10:30 | End experiment | Lead | System stable |
+
+## Abort Criteria
+- [ ] Error rate > 5%
+- [ ] Customer complaints received
+- [ ] Cascading failures detected
+- [ ] Recovery taking > 15 minutes
+
+## Rollback Procedure
+1. Stop experiment immediately
+2. Restore from snapshot if needed
+3. Scale up healthy instances
+4. Page on-call if needed
+
+## Post-Game Analysis
+- What happened?
+- What did we learn?
+- What should we fix?
+- Schedule next game day
+```
+
+### Automated Game Day Execution
+
+```python
+# Automated game day orchestration
+import asyncio
+from datetime import datetime, timedelta
+from dataclasses import dataclass
+from typing import List, Callable
+
+@dataclass
+class GameDayStep:
+    name: str
+    action: Callable
+    duration_seconds: int
+    abort_check: Callable[[], bool]
+    rollback: Callable
+
+class GameDayOrchestrator:
+    def __init__(self, steady_state_check: Callable[[], bool]):
+        self.steady_state_check = steady_state_check
+        self.steps: List[GameDayStep] = []
+        self.aborted = False
+
+    def add_step(self, step: GameDayStep):
+        self.steps.append(step)
+
+    async def run(self):
+        print(f"[{datetime.now()}] Game Day Starting")
+
+        # Verify steady state before starting
+        if not self.steady_state_check():
+            print("ERROR: System not in steady state. Aborting.")
+            return
+
+        executed_steps = []
+
+        try:
+            for step in self.steps:
+                print(f"[{datetime.now()}] Executing: {step.name}")
+
+                # Execute action
+                await asyncio.to_thread(step.action)
+                executed_steps.append(step)
+
+                # Wait and monitor
+                end_time = datetime.now() + timedelta(seconds=step.duration_seconds)
+                while datetime.now() < end_time:
+                    if step.abort_check():
+                        raise AbortException(f"Abort triggered during {step.name}")
+                    await asyncio.sleep(1)
+
+                # Verify steady state
+                if not self.steady_state_check():
+                    print(f"WARN: Steady state violated after {step.name}")
+
+        except AbortException as e:
+            print(f"ABORT: {e}")
+            self.aborted = True
+
+        finally:
+            # Rollback in reverse order
+            print("Rolling back...")
+            for step in reversed(executed_steps):
+                try:
+                    await asyncio.to_thread(step.rollback)
+                except Exception as e:
+                    print(f"Rollback failed for {step.name}: {e}")
+
+        print(f"[{datetime.now()}] Game Day Complete")
+
+# Usage
+orchestrator = GameDayOrchestrator(
+    steady_state_check=lambda: check_api_health() and check_error_rate() < 0.01
+)
+
+orchestrator.add_step(GameDayStep(
+    name="Kill cache cluster node",
+    action=lambda: kill_redis_node("redis-1"),
+    duration_seconds=60,
+    abort_check=lambda: get_error_rate() > 0.05,
+    rollback=lambda: restore_redis_node("redis-1")
+))
+
+asyncio.run(orchestrator.run())
+```
+
+## Best Practices
+
+### 1. Start Small
+
+```yaml
+# Chaos maturity levels
+level_1:
+  name: "Chaos Curious"
+  experiments:
+    - Kill single non-critical pod
+    - Add minor latency to internal calls
+  environment: staging
+
+level_2:
+  name: "Chaos Aware"
+  experiments:
+    - Kill critical service pods
+    - Network partition between services
+  environment: production (low traffic)
+
+level_3:
+  name: "Chaos Native"
+  experiments:
+    - Multi-AZ failures
+    - Database failovers
+    - Cascading failures
+  environment: production (all traffic)
+```
+
+### 2. Monitor Everything
+
+```yaml
+# Chaos observability requirements
+metrics:
+  - name: error_rate
+    threshold: 0.1%
+    source: prometheus
+  - name: latency_p99
+    threshold: 500ms
+    source: prometheus
+  - name: availability
+    threshold: 99.9%
+    source: synthetic_monitoring
+
+alerts:
+  - name: chaos_impact_high
+    condition: error_rate > 1%
+    action: abort_experiment
+  - name: chaos_duration_exceeded
+    condition: experiment_time > 10m
+    action: notify_and_review
+```
+
+### 3. Document Everything
+
+```markdown
+## Experiment Report: Redis Failover
+
+**Date:** 2024-01-15
+**Duration:** 5 minutes
+**Environment:** Production
+
+### Hypothesis
+When Redis primary fails, the application will:
+1. Detect failure within 30 seconds
+2. Reconnect to replica within 60 seconds
+3. Maintain < 1% error rate
+
+### Results
+| Metric | Expected | Actual | Status |
+|--------|----------|--------|--------|
+| Detection time | < 30s | 15s | PASS |
+| Reconnect time | < 60s | 45s | PASS |
+| Error rate | < 1% | 0.3% | PASS |
+
+### Findings
+- Sentinel failover worked as expected
+- Connection pool reset caused brief spike
+- Alert fired correctly at 0.5% error rate
+
+### Action Items
+- [ ] Reduce connection pool timeout to 5s
+- [ ] Add retry logic for transient failures
+- [ ] Update runbook with actual metrics
+```
+
+## Use Cases
+
+### 1. Validate Auto-Scaling
+
+```python
+# Test auto-scaling under load + chaos
+async def test_autoscaling_resilience():
+    # Generate load
+    await generate_load(rps=10000)
+
+    # Inject chaos: kill 50% of pods
+    await kill_pods_by_percentage(0.5)
+
+    # Verify autoscaler responds
+    await wait_for_condition(
+        lambda: get_pod_count() >= MIN_PODS,
+        timeout=120
+    )
+
+    # Verify steady state
+    assert await get_error_rate() < 0.01
+```
+
+### 2. Test Circuit Breakers
+
+```python
+# Verify circuit breaker opens under failure
+async def test_circuit_breaker():
+    # Baseline: circuit closed
+    assert await get_circuit_state("payment-service") == "closed"
+
+    # Inject 100% failure rate
+    await inject_failure("payment-service", rate=1.0)
+
+    # Wait for circuit to open
+    await wait_for_condition(
+        lambda: get_circuit_state("payment-service") == "open",
+        timeout=30
+    )
+
+    # Verify fallback is used
+    response = await call_payment_service()
+    assert response.used_fallback == True
+```
+
+### 3. Disaster Recovery Drill
+
+```python
+# Full region failover test
+async def test_region_failover():
+    # Record baseline
+    baseline_metrics = await capture_metrics()
+
+    # Simulate region failure
+    await simulate_region_outage("us-east-1")
+
+    # Verify traffic shifts
+    await wait_for_condition(
+        lambda: get_traffic_in_region("us-west-2") > 0.95,
+        timeout=180
+    )
+
+    # Verify performance maintained
+    current_metrics = await capture_metrics()
+    assert current_metrics.latency_p99 < baseline_metrics.latency_p99 * 1.5
+```
+
+## Related Skills
+
+- `devops/kubernetes` - Container orchestration chaos
+- `devops/observability` - Monitoring chaos impact
+- `testing/performance-testing` - Load testing integration
+- `devops/feature-flags` - Chaos kill switches
+
+---
+
+*Think Omega. Build Omega. Be Omega.*

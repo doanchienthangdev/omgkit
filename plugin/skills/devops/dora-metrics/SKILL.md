@@ -1,0 +1,852 @@
+---
+name: DORA Metrics and DevOps Performance
+description: The agent implements DORA metrics tracking for measuring and improving software delivery performance. Use when establishing engineering metrics, benchmarking teams, or driving DevOps transformation.
+category: devops
+---
+
+# DORA Metrics and DevOps Performance
+
+## Purpose
+
+DORA (DevOps Research and Assessment) metrics are the industry standard for measuring software delivery performance. Google's research across thousands of organizations identified four key metrics that predict:
+
+- **Organizational performance** (profitability, market share)
+- **Non-commercial performance** (quality, customer satisfaction)
+- **Team well-being** and reduced burnout
+
+Elite performers who meet reliability targets are **2.3x more likely** to use trunk-based development and continuous delivery practices.
+
+## Features
+
+| Metric | What It Measures | Elite Benchmark |
+|--------|------------------|-----------------|
+| Deployment Frequency | How often code reaches production | Multiple times per day |
+| Lead Time for Changes | Time from commit to production | Less than 1 hour |
+| Change Failure Rate | Percentage of deployments causing failures | 0-15% |
+| Time to Restore Service | Recovery time from incidents | Less than 1 hour |
+
+## The Four Key Metrics
+
+### 1. Deployment Frequency
+
+**Definition:** How often your organization deploys code to production.
+
+```typescript
+// Deployment frequency calculation
+interface DeploymentData {
+  timestamp: Date;
+  environment: string;
+  service: string;
+  success: boolean;
+}
+
+function calculateDeploymentFrequency(
+  deployments: DeploymentData[],
+  periodDays: number = 30
+): { frequency: string; deploymentsPerDay: number } {
+  const productionDeployments = deployments.filter(
+    d => d.environment === 'production' && d.success
+  );
+
+  const deploymentsPerDay = productionDeployments.length / periodDays;
+
+  let frequency: string;
+  if (deploymentsPerDay >= 1) {
+    frequency = 'elite'; // Multiple times per day or daily
+  } else if (deploymentsPerDay >= 1/7) {
+    frequency = 'high'; // Weekly to daily
+  } else if (deploymentsPerDay >= 1/30) {
+    frequency = 'medium'; // Monthly to weekly
+  } else {
+    frequency = 'low'; // Less than monthly
+  }
+
+  return { frequency, deploymentsPerDay };
+}
+```
+
+### 2. Lead Time for Changes
+
+**Definition:** Time from code commit to code running in production.
+
+```typescript
+// Lead time calculation
+interface ChangeData {
+  commitTimestamp: Date;
+  deployTimestamp: Date;
+  commitSha: string;
+  prNumber?: number;
+}
+
+function calculateLeadTime(changes: ChangeData[]): {
+  medianHours: number;
+  p90Hours: number;
+  performance: string;
+} {
+  const leadTimes = changes.map(c =>
+    (c.deployTimestamp.getTime() - c.commitTimestamp.getTime()) / (1000 * 60 * 60)
+  );
+
+  leadTimes.sort((a, b) => a - b);
+
+  const median = leadTimes[Math.floor(leadTimes.length / 2)];
+  const p90 = leadTimes[Math.floor(leadTimes.length * 0.9)];
+
+  let performance: string;
+  if (median < 1) {
+    performance = 'elite'; // Less than 1 hour
+  } else if (median < 24) {
+    performance = 'high'; // Less than 1 day
+  } else if (median < 168) {
+    performance = 'medium'; // Less than 1 week
+  } else {
+    performance = 'low'; // More than 1 week
+  }
+
+  return { medianHours: median, p90Hours: p90, performance };
+}
+```
+
+### 3. Change Failure Rate
+
+**Definition:** Percentage of deployments that result in degraded service requiring remediation.
+
+```typescript
+// Change failure rate calculation
+interface DeploymentOutcome {
+  deploymentId: string;
+  timestamp: Date;
+  success: boolean;
+  causedIncident: boolean;
+  requiredRollback: boolean;
+  requiredHotfix: boolean;
+}
+
+function calculateChangeFailureRate(deployments: DeploymentOutcome[]): {
+  rate: number;
+  performance: string;
+} {
+  const total = deployments.length;
+  const failures = deployments.filter(d =>
+    d.causedIncident || d.requiredRollback || d.requiredHotfix
+  ).length;
+
+  const rate = (failures / total) * 100;
+
+  let performance: string;
+  if (rate <= 15) {
+    performance = 'elite'; // 0-15%
+  } else if (rate <= 30) {
+    performance = 'high'; // 16-30%
+  } else if (rate <= 45) {
+    performance = 'medium'; // 31-45%
+  } else {
+    performance = 'low'; // 46%+
+  }
+
+  return { rate, performance };
+}
+```
+
+### 4. Time to Restore Service (MTTR)
+
+**Definition:** How long it takes to restore service when an incident occurs.
+
+```typescript
+// MTTR calculation
+interface Incident {
+  id: string;
+  startTime: Date;
+  resolvedTime: Date;
+  severity: 'critical' | 'major' | 'minor';
+  service: string;
+}
+
+function calculateMTTR(incidents: Incident[]): {
+  medianHours: number;
+  performance: string;
+  byService: Record<string, number>;
+} {
+  const restorationTimes = incidents.map(i =>
+    (i.resolvedTime.getTime() - i.startTime.getTime()) / (1000 * 60 * 60)
+  );
+
+  restorationTimes.sort((a, b) => a - b);
+  const median = restorationTimes[Math.floor(restorationTimes.length / 2)];
+
+  let performance: string;
+  if (median < 1) {
+    performance = 'elite'; // Less than 1 hour
+  } else if (median < 24) {
+    performance = 'high'; // Less than 1 day
+  } else if (median < 168) {
+    performance = 'medium'; // Less than 1 week
+  } else {
+    performance = 'low'; // More than 1 week
+  }
+
+  // Group by service
+  const byService: Record<string, number[]> = {};
+  for (const incident of incidents) {
+    if (!byService[incident.service]) byService[incident.service] = [];
+    const hours = (incident.resolvedTime.getTime() - incident.startTime.getTime()) / (1000 * 60 * 60);
+    byService[incident.service].push(hours);
+  }
+
+  const serviceMedians: Record<string, number> = {};
+  for (const [service, times] of Object.entries(byService)) {
+    times.sort((a, b) => a - b);
+    serviceMedians[service] = times[Math.floor(times.length / 2)];
+  }
+
+  return { medianHours: median, performance, byService: serviceMedians };
+}
+```
+
+## Performance Levels (2024 Benchmarks)
+
+| Level | Deploy Freq | Lead Time | Change Failure | MTTR |
+|-------|-------------|-----------|----------------|------|
+| **Elite** | Multiple/day | < 1 hour | 0-15% | < 1 hour |
+| **High** | Daily-Weekly | 1 day - 1 week | 16-30% | < 1 day |
+| **Medium** | Weekly-Monthly | 1 week - 1 month | 16-30% | < 1 day |
+| **Low** | Monthly+ | 1-6 months | 16-30% | < 1 week |
+
+**Key Insight (2024 DORA Report):** Elite performers are **2.3x more likely** to meet reliability targets when using trunk-based development.
+
+## Measurement Implementation
+
+### GitHub Actions DORA Workflow
+
+```yaml
+# .github/workflows/dora-metrics.yml
+name: DORA Metrics Collection
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+  workflow_dispatch:
+
+jobs:
+  collect-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect Deployment Data
+        id: deployments
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            // Get workflow runs (deployments)
+            const { data: runs } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              created: `>=${thirtyDaysAgo.toISOString()}`,
+              status: 'completed'
+            });
+
+            const deployments = runs.workflow_runs.filter(r =>
+              r.conclusion === 'success'
+            );
+
+            // Calculate deployment frequency
+            const deploymentsPerDay = deployments.length / 30;
+
+            return {
+              count: deployments.length,
+              perDay: deploymentsPerDay.toFixed(2),
+              frequency: deploymentsPerDay >= 1 ? 'elite' :
+                         deploymentsPerDay >= 0.14 ? 'high' :
+                         deploymentsPerDay >= 0.03 ? 'medium' : 'low'
+            };
+
+      - name: Collect Lead Time Data
+        id: lead-time
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+            // Get merged PRs
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              sort: 'updated',
+              direction: 'desc',
+              per_page: 100
+            });
+
+            const mergedPRs = prs.filter(pr =>
+              pr.merged_at &&
+              new Date(pr.merged_at) > thirtyDaysAgo
+            );
+
+            const leadTimes = mergedPRs.map(pr => {
+              const created = new Date(pr.created_at);
+              const merged = new Date(pr.merged_at);
+              return (merged - created) / (1000 * 60 * 60); // hours
+            });
+
+            leadTimes.sort((a, b) => a - b);
+            const median = leadTimes[Math.floor(leadTimes.length / 2)] || 0;
+
+            return {
+              medianHours: median.toFixed(1),
+              performance: median < 1 ? 'elite' :
+                          median < 24 ? 'high' :
+                          median < 168 ? 'medium' : 'low'
+            };
+
+      - name: Generate Report
+        run: |
+          cat << EOF > dora-report.md
+          # DORA Metrics Report
+          **Period:** Last 30 days
+          **Generated:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          ## Metrics Summary
+
+          | Metric | Value | Performance |
+          |--------|-------|-------------|
+          | Deployment Frequency | ${{ fromJson(steps.deployments.outputs.result).perDay }}/day | ${{ fromJson(steps.deployments.outputs.result).frequency }} |
+          | Lead Time for Changes | ${{ fromJson(steps.lead-time.outputs.result).medianHours }} hours | ${{ fromJson(steps.lead-time.outputs.result).performance }} |
+
+          ## Recommendations
+          $(if [ "${{ fromJson(steps.deployments.outputs.result).frequency }}" != "elite" ]; then echo "- Increase deployment frequency through smaller, more frequent releases"; fi)
+          $(if [ "${{ fromJson(steps.lead-time.outputs.result).performance }}" != "elite" ]; then echo "- Reduce lead time by automating more of the review process"; fi)
+          EOF
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dora-metrics-report
+          path: dora-report.md
+```
+
+### Custom Metrics Collection Script
+
+```typescript
+// scripts/collect-dora-metrics.ts
+import { Octokit } from '@octokit/rest';
+
+interface DORAMetrics {
+  period: { start: Date; end: Date };
+  deploymentFrequency: {
+    count: number;
+    perDay: number;
+    performance: 'elite' | 'high' | 'medium' | 'low';
+  };
+  leadTime: {
+    medianHours: number;
+    p90Hours: number;
+    performance: 'elite' | 'high' | 'medium' | 'low';
+  };
+  changeFailureRate: {
+    total: number;
+    failures: number;
+    rate: number;
+    performance: 'elite' | 'high' | 'medium' | 'low';
+  };
+  mttr: {
+    medianHours: number;
+    incidentCount: number;
+    performance: 'elite' | 'high' | 'medium' | 'low';
+  };
+  overallPerformance: 'elite' | 'high' | 'medium' | 'low';
+}
+
+class DORAMetricsCollector {
+  private octokit: Octokit;
+  private owner: string;
+  private repo: string;
+
+  constructor(token: string, owner: string, repo: string) {
+    this.octokit = new Octokit({ auth: token });
+    this.owner = owner;
+    this.repo = repo;
+  }
+
+  async collect(periodDays: number = 30): Promise<DORAMetrics> {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(start.getDate() - periodDays);
+
+    const [deployments, prs, incidents] = await Promise.all([
+      this.getDeployments(start, end),
+      this.getMergedPRs(start, end),
+      this.getIncidents(start, end)
+    ]);
+
+    // Calculate each metric
+    const deploymentFrequency = this.calcDeploymentFrequency(deployments, periodDays);
+    const leadTime = this.calcLeadTime(prs);
+    const changeFailureRate = this.calcChangeFailureRate(deployments, incidents);
+    const mttr = this.calcMTTR(incidents);
+
+    // Determine overall performance
+    const performances = [
+      deploymentFrequency.performance,
+      leadTime.performance,
+      changeFailureRate.performance,
+      mttr.performance
+    ];
+
+    const overallPerformance = this.getOverallPerformance(performances);
+
+    return {
+      period: { start, end },
+      deploymentFrequency,
+      leadTime,
+      changeFailureRate,
+      mttr,
+      overallPerformance
+    };
+  }
+
+  private async getDeployments(start: Date, end: Date) {
+    const { data } = await this.octokit.actions.listWorkflowRuns({
+      owner: this.owner,
+      repo: this.repo,
+      workflow_id: 'deploy.yml',
+      created: `${start.toISOString()}..${end.toISOString()}`
+    });
+    return data.workflow_runs;
+  }
+
+  private async getMergedPRs(start: Date, end: Date) {
+    const { data } = await this.octokit.pulls.list({
+      owner: this.owner,
+      repo: this.repo,
+      state: 'closed',
+      sort: 'updated',
+      per_page: 100
+    });
+    return data.filter(pr =>
+      pr.merged_at &&
+      new Date(pr.merged_at) >= start &&
+      new Date(pr.merged_at) <= end
+    );
+  }
+
+  private async getIncidents(start: Date, end: Date) {
+    // This would typically come from PagerDuty, OpsGenie, or GitHub Issues
+    // Placeholder implementation
+    const { data } = await this.octokit.issues.listForRepo({
+      owner: this.owner,
+      repo: this.repo,
+      labels: 'incident',
+      state: 'closed',
+      since: start.toISOString()
+    });
+    return data;
+  }
+
+  private calcDeploymentFrequency(deployments: any[], periodDays: number) {
+    const successful = deployments.filter(d => d.conclusion === 'success');
+    const perDay = successful.length / periodDays;
+
+    return {
+      count: successful.length,
+      perDay,
+      performance: this.getFrequencyPerformance(perDay)
+    };
+  }
+
+  private calcLeadTime(prs: any[]) {
+    const times = prs.map(pr => {
+      const created = new Date(pr.created_at);
+      const merged = new Date(pr.merged_at);
+      return (merged.getTime() - created.getTime()) / (1000 * 60 * 60);
+    });
+
+    times.sort((a, b) => a - b);
+    const median = times[Math.floor(times.length / 2)] || 0;
+    const p90 = times[Math.floor(times.length * 0.9)] || 0;
+
+    return {
+      medianHours: median,
+      p90Hours: p90,
+      performance: this.getLeadTimePerformance(median)
+    };
+  }
+
+  private calcChangeFailureRate(deployments: any[], incidents: any[]) {
+    const total = deployments.filter(d => d.conclusion === 'success').length;
+    const failures = incidents.length; // Simplified
+
+    const rate = total > 0 ? (failures / total) * 100 : 0;
+
+    return {
+      total,
+      failures,
+      rate,
+      performance: this.getFailureRatePerformance(rate)
+    };
+  }
+
+  private calcMTTR(incidents: any[]) {
+    const times = incidents
+      .filter(i => i.closed_at)
+      .map(i => {
+        const opened = new Date(i.created_at);
+        const closed = new Date(i.closed_at);
+        return (closed.getTime() - opened.getTime()) / (1000 * 60 * 60);
+      });
+
+    times.sort((a, b) => a - b);
+    const median = times[Math.floor(times.length / 2)] || 0;
+
+    return {
+      medianHours: median,
+      incidentCount: incidents.length,
+      performance: this.getMTTRPerformance(median)
+    };
+  }
+
+  private getFrequencyPerformance(perDay: number): 'elite' | 'high' | 'medium' | 'low' {
+    if (perDay >= 1) return 'elite';
+    if (perDay >= 1/7) return 'high';
+    if (perDay >= 1/30) return 'medium';
+    return 'low';
+  }
+
+  private getLeadTimePerformance(hours: number): 'elite' | 'high' | 'medium' | 'low' {
+    if (hours < 1) return 'elite';
+    if (hours < 24) return 'high';
+    if (hours < 168) return 'medium';
+    return 'low';
+  }
+
+  private getFailureRatePerformance(rate: number): 'elite' | 'high' | 'medium' | 'low' {
+    if (rate <= 15) return 'elite';
+    if (rate <= 30) return 'high';
+    if (rate <= 45) return 'medium';
+    return 'low';
+  }
+
+  private getMTTRPerformance(hours: number): 'elite' | 'high' | 'medium' | 'low' {
+    if (hours < 1) return 'elite';
+    if (hours < 24) return 'high';
+    if (hours < 168) return 'medium';
+    return 'low';
+  }
+
+  private getOverallPerformance(performances: string[]): 'elite' | 'high' | 'medium' | 'low' {
+    const scores = { elite: 4, high: 3, medium: 2, low: 1 };
+    const avg = performances.reduce((sum, p) => sum + scores[p as keyof typeof scores], 0) / performances.length;
+
+    if (avg >= 3.5) return 'elite';
+    if (avg >= 2.5) return 'high';
+    if (avg >= 1.5) return 'medium';
+    return 'low';
+  }
+}
+
+// Usage
+const collector = new DORAMetricsCollector(
+  process.env.GITHUB_TOKEN!,
+  'myorg',
+  'myrepo'
+);
+
+const metrics = await collector.collect(30);
+console.log(JSON.stringify(metrics, null, 2));
+```
+
+### Grafana Dashboard Configuration
+
+```json
+{
+  "dashboard": {
+    "title": "DORA Metrics Dashboard",
+    "panels": [
+      {
+        "title": "Deployment Frequency",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(deployments_total{environment=\"production\"}[30d])) / 30",
+            "legendFormat": "Deploys/day"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 0.03, "color": "orange" },
+                { "value": 0.14, "color": "yellow" },
+                { "value": 1, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "title": "Lead Time for Changes",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, sum(rate(lead_time_hours_bucket[30d])) by (le))",
+            "legendFormat": "Median (hours)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "h",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 24, "color": "orange" },
+                { "value": 168, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "title": "Change Failure Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "sum(deployments_failed_total) / sum(deployments_total) * 100",
+            "legendFormat": "Failure Rate %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 15, "color": "yellow" },
+                { "value": 30, "color": "orange" },
+                { "value": 45, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "title": "Time to Restore (MTTR)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.5, sum(rate(incident_resolution_hours_bucket[30d])) by (le))",
+            "legendFormat": "Median (hours)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "h",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 24, "color": "orange" },
+                { "value": 168, "color": "red" }
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+## Tools and Platforms
+
+| Tool | Type | Features |
+|------|------|----------|
+| **Four Keys** (Google) | Open Source | GitHub/GitLab integration, BigQuery |
+| **LinearB** | Commercial | Git analytics, workflow metrics |
+| **Sleuth** | Commercial | Deploy tracking, change intelligence |
+| **Faros AI** | Commercial | Multi-source aggregation |
+| **Propelo** | Commercial | SDLC insights |
+| **Jellyfish** | Commercial | Engineering management |
+
+### Four Keys Setup (Google)
+
+```bash
+# Deploy Four Keys to GCP
+git clone https://github.com/dora-team/fourkeys.git
+cd fourkeys
+
+# Configure
+export PROJECT_ID="my-project"
+export REGION="us-central1"
+
+# Deploy
+./setup/setup.sh
+
+# Configure webhook for GitHub events
+# Add to GitHub repo settings: https://<REGION>-<PROJECT_ID>.cloudfunctions.net/github-parser
+```
+
+## Improvement Strategies
+
+### Improving Deployment Frequency
+
+| Current | Target | Strategy |
+|---------|--------|----------|
+| Monthly | Weekly | Automate deployments, reduce batch size |
+| Weekly | Daily | Feature flags, trunk-based development |
+| Daily | Multiple/day | Continuous deployment, small PRs |
+
+### Improving Lead Time
+
+| Bottleneck | Solution |
+|------------|----------|
+| Long code reviews | Smaller PRs, async reviews, automation |
+| Manual testing | Automated tests, shift-left |
+| Manual deployments | CI/CD automation |
+| Environment issues | Infrastructure as code |
+
+### Reducing Change Failure Rate
+
+| Problem | Solution |
+|---------|----------|
+| Insufficient testing | Increase coverage, add integration tests |
+| Big bang releases | Feature flags, canary releases |
+| Lack of review | Automated checks, required reviews |
+| Poor monitoring | Better observability, alerting |
+
+### Reducing MTTR
+
+| Improvement | Impact |
+|-------------|--------|
+| Runbooks | Faster diagnosis |
+| Feature flags | Instant rollback |
+| Observability | Faster root cause |
+| Chaos engineering | Proactive resilience |
+
+## Best Practices
+
+### 1. Measure Consistently
+
+```typescript
+// Standardized metric definitions
+const METRIC_DEFINITIONS = {
+  deploymentFrequency: {
+    source: 'GitHub Actions',
+    filter: 'workflow=deploy.yml, conclusion=success',
+    aggregation: 'count per day'
+  },
+  leadTime: {
+    source: 'GitHub PRs',
+    measurement: 'created_at to merged_at',
+    aggregation: 'median'
+  },
+  changeFailureRate: {
+    source: 'GitHub Issues + Deployments',
+    filter: 'label=incident, within 24h of deployment',
+    aggregation: 'incidents / deployments * 100'
+  },
+  mttr: {
+    source: 'PagerDuty',
+    measurement: 'triggered_at to resolved_at',
+    aggregation: 'median'
+  }
+};
+```
+
+### 2. Set Realistic Goals
+
+```yaml
+# Quarterly improvement targets
+q1_2024:
+  deployment_frequency:
+    current: 0.5/day
+    target: 1.0/day
+    improvement: 100%
+  lead_time:
+    current: 48h
+    target: 24h
+    improvement: 50%
+  change_failure_rate:
+    current: 25%
+    target: 20%
+    improvement: 20%
+  mttr:
+    current: 4h
+    target: 2h
+    improvement: 50%
+```
+
+### 3. Avoid Gaming Metrics
+
+| Gaming Behavior | Why It's Bad | Better Approach |
+|-----------------|--------------|-----------------|
+| Deploying empty commits | Fake frequency | Track meaningful changes |
+| Not labeling incidents | Hide failures | Blameless culture |
+| Splitting PRs artificially | Fake lead time | Focus on value |
+| Rushing fixes | Lower quality | Fix root cause |
+
+## Use Cases
+
+### 1. Team Performance Review
+
+```typescript
+// Quarterly DORA review
+async function quarterlyReview(team: string) {
+  const metrics = await collectMetrics({ team, period: '90d' });
+
+  return {
+    summary: {
+      overallPerformance: metrics.overallPerformance,
+      strongestMetric: findStrongest(metrics),
+      improvementArea: findWeakest(metrics)
+    },
+    comparison: {
+      vsLastQuarter: await compareToLastQuarter(team, metrics),
+      vsIndustry: compareToIndustryBenchmarks(metrics)
+    },
+    recommendations: generateRecommendations(metrics)
+  };
+}
+```
+
+### 2. DevOps Transformation Tracking
+
+```typescript
+// Track transformation progress
+const transformationGoals = {
+  phase1: { // Foundation
+    deploymentFrequency: 'weekly',
+    leadTime: '< 1 week'
+  },
+  phase2: { // Acceleration
+    deploymentFrequency: 'daily',
+    leadTime: '< 1 day',
+    changeFailureRate: '< 30%'
+  },
+  phase3: { // Excellence
+    deploymentFrequency: 'multiple/day',
+    leadTime: '< 1 hour',
+    changeFailureRate: '< 15%',
+    mttr: '< 1 hour'
+  }
+};
+```
+
+## Related Skills
+
+- `devops/github-actions` - CI/CD automation
+- `devops/observability` - Monitoring and metrics
+- `testing/comprehensive-testing` - Quality gates
+- `devops/feature-flags` - Progressive delivery
+
+---
+
+*Think Omega. Build Omega. Be Omega.*

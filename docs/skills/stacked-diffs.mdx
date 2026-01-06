@@ -1,0 +1,622 @@
+---
+title: "Stacked Diffs Workflow"
+description: "The agent implements stacked diffs (stacked PRs) for breaking large changes into reviewable chunks. Use when working on complex features, managing dependent changes, or optimizing code review flow."
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Methodology
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+The agent implements stacked diffs (stacked PRs) for breaking large changes into reviewable chunks. Use when working on complex features, managing dependent changes, or optimizing code review flow.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Stacked Diffs Workflow
+
+## Purpose
+
+Stacked diffs (also known as stacked PRs or stacked branches) is a code review workflow pioneered at Meta (Facebook) that enables:
+
+- **Breaking large changes** into small, reviewable chunks
+- **Parallel code review** of dependent changes
+- **Faster iteration** without waiting for reviews
+- **Cleaner git history** with logical commits
+- **Reduced context switching** for reviewers
+
+Meta engineers use stacked diffs extensively with their internal tools, and this practice has spread to companies like Uber, Airbnb, and many others.
+
+## Features
+
+| Feature | Description | Benefit |
+|---------|-------------|---------|
+| Dependent PRs | Chain of PRs building on each other | Logical separation |
+| Parallel Review | Review all PRs simultaneously | Faster feedback |
+| Easy Updates | Update any commit in the stack | Flexible iteration |
+| Automatic Rebase | Tools handle rebase complexity | Less manual work |
+| Merge Automation | Merge entire stacks efficiently | Cleaner history |
+
+## Stacked Diffs vs Traditional PRs
+
+### Traditional PR Workflow
+
+```
+Main ─────────────────────────────────────────────►
+       \
+        └── Feature Branch (1000 lines) ──────────►
+                        │
+                        └── Single large PR
+                            - Hard to review
+                            - Long review time
+                            - All-or-nothing merge
+```
+
+### Stacked Diffs Workflow
+
+```
+Main ────────────────────────────────────────────────►
+       \
+        └── PR 1: Add data model (100 lines)
+             \
+              └── PR 2: Add API endpoint (150 lines)
+                   \
+                    └── PR 3: Add frontend (200 lines)
+                         \
+                          └── PR 4: Add tests (150 lines)
+
+Each PR:
+- Small and focused
+- Can be reviewed in parallel
+- Merged independently (in order)
+```
+
+## Tools
+
+### Graphite (Recommended)
+
+```bash
+# Install Graphite CLI
+npm install -g @withgraphite/graphite-cli
+
+# Authenticate with GitHub
+gt auth
+
+# Create first branch in stack
+gt branch create feature/add-data-model
+# ... make changes ...
+git add . && gt commit -m "Add user data model"
+
+# Create dependent branch
+gt branch create feature/add-api
+# ... make changes ...
+git add . && gt commit -m "Add user API endpoints"
+
+# Create another dependent branch
+gt branch create feature/add-frontend
+# ... make changes ...
+git add . && gt commit -m "Add user frontend components"
+
+# View your stack
+gt log
+
+# Submit all PRs in stack
+gt stack submit
+
+# After PR 1 is approved and merged, restack remaining
+gt stack restack
+
+# Sync with remote
+gt repo sync
+```
+
+### ghstack (GitHub)
+
+```bash
+# Install ghstack
+pip install ghstack
+
+# Configure
+ghstack config set github.com
+
+# Create stack from commits
+# First, make commits on a local branch
+git checkout -b feature/user-system
+git commit -m "Add user data model"
+git commit -m "Add user API"
+git commit -m "Add user frontend"
+
+# Submit stack to GitHub
+ghstack submit
+
+# Update a commit in the middle
+git rebase -i HEAD~3
+# Edit the commit
+ghstack submit
+
+# After reviews, land the stack
+ghstack land
+```
+
+### git-branchless
+
+```bash
+# Install git-branchless
+cargo install git-branchless
+
+# Initialize
+git branchless init
+
+# Create commits (each becomes a "branch")
+git commit -m "Add data model"
+git commit -m "Add API"
+git commit -m "Add frontend"
+
+# View stack
+git smartlog
+
+# Submit to GitHub
+git branchless submit
+
+# Rebase and update
+git branchless reword HEAD~2  # Edit middle commit
+git branchless submit         # Update all PRs
+```
+
+### Sapling (Meta's Tool)
+
+```bash
+# Install Sapling
+brew install sapling
+
+# Clone repo
+sl clone https://github.com/org/repo
+
+# Create commits in stack
+sl commit -m "Add data model"
+sl commit -m "Add API"
+sl commit -m "Add frontend"
+
+# View stack
+sl smartlog
+
+# Submit for review
+sl pr submit
+
+# Amend a commit in the middle
+sl goto <commit-hash>
+# make changes
+sl amend
+
+# Rebase dependent commits
+sl rebase -d <base>
+```
+
+## Workflow Patterns
+
+### Creating a Stack
+
+```bash
+# Start from main
+git checkout main && git pull
+
+# Create first logical change
+gt branch create feat/step-1-models
+# Make changes for data models
+git add . && gt commit -m "feat: add user and post models"
+
+# Create second logical change (builds on first)
+gt branch create feat/step-2-api
+# Make changes for API layer
+git add . && gt commit -m "feat: add REST API for users"
+
+# Create third logical change (builds on second)
+gt branch create feat/step-3-frontend
+# Make changes for frontend
+git add . && gt commit -m "feat: add user management UI"
+
+# Submit entire stack
+gt stack submit
+
+# Result: 3 PRs created, each targeting the previous
+```
+
+### Updating Middle Commits
+
+```bash
+# Scenario: Reviewer requests changes to PR 2 (API layer)
+
+# Check out the branch for PR 2
+gt branch checkout feat/step-2-api
+
+# Make the requested changes
+# ... edit files ...
+
+# Amend the commit
+git add . && git commit --amend
+
+# Restack all dependent branches
+gt stack restack
+
+# Update all PRs
+gt stack submit
+```
+
+### Handling Merge Conflicts
+
+```bash
+# When PR 1 is merged and conflicts arise
+
+# Sync with remote
+gt repo sync
+
+# Restack your branches on top of main
+gt stack restack --onto main
+
+# If conflicts occur, resolve them
+# ... resolve conflicts ...
+git add . && git rebase --continue
+
+# Update PRs
+gt stack submit
+```
+
+### Merging a Stack
+
+```bash
+# Option 1: Merge from bottom up
+# After PR 1 approved:
+gh pr merge 123 --squash  # PR 1
+gt repo sync
+gt stack restack
+
+# After PR 2 approved:
+gh pr merge 124 --squash  # PR 2
+gt repo sync
+gt stack restack
+
+# Continue until all merged
+
+# Option 2: Use Graphite's merge queue
+gt stack merge  # Merges all approved PRs in order
+```
+
+## Best Practices
+
+### 1. Keep PRs Small and Focused
+
+```markdown
+## Good Stack Structure
+
+PR 1: Database migrations and models
+- Add User table migration
+- Add Post table migration
+- Add UserPost junction table
+
+PR 2: Repository layer
+- Add UserRepository with CRUD
+- Add PostRepository with CRUD
+
+PR 3: Service layer
+- Add UserService with business logic
+- Add PostService with business logic
+
+PR 4: API controllers
+- Add /users endpoints
+- Add /posts endpoints
+
+PR 5: Integration tests
+- Add API integration tests
+- Add E2E user flow tests
+```
+
+### 2. Write Clear Stack Descriptions
+
+```markdown
+## PR Description Template for Stacks
+
+### Stack Overview (in first PR)
+This stack implements user authentication:
+1. **PR 1** (this PR): Database schema for users
+2. PR 2: Authentication service
+3. PR 3: Login/Register endpoints
+4. PR 4: JWT middleware
+5. PR 5: Frontend auth components
+
+### This PR
+Adds the database schema and migrations for the user authentication system.
+
+### Dependencies
+- Base: `main`
+- Next in stack: PR #124
+
+### Testing
+- [ ] Unit tests pass
+- [ ] Migration tested locally
+
+### Review Notes
+Please review the schema design first. Later PRs depend on this structure.
+```
+
+### 3. Coordinate with Reviewers
+
+```typescript
+// PR naming convention for stacks
+const prNamingConvention = {
+  format: '[Stack: <stack-name>] <n>/<total>: <description>',
+  examples: [
+    '[Stack: user-auth] 1/5: Add user database schema',
+    '[Stack: user-auth] 2/5: Add authentication service',
+    '[Stack: user-auth] 3/5: Add login endpoints',
+    '[Stack: user-auth] 4/5: Add JWT middleware',
+    '[Stack: user-auth] 5/5: Add frontend components'
+  ]
+};
+```
+
+### 4. Handle Reviews Efficiently
+
+```bash
+# Respond to review comments efficiently
+
+# If change affects only one PR
+gt branch checkout feat/affected-branch
+# make changes
+git add . && gt commit --amend
+gt stack submit
+
+# If change affects multiple PRs
+# Start from the earliest affected PR
+gt branch checkout feat/earliest-affected
+# make changes
+git add . && gt commit --amend
+gt stack restack  # Propagates changes up the stack
+gt stack submit
+```
+
+## Anti-Patterns
+
+| Anti-Pattern | Problem | Solution |
+|--------------|---------|----------|
+| **Huge PRs in stack** | Still hard to review | Keep each PR < 400 lines |
+| **Unrelated changes** | Confuses reviewers | Each PR should be cohesive |
+| **Too many PRs** | Overhead exceeds benefit | 3-7 PRs is ideal |
+| **Unclear dependencies** | Hard to merge correctly | Document stack structure |
+| **No tests per PR** | Can't verify independently | Include relevant tests |
+| **Force pushing shared branches** | Breaks collaborators | Use amend + restack |
+
+## Git Commands for Manual Stacking
+
+When tools aren't available, you can manage stacks manually:
+
+```bash
+# Create a stack manually
+git checkout main
+git checkout -b stack/feature-1
+# make changes, commit
+
+git checkout -b stack/feature-2
+# make changes, commit
+
+git checkout -b stack/feature-3
+# make changes, commit
+
+# Create PRs targeting each other
+gh pr create --base main --head stack/feature-1
+gh pr create --base stack/feature-1 --head stack/feature-2
+gh pr create --base stack/feature-2 --head stack/feature-3
+
+# After feature-1 merges, rebase the rest
+git checkout stack/feature-2
+git rebase main
+git push --force-with-lease
+
+git checkout stack/feature-3
+git rebase stack/feature-2
+git push --force-with-lease
+
+# Update PR targets
+gh pr edit 124 --base main  # feature-2 now targets main
+```
+
+### Interactive Rebase for Stack Edits
+
+```bash
+# Edit a commit in the middle of a stack
+git rebase -i main
+
+# In the editor, change 'pick' to 'edit' for the commit to modify
+# pick abc123 Add data model
+# edit def456 Add API endpoints  <-- edit this one
+# pick ghi789 Add frontend
+
+# Make your changes
+git add . && git commit --amend
+
+# Continue rebase
+git rebase --continue
+
+# Force push all branches
+git push --force-with-lease origin stack/feature-1
+git push --force-with-lease origin stack/feature-2
+git push --force-with-lease origin stack/feature-3
+```
+
+## IDE Integration
+
+### VS Code with Graphite
+
+```json
+// .vscode/settings.json
+{
+  "graphite.enabled": true,
+  "graphite.showStackInStatusBar": true,
+  "git.branchPrefix": "stack/"
+}
+```
+
+### JetBrains IDEs
+
+```bash
+# Use terminal integration
+# Add to .zshrc or .bashrc
+alias gs='gt stack'
+alias gb='gt branch'
+alias gc='gt commit'
+```
+
+## Use Cases
+
+### 1. Large Feature Development
+
+```markdown
+## Stack: E-commerce Checkout Redesign
+
+1. **PR 1**: Cart data model updates
+   - Add discount fields
+   - Add shipping options
+
+2. **PR 2**: Cart service layer
+   - Discount calculation logic
+   - Shipping cost estimation
+
+3. **PR 3**: Checkout API endpoints
+   - POST /checkout/initiate
+   - POST /checkout/complete
+
+4. **PR 4**: Payment integration
+   - Stripe checkout session
+   - Webhook handlers
+
+5. **PR 5**: Checkout UI components
+   - Cart summary
+   - Payment form
+   - Order confirmation
+
+6. **PR 6**: E2E tests
+   - Full checkout flow tests
+```
+
+### 2. Refactoring Safely
+
+```markdown
+## Stack: Extract Service from Monolith
+
+1. **PR 1**: Add new service interface
+   - Define contracts
+   - Add feature flag
+
+2. **PR 2**: Implement new service
+   - Core logic extraction
+   - Unit tests
+
+3. **PR 3**: Add service client
+   - HTTP client implementation
+   - Circuit breaker
+
+4. **PR 4**: Migrate callers (batch 1)
+   - Update user service
+   - Update order service
+
+5. **PR 5**: Migrate callers (batch 2)
+   - Update remaining services
+
+6. **PR 6**: Remove old code
+   - Delete deprecated methods
+   - Remove feature flag
+```
+
+### 3. Cross-Team Collaboration
+
+```bash
+# When multiple developers work on a stack
+
+# Developer A creates base
+gt branch create feature/base
+git add . && gt commit -m "feat: add base infrastructure"
+gt stack submit
+
+# Developer B branches from A's work
+gt branch checkout feature/base
+gt branch create feature/extension
+git add . && gt commit -m "feat: extend with new capability"
+gt stack submit
+
+# When A updates their PR
+gt repo sync
+gt stack restack  # B's changes are rebased automatically
+```
+
+## Metrics and Benefits
+
+### Before Stacked Diffs
+| Metric | Value |
+|--------|-------|
+| Average PR size | 1,200 lines |
+| Review turnaround | 3-5 days |
+| Merge conflicts | Frequent |
+| Review quality | Lower |
+
+### After Stacked Diffs
+| Metric | Value |
+|--------|-------|
+| Average PR size | 150-300 lines |
+| Review turnaround | Same day |
+| Merge conflicts | Rare |
+| Review quality | Higher |
+
+## Related Skills
+
+- `methodology/finishing-development-branch` - Branch completion
+- `methodology/requesting-code-review` - Code review best practices
+- `devops/github-actions` - CI/CD for stacks
+- `devops/feature-flags` - Trunk-based development
+
+---
+
+*Think Omega. Build Omega. Be Omega.*
+
+
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  stacked-diffs:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 155 skills
+  </Card>
+  <Card title="Methodology" icon="diagram-project" href="/skills/overview#methodology">
+    More methodology skills
+  </Card>
+</CardGroup>

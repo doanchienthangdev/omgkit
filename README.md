@@ -37,9 +37,9 @@ All coordinated through **Omega-level thinking** - a framework for finding break
 | Component | Count | Description |
 |-----------|-------|-------------|
 | **Agents** | 41 | Specialized AI team members with distinct roles |
-| **Commands** | 144 | Slash commands for every development task |
-| **Workflows** | 61 | Complete development processes from idea to deploy |
-| **Skills** | 145 | Domain expertise modules across 23 categories |
+| **Commands** | 151 | Slash commands for every development task |
+| **Workflows** | 67 | Complete development processes from idea to deploy |
+| **Skills** | 157 | Domain expertise modules across 24 categories |
 | **Modes** | 10 | Behavioral configurations for different contexts |
 | **Archetypes** | 14 | Project templates for autonomous development |
 
@@ -222,7 +222,7 @@ Agents are specialized AI team members, each with distinct expertise and respons
 
 ---
 
-## Commands (144)
+## Commands (151)
 
 Commands are slash-prefixed actions organized by namespace.
 
@@ -370,7 +370,7 @@ Commands are slash-prefixed actions organized by namespace.
 
 ---
 
-## Workflows (61)
+## Workflows (67)
 
 Workflows are orchestrated sequences of agents, commands, and skills.
 
@@ -454,9 +454,9 @@ Workflows are orchestrated sequences of agents, commands, and skills.
 
 ---
 
-## Skills (145)
+## Skills (157)
 
-Skills are domain expertise modules organized in 23 categories.
+Skills are domain expertise modules organized in 24 categories.
 
 ### AI Engineering (12 skills)
 
@@ -518,6 +518,17 @@ Based on Chip Huyen's "Designing ML Systems" and Stanford CS 329S:
 | `frameworks/fastapi` | Async/await, Pydantic v2, dependency injection |
 | `frameworks/nestjs` | TypeScript, dependency injection, microservices |
 
+### BigTech Workflow Alignment (4 skills - New)
+
+Skills aligning OMGKIT with Google, Meta, Netflix, and Amazon engineering practices:
+
+| Skill | Description | BigTech Reference |
+|-------|-------------|-------------------|
+| `devops/feature-flags` | Progressive delivery, canary releases, A/B testing | Netflix, LaunchDarkly |
+| `testing/chaos-engineering` | Fault injection, game days, resilience testing | Netflix Chaos Monkey |
+| `devops/dora-metrics` | Deployment frequency, lead time, MTTR tracking | Google DORA Research |
+| `methodology/stacked-diffs` | Stacked PRs for parallel code review | Meta Engineering |
+
 ### Other Categories
 
 | Category | Skills | Focus |
@@ -529,7 +540,8 @@ Based on Chip Huyen's "Designing ML Systems" and Stanford CS 329S:
 | Game Development | 5 | Unity, Godot, networking |
 | Databases | 9 | PostgreSQL, MongoDB, Redis |
 | Frontend | 7 | Tailwind, shadcn/ui, accessibility |
-| DevOps | 7 | Docker, Kubernetes, GitHub Actions |
+| DevOps | 9 | Docker, Kubernetes, GitHub Actions, DORA, Feature Flags |
+| Testing | 10 | Comprehensive, chaos, mutation, security |
 | Security | 4 | OWASP, OAuth, hardening |
 
 ---

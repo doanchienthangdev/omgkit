@@ -603,6 +603,8 @@
       "pages": [
         "skills/aws",
         "skills/docker",
+        "skills/dora-metrics",
+        "skills/feature-flags",
         "skills/github-actions",
         "skills/kubernetes",
         "skills/monorepo-management",
@@ -622,6 +624,7 @@
     {
       "group": "Testing",
       "pages": [
+        "skills/chaos-engineering",
         "skills/chaos-testing",
         "skills/comprehensive-testing",
         "skills/mutation-testing",
@@ -663,6 +666,7 @@
         "skills/research-validation",
         "skills/root-cause-tracing",
         "skills/sequential-thinking",
+        "skills/stacked-diffs",
         "skills/systematic-debugging",
         "skills/test-driven-development",
         "skills/testing-anti-patterns",

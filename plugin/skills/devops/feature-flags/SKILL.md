@@ -1,0 +1,559 @@
+---
+name: Feature Flags and Progressive Delivery
+description: The agent implements feature flag systems for trunk-based development, canary releases, and A/B testing. Use when implementing gradual rollouts, kill switches, or experiment-driven development.
+category: devops
+---
+
+# Feature Flags and Progressive Delivery
+
+## Purpose
+
+Feature flags (also known as feature toggles) are a core BigTech practice that enables:
+
+- **Trunk-based development** without breaking production
+- **Canary releases** and gradual rollouts
+- **A/B testing** and experimentation
+- **Kill switches** for instant production rollbacks
+- **User targeting** for beta features
+
+Google, Netflix, Meta, and Amazon all use feature flags extensively to achieve continuous deployment with minimal risk.
+
+## Features
+
+| Feature | Description | Use Case |
+|---------|-------------|----------|
+| Boolean Flags | Simple on/off toggles | Feature enable/disable |
+| Multivariate Flags | Multiple values per flag | A/B/n testing |
+| Percentage Rollouts | Gradual user exposure | Canary releases |
+| User Targeting | Rules-based targeting | Beta programs |
+| Kill Switches | Emergency disable | Incident response |
+| Scheduled Flags | Time-based activation | Launch coordination |
+
+## Feature Flag Providers
+
+### LaunchDarkly (Enterprise)
+
+```typescript
+// LaunchDarkly SDK Integration
+import * as LaunchDarkly from 'launchdarkly-node-server-sdk';
+
+const client = LaunchDarkly.init(process.env.LAUNCHDARKLY_SDK_KEY);
+
+async function isFeatureEnabled(flagKey: string, user: LDUser): Promise<boolean> {
+  await client.waitForInitialization();
+  return client.variation(flagKey, user, false);
+}
+
+// Usage
+const user = {
+  key: 'user-123',
+  email: 'user@example.com',
+  custom: {
+    plan: 'enterprise',
+    region: 'us-east'
+  }
+};
+
+if (await isFeatureEnabled('new-checkout-flow', user)) {
+  // New checkout experience
+} else {
+  // Legacy checkout
+}
+```
+
+### Unleash (Open Source)
+
+```typescript
+// Unleash SDK Integration
+import { initialize, isEnabled } from 'unleash-client';
+
+const unleash = initialize({
+  url: 'https://unleash.example.com/api',
+  appName: 'my-app',
+  customHeaders: {
+    Authorization: process.env.UNLEASH_API_TOKEN
+  }
+});
+
+// Wait for ready
+unleash.on('ready', () => {
+  if (isEnabled('new-feature')) {
+    console.log('Feature is enabled!');
+  }
+});
+
+// With context
+const context = {
+  userId: 'user-123',
+  sessionId: 'session-abc',
+  remoteAddress: '192.168.1.1'
+};
+
+if (isEnabled('beta-feature', context)) {
+  // Beta experience
+}
+```
+
+### Flagsmith (Open Source)
+
+```typescript
+// Flagsmith SDK Integration
+import Flagsmith from 'flagsmith-nodejs';
+
+const flagsmith = new Flagsmith({
+  environmentKey: process.env.FLAGSMITH_ENVIRONMENT_KEY
+});
+
+// Get flags for user
+const flags = await flagsmith.getIdentityFlags('user-123', {
+  plan: 'premium',
+  signup_date: '2024-01-01'
+});
+
+if (flags.isFeatureEnabled('dark_mode')) {
+  enableDarkMode();
+}
+
+// Get feature value
+const buttonColor = flags.getFeatureValue('button_color');
+```
+
+### Custom Feature Flag Service
+
+```typescript
+// Custom Feature Flag Implementation
+interface FeatureFlag {
+  key: string;
+  enabled: boolean;
+  rolloutPercentage?: number;
+  userTargeting?: TargetingRule[];
+  schedule?: {
+    startAt?: Date;
+    endAt?: Date;
+  };
+}
+
+interface TargetingRule {
+  attribute: string;
+  operator: 'eq' | 'neq' | 'contains' | 'in';
+  value: string | string[];
+}
+
+class FeatureFlagService {
+  private flags: Map<string, FeatureFlag> = new Map();
+
+  async isEnabled(flagKey: string, context: Record<string, any>): Promise<boolean> {
+    const flag = this.flags.get(flagKey);
+    if (!flag) return false;
+
+    // Check if globally disabled
+    if (!flag.enabled) return false;
+
+    // Check schedule
+    if (flag.schedule) {
+      const now = new Date();
+      if (flag.schedule.startAt && now < flag.schedule.startAt) return false;
+      if (flag.schedule.endAt && now > flag.schedule.endAt) return false;
+    }
+
+    // Check targeting rules
+    if (flag.userTargeting) {
+      const matches = this.evaluateTargeting(flag.userTargeting, context);
+      if (!matches) return false;
+    }
+
+    // Check percentage rollout
+    if (flag.rolloutPercentage !== undefined) {
+      const hash = this.hashUser(context.userId || 'anonymous', flagKey);
+      return hash < flag.rolloutPercentage;
+    }
+
+    return true;
+  }
+
+  private hashUser(userId: string, flagKey: string): number {
+    // Consistent hashing for stable rollout
+    const combined = `${userId}:${flagKey}`;
+    let hash = 0;
+    for (let i = 0; i < combined.length; i++) {
+      hash = ((hash << 5) - hash) + combined.charCodeAt(i);
+      hash = hash & hash;
+    }
+    return Math.abs(hash % 100);
+  }
+
+  private evaluateTargeting(rules: TargetingRule[], context: Record<string, any>): boolean {
+    return rules.every(rule => {
+      const value = context[rule.attribute];
+      switch (rule.operator) {
+        case 'eq': return value === rule.value;
+        case 'neq': return value !== rule.value;
+        case 'contains': return String(value).includes(String(rule.value));
+        case 'in': return Array.isArray(rule.value) && rule.value.includes(value);
+        default: return false;
+      }
+    });
+  }
+}
+```
+
+## Framework Integration
+
+### React/Next.js
+
+```typescript
+// React Feature Flag Provider
+import { createContext, useContext, useEffect, useState } from 'react';
+
+interface FeatureFlagContextType {
+  isEnabled: (flag: string) => boolean;
+  getValue: (flag: string) => any;
+  loading: boolean;
+}
+
+const FeatureFlagContext = createContext<FeatureFlagContextType | null>(null);
+
+export function FeatureFlagProvider({ children, userId }: {
+  children: React.ReactNode;
+  userId: string;
+}) {
+  const [flags, setFlags] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadFlags() {
+      const response = await fetch(`/api/flags?userId=${userId}`);
+      const data = await response.json();
+      setFlags(data);
+      setLoading(false);
+    }
+    loadFlags();
+  }, [userId]);
+
+  const value = {
+    isEnabled: (flag: string) => Boolean(flags[flag]?.enabled),
+    getValue: (flag: string) => flags[flag]?.value,
+    loading
+  };
+
+  return (
+    <FeatureFlagContext.Provider value={value}>
+      {children}
+    </FeatureFlagContext.Provider>
+  );
+}
+
+// Custom Hook
+export function useFeatureFlag(flagKey: string) {
+  const context = useContext(FeatureFlagContext);
+  if (!context) throw new Error('useFeatureFlag must be used within FeatureFlagProvider');
+  return {
+    enabled: context.isEnabled(flagKey),
+    value: context.getValue(flagKey),
+    loading: context.loading
+  };
+}
+
+// Component Usage
+function NewFeature() {
+  const { enabled, loading } = useFeatureFlag('new-dashboard');
+
+  if (loading) return <Spinner />;
+  if (!enabled) return <LegacyDashboard />;
+
+  return <NewDashboard />;
+}
+```
+
+### Node.js/Express Middleware
+
+```typescript
+// Express Feature Flag Middleware
+import { Request, Response, NextFunction } from 'express';
+
+declare global {
+  namespace Express {
+    interface Request {
+      featureFlags: {
+        isEnabled: (flag: string) => Promise<boolean>;
+        getValue: (flag: string) => Promise<any>;
+      };
+    }
+  }
+}
+
+export function featureFlagMiddleware(flagService: FeatureFlagService) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const context = {
+      userId: req.user?.id,
+      userAgent: req.headers['user-agent'],
+      ip: req.ip,
+      ...req.user
+    };
+
+    req.featureFlags = {
+      isEnabled: (flag: string) => flagService.isEnabled(flag, context),
+      getValue: (flag: string) => flagService.getValue(flag, context)
+    };
+
+    next();
+  };
+}
+
+// Route Usage
+app.get('/api/checkout', async (req, res) => {
+  if (await req.featureFlags.isEnabled('new-checkout')) {
+    return newCheckoutHandler(req, res);
+  }
+  return legacyCheckoutHandler(req, res);
+});
+```
+
+### Python/FastAPI
+
+```python
+# FastAPI Feature Flag Integration
+from fastapi import FastAPI, Depends, Request
+from functools import lru_cache
+import httpx
+
+app = FastAPI()
+
+class FeatureFlagClient:
+    def __init__(self, base_url: str, api_key: str):
+        self.base_url = base_url
+        self.api_key = api_key
+        self._cache = {}
+
+    async def is_enabled(self, flag: str, context: dict = None) -> bool:
+        cache_key = f"{flag}:{hash(frozenset(context.items()) if context else '')}"
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.base_url}/api/flags/{flag}/evaluate",
+                json={"context": context or {}},
+                headers={"Authorization": f"Bearer {self.api_key}"}
+            )
+            result = response.json().get("enabled", False)
+            self._cache[cache_key] = result
+            return result
+
+@lru_cache()
+def get_flag_client():
+    return FeatureFlagClient(
+        base_url=os.environ["FLAG_SERVICE_URL"],
+        api_key=os.environ["FLAG_API_KEY"]
+    )
+
+async def get_flags(request: Request, client: FeatureFlagClient = Depends(get_flag_client)):
+    return client
+
+@app.get("/api/dashboard")
+async def dashboard(flags: FeatureFlagClient = Depends(get_flags)):
+    if await flags.is_enabled("new_dashboard", {"user_id": "123"}):
+        return {"dashboard": "v2"}
+    return {"dashboard": "v1"}
+```
+
+## Rollout Strategies
+
+### Percentage Rollout (Canary)
+
+```yaml
+# Gradual rollout configuration
+feature: new-payment-flow
+rollout:
+  - percentage: 1
+    duration: 1d
+    metrics:
+      - error_rate < 0.1%
+      - latency_p99 < 500ms
+  - percentage: 10
+    duration: 2d
+  - percentage: 50
+    duration: 3d
+  - percentage: 100
+    duration: stable
+```
+
+### Ring-based Deployment
+
+```typescript
+// Ring-based rollout
+enum DeploymentRing {
+  INTERNAL = 0,      // Employee testing
+  EARLY_ADOPTERS = 1, // Opt-in beta users
+  CANARY = 2,        // 1% of users
+  PRODUCTION = 3     // 100% of users
+}
+
+async function getUserRing(userId: string): Promise<DeploymentRing> {
+  const user = await getUser(userId);
+
+  if (user.isEmployee) return DeploymentRing.INTERNAL;
+  if (user.betaOptIn) return DeploymentRing.EARLY_ADOPTERS;
+
+  // Canary: first 1% based on user ID hash
+  const hash = hashUserId(userId);
+  if (hash < 1) return DeploymentRing.CANARY;
+
+  return DeploymentRing.PRODUCTION;
+}
+```
+
+## Best Practices
+
+### 1. Flag Lifecycle Management
+
+```typescript
+// Flag metadata for lifecycle tracking
+interface FlagMetadata {
+  key: string;
+  owner: string;
+  createdAt: Date;
+  expectedRemovalDate: Date;
+  type: 'release' | 'experiment' | 'ops' | 'permission';
+  status: 'active' | 'deprecated' | 'removed';
+  jiraTicket?: string;
+}
+
+// Automated cleanup alerts
+async function auditStaleFlags() {
+  const flags = await getAllFlags();
+  const stale = flags.filter(f =>
+    f.status === 'active' &&
+    f.expectedRemovalDate < new Date()
+  );
+
+  for (const flag of stale) {
+    await notifyOwner(flag.owner, `Flag ${flag.key} is past removal date`);
+  }
+}
+```
+
+### 2. Testing with Feature Flags
+
+```typescript
+// Test utilities for feature flags
+class TestFeatureFlagService extends FeatureFlagService {
+  private overrides: Map<string, boolean> = new Map();
+
+  override(flagKey: string, enabled: boolean): void {
+    this.overrides.set(flagKey, enabled);
+  }
+
+  clearOverrides(): void {
+    this.overrides.clear();
+  }
+
+  async isEnabled(flagKey: string, context: Record<string, any>): Promise<boolean> {
+    if (this.overrides.has(flagKey)) {
+      return this.overrides.get(flagKey)!;
+    }
+    return super.isEnabled(flagKey, context);
+  }
+}
+
+// In tests
+describe('New Checkout Flow', () => {
+  let flagService: TestFeatureFlagService;
+
+  beforeEach(() => {
+    flagService = new TestFeatureFlagService();
+  });
+
+  it('should show new checkout when flag enabled', async () => {
+    flagService.override('new-checkout', true);
+    const result = await renderCheckout(flagService);
+    expect(result).toContain('New Checkout');
+  });
+
+  it('should show legacy checkout when flag disabled', async () => {
+    flagService.override('new-checkout', false);
+    const result = await renderCheckout(flagService);
+    expect(result).toContain('Legacy Checkout');
+  });
+});
+```
+
+### 3. Flag Documentation
+
+```typescript
+// Self-documenting flags
+const FLAGS = {
+  NEW_CHECKOUT: {
+    key: 'new-checkout-flow',
+    description: 'Enables the redesigned checkout experience',
+    owner: 'payments-team',
+    type: 'release',
+    defaultValue: false,
+    // Link to design doc, metrics dashboard
+    references: {
+      designDoc: 'https://docs.example.com/new-checkout',
+      metrics: 'https://grafana.example.com/d/checkout'
+    }
+  }
+} as const;
+```
+
+## Anti-Patterns to Avoid
+
+| Anti-Pattern | Problem | Solution |
+|--------------|---------|----------|
+| Long-lived flags | Technical debt accumulation | Set removal dates, automate cleanup |
+| Nested flags | Complexity explosion | Flatten flag dependencies |
+| Flag in loops | Performance issues | Evaluate once, cache result |
+| No default values | Runtime errors | Always provide defaults |
+| Missing tests | Untested code paths | Test both flag states |
+| No ownership | Orphaned flags | Assign owners, track lifecycle |
+
+## Use Cases
+
+### 1. Trunk-Based Development
+
+Enable incomplete features in production without exposing to users:
+
+```typescript
+// Feature under development
+if (await flags.isEnabled('wip-new-editor')) {
+  return <NewEditor />; // Only visible to developers
+}
+return <CurrentEditor />;
+```
+
+### 2. Incident Kill Switch
+
+Instantly disable problematic features:
+
+```typescript
+// Kill switch for external service
+if (await flags.isEnabled('external-recommendations')) {
+  recommendations = await fetchExternalRecommendations();
+} else {
+  recommendations = await getFallbackRecommendations();
+}
+```
+
+### 3. A/B Testing
+
+Run experiments with statistical significance:
+
+```typescript
+const variant = await flags.getValue('pricing-page-variant');
+// variant: 'control' | 'variant-a' | 'variant-b'
+trackExperiment('pricing-page', variant, userId);
+return <PricingPage variant={variant} />;
+```
+
+## Related Skills
+
+- `devops/github-actions` - CI/CD integration
+- `testing/comprehensive-testing` - Testing flag states
+- `devops/observability` - Monitoring rollouts
+- `methodology/finishing-development-branch` - Branch workflow
+
+---
+
+*Think Omega. Build Omega. Be Omega.*
