@@ -115,6 +115,32 @@ hooks:
     actions:
       - install
 
+testing:
+  enforcement:
+    level: strict  # Stricter for gitflow
+  auto_generate_tasks: true
+  coverage_gates:
+    unit:
+      minimum: 85
+      target: 95
+    integration:
+      minimum: 70
+      target: 80
+    overall:
+      minimum: 80
+      target: 90
+  required_test_types:
+    - unit
+    - integration
+    - e2e
+  optional_test_types:
+    - security
+    - performance
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+    on_missing_test_types: true
+
 feature_flags:
   provider: none
   default_state: false
@@ -126,3 +152,4 @@ ci:
     - test
     - lint
     - type-check
+    - coverage

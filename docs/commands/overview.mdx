@@ -1,15 +1,15 @@
 ---
 title: "Commands Overview"
-description: "156 slash commands for every development task"
+description: "160 slash commands for every development task"
 icon: "terminal"
 ---
 
-OMGKIT provides **156 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
+OMGKIT provides **160 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
 
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="156" icon="terminal">
+  <Card title="160" icon="terminal">
     Total Commands
   </Card>
   <Card title="28" icon="folder">
@@ -42,7 +42,7 @@ OMGKIT provides **156 slash commands** covering the entire development lifecycle
     **5 commands** - UI/UX and visual design
   </Card>
   <Card title="Dev" icon="code" href="#dev">
-    **11 commands** - Build features and fix bugs
+    **12 commands** - Build features and fix bugs
   </Card>
   <Card title="Domain" icon="terminal" href="#domain">
     **2 commands** - Domain-driven design commands
@@ -96,7 +96,7 @@ OMGKIT provides **156 slash commands** covering the entire development lifecycle
     **1 commands** - Platform engineering commands
   </Card>
   <Card title="Quality" icon="shield-check" href="#quality">
-    **11 commands** - Ensure code health and security
+    **14 commands** - Ensure code health and security
   </Card>
   <Card title="Security" icon="terminal" href="#security">
     **2 commands** - Security scanning and auditing
@@ -198,6 +198,7 @@ Development commands for building features and fixing bugs
 
 | Command | Description | Usage |
 |---------|-------------|-------|
+| [`/dev:feature-tested`](/commands/feature-tested) | Create a feature with automatically gene... | `/dev:feature-tested` |
 | [`/dev:feature`](/commands/feature) | Full feature development with planning, ... | `/dev:feature [feature description]` |
 | [`/dev:fix-ci`](/commands/fix-ci) | Fix CI/CD pipeline issues | `/dev:fix-ci [github-action-url]` |
 | [`/dev:fix-fast`](/commands/fix-fast) | Quick bug fix with minimal investigation | `/dev:fix-fast [bug]` |
@@ -416,6 +417,7 @@ Quality and security commands for code health
 | Command | Description | Usage |
 |---------|-------------|-------|
 | [`/quality:api-gen`](/commands/api-gen) | Generate API code from spec | `/quality:api-gen [resource]` |
+| [`/quality:coverage-check`](/commands/coverage-check) | Check test coverage against configured g... | `/quality:coverage-check` |
 | [`/quality:lint`](/commands/lint) | Run linting | `/quality:lint` |
 | [`/quality:optimize`](/commands/optimize) | Performance optimization | `/quality:optimize [file]` |
 | [`/quality:refactor`](/commands/refactor) | Improve code structure | `/quality:refactor [file or directory]` |
@@ -424,8 +426,10 @@ Quality and security commands for code health
 | [`/quality:test-mutate`](/commands/test-mutate) | Run mutation testing with Stryker to ver... | `/quality:test-mutate` |
 | [`/quality:test-omega`](/commands/test-omega) | Run comprehensive 4-dimensional Omega te... | `/quality:test-omega` |
 | [`/quality:test-performance`](/commands/test-performance) | Run performance testing including benchm... | `/quality:test-performance` |
+| [`/quality:test-plan`](/commands/test-plan) | Generate a comprehensive test plan for a... | `/quality:test-plan` |
 | [`/quality:test-property`](/commands/test-property) | Generate and run property-based tests us... | `/quality:test-property` |
 | [`/quality:test-security`](/commands/test-security) | Run comprehensive security testing cover... | `/quality:test-security` |
+| [`/quality:verify-done`](/commands/verify-done) | Verify all test requirements are met bef... | `/quality:verify-done` |
 
 
 ## Security
@@ -616,7 +620,7 @@ Switch modes with `/context:mode <mode-name>` or use the shorthand `/mode:<mode-
     10 behavioral modes
   </Card>
   <Card title="Skills" icon="brain" href="/skills/overview">
-    157 domain expertise modules
+    159 domain expertise modules
   </Card>
   <Card title="Quick Start" icon="rocket" href="/getting-started/quickstart">
     Get started in 5 minutes

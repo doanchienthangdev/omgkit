@@ -252,6 +252,7 @@
       "group": "Development",
       "pages": [
         "commands/feature",
+        "commands/feature-tested",
         "commands/fix",
         "commands/fix-ci",
         "commands/fix-fast",
@@ -299,6 +300,7 @@
       "group": "Quality",
       "pages": [
         "commands/api-gen",
+        "commands/coverage-check",
         "commands/lint",
         "commands/optimize",
         "commands/refactor",
@@ -307,8 +309,10 @@
         "commands/test-mutate",
         "commands/test-omega",
         "commands/test-performance",
+        "commands/test-plan",
         "commands/test-property",
-        "commands/test-security"
+        "commands/test-security",
+        "commands/verify-done"
       ]
     },
     {
@@ -679,6 +683,8 @@
         "skills/stacked-diffs",
         "skills/systematic-debugging",
         "skills/test-driven-development",
+        "skills/test-enforcement",
+        "skills/test-task-generation",
         "skills/testing-anti-patterns",
         "skills/token-optimization",
         "skills/verification-before-completion",
@@ -954,6 +960,7 @@
     {
       "group": "Testing",
       "pages": [
+        "workflows/automated-testing",
         "workflows/comprehensive-testing",
         "workflows/security-hardening",
         "workflows/test-driven-development"

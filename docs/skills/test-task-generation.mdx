@@ -1,0 +1,421 @@
+---
+title: "Test Task Generation"
+description: "The agent automatically generates comprehensive test tasks from feature requirements, ensuring every implementation task has corresponding test coverage with proper acceptance criteria."
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Methodology
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+The agent automatically generates comprehensive test tasks from feature requirements, ensuring every implementation task has corresponding test coverage with proper acceptance criteria.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Test Task Generation
+
+## Overview
+
+This skill enables automatic generation of test tasks whenever implementation tasks are created. It ensures comprehensive test coverage by mapping feature types to required test categories and generating acceptance criteria for each test.
+
+## Core Principle
+
+**Every implementation task must have a corresponding test task.**
+
+```
+Implementation Task → Test Task(s)
+├── Unit Test Task
+├── Integration Test Task (if applicable)
+├── E2E Test Task (if applicable)
+└── Specialized Test Tasks (security, performance, etc.)
+```
+
+## Test Task Generation Rules
+
+### 1. Feature Type to Test Type Mapping
+
+| Feature Type | Required Tests | Optional Tests |
+|-------------|----------------|----------------|
+| API Endpoint | Unit, Integration, Contract | Performance, Security |
+| UI Component | Unit, Snapshot, A11y | E2E, Visual Regression |
+| Business Logic | Unit, Property-based | Mutation |
+| Database Operation | Integration, Migration | Performance |
+| Authentication | Unit, Integration, Security | Penetration |
+| File Processing | Unit, Integration | Performance, Fuzzing |
+| External Integration | Unit, Contract, Integration | Chaos |
+| Real-time Feature | Unit, Integration, E2E | Load, Stress |
+
+### 2. Test Task Template
+
+```markdown
+## Test Task: [TEST-{ID}] {Test Type} for {Feature}
+
+**Parent Task:** TASK-{PARENT_ID}
+**Type:** {Unit|Integration|E2E|Security|Performance|Contract|Property}
+**Priority:** {P0|P1|P2}
+
+### Acceptance Criteria
+- [ ] All happy path scenarios covered
+- [ ] Edge cases tested: {list}
+- [ ] Error scenarios tested: {list}
+- [ ] Coverage target met: {percentage}%
+
+### Test Cases
+1. **{test_name}**: {description}
+   - Given: {precondition}
+   - When: {action}
+   - Then: {expected_result}
+
+### Files to Create/Modify
+- `{test_file_path}`
+
+### Dependencies
+- Requires: TASK-{PARENT_ID} implementation complete
+- Blocked by: {dependencies}
+```
+
+### 3. Auto-Generation Algorithm
+
+```
+FUNCTION generate_test_tasks(implementation_task):
+  feature_type = classify_feature(implementation_task)
+  required_tests = TEST_TYPE_MAP[feature_type].required
+  optional_tests = TEST_TYPE_MAP[feature_type].optional
+
+  test_tasks = []
+
+  FOR test_type IN required_tests:
+    test_task = create_test_task(
+      parent: implementation_task,
+      type: test_type,
+      priority: P1,
+      acceptance_criteria: generate_criteria(test_type, implementation_task)
+    )
+    test_tasks.append(test_task)
+
+  FOR test_type IN optional_tests:
+    IF should_include_optional(implementation_task, test_type):
+      test_task = create_test_task(
+        parent: implementation_task,
+        type: test_type,
+        priority: P2,
+        acceptance_criteria: generate_criteria(test_type, implementation_task)
+      )
+      test_tasks.append(test_task)
+
+  RETURN test_tasks
+```
+
+## Feature Classification
+
+### API Endpoint Detection
+```
+Indicators:
+- Route/endpoint definition
+- HTTP method handling
+- Request/response processing
+- Controller/handler creation
+
+Required Tests:
+- Unit: Handler logic
+- Integration: Full request cycle
+- Contract: API schema validation
+```
+
+### UI Component Detection
+```
+Indicators:
+- React/Vue/Angular component
+- JSX/TSX files
+- Props interface
+- Event handlers
+
+Required Tests:
+- Unit: Component logic
+- Snapshot: Render output
+- Accessibility: ARIA, keyboard nav
+```
+
+### Business Logic Detection
+```
+Indicators:
+- Pure functions
+- Domain models
+- Calculations
+- State transformations
+
+Required Tests:
+- Unit: All branches
+- Property-based: Invariants
+```
+
+### Database Operation Detection
+```
+Indicators:
+- ORM/Query builder usage
+- Schema changes
+- Migration files
+- Repository patterns
+
+Required Tests:
+- Integration: Database operations
+- Migration: Up/down paths
+```
+
+## Coverage Requirements by Test Type
+
+| Test Type | Minimum Coverage | Target Coverage |
+|-----------|-----------------|-----------------|
+| Unit | 80% | 95% |
+| Integration | 60% | 80% |
+| E2E | Critical paths | Happy paths |
+| Contract | All endpoints | All schemas |
+| Property | Core invariants | All pure functions |
+
+## Test Naming Conventions
+
+```
+Unit Tests:
+  {module}.test.ts
+  {module}.spec.ts
+
+Integration Tests:
+  {module}.integration.test.ts
+  {feature}.int.spec.ts
+
+E2E Tests:
+  {feature}.e2e.test.ts
+  {flow}.e2e.spec.ts
+
+Contract Tests:
+  {api}.contract.test.ts
+
+Property Tests:
+  {module}.property.test.ts
+```
+
+## Acceptance Criteria Generation
+
+### For Unit Tests
+```markdown
+- [ ] All public methods tested
+- [ ] All branches covered (if/else, switch)
+- [ ] Edge cases: null, undefined, empty, boundary values
+- [ ] Error cases: invalid input, exceptions
+- [ ] Mocks properly isolated
+- [ ] No external dependencies
+```
+
+### For Integration Tests
+```markdown
+- [ ] Full flow from entry to exit
+- [ ] Database interactions verified
+- [ ] External service mocks configured
+- [ ] Transaction handling tested
+- [ ] Cleanup after tests
+```
+
+### For E2E Tests
+```markdown
+- [ ] User journey complete
+- [ ] All UI interactions work
+- [ ] Data persists correctly
+- [ ] Error states handled
+- [ ] Performance acceptable
+```
+
+### For Security Tests
+```markdown
+- [ ] Authentication required
+- [ ] Authorization enforced
+- [ ] Input validation works
+- [ ] No injection vulnerabilities
+- [ ] Sensitive data protected
+```
+
+## Integration with Development Workflow
+
+### 1. Feature Creation
+```
+/dev:feature-tested "Add user profile API"
+
+Generated Tasks:
+├── TASK-001: Implement user profile endpoint (P1)
+├── TEST-001: Unit tests for profile handler (P1)
+├── TEST-002: Integration tests for profile API (P1)
+├── TEST-003: Contract tests for profile schema (P1)
+└── TEST-004: Security tests for profile access (P2)
+```
+
+### 2. Task Tracking
+```
+Todo List:
+✅ TASK-001: Implement user profile endpoint
+⏳ TEST-001: Unit tests for profile handler
+⏳ TEST-002: Integration tests for profile API
+⏳ TEST-003: Contract tests for profile schema
+⏳ TEST-004: Security tests for profile access
+
+Status: Implementation complete, tests pending
+Blocking: Cannot mark feature as "done" until all tests pass
+```
+
+### 3. Completion Verification
+```
+/quality:verify-done
+
+Checking feature completion...
+├── Implementation: ✅ Complete
+├── Unit Tests: ✅ 95% coverage
+├── Integration Tests: ✅ 78% coverage
+├── Contract Tests: ✅ All schemas valid
+├── Security Tests: ✅ No vulnerabilities
+└── Status: ✅ DONE - All criteria met
+```
+
+## Examples
+
+### Example 1: REST API Endpoint
+
+**Implementation Task:**
+```markdown
+TASK-042: Create POST /api/users endpoint
+- Validate request body
+- Create user in database
+- Return created user
+```
+
+**Generated Test Tasks:**
+```markdown
+TEST-042-A: Unit tests for user creation handler
+- Test input validation
+- Test user model creation
+- Test error handling
+- Coverage target: 90%
+
+TEST-042-B: Integration tests for POST /api/users
+- Test full request/response cycle
+- Test database persistence
+- Test duplicate handling
+- Test transaction rollback
+
+TEST-042-C: Contract tests for user API
+- Validate request schema
+- Validate response schema
+- Test error response formats
+```
+
+### Example 2: React Component
+
+**Implementation Task:**
+```markdown
+TASK-087: Create UserCard component
+- Display user avatar and name
+- Show user status badge
+- Handle click to view profile
+```
+
+**Generated Test Tasks:**
+```markdown
+TEST-087-A: Unit tests for UserCard component
+- Test rendering with props
+- Test click handler
+- Test status badge variants
+- Coverage target: 95%
+
+TEST-087-B: Snapshot tests for UserCard
+- Capture default state
+- Capture each status variant
+- Capture loading state
+
+TEST-087-C: Accessibility tests for UserCard
+- Test keyboard navigation
+- Test screen reader labels
+- Test focus management
+```
+
+## Best Practices
+
+### DO
+- Generate test tasks immediately after implementation tasks
+- Include specific acceptance criteria
+- Map test files to implementation files
+- Set realistic coverage targets
+- Include edge cases in criteria
+
+### DON'T
+- Skip test task generation for "simple" features
+- Generate vague acceptance criteria
+- Ignore optional test types for critical features
+- Set coverage targets below minimums
+- Create test tasks without parent reference
+
+## Quality Gates
+
+Before a feature can be marked as "done":
+
+1. **All test tasks completed** - Every generated test task must be done
+2. **Coverage met** - Each test type meets minimum coverage
+3. **Tests passing** - All tests in CI pipeline pass
+4. **No regressions** - Existing tests still pass
+5. **Evidence provided** - Test reports attached
+
+## Related Documentation
+
+- [Test Enforcement](../test-enforcement/SKILL.md)
+- [TDD Methodology](../test-driven-development/SKILL.md)
+- [Comprehensive Testing](../../testing/comprehensive-testing/SKILL.md)
+- [Verification Before Completion](../verification-before-completion/SKILL.md)
+
+
+## Usage Graph
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/automated-testing](/workflows/automated-testing) | End-to-end testing automation workflow that generates test p... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  test-task-generation:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 159 skills
+  </Card>
+  <Card title="Methodology" icon="diagram-project" href="/skills/overview#methodology">
+    More methodology skills
+  </Card>
+</CardGroup>

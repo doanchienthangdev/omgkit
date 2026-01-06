@@ -37,9 +37,9 @@ All coordinated through **Omega-level thinking** - a framework for finding break
 | Component | Count | Description |
 |-----------|-------|-------------|
 | **Agents** | 41 | Specialized AI team members with distinct roles |
-| **Commands** | 151 | Slash commands for every development task |
-| **Workflows** | 67 | Complete development processes from idea to deploy |
-| **Skills** | 157 | Domain expertise modules across 24 categories |
+| **Commands** | 160 | Slash commands for every development task |
+| **Workflows** | 69 | Complete development processes from idea to deploy |
+| **Skills** | 161 | Domain expertise modules across 24 categories |
 | **Modes** | 10 | Behavioral configurations for different contexts |
 | **Archetypes** | 14 | Project templates for autonomous development |
 
@@ -87,6 +87,53 @@ OMGKIT brings agile methodology to AI-assisted development:
 - **Backlog**: Prioritized list of work items
 - **Sprints**: Time-boxed development cycles
 - **AI Team**: Autonomous execution with human oversight
+
+### 4. Testing Automation (New)
+
+OMGKIT includes a comprehensive testing automation system:
+
+#### Auto-Generate Test Tasks
+When you create a feature, OMGKIT automatically generates corresponding test tasks:
+
+```yaml
+# workflow.yaml
+testing:
+  auto_generate_tasks: true
+  required_test_types:
+    - unit
+    - integration
+```
+
+Feature tasks automatically spawn test tasks based on feature type (API → Contract tests, UI → Snapshot tests, etc.)
+
+#### Enforce Tests Before Done
+No task can be marked "done" without passing tests:
+
+```yaml
+testing:
+  enforcement:
+    level: standard  # soft | standard | strict
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+```
+
+#### Coverage Gates
+Set minimum and target coverage thresholds:
+
+```yaml
+testing:
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+    integration:
+      minimum: 60
+      target: 75
+    overall:
+      minimum: 75
+      target: 85
+```
 
 ---
 
@@ -222,7 +269,7 @@ Agents are specialized AI team members, each with distinct expertise and respons
 
 ---
 
-## Commands (151)
+## Commands (160)
 
 Commands are slash-prefixed actions organized by namespace.
 
@@ -260,10 +307,13 @@ Commands are slash-prefixed actions organized by namespace.
 ### Quality (`/quality:*`)
 
 ```bash
-/quality:security-scan  # Scan for vulnerabilities
+/quality:security-scan   # Scan for vulnerabilities
 /quality:refactor <file> # Improve code structure
 /quality:optimize <file> # Performance optimization
-/quality:lint           # Run linting
+/quality:lint            # Run linting
+/quality:verify-done     # Verify test requirements before completion
+/quality:coverage-check  # Check coverage against gates
+/quality:test-plan       # Generate comprehensive test plan
 ```
 
 ### Omega (`/omega:*`)
@@ -370,7 +420,7 @@ Commands are slash-prefixed actions organized by namespace.
 
 ---
 
-## Workflows (67)
+## Workflows (69)
 
 Workflows are orchestrated sequences of agents, commands, and skills.
 
@@ -382,6 +432,12 @@ Workflows are orchestrated sequences of agents, commands, and skills.
 | `development/bug-fix` | Systematic debugging and resolution |
 | `development/refactor` | Code improvement and restructuring |
 | `development/code-review` | Comprehensive code review |
+
+### Testing Automation (New)
+
+| Workflow | Description |
+|----------|-------------|
+| `testing/automated-testing` | End-to-end testing automation with task generation, enforcement, and coverage gates |
 
 ### AI Engineering
 
@@ -454,7 +510,7 @@ Workflows are orchestrated sequences of agents, commands, and skills.
 
 ---
 
-## Skills (157)
+## Skills (161)
 
 Skills are domain expertise modules organized in 24 categories.
 
@@ -498,7 +554,7 @@ Based on Chip Huyen's "Designing ML Systems" and Stanford CS 329S:
 | `ml-systems/robust-ai` | Reliability, monitoring, drift detection |
 | `ml-systems/deployment-paradigms` | Batch vs real-time vs streaming |
 
-### Methodology (17 skills)
+### Methodology (19 skills)
 
 | Skill | Description |
 |-------|-------------|
@@ -507,6 +563,8 @@ Based on Chip Huyen's "Designing ML Systems" and Stanford CS 329S:
 | `methodology/debugging` | Systematic debugging approach |
 | `methodology/code-review` | Review standards and checklists |
 | `methodology/tdd` | Test-driven development |
+| `methodology/test-task-generation` | Auto-generate test tasks from features |
+| `methodology/test-enforcement` | Enforce tests before task completion |
 
 ### Frameworks (10 skills)
 
@@ -735,7 +793,7 @@ If any sync issue is detected (missing pages, wrong counts, broken links), the v
 
 ## Validation & Testing
 
-OMGKIT has 5700+ automated tests ensuring system integrity.
+OMGKIT has 7300+ automated tests ensuring system integrity.
 
 ### Run Tests
 

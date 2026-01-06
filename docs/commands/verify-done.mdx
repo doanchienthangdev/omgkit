@@ -1,0 +1,219 @@
+---
+title: "/quality:verify-done"
+description: "Verify all test requirements are met before marking a task or feature as complete. Checks test existence, coverage, and passing status."
+icon: "shield-check"
+---
+
+<Info>
+  **Category:** Quality
+
+  **Syntax:** `/quality:verify-done`
+</Info>
+
+## Overview
+
+Verify all test requirements are met before marking a task or feature as complete. Checks test existence, coverage, and passing status.
+
+## Quick Start
+
+```bash
+/quality:verify-done
+```
+
+
+# /quality:verify-done
+
+Verify that all test requirements are satisfied before marking work as done.
+
+## Usage
+
+```bash
+/quality:verify-done [task-id]
+/quality:verify-done --all
+/quality:verify-done --feature <feature-name>
+```
+
+## What It Checks
+
+### 1. Test Existence
+- Unit tests exist for changed files
+- Integration tests for API/DB changes
+- Test files follow naming conventions
+
+### 2. Test Execution
+- All tests pass (no failures)
+- No skipped tests for critical paths
+- No flaky tests detected
+
+### 3. Coverage Requirements
+- Unit coverage meets minimum (default: 80%)
+- Branch coverage meets minimum (default: 70%)
+- Overall coverage meets threshold
+
+### 4. Test Quality
+- Tests are meaningful (not empty)
+- Assertions present
+- Edge cases covered
+
+## Output Format
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║                    VERIFY DONE REPORT                         ║
+╚══════════════════════════════════════════════════════════════╝
+
+Task: TASK-042 - Implement user profile API
+Status: ❌ BLOCKED
+
+┌─────────────────────────────────────────────────────────────┐
+│ Test Existence                                               │
+├─────────────────────────────────────────────────────────────┤
+│ ✅ Unit tests found: tests/unit/user.test.ts                │
+│ ✅ Integration tests found: tests/integration/user.int.ts   │
+│ ⚠️  E2E tests: Not found (optional)                         │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ Test Results                                                 │
+├─────────────────────────────────────────────────────────────┤
+│ Total: 24 | Passed: 23 | Failed: 1 | Skipped: 0            │
+│ ❌ FAILING: user.test.ts > should validate email format     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ Coverage                                                     │
+├─────────────────────────────────────────────────────────────┤
+│ Lines:     78% ████████░░ (min: 80%) ❌                      │
+│ Branches:  72% ███████░░░ (min: 70%) ✅                      │
+│ Functions: 85% █████████░ (min: 80%) ✅                      │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ Blocking Issues                                              │
+├─────────────────────────────────────────────────────────────┤
+│ 1. ❌ Test failure: user.test.ts line 45                    │
+│ 2. ❌ Line coverage 78% below minimum 80%                   │
+│    Uncovered: src/handlers/user.ts:52-58                    │
+└─────────────────────────────────────────────────────────────┘
+
+Action Required:
+  1. Fix failing test in user.test.ts
+  2. Add tests for lines 52-58 in user.ts
+
+Run: npm test -- --watch to fix issues
+```
+
+## Configuration
+
+Reads from `.omgkit/workflow.yaml`:
+
+```yaml
+testing:
+  enforcement:
+    level: standard
+  coverage_gates:
+    unit:
+      minimum: 80
+    integration:
+      minimum: 60
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+```
+
+## Exit Codes
+
+- `0`: All requirements met, can mark as done
+- `1`: Blocking issues found, cannot complete
+- `2`: Warnings only, can complete with acknowledgment
+
+## Examples
+
+### Check specific task
+```bash
+/quality:verify-done TASK-042
+```
+
+### Check all pending tasks
+```bash
+/quality:verify-done --all
+```
+
+### Check entire feature
+```bash
+/quality:verify-done --feature user-profile
+```
+
+## Integration
+
+Works with:
+- `/dev:feature-tested` - Generates tasks with test requirements
+- `/quality:coverage-check` - Detailed coverage analysis
+- `/sprint:sprint-end` - Validates all sprint tasks
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Bash** - Enables bash capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+
+
+## Usage Graph
+
+### Available In Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/automated-testing](/workflows/automated-testing) | End-to-end testing automation workflow that generates test p... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/quality:verify-done
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/quality:verify-done
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 160 commands
+  </Card>
+  <Card title="Quality Commands" icon="shield-check" href="/commands/overview#quality">
+    More quality commands
+  </Card>
+</CardGroup>

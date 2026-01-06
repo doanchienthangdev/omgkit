@@ -135,6 +135,39 @@ hooks:
       - test
 
 # =============================================================================
+# TESTING AUTOMATION
+# =============================================================================
+testing:
+  # Enforcement level: soft | standard | strict
+  enforcement:
+    level: standard
+
+  # Auto-generate test tasks when creating features
+  auto_generate_tasks: true
+
+  # Coverage gates
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+    integration:
+      minimum: 60
+      target: 75
+    overall:
+      minimum: 75
+      target: 85
+
+  # Required test types
+  required_test_types:
+    - unit
+    - integration
+
+  # Block completion on test failure
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+
+# =============================================================================
 # FEATURE FLAGS
 # =============================================================================
 feature_flags:

@@ -1,0 +1,256 @@
+---
+title: "/quality:test-plan"
+description: "Generate a comprehensive test plan for a feature or task, identifying all required test types, test cases, and acceptance criteria."
+icon: "shield-check"
+---
+
+<Info>
+  **Category:** Quality
+
+  **Syntax:** `/quality:test-plan`
+</Info>
+
+## Overview
+
+Generate a comprehensive test plan for a feature or task, identifying all required test types, test cases, and acceptance criteria.
+
+## Quick Start
+
+```bash
+/quality:test-plan
+```
+
+
+# /quality:test-plan
+
+Generate a comprehensive test plan for a feature, identifying required tests, coverage targets, and acceptance criteria.
+
+## Usage
+
+```bash
+/quality:test-plan <feature-description>
+/quality:test-plan --file src/handlers/user.ts
+/quality:test-plan --task TASK-042
+```
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--file` | Generate plan for specific file | - |
+| `--task` | Generate plan for existing task | - |
+| `--type` | Focus on specific test type | all |
+| `--output` | Output format (md, yaml, json) | md |
+
+## Output Format
+
+```markdown
+# Test Plan: User Profile API
+
+## Overview
+
+Feature: User Profile Management API
+Files Changed: 3
+Estimated Tests: 24
+Coverage Target: 90%
+
+## Test Types Required
+
+| Type | Required | Reason |
+|------|----------|--------|
+| Unit | Yes | Business logic in handlers |
+| Integration | Yes | Database operations |
+| Contract | Yes | Public API endpoint |
+| E2E | Optional | User-facing feature |
+| Security | Yes | Authentication required |
+| Performance | Optional | High-traffic endpoint |
+
+## Test Cases
+
+### Unit Tests (12 tests)
+
+#### Handler Tests
+1. **createUserProfile_validInput_createsProfile**
+   - Given: Valid user data
+   - When: createProfile called
+   - Then: Profile created in database
+
+2. **createUserProfile_duplicateEmail_throwsError**
+   - Given: Email already exists
+   - When: createProfile called
+   - Then: DuplicateEmailError thrown
+
+3. **createUserProfile_invalidEmail_throwsValidationError**
+   - Given: Invalid email format
+   - When: createProfile called
+   - Then: ValidationError thrown
+
+[... more test cases ...]
+
+### Integration Tests (8 tests)
+
+#### API Tests
+1. **POST /api/profile - success**
+   - Request: Valid profile data
+   - Expected: 201 Created with profile
+
+2. **POST /api/profile - duplicate**
+   - Request: Existing email
+   - Expected: 409 Conflict
+
+[... more test cases ...]
+
+### Security Tests (4 tests)
+
+1. **Unauthenticated access blocked**
+2. **SQL injection prevented**
+3. **XSS in profile fields prevented**
+4. **Rate limiting enforced**
+
+## Coverage Targets
+
+| File | Target | Focus Areas |
+|------|--------|-------------|
+| src/handlers/profile.ts | 95% | All branches |
+| src/services/profileService.ts | 90% | Error paths |
+| src/validators/profileValidator.ts | 100% | All rules |
+
+## Test File Structure
+
+```
+tests/
+├── unit/
+│   ├── handlers/
+│   │   └── profile.test.ts
+│   └── services/
+│       └── profileService.test.ts
+├── integration/
+│   └── api/
+│       └── profile.int.test.ts
+└── security/
+    └── profile.security.test.ts
+```
+
+## Acceptance Criteria
+
+- [ ] All 24 tests passing
+- [ ] Line coverage ≥ 90%
+- [ ] Branch coverage ≥ 80%
+- [ ] No security vulnerabilities
+- [ ] API contract validated
+- [ ] Performance baseline established
+
+## Dependencies
+
+- Requires: User authentication implemented
+- Mocks needed: Email service, Database
+- Test data: User fixtures in tests/fixtures/
+
+## Estimated Effort
+
+| Activity | Time |
+|----------|------|
+| Unit tests | 2 hours |
+| Integration tests | 1.5 hours |
+| Security tests | 1 hour |
+| Documentation | 0.5 hours |
+| **Total** | **5 hours** |
+```
+
+## Integration
+
+### With Feature Development
+```bash
+/dev:feature-tested "Add user profile API"
+# Automatically calls /quality:test-plan internally
+```
+
+### Standalone Planning
+```bash
+/quality:test-plan "Payment processing module"
+# Outputs test plan for review before implementation
+```
+
+## Examples
+
+### Generate plan for new feature
+```bash
+/quality:test-plan "User authentication with OAuth"
+```
+
+### Generate plan for existing code
+```bash
+/quality:test-plan --file src/services/payment.ts
+```
+
+### Generate plan for task
+```bash
+/quality:test-plan --task TASK-042
+```
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Grep** - Enables grep capabilities
+- **Glob** - Enables glob capabilities
+- **Task** - Enables task capabilities
+
+
+## Usage Graph
+
+### Available In Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/automated-testing](/workflows/automated-testing) | End-to-end testing automation workflow that generates test p... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/quality:test-plan
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/quality:test-plan
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 160 commands
+  </Card>
+  <Card title="Quality Commands" icon="shield-check" href="/commands/overview#quality">
+    More quality commands
+  </Card>
+</CardGroup>

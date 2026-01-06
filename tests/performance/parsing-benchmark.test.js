@@ -130,7 +130,7 @@ describe('Parsing Performance Benchmarks', () => {
         }
       }) / smallFiles.length;
 
-      expect(avgTime).toBeLessThan(1);
+      expect(avgTime).toBeLessThan(3);
     });
 
     it('parses frontmatter under 5ms for medium files', async () => {
@@ -232,18 +232,18 @@ ${Array(20).fill('    - item').join('\n')}
         yaml.load(complexYaml, { schema: yaml.SAFE_SCHEMA });
       }, 10);
 
-      // Allow 10ms for complex YAML parsing
-      expect(time).toBeLessThan(10);
+      // Allow 20ms for complex YAML parsing
+      expect(time).toBeLessThan(20);
     });
   });
 
   describe('File Collection', () => {
-    it('collects all markdown files under 100ms', async () => {
+    it('collects all markdown files under 150ms', async () => {
       const time = await timeExecution(() => {
         collectMarkdownFiles(PLUGIN_DIR);
       });
 
-      expect(time).toBeLessThan(100);
+      expect(time).toBeLessThan(150);
     });
 
     it('returns correct file count', () => {

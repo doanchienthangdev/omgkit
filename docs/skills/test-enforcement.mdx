@@ -1,0 +1,493 @@
+---
+title: "Test Enforcement"
+description: "The agent enforces mandatory test completion before any task or feature can be marked as done, ensuring code quality through strict validation gates and evidence-based completion criteria."
+icon: "diagram-project"
+---
+
+<Info>
+  **Category:** Methodology
+
+  **Auto-Detection:** OMGKIT automatically detects when this skill is needed based on your project files.
+</Info>
+
+## Overview
+
+The agent enforces mandatory test completion before any task or feature can be marked as done, ensuring code quality through strict validation gates and evidence-based completion criteria.
+
+## What You Get
+
+When this skill is active, agents automatically apply:
+
+<Check>Industry best practices</Check>
+<Check>Idiomatic patterns</Check>
+<Check>Security considerations</Check>
+<Check>Performance optimizations</Check>
+
+
+# Test Enforcement
+
+## Overview
+
+This skill defines the enforcement rules and mechanisms that ensure tests are written, executed, and passing before any implementation work can be considered complete. It provides a framework for blocking premature completion and requiring evidence of test coverage.
+
+## Core Principle
+
+**No code is "done" without tests.**
+
+```
+Definition of Done:
+├── Code implemented ✓
+├── Tests written ✓
+├── Tests passing ✓
+├── Coverage met ✓
+├── Review approved ✓
+└── THEN → Done
+```
+
+## Enforcement Levels
+
+### Level 1: Soft Enforcement (Warning)
+- Warn when completing without tests
+- Allow override with justification
+- Log for retrospective
+
+### Level 2: Standard Enforcement (Default)
+- Block completion without tests
+- Require minimum coverage
+- Allow emergency override with approval
+
+### Level 3: Strict Enforcement (Critical Systems)
+- Block all completion without full test suite
+- Require coverage above target
+- No overrides allowed
+
+## Configuration
+
+```yaml
+# .omgkit/workflow.yaml
+testing:
+  enforcement:
+    level: standard  # soft | standard | strict
+
+  requirements:
+    unit_tests: required
+    integration_tests: required
+    e2e_tests: optional
+    security_tests: conditional  # Required for auth features
+
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+      block_below: 70
+    integration:
+      minimum: 60
+      target: 75
+      block_below: 50
+    overall:
+      minimum: 75
+      target: 85
+
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+    on_missing_test_types: true
+
+  overrides:
+    allow_emergency: true
+    require_approval: true
+    log_all_overrides: true
+```
+
+## Pre-Completion Checklist
+
+### Mandatory Checks (Cannot Override)
+
+```markdown
+## Blocking Criteria
+
+- [ ] **Tests Exist**: At least one test file for changed code
+- [ ] **Tests Execute**: All tests run without errors
+- [ ] **Tests Pass**: Zero failing tests
+- [ ] **No Skipped Critical**: No skipped tests for critical paths
+```
+
+### Standard Checks (Override with Approval)
+
+```markdown
+## Standard Criteria
+
+- [ ] **Unit Coverage**: ≥80% line coverage
+- [ ] **Branch Coverage**: ≥70% branch coverage
+- [ ] **Integration Tests**: Present for API/DB changes
+- [ ] **No Flaky Tests**: Tests deterministic
+- [ ] **Test Isolation**: No test interdependencies
+```
+
+### Quality Checks (Override with Justification)
+
+```markdown
+## Quality Criteria
+
+- [ ] **Mutation Score**: ≥60% mutations killed
+- [ ] **Performance Tests**: Present for perf-critical code
+- [ ] **Security Tests**: Present for auth/input handling
+- [ ] **E2E Tests**: Present for user-facing features
+```
+
+## Enforcement Workflow
+
+### 1. Task Completion Attempt
+
+```
+Developer: "Mark TASK-042 as done"
+
+System Check:
+├── Has tests? → Yes
+├── Tests passing? → Yes
+├── Coverage ≥ 80%? → 75% (FAIL)
+└── Block completion
+
+Response: "Cannot mark as done. Coverage is 75%, minimum is 80%.
+          Add tests for uncovered lines: src/handlers/user.ts:45-52"
+```
+
+### 2. Override Request
+
+```
+Developer: "Override coverage requirement"
+
+System Check:
+├── Enforcement level? → Standard
+├── Override allowed? → Yes, with approval
+├── Approval required? → Yes
+└── Request approval
+
+Response: "Override requested. Waiting for approval from:
+          - Tech Lead
+          - QA Lead
+          Justification required."
+```
+
+### 3. Emergency Override
+
+```
+Developer: "Emergency override - production hotfix"
+
+System Check:
+├── Emergency flag? → Yes
+├── Emergency override allowed? → Yes
+├── Logging? → Enabled
+└── Grant temporary override
+
+Response: "Emergency override granted.
+          ⚠️ This is logged and will be reviewed.
+          ⚠️ Tests must be added within 24 hours.
+          ⚠️ Follow-up task created: TASK-043 Add tests for hotfix"
+```
+
+## Evidence Requirements
+
+### Test Execution Evidence
+
+```markdown
+## Required Evidence
+
+### Test Report
+- Total tests: 42
+- Passed: 42
+- Failed: 0
+- Skipped: 0
+- Duration: 3.2s
+
+### Coverage Report
+| File | Lines | Branches | Functions |
+|------|-------|----------|-----------|
+| user.ts | 92% | 85% | 100% |
+| auth.ts | 88% | 80% | 95% |
+| **Total** | **90%** | **82%** | **97%** |
+
+### Attached Artifacts
+- [ ] test-report.json
+- [ ] coverage/lcov.info
+- [ ] screenshots/ (for E2E)
+```
+
+### Approval Evidence (for Overrides)
+
+```markdown
+## Override Approval
+
+**Requested by:** developer@team.com
+**Approved by:** techlead@team.com
+**Reason:** Legacy code refactor - tests will be added in TASK-044
+**Follow-up:** TASK-044 due in 3 days
+**Logged at:** 2024-01-06T14:30:00Z
+```
+
+## Integration Points
+
+### 1. Todo List Integration
+
+```
+Before enforcement:
+- [ ] TASK-042: Implement user endpoint
+- [ ] TEST-042: Add tests for user endpoint
+
+After attempting completion without tests:
+- [x] TASK-042: Implement user endpoint
+- [ ] TEST-042: Add tests for user endpoint ⚠️ BLOCKING
+
+Status: Feature blocked until TEST-042 complete
+```
+
+### 2. Git Hook Integration
+
+```bash
+# pre-push hook
+#!/bin/bash
+
+echo "Running test enforcement checks..."
+
+# Run tests
+npm test
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failing. Push blocked."
+  exit 1
+fi
+
+# Check coverage
+coverage=$(npm run coverage:check --silent)
+if [ $coverage -lt 80 ]; then
+  echo "❌ Coverage $coverage% below minimum 80%. Push blocked."
+  exit 1
+fi
+
+echo "✅ Test enforcement passed."
+```
+
+### 3. PR Integration
+
+```yaml
+# GitHub Actions check
+name: Test Enforcement
+on: [pull_request]
+
+jobs:
+  enforce-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Check Coverage
+        run: |
+          coverage=$(npm run coverage:json | jq '.total.lines.pct')
+          if (( $(echo "$coverage < 80" | bc -l) )); then
+            echo "Coverage $coverage% below minimum"
+            exit 1
+          fi
+
+      - name: Verify Test Types
+        run: |
+          if [ ! -f "tests/unit/*.test.ts" ]; then
+            echo "Missing unit tests"
+            exit 1
+          fi
+```
+
+## Enforcement Messages
+
+### Blocking Messages
+
+```
+❌ COMPLETION BLOCKED: Tests Required
+
+Your task cannot be marked as done because:
+• No test files found for changed code
+• Add tests to: tests/unit/user.test.ts
+
+Run: /quality:verify-done for detailed requirements
+```
+
+```
+❌ COMPLETION BLOCKED: Coverage Below Minimum
+
+Your task cannot be marked as done because:
+• Current coverage: 72%
+• Minimum required: 80%
+
+Uncovered lines:
+• src/handlers/user.ts: lines 45-52, 78-82
+• src/services/auth.ts: lines 23-25
+
+Run: npm run test:coverage for detailed report
+```
+
+### Warning Messages
+
+```
+⚠️ WARNING: Optional Tests Missing
+
+Your task can be completed, but consider adding:
+• Performance tests (recommended for API endpoints)
+• Security tests (recommended for auth handling)
+
+These tests improve code quality and catch issues early.
+```
+
+### Success Messages
+
+```
+✅ TEST ENFORCEMENT PASSED
+
+All requirements met:
+• Tests exist: ✓
+• Tests passing: ✓ (42/42)
+• Coverage: ✓ (92%)
+• No skipped: ✓
+
+Task can be marked as done.
+```
+
+## Override Procedures
+
+### Standard Override
+
+1. Request override with justification
+2. Wait for approval (Tech Lead or QA)
+3. Document reason in task
+4. Create follow-up task for tests
+5. Complete original task
+
+### Emergency Override
+
+1. Flag as emergency
+2. System grants temporary override
+3. Complete task
+4. Follow-up task auto-created
+5. Must add tests within SLA (24-48 hours)
+
+### Override Audit
+
+All overrides are logged:
+```json
+{
+  "task_id": "TASK-042",
+  "override_type": "coverage",
+  "requested_by": "developer@team.com",
+  "approved_by": "techlead@team.com",
+  "reason": "Legacy code, tests in follow-up",
+  "follow_up_task": "TASK-043",
+  "timestamp": "2024-01-06T14:30:00Z",
+  "enforcement_level": "standard"
+}
+```
+
+## Metrics and Reporting
+
+### Enforcement Metrics
+
+```
+Weekly Report:
+├── Tasks completed: 42
+├── With tests: 40 (95%)
+├── Overrides used: 2 (5%)
+│   ├── Emergency: 1
+│   └── Approved: 1
+├── Average coverage: 87%
+└── Test-first tasks: 15 (36%)
+```
+
+### Coverage Trends
+
+```
+Coverage Trend (Last 4 Weeks):
+Week 1: 78% ████████
+Week 2: 82% █████████
+Week 3: 85% █████████
+Week 4: 87% █████████
+Target:  90% ██████████
+```
+
+## Best Practices
+
+### DO
+- Set realistic coverage minimums
+- Allow emergency overrides for hotfixes
+- Create follow-up tasks for overrides
+- Review override patterns in retrospectives
+- Celebrate test-first development
+
+### DON'T
+- Set coverage targets too high initially
+- Block all overrides (causes workarounds)
+- Skip enforcement for "simple" changes
+- Ignore flaky test patterns
+- Punish developers for using overrides appropriately
+
+## Escalation Path
+
+```
+Coverage below minimum
+    ↓
+Request override
+    ↓
+Tech Lead approval required
+    ↓
+If denied → Add tests
+    ↓
+If approved → Create follow-up task
+    ↓
+Complete with documented override
+```
+
+## Related Documentation
+
+- [Test Task Generation](../test-task-generation/SKILL.md)
+- [Verification Before Completion](../verification-before-completion/SKILL.md)
+- [Workflow Config](../../devops/workflow-config/SKILL.md)
+- [Git Hooks](../../devops/git-hooks/SKILL.md)
+
+
+## Usage Graph
+
+### Used By Workflows
+
+| Workflow | Description |
+|----------|-------------|
+| [testing/automated-testing](/workflows/automated-testing) | End-to-end testing automation workflow that generates test p... |
+
+
+## Configuration
+
+You can customize skill behavior in your project config:
+
+```yaml
+# .omgkit/config.yaml
+skills:
+  test-enforcement:
+    enabled: true
+    # Add skill-specific settings here
+```
+
+## When This Skill Activates
+
+OMGKIT detects and activates this skill when it finds:
+
+- Relevant file extensions in your project
+- Configuration files specific to this technology
+- Package dependencies in package.json, requirements.txt, etc.
+
+## Related Skills
+
+<CardGroup cols={2}>
+  <Card title="All Skills" icon="brain" href="/skills/overview">
+    See all 159 skills
+  </Card>
+  <Card title="Methodology" icon="diagram-project" href="/skills/overview#methodology">
+    More methodology skills
+  </Card>
+</CardGroup>

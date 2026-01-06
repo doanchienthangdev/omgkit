@@ -90,6 +90,27 @@ hooks:
     actions:
       - test
 
+testing:
+  enforcement:
+    level: standard
+  auto_generate_tasks: true
+  coverage_gates:
+    unit:
+      minimum: 80
+      target: 90
+    integration:
+      minimum: 60
+      target: 75
+    overall:
+      minimum: 75
+      target: 85
+  required_test_types:
+    - unit
+    - integration
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+
 feature_flags:
   provider: none
 
@@ -98,3 +119,4 @@ ci:
   required_checks:
     - build
     - test
+    - coverage

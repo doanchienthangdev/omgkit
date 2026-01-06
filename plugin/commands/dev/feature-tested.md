@@ -1,0 +1,208 @@
+---
+name: Feature Tested
+description: Create a feature with automatically generated test tasks. Ensures every implementation task has corresponding test coverage before the feature can be marked complete.
+category: dev
+related_skills:
+  - methodology/test-task-generation
+  - methodology/test-enforcement
+  - methodology/executing-plans
+related_commands:
+  - /quality:test-plan
+  - /quality:verify-done
+  - /dev:feature
+  - /dev:test
+allowed-tools: Task, Read, Write, Bash, Grep, Glob
+---
+
+# /dev:feature-tested
+
+Build a feature with automatically generated test tasks. This command ensures comprehensive test coverage by creating test tasks alongside implementation tasks.
+
+## Usage
+
+```bash
+/dev:feature-tested <feature-description>
+/dev:feature-tested "Add user authentication" --coverage 90
+/dev:feature-tested "Payment processing" --test-types unit,integration,e2e
+```
+
+## Options
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--coverage` | Minimum coverage target | 80% |
+| `--test-types` | Required test types | unit,integration |
+| `--tdd` | Use TDD approach (tests first) | false |
+| `--strict` | Strict enforcement (no overrides) | false |
+
+## How It Works
+
+### 1. Feature Analysis
+Analyzes the feature description to determine:
+- Feature type (API, UI, business logic, etc.)
+- Required test types
+- Coverage targets
+- Acceptance criteria
+
+### 2. Task Generation
+Creates implementation tasks AND corresponding test tasks:
+
+```
+Feature: Add user profile API
+
+Generated Tasks:
+┌─────────────────────────────────────────────────────────────┐
+│ Implementation Tasks                                         │
+├─────────────────────────────────────────────────────────────┤
+│ ☐ TASK-001: Create profile database schema                  │
+│ ☐ TASK-002: Implement profile service                       │
+│ ☐ TASK-003: Create profile API endpoints                    │
+│ ☐ TASK-004: Add input validation                            │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ Test Tasks (Auto-Generated)                                  │
+├─────────────────────────────────────────────────────────────┤
+│ ☐ TEST-001: Unit tests for profile service                  │
+│ ☐ TEST-002: Integration tests for profile API               │
+│ ☐ TEST-003: Contract tests for API schema                   │
+│ ☐ TEST-004: Security tests for profile endpoints            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3. Enforcement
+- Cannot mark feature as "done" until all test tasks complete
+- Coverage must meet minimum threshold
+- All tests must pass
+
+## Output Format
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║              FEATURE WITH TESTS CREATED                       ║
+╚══════════════════════════════════════════════════════════════╝
+
+Feature: Add user profile API
+ID: FEAT-042
+Coverage Target: 90%
+
+┌─────────────────────────────────────────────────────────────┐
+│ Implementation Tasks (4)                                     │
+├─────────────────────────────────────────────────────────────┤
+│ TASK-001: Create profile database schema          [Pending] │
+│ TASK-002: Implement profile service               [Pending] │
+│ TASK-003: Create profile API endpoints            [Pending] │
+│ TASK-004: Add input validation                    [Pending] │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ Test Tasks (4) - Auto-Generated                              │
+├─────────────────────────────────────────────────────────────┤
+│ TEST-001: Unit tests for profile service          [Pending] │
+│   → Coverage target: 90% for src/services/profile.ts       │
+│   → Test file: tests/unit/services/profile.test.ts         │
+│                                                              │
+│ TEST-002: Integration tests for profile API       [Pending] │
+│   → Coverage target: 75% for API endpoints                 │
+│   → Test file: tests/integration/api/profile.int.test.ts   │
+│                                                              │
+│ TEST-003: Contract tests for API schema           [Pending] │
+│   → Validates: Request/response schemas                    │
+│   → Test file: tests/contract/profile.contract.test.ts     │
+│                                                              │
+│ TEST-004: Security tests for profile endpoints    [Pending] │
+│   → Checks: Auth, injection, XSS                           │
+│   → Test file: tests/security/profile.security.test.ts     │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ Completion Requirements                                      │
+├─────────────────────────────────────────────────────────────┤
+│ ☐ All implementation tasks complete                         │
+│ ☐ All test tasks complete                                   │
+│ ☐ Overall coverage ≥ 90%                                    │
+│ ☐ All tests passing                                         │
+│ ☐ No security vulnerabilities                               │
+│ ☐ Code review approved                                      │
+└─────────────────────────────────────────────────────────────┘
+
+Next: Start with TASK-001 or use --tdd to write tests first
+```
+
+## TDD Mode
+
+With `--tdd` flag, tests are created and executed first:
+
+```bash
+/dev:feature-tested "Add user profile API" --tdd
+```
+
+Flow:
+1. Generate test tasks first
+2. Write failing tests (Red)
+3. Implement to pass tests (Green)
+4. Refactor (Refactor)
+5. Verify coverage
+
+## Workflow Integration
+
+### Sprint Planning
+```bash
+/sprint:sprint-new
+# Add feature with tests
+/dev:feature-tested "User profile management"
+```
+
+### Daily Development
+```bash
+# Check what's needed
+/quality:verify-done FEAT-042
+
+# Work on implementation
+# Work on tests
+# Verify completion
+/quality:verify-done FEAT-042
+```
+
+### Feature Completion
+```bash
+# Attempt to complete
+/quality:verify-done FEAT-042
+
+# If all requirements met:
+# ✅ Feature FEAT-042 marked as DONE
+
+# If requirements not met:
+# ❌ Cannot complete: Coverage 75% below 90% minimum
+```
+
+## Examples
+
+### Basic feature with tests
+```bash
+/dev:feature-tested "Add user authentication"
+```
+
+### With strict coverage
+```bash
+/dev:feature-tested "Payment processing" --coverage 95 --strict
+```
+
+### TDD approach
+```bash
+/dev:feature-tested "Shopping cart" --tdd
+```
+
+### Specific test types
+```bash
+/dev:feature-tested "Admin dashboard" --test-types unit,e2e,security
+```
+
+## Comparison with /dev:feature
+
+| Aspect | /dev:feature | /dev:feature-tested |
+|--------|-------------|---------------------|
+| Test tasks | Manual | Auto-generated |
+| Enforcement | Soft | Hard (blocking) |
+| Coverage tracking | Manual | Automatic |
+| Completion check | Manual | Automatic |

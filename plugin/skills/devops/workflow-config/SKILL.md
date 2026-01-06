@@ -1,18 +1,23 @@
 ---
 name: Workflow Config System
-description: The agent implements a centralized workflow configuration system for Git workflows, enabling set-once-use-everywhere automation for trunk-based development, gitflow, and github-flow patterns.
+description: The agent implements a centralized workflow configuration system for Git workflows, enabling set-once-use-everywhere automation for trunk-based development, gitflow, and github-flow patterns with integrated testing automation.
 category: devops
 related_skills:
   - devops/git-hooks
   - devops/feature-flags
   - devops/github-actions
   - methodology/finishing-development-branch
+  - methodology/test-task-generation
+  - methodology/test-enforcement
 related_commands:
   - /workflow:init
   - /workflow:trunk-based
   - /workflow:status
   - /git:commit
   - /git:pr
+  - /quality:verify-done
+  - /quality:coverage-check
+  - /dev:feature-tested
 ---
 
 # Workflow Config System
@@ -290,6 +295,57 @@ feature_flags:
   require_for_wip: true
 
 # =============================================================================
+# TESTING AUTOMATION SETTINGS
+# =============================================================================
+testing:
+  # Enforcement level: soft | standard | strict
+  enforcement:
+    level: standard
+
+  # Auto-generate test tasks when creating features
+  auto_generate_tasks: true
+
+  # Coverage gates (minimum thresholds)
+  coverage_gates:
+    unit:
+      minimum: 80        # Block if below
+      target: 90         # Goal to achieve
+      excellent: 95      # Exceptional
+    integration:
+      minimum: 60
+      target: 75
+    branch:
+      minimum: 70
+      target: 80
+    overall:
+      minimum: 75
+      target: 85
+
+  # Required test types for all features
+  required_test_types:
+    - unit
+    - integration
+
+  # Optional test types (generated when applicable)
+  optional_test_types:
+    - e2e
+    - security
+    - performance
+    - contract
+
+  # Blocking behavior
+  blocking:
+    on_test_failure: true
+    on_coverage_below_minimum: true
+    on_missing_test_types: true
+
+  # Override settings
+  overrides:
+    allow_emergency: true
+    require_approval: true
+    log_all_overrides: true
+
+# =============================================================================
 # CI/CD INTEGRATION
 # =============================================================================
 ci:
@@ -301,6 +357,7 @@ ci:
     - build
     - test
     - lint
+    - coverage  # Added coverage check
 
   # Allow merge with failing checks (not recommended)
   allow_failing_checks: false
