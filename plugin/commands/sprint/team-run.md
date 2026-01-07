@@ -1,13 +1,19 @@
 ---
 description: Run AI team on sprint tasks with configurable test enforcement
 allowed-tools: Task, Read, Write, Bash, Grep, Glob
-argument-hint: "[--mode MODE] [--no-test] [--test-level LEVEL]"
+argument-hint: "[--mode MODE] [--no-test] [--test-level LEVEL] [--ref=<path>]"
+references:
+  supported: true
+  inherit_from_sprint: true
+  types: [file, folder, glob]
 related_skills:
   - methodology/test-enforcement
   - methodology/test-task-generation
   - omega/omega-sprint
+  - autonomous/project-orchestration
 related_commands:
   - /sprint:team-status
+  - /sprint:sprint-new
   - /quality:verify-done
   - /quality:coverage-check
 testing:
@@ -44,6 +50,24 @@ This command respects project testing configuration from `.omgkit/workflow.yaml`
 | `--no-test` | Skip test enforcement (soft mode only) | `/sprint:team-run --no-test` |
 | `--test-level <level>` | Override enforcement level | `/sprint:team-run --test-level strict` |
 | `--with-test` | Force test enforcement | `/sprint:team-run --with-test` |
+| `--ref=<path>` | Additional reference sources | `/sprint:team-run --ref=specs/api.yaml` |
+
+### Reference Options
+
+The `--ref` parameter provides additional context for task execution:
+
+```bash
+# Use sprint references (inherited automatically)
+/sprint:team-run
+
+# Add additional references for this run
+/sprint:team-run --ref=docs/architecture.md
+
+# Override sprint references
+/sprint:team-run --ref=specs/api-v2.yaml
+```
+
+**Reference Inheritance**: By default, team-run inherits references from the current sprint. Use `--ref` to add or override.
 
 ### Enforcement Levels
 

@@ -88,7 +88,37 @@ OMGKIT brings agile methodology to AI-assisted development:
 - **Sprints**: Time-boxed development cycles
 - **AI Team**: Autonomous execution with human oversight
 
-### 4. Testing Automation (New)
+### 4. Reference-Aware Planning (New)
+
+Use PRDs, specs, and design documents to inform sprint planning:
+
+```bash
+# Create sprint with PRD reference
+/sprint:sprint-new "Auth Sprint" --ref=.omgkit/artifacts/prd-auth.md
+
+# Sprint with multiple references
+/sprint:sprint-new "Payment" --ref=artifacts/prd.md,specs/api.yaml
+
+# Sprint with AI proposal based on references
+/sprint:sprint-new "MVP" --propose --ref=.omgkit/artifacts/
+```
+
+Configure in `.omgkit/workflow.yaml`:
+
+```yaml
+references:
+  enabled: true
+  auto_suggest: true
+  max_tokens: 10000
+  extract_sections:
+    - requirements
+    - user_stories
+    - acceptance_criteria
+```
+
+References automatically propagate to `/sprint:team-run` and `/sprint:backlog-add`.
+
+### 5. Testing Automation
 
 OMGKIT includes a comprehensive testing automation system:
 
@@ -347,6 +377,13 @@ Commands are slash-prefixed actions organized by namespace.
 /sprint:backlog-show    # Display backlog
 /sprint:team-run        # Run AI team
 /sprint:team-status     # Show team activity
+```
+
+**Reference-Aware Planning** (available on sprint commands):
+```bash
+/sprint:sprint-new "Auth" --ref=artifacts/prd.md     # Sprint with PRD context
+/sprint:team-run --ref=specs/api.yaml                # Add refs during execution
+/sprint:backlog-add "Login" --ref=artifacts/prd.md   # Task with ref context
 ```
 
 ### Autonomous Development (`/auto:*`)

@@ -176,3 +176,46 @@ feature_flags:
 
   # Default state for new flags
   default_state: false
+
+# =============================================================================
+# REFERENCE-AWARE PLANNING
+# =============================================================================
+references:
+  # Enable reference loading in sprints
+  enabled: true
+
+  # Auto-suggest relevant artifacts when creating sprints
+  auto_suggest: true
+
+  # Maximum tokens for reference content (prevent context overflow)
+  max_tokens: 10000
+
+  # Section extraction settings for PRD/spec files
+  extract_sections:
+    - requirements
+    - user_stories
+    - acceptance_criteria
+    - constraints
+    - api_endpoints
+
+  # Propagate references to child commands
+  propagation:
+    # Pass sprint refs to team-run
+    to_team_run: true
+
+    # Pass sprint refs to individual tasks
+    to_tasks: true
+
+    # Pass refs to feature/fix commands
+    to_dev_commands: true
+
+  # Reference validation
+  validation:
+    # Check if referenced files exist
+    check_exists: true
+
+    # Warn if references are outdated (modified after sprint creation)
+    check_freshness: true
+
+    # Maximum file age in days before warning
+    max_age_days: 30

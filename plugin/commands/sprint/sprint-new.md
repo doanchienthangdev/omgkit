@@ -1,24 +1,101 @@
 ---
-description: Create new sprint
+description: Create new sprint with optional reference sources
 allowed-tools: Task, Read, Write, Grep, Glob
-argument-hint: "[name] [--propose]"
+argument-hint: "[name] [--propose] [--ref=<path>]"
+references:
+  supported: true
+  types: [file, folder, glob]
+  default_paths:
+    - ".omgkit/artifacts/"
+related_skills:
+  - autonomous/project-orchestration
+  - methodology/agile-sprint
+related_commands:
+  - /sprint:sprint-start
+  - /sprint:team-run
+  - /sprint:backlog-add
 ---
 
-# 🏃 Sprint New: $ARGUMENTS
+# Sprint New: $ARGUMENTS
 
-Create new sprint.
+Create a new sprint with optional reference sources for context-aware planning.
 
 ## Options
-- `--propose` - AI analyzes codebase and proposes tasks
 
-## AI Proposal Analyzes
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--propose` | AI analyzes codebase and proposes tasks | `--propose` |
+| `--ref=<path>` | Reference source(s) for planning context | `--ref=artifacts/prd.md` |
+
+## Reference Options
+
+The `--ref` parameter allows you to specify reference sources that provide context for sprint planning:
+
+### Single File Reference
+```bash
+/sprint:sprint-new "Auth Sprint" --ref=.omgkit/artifacts/prd-auth.md
+```
+
+### Multiple Files Reference
+```bash
+/sprint:sprint-new "Payment Sprint" --ref=artifacts/prd.md,specs/api.yaml
+```
+
+### Folder Reference (all files)
+```bash
+/sprint:sprint-new "MVP Sprint" --ref=.omgkit/artifacts/
+```
+
+### Glob Pattern Reference
+```bash
+/sprint:sprint-new "API Sprint" --ref="specs/*.yaml"
+```
+
+## Reference Types
+
+| Type | File Patterns | Extracted Sections |
+|------|---------------|-------------------|
+| PRD | `**/prd*.md`, `**/requirements*.md` | Requirements, User Stories, Acceptance Criteria |
+| Spec | `**/spec*.md`, `**/technical*.md` | Technical specs, Architecture |
+| OpenAPI | `**/*.yaml`, `**/*.yml` | Endpoints, Schemas |
+| Design | `**/design*.md` | UI/UX flows, Mockups |
+
+## How References Work
+
+```
+/sprint:sprint-new "Feature X" --ref=artifacts/prd.md
+                    ↓
+┌─────────────────────────────────────────────────────────┐
+│  1. Load Reference Sources                              │
+│     └── Read artifacts/prd.md                           │
+│                                                          │
+│  2. Extract Relevant Sections                           │
+│     ├── Requirements                                    │
+│     ├── User Stories                                    │
+│     ├── Acceptance Criteria                             │
+│     └── Technical Constraints                           │
+│                                                          │
+│  3. Inject into Planning Context                        │
+│     └── AI plans with full context                      │
+│                                                          │
+│  4. Store Reference in Sprint                           │
+│     └── sprint.yaml includes ref sources                │
+└─────────────────────────────────────────────────────────┘
+```
+
+## AI Proposal Analysis (with --propose)
+
+When using `--propose`, AI analyzes:
+
 - TODOs and FIXMEs in code
 - Test coverage gaps
 - Documentation gaps
 - Features aligned with vision
 - Technical debt
+- **Reference documents** (when --ref provided)
 
 ## Output
+
 Save to: `.omgkit/sprints/current.yaml`
 
 ```yaml
@@ -27,5 +104,46 @@ sprint:
   status: planning
   start_date: null
   end_date: null
+
+  # Reference sources (when --ref used)
+  references:
+    - source: ".omgkit/artifacts/prd-auth.md"
+      type: prd
+      sections: [requirements, stories, acceptance]
+
   tasks: []
 ```
+
+## Context Propagation
+
+References set in sprint are automatically propagated to:
+
+- `/sprint:team-run` - Agents receive reference context
+- `/sprint:backlog-add` - New tasks can inherit sprint refs
+- `/dev:feature` - Implementation aligned with specs
+
+## Examples
+
+```bash
+# Basic sprint without references
+/sprint:sprint-new "Sprint 1"
+
+# Sprint with AI-proposed tasks
+/sprint:sprint-new "MVP Sprint" --propose
+
+# Sprint with PRD reference
+/sprint:sprint-new "Auth Sprint" --ref=.omgkit/artifacts/prd-auth.md
+
+# Sprint with multiple references and AI proposal
+/sprint:sprint-new "Payment Sprint" --propose --ref=artifacts/prd.md,specs/api.yaml
+
+# Sprint with entire artifacts folder
+/sprint:sprint-new "Full Feature" --ref=.omgkit/artifacts/
+```
+
+## Best Practices
+
+1. **Use specific references** - Point to relevant documents, not entire folders
+2. **Combine with --propose** - Let AI analyze refs and propose aligned tasks
+3. **Keep artifacts updated** - Reference docs should reflect current requirements
+4. **Link tasks to requirements** - Use `requirement_ref` in tasks for traceability

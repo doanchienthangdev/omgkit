@@ -36,6 +36,60 @@ output:
   artifacts_dir: .omgkit/artifacts
   verbose: false
 
+# Reference settings
+references:
+  # Enable reference loading in sprints and commands
+  enabled: true
+
+  # Auto-suggest relevant artifacts when planning
+  auto_suggest: true
+
+  # Default paths to search for references
+  default_paths:
+    - ".omgkit/artifacts/"
+    - "docs/"
+
+  # Maximum tokens to include from references
+  max_tokens: 10000
+
+  # File type mappings for smart extraction
+  type_mappings:
+    prd:
+      patterns:
+        - "**/prd*.md"
+        - "**/requirements*.md"
+        - "**/product*.md"
+      sections:
+        - requirements
+        - user_stories
+        - acceptance_criteria
+    spec:
+      patterns:
+        - "**/spec*.md"
+        - "**/technical*.md"
+        - "**/architecture*.md"
+      sections:
+        - overview
+        - api
+        - data_model
+    openapi:
+      patterns:
+        - "**/*.yaml"
+        - "**/*.yml"
+        - "**/openapi.*"
+      sections:
+        - paths
+        - components
+    design:
+      patterns:
+        - "**/design*.md"
+        - "**/ui*.md"
+        - "**/ux*.md"
+      sections:
+        - flows
+        - components
+        - interactions
+
 # MCP settings
 mcp:
   context7: true

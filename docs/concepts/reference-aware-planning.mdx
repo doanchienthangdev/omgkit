@@ -1,0 +1,328 @@
+---
+title: "Reference-Aware Planning"
+description: "Use PRDs, specs, and design docs to inform sprint planning"
+icon: "book-open"
+---
+
+## Overview
+
+**Reference-Aware Planning** is an OMGKIT feature that allows you to specify reference documents (PRDs, specs, designs) when creating sprints. These references provide context that helps AI generate better, more aligned sprint plans.
+
+## Why Reference-Aware Planning?
+
+Traditional sprint planning in OMGKIT analyzes your codebase for TODOs, test gaps, and technical debt. But it doesn't know about:
+
+- Product requirements (PRDs)
+- API specifications
+- Design documents
+- Business rules
+- Acceptance criteria
+
+With `--ref`, you bridge this gap by providing the context AI needs to create sprints that align with your actual requirements.
+
+## Quick Start
+
+```bash
+# Create sprint with PRD reference
+/sprint:sprint-new "User Authentication" --ref=.omgkit/artifacts/prd-auth.md
+
+# Sprint with multiple references
+/sprint:sprint-new "Payment Integration" --ref=artifacts/prd.md,specs/api-payment.yaml
+
+# Sprint with AI proposal based on references
+/sprint:sprint-new "MVP Sprint" --propose --ref=.omgkit/artifacts/
+```
+
+## Reference Types
+
+OMGKIT automatically detects document types and extracts relevant sections:
+
+<CardGroup cols={2}>
+  <Card title="PRD Documents" icon="file-lines">
+    **Patterns:** `**/prd*.md`, `**/requirements*.md`
+
+    **Extracts:** Requirements, User Stories, Acceptance Criteria, Constraints
+  </Card>
+  <Card title="Technical Specs" icon="code">
+    **Patterns:** `**/spec*.md`, `**/technical*.md`
+
+    **Extracts:** Architecture, API design, Data models
+  </Card>
+  <Card title="OpenAPI/Swagger" icon="brackets-curly">
+    **Patterns:** `**/*.yaml`, `**/openapi.*`
+
+    **Extracts:** Endpoints, Schemas, Parameters, Responses
+  </Card>
+  <Card title="Design Documents" icon="pen-ruler">
+    **Patterns:** `**/design*.md`, `**/ui*.md`
+
+    **Extracts:** UI flows, Component specs, Interactions
+  </Card>
+</CardGroup>
+
+## How It Works
+
+```
+                         ┌─────────────────────┐
+                         │  /sprint:sprint-new │
+                         │  --ref=artifacts/   │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+┌───────────────────────────────────────────────────────────────┐
+│                     Reference Loading                          │
+├───────────────────────────────────────────────────────────────┤
+│  1. Parse --ref parameter (file, folder, or glob)             │
+│  2. Load matching files                                        │
+│  3. Detect document type (PRD, spec, OpenAPI, design)         │
+│  4. Extract relevant sections based on type                    │
+│  5. Consolidate within token budget                           │
+└───────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌───────────────────────────────────────────────────────────────┐
+│                    Sprint Planning                             │
+├───────────────────────────────────────────────────────────────┤
+│  AI plans with full context from:                             │
+│  • Reference documents (requirements, specs)                   │
+│  • Codebase analysis (TODOs, test gaps)                       │
+│  • Vision and backlog                                          │
+└───────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌───────────────────────────────────────────────────────────────┐
+│                    Sprint Output                               │
+├───────────────────────────────────────────────────────────────┤
+│  sprint:                                                       │
+│    name: "User Authentication"                                 │
+│    references:                                                 │
+│      - source: "artifacts/prd-auth.md"                        │
+│        type: prd                                               │
+│    tasks:                                                      │
+│      - title: "Implement OAuth login"                         │
+│        requirement_ref: "REQ-AUTH-001"                        │
+└───────────────────────────────────────────────────────────────┘
+```
+
+## Commands with Reference Support
+
+| Command | Description | Reference Behavior |
+|---------|-------------|-------------------|
+| `/sprint:sprint-new` | Create new sprint | Sets sprint references |
+| `/sprint:team-run` | Execute sprint | Inherits sprint references |
+| `/sprint:backlog-add` | Add task to backlog | Links to specific reference |
+
+## Reference Formats
+
+### Single File
+
+```bash
+/sprint:sprint-new "Sprint 1" --ref=.omgkit/artifacts/prd.md
+```
+
+### Multiple Files
+
+```bash
+/sprint:sprint-new "Sprint 1" --ref=artifacts/prd.md,specs/api.yaml,design/flows.md
+```
+
+### Entire Folder
+
+```bash
+/sprint:sprint-new "Sprint 1" --ref=.omgkit/artifacts/
+```
+
+### Glob Pattern
+
+```bash
+/sprint:sprint-new "Sprint 1" --ref="specs/**/*.yaml"
+```
+
+## Context Propagation
+
+When you set references in a sprint, they automatically propagate:
+
+```
+/sprint:sprint-new --ref=artifacts/prd.md
+         │
+         ▼
+┌─────────────────────────────────────┐
+│  Sprint: references stored          │
+└──────────────┬──────────────────────┘
+               │
+    ┌──────────┼──────────┐
+    ▼          ▼          ▼
+┌────────┐ ┌────────┐ ┌────────┐
+│ team   │ │backlog │ │ agents │
+│ run    │ │ add    │ │        │
+└────────┘ └────────┘ └────────┘
+    │          │          │
+    └──────────┼──────────┘
+               ▼
+       All receive context
+       from sprint references
+```
+
+## Configuration
+
+### workflow.yaml
+
+```yaml
+references:
+  # Enable reference loading
+  enabled: true
+
+  # Auto-suggest relevant artifacts
+  auto_suggest: true
+
+  # Maximum tokens for reference content
+  max_tokens: 10000
+
+  # Sections to extract
+  extract_sections:
+    - requirements
+    - user_stories
+    - acceptance_criteria
+    - constraints
+
+  # Propagation settings
+  propagation:
+    to_team_run: true
+    to_tasks: true
+    to_dev_commands: true
+
+  # Validation
+  validation:
+    check_exists: true
+    check_freshness: true
+    max_age_days: 30
+```
+
+### config.yaml
+
+```yaml
+references:
+  enabled: true
+  default_paths:
+    - ".omgkit/artifacts/"
+    - "docs/"
+
+  type_mappings:
+    prd:
+      patterns:
+        - "**/prd*.md"
+        - "**/requirements*.md"
+      sections:
+        - requirements
+        - user_stories
+        - acceptance_criteria
+```
+
+## Artifacts Folder Structure
+
+Organize your reference documents in `.omgkit/artifacts/`:
+
+```
+.omgkit/artifacts/
+├── data/                    # Sample data, schemas
+│   ├── schema.sql
+│   └── sample-users.json
+├── docs/                    # PRDs, requirements
+│   ├── prd-auth.md
+│   └── user-stories.md
+├── knowledge/               # Business rules, glossary
+│   ├── glossary.md
+│   └── business-rules.md
+├── research/                # Analysis, research
+│   └── competitor-analysis.md
+└── README.md
+```
+
+## Linking Tasks to Requirements
+
+When adding tasks, link them to specific requirements:
+
+```bash
+/backlog:add "Implement OAuth login" --type feature --req=REQ-AUTH-001
+```
+
+This creates traceability:
+
+```yaml
+tasks:
+  - id: TASK-042
+    title: "Implement OAuth login"
+    reference:
+      requirement_id: "REQ-AUTH-001"
+      source: "artifacts/prd-auth.md"
+```
+
+## Best Practices
+
+<Steps>
+  <Step title="Use Specific References">
+    Point to specific files rather than entire folders. More specific = better context.
+
+    ```bash
+    # Good
+    --ref=artifacts/prd-auth.md
+
+    # Less optimal
+    --ref=artifacts/
+    ```
+  </Step>
+  <Step title="Combine with --propose">
+    Let AI analyze references and propose aligned tasks:
+
+    ```bash
+    /sprint:sprint-new "Auth Sprint" --propose --ref=artifacts/prd-auth.md
+    ```
+  </Step>
+  <Step title="Keep References Updated">
+    Outdated reference docs lead to misaligned sprints. Update artifacts when requirements change.
+  </Step>
+  <Step title="Use Standard Headers">
+    For best extraction, use standard markdown headers:
+
+    ```markdown
+    ## Requirements
+    ## User Stories
+    ## Acceptance Criteria
+    ## Constraints
+    ```
+  </Step>
+</Steps>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Reference file not found">
+    Check that the path is relative to project root. Use `ls .omgkit/artifacts/` to verify.
+  </Accordion>
+  <Accordion title="Sections not extracted">
+    Ensure your document uses standard markdown headers like `## Requirements` or `## User Stories`.
+  </Accordion>
+  <Accordion title="Token limit exceeded">
+    Reduce the number of references or use more specific file paths. Check `references.max_tokens` in workflow.yaml.
+  </Accordion>
+  <Accordion title="References not propagating">
+    Verify `references.propagation.to_team_run: true` in workflow.yaml.
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="/sprint:sprint-new" icon="calendar-plus" href="/commands/sprint-new">
+    Create sprints with references
+  </Card>
+  <Card title="/sprint:team-run" icon="play" href="/commands/team-run">
+    Execute with reference context
+  </Card>
+  <Card title="/sprint:backlog-add" icon="plus" href="/commands/backlog-add">
+    Link tasks to requirements
+  </Card>
+  <Card title="Sprint Management" icon="calendar-days" href="/concepts/sprint-management">
+    Complete sprint workflow
+  </Card>
+</CardGroup>
