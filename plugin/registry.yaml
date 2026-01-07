@@ -3,7 +3,7 @@
 # Version: 2.26.1
 # Updated: 2026-01-06
 
-version: "2.26.1"
+version: "2.27.0"
 
 # =============================================================================
 # OPTIMIZED ALIGNMENT PRINCIPLE (OAP)
@@ -409,6 +409,7 @@ agents:
       - /sprint:sprint-start
       - /sprint:sprint-current
       - /sprint:sprint-end
+      - /sprint:ship
       - /sprint:backlog-add
       - /sprint:backlog-show
       - /sprint:backlog-prioritize
@@ -870,13 +871,13 @@ workflows:
     skills:
       - omega/omega-sprint
       - methodology/executing-plans
-    commands: [/sprint:sprint-current, /sprint:team-run, /sprint:team-status, /dev:fix, /sprint:sprint-end]
+    commands: [/sprint:sprint-current, /sprint:team-run, /sprint:team-status, /dev:fix, /sprint:sprint-end, /sprint:ship]
 
   sprint/sprint-retrospective:
     agents: [sprint-master, project-manager, journal-writer]
     skills:
       - omega/omega-sprint
-    commands: [/sprint:sprint-end, /planning:doc]
+    commands: [/sprint:sprint-end, /sprint:ship, /planning:doc]
 
   # Fullstack workflows
   fullstack/full-feature:

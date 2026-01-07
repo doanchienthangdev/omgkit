@@ -37,7 +37,7 @@ All coordinated through **Omega-level thinking** - a framework for finding break
 | Component | Count | Description |
 |-----------|-------|-------------|
 | **Agents** | 41 | Specialized AI team members with distinct roles |
-| **Commands** | 160 | Slash commands for every development task |
+| **Commands** | 161 | Slash commands for every development task |
 | **Workflows** | 69 | Complete development processes from idea to deploy |
 | **Skills** | 161 | Domain expertise modules across 24 categories |
 | **Modes** | 10 | Behavioral configurations for different contexts |
@@ -373,6 +373,7 @@ Commands are slash-prefixed actions organized by namespace.
 /sprint:sprint-start    # Start current sprint
 /sprint:sprint-current  # Show sprint progress
 /sprint:sprint-end      # End sprint + retrospective
+/sprint:ship            # Complete sprint + commit + push + PR
 /sprint:backlog-add     # Add task to backlog
 /sprint:backlog-show    # Display backlog
 /sprint:team-run        # Run AI team
@@ -384,6 +385,14 @@ Commands are slash-prefixed actions organized by namespace.
 /sprint:sprint-new "Auth" --ref=artifacts/prd.md     # Sprint with PRD context
 /sprint:team-run --ref=specs/api.yaml                # Add refs during execution
 /sprint:backlog-add "Login" --ref=artifacts/prd.md   # Task with ref context
+```
+
+**Sprint Ship** (complete sprint + deploy):
+```bash
+/sprint:ship "Sprint 1 - MVP"     # Ship with message
+/sprint:ship --skip-tests         # Skip tests (not recommended)
+/sprint:ship --no-pr              # Push directly without PR
+/sprint:ship --force              # Ship with incomplete tasks
 ```
 
 ### Autonomous Development (`/auto:*`)

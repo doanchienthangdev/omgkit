@@ -299,6 +299,52 @@ Carry Over to Next Sprint:
   - [ ] Mobile responsive fixes
 ```
 
+## Shipping the Sprint
+
+Ship the completed sprint to production in one command:
+
+```bash
+/sprint:ship "Sprint 1 - MVP Complete"
+```
+
+This command automates the full release workflow:
+
+1. **Validate** - Check sprint status and task completion
+2. **Test** - Run all tests (unless `--skip-tests`)
+3. **End Sprint** - Generate retrospective and archive
+4. **Commit** - Create commit with sprint summary
+5. **Push** - Push to remote repository
+6. **PR/Deploy** - Create PR or trigger CI/CD (unless `--no-pr`)
+
+### Ship Options
+
+```bash
+# Skip tests (not recommended for production)
+/sprint:ship "Hotfix" --skip-tests
+
+# Push directly without PR (trunk-based development)
+/sprint:ship "Sprint 1" --no-pr
+
+# Force ship with incomplete tasks
+/sprint:ship "MVP" --force
+```
+
+### Configuration
+
+Configure ship behavior in `.omgkit/workflow.yaml`:
+
+```yaml
+ship:
+  auto_test: true
+  test_command: "npm test"
+  create_pr: true
+  pr:
+    labels: ["sprint-complete"]
+  commit:
+    prefix: "feat(sprint)"
+    include_retrospective: true
+```
+
 ## Best Practices
 
 <AccordionGroup>

@@ -104,6 +104,19 @@ Complete sprint:
 
 **Output:** Sprint completed
 
+### Step 6: Ship (Optional)
+**Agent:** sprint-master
+**Command:** `/sprint:ship`
+**Duration:** 5-15 minutes
+
+Ship sprint to production:
+- Run tests
+- Commit all changes
+- Push to remote
+- Create PR or deploy
+
+**Output:** Sprint shipped
+
 ## Quality Gates
 
 - [ ] All high-priority tasks complete
@@ -190,6 +203,7 @@ This workflow orchestrates the following agents:
 - `/sprint:team-status`
 - `/dev:fix`
 - `/sprint:sprint-end`
+- `/sprint:ship`
 
 
 
@@ -227,6 +241,7 @@ This workflow orchestrates the following agents:
 | [`/sprint:team-status`](/commands/sprint-team-status) | Show AI team activity |
 | [`/dev:fix`](/commands/dev-fix) | Debug and fix bugs with regression test enforcement |
 | [`/sprint:sprint-end`](/commands/sprint-sprint-end) | End sprint with retrospective |
+| [`/sprint:ship`](/commands/sprint-ship) | Complete sprint and ship to production |
 
 
 ## Tips for Best Results

@@ -12,6 +12,7 @@ skills:
   - omega/omega-sprint
 commands:
   - /sprint:sprint-end
+  - /sprint:ship
   - /planning:doc
 prerequisites:
   - Sprint completed

@@ -19,6 +19,7 @@ commands:
   - /sprint:team-status
   - /dev:fix
   - /sprint:sprint-end
+  - /sprint:ship
 prerequisites:
   - Sprint created and started
   - Tasks assigned
@@ -108,6 +109,19 @@ Complete sprint:
 - Prepare for review
 
 **Output:** Sprint completed
+
+### Step 6: Ship (Optional)
+**Agent:** sprint-master
+**Command:** `/sprint:ship`
+**Duration:** 5-15 minutes
+
+Ship sprint to production:
+- Run tests
+- Commit all changes
+- Push to remote
+- Create PR or deploy
+
+**Output:** Sprint shipped
 
 ## Quality Gates
 

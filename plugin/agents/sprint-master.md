@@ -15,6 +15,7 @@ commands:
   - /sprint:sprint-start
   - /sprint:sprint-current
   - /sprint:sprint-end
+  - /sprint:ship
   - /sprint:backlog-add
   - /sprint:backlog-show
   - /sprint:backlog-prioritize

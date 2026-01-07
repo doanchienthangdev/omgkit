@@ -1,27 +1,23 @@
 ---
-title: "/sprint:ship"
-description: "Complete sprint and ship to production"
-icon: "calendar-days"
+description: Complete sprint and ship to production
+allowed-tools: Task, Read, Write, Bash, Grep, Glob
+argument-hint: "[message] [--skip-tests] [--no-pr] [--force]"
+ship:
+  auto_test: true
+  auto_pr: true
+  commit_prefix: "feat(sprint)"
+related_skills:
+  - autonomous/project-orchestration
+  - omega/omega-sprint
+  - devops/workflow-config
+related_commands:
+  - /sprint:sprint-end
+  - /git:ship
+  - /git:commit
+  - /git:pr
 ---
 
-<Info>
-  **Category:** Sprint
-
-  **Syntax:** `/sprint:ship "[message] [--skip-tests] [--no-pr] [--force]"`
-</Info>
-
-## Overview
-
-Complete sprint and ship to production
-
-## Quick Start
-
-```bash
-/sprint:ship "[message]
-```
-
-
-# Sprint Ship: "[message] [--skip-tests] [--no-pr] [--force]"
+# Sprint Ship: $ARGUMENTS
 
 Complete the current sprint and ship all changes to production in a single workflow.
 
@@ -266,79 +262,3 @@ ship:
 - `/sprint:team-run` - Execute sprint tasks
 - `/git:ship` - Ship code (standalone)
 - `/git:pr` - Create pull request
-
-
-
-## Tools Used
-
-This command uses the following tools:
-
-- **Task** - Enables task capabilities
-- **Read** - Enables read capabilities
-- **Write** - Enables write capabilities
-- **Bash** - Enables bash capabilities
-- **Grep** - Enables grep capabilities
-- **Glob** - Enables glob capabilities
-
-
-## Usage Graph
-
-### Triggered By Agents
-
-| Agent | Description |
-|-------|-------------|
-| [sprint-master](/agents/sprint-master) | AI Team orchestrator with sprint management, velocity tracki... |
-
-### Available In Workflows
-
-| Workflow | Description |
-|----------|-------------|
-| [sprint/sprint-execution](/workflows/sprint-execution) | Execute sprint with AI team |
-| [sprint/sprint-retrospective](/workflows/sprint-retrospective) | Analyze sprint and improve process |
-
-
-## Examples
-
-### Basic Usage
-
-```bash
-/sprint:ship "your input here"
-```
-
-### With Context
-
-```bash
-# First, ensure context is loaded
-/context:index
-
-# Then run the command
-/sprint:ship "detailed description"
-```
-
-## Tips
-
-<Note>
-For best results, be specific in your descriptions and include relevant file paths or context.
-</Note>
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Command not found">
-    Make sure OMGKIT is installed: `npx omgkit --version`
-  </Accordion>
-  <Accordion title="Unexpected results">
-    Try running `/index` first to refresh codebase context.
-  </Accordion>
-</AccordionGroup>
-
-## Related Commands
-
-<CardGroup cols={2}>
-  <Card title="All Commands" icon="terminal" href="/commands/overview">
-    See all 161 commands
-  </Card>
-  <Card title="Sprint Commands" icon="calendar-days" href="/commands/overview#sprint">
-    More sprint commands
-  </Card>
-</CardGroup>

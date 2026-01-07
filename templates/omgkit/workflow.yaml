@@ -219,3 +219,49 @@ references:
 
     # Maximum file age in days before warning
     max_age_days: 30
+
+# =============================================================================
+# SPRINT SHIP CONFIGURATION
+# =============================================================================
+ship:
+  # Run tests before shipping
+  auto_test: true
+
+  # Test command to run (uses package.json test script by default)
+  test_command: "npm test"
+
+  # Create PR instead of direct push
+  create_pr: true
+
+  # PR settings (when create_pr: true)
+  pr:
+    # Create as draft
+    draft: false
+
+    # Auto-assign reviewers
+    reviewers: []
+
+    # Auto-add labels
+    labels: ["sprint-complete"]
+
+  # Commit message settings
+  commit:
+    # Commit message prefix
+    prefix: "feat(sprint)"
+
+    # Include retrospective in commit body
+    include_retrospective: true
+
+    # Include metrics in commit body
+    include_metrics: true
+
+  # Ship behavior
+  behavior:
+    # Allow shipping with incomplete tasks (requires --force)
+    allow_incomplete: false
+
+    # Archive sprint after successful ship
+    archive_sprint: true
+
+    # Run lint/format before commit
+    pre_commit_checks: true
