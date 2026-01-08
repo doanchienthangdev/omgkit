@@ -1,15 +1,15 @@
 ---
 title: "Commands Overview"
-description: "161 slash commands for every development task"
+description: "169 slash commands for every development task"
 icon: "terminal"
 ---
 
-OMGKIT provides **161 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
+OMGKIT provides **169 slash commands** covering the entire development lifecycle. Commands are grouped by purpose and automatically route to the appropriate agent.
 
 ## At a Glance
 
 <CardGroup cols={4}>
-  <Card title="161" icon="terminal">
+  <Card title="169" icon="terminal">
     Total Commands
   </Card>
   <Card title="28" icon="folder">
@@ -39,7 +39,7 @@ OMGKIT provides **161 slash commands** covering the entire development lifecycle
     **2 commands** - Data processing and transformation
   </Card>
   <Card title="Design" icon="palette" href="#design">
-    **5 commands** - UI/UX and visual design
+    **13 commands** - UI/UX and visual design
   </Card>
   <Card title="Dev" icon="code" href="#dev">
     **12 commands** - Build features and fix bugs
@@ -185,11 +185,19 @@ Design and UI/UX commands for visual work
 
 | Command | Description | Usage |
 |---------|-------------|-------|
+| [`/design:add`](/commands/add) | Add shadcn/ui components to the project | `/design:add [components...]` |
+| [`/design:builder`](/commands/builder) | Interactive theme builder | `/design:builder [base-theme]` |
 | [`/design:cro`](/commands/cro) | CRO-focused content/design | `/design:cro [page]` |
 | [`/design:enhance`](/commands/enhance) | Enhance existing content/design | `/design:enhance [target]` |
 | [`/design:fast`](/commands/fast) | Quick UI implementation | `/design:fast [UI description]` |
+| [`/design:from-screenshot`](/commands/from-screenshot) | Extract theme from screenshot using AI v... | `/design:from-screenshot [screenshot-path]` |
+| [`/design:from-url`](/commands/from-url) | Extract theme from webpage URL | `/design:from-url [url]` |
 | [`/design:good`](/commands/good) | High-quality UI with polish | `/design:good [UI description]` |
+| [`/design:preview`](/commands/preview) | Preview current project theme colors | `/design:preview [light|dark]` |
+| [`/design:reset`](/commands/reset) | Reset to original theme | `/design:reset [confirm]` |
 | [`/design:screenshot`](/commands/screenshot) | Implement UI from screenshot | `/design:screenshot [screenshot reference]` |
+| [`/design:theme`](/commands/theme) | Switch project to a different OMGKIT the... | `/design:theme [theme-id]` |
+| [`/design:themes`](/commands/themes) | List all available OMGKIT design themes | `/design:themes [category]` |
 
 
 ## Dev

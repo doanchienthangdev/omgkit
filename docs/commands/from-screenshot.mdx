@@ -1,0 +1,147 @@
+---
+title: "/design:from-screenshot"
+description: "Extract theme from screenshot using AI vision"
+icon: "palette"
+---
+
+<Info>
+  **Category:** Design
+
+  **Syntax:** `/design:from-screenshot <screenshot-path>`
+</Info>
+
+## Overview
+
+Extract theme from screenshot using AI vision
+
+## Quick Start
+
+```bash
+/design:from-screenshot "screenshot-path"
+```
+
+
+# 📸 Extract Theme from Screenshot: \<screenshot-path\>
+
+Use Claude Vision to analyze a screenshot and extract a cohesive color theme.
+
+## Supported Formats
+
+- PNG, JPG, JPEG, WebP
+- Screenshots from websites, apps, or design tools
+- Dribbble shots, Figma exports, or any UI design
+
+## Process
+
+1. Load the screenshot image
+2. Analyze colors using Claude Vision
+3. Extract dominant colors:
+   - Background and foreground
+   - Primary brand color
+   - Secondary and accent colors
+   - Semantic colors (success, warning, error)
+4. Determine light/dark mode preference
+5. Generate complementary dark/light mode
+6. Create theme.json and theme.css
+
+## Color Extraction
+
+Claude Vision will identify:
+- **Backgrounds** - Main surface colors
+- **Text colors** - Primary and secondary text
+- **Brand colors** - CTAs, buttons, links
+- **Semantic colors** - Success, warning, error indicators
+- **Borders** - Dividers and boundaries
+
+## Output
+
+- `.omgkit/design/theme.json` - Extracted theme configuration
+- `.omgkit/design/theme.css` - CSS variables (light + dark)
+
+## Usage
+
+```bash
+/design:from-screenshot ./mockup.png
+/design:from-screenshot ~/Downloads/dribbble-shot.jpg
+/design:from-screenshot ./figma-export.webp
+```
+
+## Tips for Best Results
+
+1. **High contrast screenshots** - Clear color distinctions work best
+2. **Full UI screenshots** - More elements = better color extraction
+3. **Avoid gradients** - Solid colors extract more reliably
+4. **Include buttons/CTAs** - Helps identify primary colors
+
+## Post-Extraction
+
+After extraction, you can:
+- `/design:preview` - Review extracted colors
+- `/design:builder` - Adjust colors manually
+- `/design:theme <id>` - Switch to a curated theme instead
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+- **Task** - Enables task capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [ui-ux-designer](/agents/ui-ux-designer) | UI component creation, responsive design, accessibility. Cre... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/design:from-screenshot "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/design:from-screenshot "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 169 commands
+  </Card>
+  <Card title="Design Commands" icon="palette" href="/commands/overview#design">
+    More design commands
+  </Card>
+</CardGroup>

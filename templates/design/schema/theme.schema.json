@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OMGKIT Theme Schema",
+  "description": "Schema for OMGKIT design system themes (shadcn/ui compatible)",
+  "type": "object",
+  "required": ["name", "id", "category", "colors"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Display name of the theme"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique identifier (kebab-case)"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["tech-ai", "minimal-clean", "corporate-enterprise", "creative-bold", "nature-organic"],
+      "description": "Theme category"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the theme aesthetic"
+    },
+    "colors": {
+      "type": "object",
+      "required": ["light", "dark"],
+      "properties": {
+        "light": { "$ref": "#/definitions/colorPalette" },
+        "dark": { "$ref": "#/definitions/colorPalette" }
+      }
+    },
+    "radius": {
+      "type": "string",
+      "default": "0.5rem",
+      "description": "Border radius for components"
+    },
+    "fontFamily": {
+      "type": "object",
+      "properties": {
+        "sans": { "type": "string", "default": "Inter, system-ui, sans-serif" },
+        "mono": { "type": "string", "default": "JetBrains Mono, monospace" }
+      }
+    }
+  },
+  "definitions": {
+    "colorPalette": {
+      "type": "object",
+      "required": [
+        "background", "foreground",
+        "primary", "primary-foreground",
+        "secondary", "secondary-foreground",
+        "muted", "muted-foreground",
+        "accent", "accent-foreground",
+        "destructive", "destructive-foreground",
+        "border", "input", "ring",
+        "card", "card-foreground",
+        "popover", "popover-foreground"
+      ],
+      "properties": {
+        "background": { "$ref": "#/definitions/hslColor" },
+        "foreground": { "$ref": "#/definitions/hslColor" },
+        "primary": { "$ref": "#/definitions/hslColor" },
+        "primary-foreground": { "$ref": "#/definitions/hslColor" },
+        "secondary": { "$ref": "#/definitions/hslColor" },
+        "secondary-foreground": { "$ref": "#/definitions/hslColor" },
+        "muted": { "$ref": "#/definitions/hslColor" },
+        "muted-foreground": { "$ref": "#/definitions/hslColor" },
+        "accent": { "$ref": "#/definitions/hslColor" },
+        "accent-foreground": { "$ref": "#/definitions/hslColor" },
+        "destructive": { "$ref": "#/definitions/hslColor" },
+        "destructive-foreground": { "$ref": "#/definitions/hslColor" },
+        "border": { "$ref": "#/definitions/hslColor" },
+        "input": { "$ref": "#/definitions/hslColor" },
+        "ring": { "$ref": "#/definitions/hslColor" },
+        "card": { "$ref": "#/definitions/hslColor" },
+        "card-foreground": { "$ref": "#/definitions/hslColor" },
+        "popover": { "$ref": "#/definitions/hslColor" },
+        "popover-foreground": { "$ref": "#/definitions/hslColor" },
+        "chart-1": { "$ref": "#/definitions/hslColor" },
+        "chart-2": { "$ref": "#/definitions/hslColor" },
+        "chart-3": { "$ref": "#/definitions/hslColor" },
+        "chart-4": { "$ref": "#/definitions/hslColor" },
+        "chart-5": { "$ref": "#/definitions/hslColor" },
+        "sidebar-background": { "$ref": "#/definitions/hslColor" },
+        "sidebar-foreground": { "$ref": "#/definitions/hslColor" },
+        "sidebar-primary": { "$ref": "#/definitions/hslColor" },
+        "sidebar-primary-foreground": { "$ref": "#/definitions/hslColor" },
+        "sidebar-accent": { "$ref": "#/definitions/hslColor" },
+        "sidebar-accent-foreground": { "$ref": "#/definitions/hslColor" },
+        "sidebar-border": { "$ref": "#/definitions/hslColor" },
+        "sidebar-ring": { "$ref": "#/definitions/hslColor" }
+      }
+    },
+    "hslColor": {
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+)?\\s+\\d+(\\.\\d+)?%\\s+\\d+(\\.\\d+)?%$",
+      "description": "HSL color without hsl() wrapper, e.g., '220 14.3% 95.9%'"
+    }
+  }
+}

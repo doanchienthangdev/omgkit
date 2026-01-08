@@ -376,11 +376,19 @@
     {
       "group": "Design",
       "pages": [
+        "commands/add",
+        "commands/builder",
         "commands/cro",
         "commands/enhance",
         "commands/fast",
+        "commands/from-screenshot",
+        "commands/from-url",
         "commands/good",
-        "commands/screenshot"
+        "commands/preview",
+        "commands/reset",
+        "commands/screenshot",
+        "commands/theme",
+        "commands/themes"
       ]
     },
     {

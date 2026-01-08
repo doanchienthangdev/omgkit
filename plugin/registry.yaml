@@ -437,6 +437,14 @@ agents:
       - /design:enhance
       - /design:fast
       - /design:good
+      - /design:themes
+      - /design:theme
+      - /design:preview
+      - /design:add
+      - /design:from-screenshot
+      - /design:from-url
+      - /design:builder
+      - /design:reset
 
   api-designer:
     file: agents/api-designer.md

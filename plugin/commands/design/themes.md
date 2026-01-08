@@ -1,0 +1,50 @@
+---
+description: List all available OMGKIT design themes
+allowed-tools: Read, Glob
+argument-hint: [category]
+---
+
+# 🎨 Design Themes: $ARGUMENTS
+
+List all available OMGKIT design themes organized by category.
+
+## Categories
+
+- **tech-ai** (6 themes): Neo Tokyo, Electric Cyan, Neural Dark, Matrix Green, Quantum Purple, Hologram
+- **minimal-clean** (6 themes): Minimal Slate, Paper, Mono, Zen, Nordic, Swiss
+- **corporate-enterprise** (6 themes): Ocean Blue, Corporate Indigo, Finance, Legal, Healthcare, Consulting
+- **creative-bold** (6 themes): Coral Sunset, Candy, Neon, Gradient Dream, Retro, Studio
+- **nature-organic** (6 themes): Forest, Ocean, Desert, Lavender, Arctic, Autumn
+
+## Process
+
+1. Load themes from `templates/design/themes/`
+2. Group by category
+3. Display with:
+   - Theme name and ID
+   - Category badge
+   - Primary color
+   - Brief description
+
+## Usage
+
+```bash
+/design:themes              # List all 30 themes
+/design:themes tech-ai      # List only tech-ai themes
+/design:themes minimal      # Filter by partial category name
+```
+
+## Output Format
+
+For each theme, show:
+- **ID** (used for selection)
+- **Name** (display name)
+- **Category**
+- **Primary color** (hex and HSL)
+- **Description**
+
+## Next Steps
+
+After browsing themes:
+- `/design:theme <id>` - Apply a theme to your project
+- `/design:preview` - Preview current theme

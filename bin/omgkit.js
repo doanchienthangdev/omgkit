@@ -56,6 +56,8 @@ ${COLORS.bright}GLOBAL COMMANDS${COLORS.reset}
 
 ${COLORS.bright}PROJECT COMMANDS${COLORS.reset}
   ${COLORS.cyan}init${COLORS.reset}              Initialize .omgkit/ in current project
+  ${COLORS.cyan}init --with-design${COLORS.reset} Initialize with theme selection UI
+  ${COLORS.cyan}init --theme <id>${COLORS.reset} Initialize with specific theme (e.g., neo-tokyo)
   ${COLORS.cyan}project:upgrade${COLORS.reset}   Upgrade project to latest OMGKIT version
   ${COLORS.cyan}project:rollback${COLORS.reset}  Rollback project to previous backup
   ${COLORS.cyan}project:backups${COLORS.reset}   List available project backups
@@ -74,6 +76,8 @@ ${COLORS.bright}UPGRADE OPTIONS${COLORS.reset}
 ${COLORS.bright}EXAMPLES${COLORS.reset}
   omgkit install               # Install plugin globally
   omgkit init                  # Initialize project
+  omgkit init --theme neo-tokyo # Init with specific theme
+  omgkit init --with-design   # Init with theme selection UI
   omgkit project:upgrade       # Upgrade project config
   omgkit project:upgrade --dry # Preview upgrade changes
   omgkit project:rollback      # Rollback to last backup
@@ -114,7 +118,12 @@ switch (command) {
     break;
   }
   case 'init': {
-    const result = initProject();
+    // Parse init options
+    const withDesign = args.includes('--with-design');
+    const themeIdx = args.indexOf('--theme');
+    const theme = themeIdx !== -1 ? args[themeIdx + 1] : null;
+
+    const result = initProject({ theme, withDesign });
     if (!result.success) process.exit(1);
     break;
   }

@@ -1,0 +1,147 @@
+---
+title: "/design:reset"
+description: "Reset to original theme"
+icon: "palette"
+---
+
+<Info>
+  **Category:** Design
+
+  **Syntax:** `/design:reset [confirm]`
+</Info>
+
+## Overview
+
+Reset to original theme
+
+## Quick Start
+
+```bash
+/design:reset [confirm]
+```
+
+
+# 🔄 Reset Theme: [confirm]
+
+Reset the project theme to the original configuration or remove theme customizations.
+
+## Process
+
+1. Check for theme backup (if exists)
+2. Prompt for confirmation (unless `confirm` passed)
+3. Restore original theme.json
+4. Regenerate theme.css
+5. Confirm reset complete
+
+## Options
+
+### Reset to Original
+If you modified a curated theme, restore the original:
+```bash
+/design:reset              # Prompts for confirmation
+/design:reset confirm      # Skip confirmation
+```
+
+### Reset to Default
+Remove all theme customizations and use default:
+```bash
+/design:reset default
+```
+
+## Files Affected
+
+- `.omgkit/design/theme.json` - Restored/reset
+- `.omgkit/design/theme.css` - Regenerated
+
+## Backup Behavior
+
+Before any theme change, OMGKIT creates a backup:
+- `.omgkit/design/theme.json.backup`
+
+Reset will restore from this backup if available.
+
+## Usage
+
+```bash
+/design:reset           # Interactive confirmation
+/design:reset confirm   # Skip confirmation
+/design:reset default   # Reset to default theme
+```
+
+## Recovery
+
+If you accidentally reset:
+1. Check git history for previous theme files
+2. Use `/design:theme <id>` to apply a curated theme
+3. Use `/design:builder` to recreate custom theme
+
+## Related Commands
+
+- `/design:theme <id>` - Apply a specific theme
+- `/design:builder` - Build new custom theme
+- `/design:preview` - Preview current theme
+
+
+
+## Tools Used
+
+This command uses the following tools:
+
+- **Read** - Enables read capabilities
+- **Write** - Enables write capabilities
+
+
+## Usage Graph
+
+### Triggered By Agents
+
+| Agent | Description |
+|-------|-------------|
+| [ui-ux-designer](/agents/ui-ux-designer) | UI component creation, responsive design, accessibility. Cre... |
+
+
+## Examples
+
+### Basic Usage
+
+```bash
+/design:reset "your input here"
+```
+
+### With Context
+
+```bash
+# First, ensure context is loaded
+/context:index
+
+# Then run the command
+/design:reset "detailed description"
+```
+
+## Tips
+
+<Note>
+For best results, be specific in your descriptions and include relevant file paths or context.
+</Note>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Command not found">
+    Make sure OMGKIT is installed: `npx omgkit --version`
+  </Accordion>
+  <Accordion title="Unexpected results">
+    Try running `/index` first to refresh codebase context.
+  </Accordion>
+</AccordionGroup>
+
+## Related Commands
+
+<CardGroup cols={2}>
+  <Card title="All Commands" icon="terminal" href="/commands/overview">
+    See all 169 commands
+  </Card>
+  <Card title="Design Commands" icon="palette" href="/commands/overview#design">
+    More design commands
+  </Card>
+</CardGroup>

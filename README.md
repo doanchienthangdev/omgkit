@@ -37,10 +37,11 @@ All coordinated through **Omega-level thinking** - a framework for finding break
 | Component | Count | Description |
 |-----------|-------|-------------|
 | **Agents** | 41 | Specialized AI team members with distinct roles |
-| **Commands** | 161 | Slash commands for every development task |
+| **Commands** | 169 | Slash commands for every development task |
 | **Workflows** | 69 | Complete development processes from idea to deploy |
 | **Skills** | 161 | Domain expertise modules across 24 categories |
 | **Modes** | 10 | Behavioral configurations for different contexts |
+| **Themes** | 30 | Curated design system themes for shadcn/ui |
 | **Archetypes** | 14 | Project templates for autonomous development |
 
 ---
@@ -164,6 +165,52 @@ testing:
       minimum: 75
       target: 85
 ```
+
+### 6. Design System (New in 2.29.0)
+
+OMGKIT includes a complete design system with 30 curated themes for shadcn/ui integration:
+
+```bash
+# Initialize with a theme (opt-in)
+omgkit init --theme neo-tokyo
+
+# Or explore themes first
+omgkit init --with-design
+```
+
+#### 5 Theme Categories
+
+| Category | Themes | Description |
+|----------|--------|-------------|
+| **Tech & AI** | neo-tokyo, electric-cyan, neural-dark, matrix-green, quantum-purple, hologram | Futuristic, cyberpunk-inspired |
+| **Minimal & Clean** | minimal-slate, paper, mono, zen, nordic, swiss | Simple, elegant, distraction-free |
+| **Corporate** | ocean-blue, corporate-indigo, finance, legal, healthcare, consulting | Professional, trustworthy |
+| **Creative & Bold** | coral-sunset, candy, neon, gradient-dream, retro, studio | Vibrant, expressive |
+| **Nature & Organic** | forest, ocean, desert, lavender, arctic, autumn | Earth tones, calming |
+
+#### Design Commands
+
+| Command | Description |
+|---------|-------------|
+| `/design:themes` | List all 30 curated themes |
+| `/design:theme <id>` | Apply a theme to your project |
+| `/design:preview` | Preview current theme colors |
+| `/design:builder` | Build custom theme interactively |
+| `/design:from-screenshot` | Extract theme from image |
+| `/design:from-url` | Extract theme from webpage |
+| `/design:add <comp>` | Add shadcn/ui components |
+| `/design:reset` | Reset to original theme |
+
+#### How It Works
+
+OMGKIT provides CSS variables that shadcn/ui components consume:
+
+```
+.omgkit/design/theme.json  →  Theme configuration
+.omgkit/design/theme.css   →  CSS variables (:root + .dark)
+```
+
+After applying a theme, use `npx shadcn@latest add button` to add components that automatically use your theme colors.
 
 ---
 
