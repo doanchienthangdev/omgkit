@@ -1,0 +1,384 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OMGKIT Theme Schema v2",
+  "description": "Extended schema with color scales, effects, animations, and $ref support",
+  "type": "object",
+  "required": ["name", "id", "category"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "2.0",
+      "description": "Schema version identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the theme"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique identifier (kebab-case)"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["tech-ai", "minimal-clean", "corporate-enterprise", "creative-bold", "nature-organic"],
+      "description": "Theme category"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the theme aesthetic"
+    },
+    "colorSystem": {
+      "type": "object",
+      "description": "Color system metadata",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["radix", "semantic", "custom"],
+          "default": "radix",
+          "description": "Color system type"
+        },
+        "version": {
+          "type": "string",
+          "default": "3.0",
+          "description": "Color system version"
+        }
+      }
+    },
+    "scales": {
+      "type": "object",
+      "description": "12-step color scales (Radix-compatible)",
+      "additionalProperties": {
+        "$ref": "#/definitions/colorScale"
+      }
+    },
+    "semanticTokens": {
+      "type": "object",
+      "description": "Semantic color tokens with $ref support",
+      "properties": {
+        "light": { "$ref": "#/definitions/semanticTokenSet" },
+        "dark": { "$ref": "#/definitions/semanticTokenSet" }
+      }
+    },
+    "statusColors": {
+      "type": "object",
+      "description": "Status colors (success, warning, info)",
+      "properties": {
+        "light": { "$ref": "#/definitions/statusColorSet" },
+        "dark": { "$ref": "#/definitions/statusColorSet" }
+      }
+    },
+    "chartColors": {
+      "type": "object",
+      "description": "Chart/visualization colors",
+      "properties": {
+        "1": { "$ref": "#/definitions/tokenValue" },
+        "2": { "$ref": "#/definitions/tokenValue" },
+        "3": { "$ref": "#/definitions/tokenValue" },
+        "4": { "$ref": "#/definitions/tokenValue" },
+        "5": { "$ref": "#/definitions/tokenValue" }
+      }
+    },
+    "sidebarTokens": {
+      "type": "object",
+      "description": "Sidebar-specific tokens",
+      "properties": {
+        "light": { "$ref": "#/definitions/sidebarTokenSet" },
+        "dark": { "$ref": "#/definitions/sidebarTokenSet" }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "description": "Typography settings",
+      "properties": {
+        "fontFamily": {
+          "type": "object",
+          "properties": {
+            "sans": { "type": "string", "default": "Inter, system-ui, sans-serif" },
+            "mono": { "type": "string", "default": "JetBrains Mono, monospace" }
+          }
+        },
+        "fontFeatureSettings": {
+          "type": "string",
+          "default": "\"rlig\" 1, \"calt\" 1"
+        }
+      }
+    },
+    "spacing": {
+      "type": "object",
+      "description": "Spacing and radius tokens",
+      "properties": {
+        "radius": { "type": "string", "default": "0.5rem" },
+        "radiusLg": { "type": "string", "default": "var(--radius)" },
+        "radiusMd": { "type": "string", "default": "calc(var(--radius) - 2px)" },
+        "radiusSm": { "type": "string", "default": "calc(var(--radius) - 4px)" }
+      }
+    },
+    "effects": {
+      "type": "object",
+      "description": "Visual effects (glassmorphism, glow, gradients)",
+      "properties": {
+        "glassMorphism": {
+          "type": "object",
+          "properties": {
+            "background": { "$ref": "#/definitions/tokenValue" },
+            "backdropBlur": { "type": "string", "default": "12px" }
+          }
+        },
+        "glow": {
+          "type": "object",
+          "properties": {
+            "default": { "type": "string" },
+            "lg": { "type": "string" },
+            "color": { "$ref": "#/definitions/tokenValue" }
+          }
+        },
+        "gradient": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "from": { "$ref": "#/definitions/tokenValue" },
+              "to": { "$ref": "#/definitions/tokenValue" },
+              "direction": { "type": "string", "default": "135deg" }
+            }
+          }
+        }
+      }
+    },
+    "animations": {
+      "type": "object",
+      "description": "Animation definitions",
+      "additionalProperties": {
+        "$ref": "#/definitions/animationDef"
+      }
+    },
+    "colors": {
+      "type": "object",
+      "description": "V1-compatible flat colors (for backward compatibility)",
+      "properties": {
+        "light": { "$ref": "#/definitions/v1ColorPalette" },
+        "dark": { "$ref": "#/definitions/v1ColorPalette" }
+      }
+    },
+    "radius": {
+      "type": "string",
+      "description": "V1-compatible radius (use spacing.radius for v2)"
+    },
+    "fontFamily": {
+      "type": "object",
+      "description": "V1-compatible fontFamily (use typography.fontFamily for v2)"
+    }
+  },
+  "definitions": {
+    "colorScale": {
+      "type": "object",
+      "description": "12-step color scale definition",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Scale name (e.g., teal, slate)"
+        },
+        "hue": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "Base hue value"
+        },
+        "saturation": {
+          "type": "object",
+          "properties": {
+            "light": {
+              "type": "object",
+              "properties": {
+                "low": { "type": "number" },
+                "high": { "type": "number" }
+              }
+            },
+            "dark": {
+              "type": "object",
+              "properties": {
+                "low": { "type": "number" },
+                "high": { "type": "number" }
+              }
+            }
+          }
+        },
+        "steps": {
+          "type": "object",
+          "properties": {
+            "light": { "$ref": "#/definitions/twelveSteps" },
+            "dark": { "$ref": "#/definitions/twelveSteps" }
+          },
+          "required": ["light", "dark"]
+        },
+        "alpha": {
+          "type": "object",
+          "description": "Alpha (transparent) variants",
+          "properties": {
+            "light": { "$ref": "#/definitions/twelveSteps" },
+            "dark": { "$ref": "#/definitions/twelveSteps" }
+          }
+        }
+      },
+      "required": ["name", "steps"]
+    },
+    "twelveSteps": {
+      "type": "object",
+      "description": "12-step color values",
+      "properties": {
+        "1": { "type": "string" },
+        "2": { "type": "string" },
+        "3": { "type": "string" },
+        "4": { "type": "string" },
+        "5": { "type": "string" },
+        "6": { "type": "string" },
+        "7": { "type": "string" },
+        "8": { "type": "string" },
+        "9": { "type": "string" },
+        "10": { "type": "string" },
+        "11": { "type": "string" },
+        "12": { "type": "string" }
+      },
+      "required": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]
+    },
+    "tokenValue": {
+      "oneOf": [
+        { "type": "string", "description": "Direct HSL value" },
+        {
+          "type": "object",
+          "properties": {
+            "$ref": {
+              "type": "string",
+              "description": "Reference path (e.g., scales.primary.steps.light.9)"
+            }
+          },
+          "required": ["$ref"]
+        }
+      ]
+    },
+    "semanticTokenSet": {
+      "type": "object",
+      "description": "Semantic token definitions",
+      "properties": {
+        "background": { "$ref": "#/definitions/tokenValue" },
+        "foreground": { "$ref": "#/definitions/tokenValue" },
+        "surface": { "$ref": "#/definitions/tokenValue" },
+        "surface-hover": { "$ref": "#/definitions/tokenValue" },
+        "surface-active": { "$ref": "#/definitions/tokenValue" },
+        "primary": { "$ref": "#/definitions/tokenValue" },
+        "primary-hover": { "$ref": "#/definitions/tokenValue" },
+        "primary-foreground": { "$ref": "#/definitions/tokenValue" },
+        "secondary": { "$ref": "#/definitions/tokenValue" },
+        "secondary-hover": { "$ref": "#/definitions/tokenValue" },
+        "secondary-foreground": { "$ref": "#/definitions/tokenValue" },
+        "muted": { "$ref": "#/definitions/tokenValue" },
+        "muted-foreground": { "$ref": "#/definitions/tokenValue" },
+        "accent": { "$ref": "#/definitions/tokenValue" },
+        "accent-hover": { "$ref": "#/definitions/tokenValue" },
+        "accent-foreground": { "$ref": "#/definitions/tokenValue" },
+        "border": { "$ref": "#/definitions/tokenValue" },
+        "border-hover": { "$ref": "#/definitions/tokenValue" },
+        "input": { "$ref": "#/definitions/tokenValue" },
+        "input-hover": { "$ref": "#/definitions/tokenValue" },
+        "ring": { "$ref": "#/definitions/tokenValue" },
+        "ring-offset": { "$ref": "#/definitions/tokenValue" },
+        "card": { "$ref": "#/definitions/tokenValue" },
+        "card-foreground": { "$ref": "#/definitions/tokenValue" },
+        "popover": { "$ref": "#/definitions/tokenValue" },
+        "popover-foreground": { "$ref": "#/definitions/tokenValue" },
+        "panel": { "$ref": "#/definitions/tokenValue" },
+        "panel-translucent": { "$ref": "#/definitions/tokenValue" },
+        "overlay": { "$ref": "#/definitions/tokenValue" }
+      }
+    },
+    "statusColorSet": {
+      "type": "object",
+      "description": "Status color definitions",
+      "properties": {
+        "destructive": { "type": "string" },
+        "destructive-foreground": { "type": "string" },
+        "success": { "type": "string" },
+        "success-foreground": { "type": "string" },
+        "warning": { "type": "string" },
+        "warning-foreground": { "type": "string" },
+        "info": { "type": "string" },
+        "info-foreground": { "type": "string" }
+      }
+    },
+    "sidebarTokenSet": {
+      "type": "object",
+      "description": "Sidebar token definitions",
+      "properties": {
+        "background": { "$ref": "#/definitions/tokenValue" },
+        "foreground": { "$ref": "#/definitions/tokenValue" },
+        "primary": { "$ref": "#/definitions/tokenValue" },
+        "primary-foreground": { "$ref": "#/definitions/tokenValue" },
+        "accent": { "$ref": "#/definitions/tokenValue" },
+        "accent-foreground": { "$ref": "#/definitions/tokenValue" },
+        "border": { "$ref": "#/definitions/tokenValue" },
+        "ring": { "$ref": "#/definitions/tokenValue" }
+      }
+    },
+    "animationDef": {
+      "type": "object",
+      "description": "Animation definition",
+      "properties": {
+        "keyframes": {
+          "type": "object",
+          "description": "Keyframe definitions (from/to or percentage-based)",
+          "additionalProperties": { "type": "object" }
+        },
+        "duration": {
+          "type": "string",
+          "default": "0.2s",
+          "description": "Animation duration"
+        },
+        "easing": {
+          "type": "string",
+          "default": "ease-out",
+          "description": "Timing function"
+        },
+        "iteration": {
+          "type": "string",
+          "description": "Iteration count (e.g., infinite, 1)"
+        }
+      }
+    },
+    "v1ColorPalette": {
+      "type": "object",
+      "description": "V1-compatible flat color palette",
+      "properties": {
+        "background": { "$ref": "#/definitions/hslColor" },
+        "foreground": { "$ref": "#/definitions/hslColor" },
+        "primary": { "$ref": "#/definitions/hslColor" },
+        "primary-foreground": { "$ref": "#/definitions/hslColor" },
+        "secondary": { "$ref": "#/definitions/hslColor" },
+        "secondary-foreground": { "$ref": "#/definitions/hslColor" },
+        "muted": { "$ref": "#/definitions/hslColor" },
+        "muted-foreground": { "$ref": "#/definitions/hslColor" },
+        "accent": { "$ref": "#/definitions/hslColor" },
+        "accent-foreground": { "$ref": "#/definitions/hslColor" },
+        "destructive": { "$ref": "#/definitions/hslColor" },
+        "destructive-foreground": { "$ref": "#/definitions/hslColor" },
+        "border": { "$ref": "#/definitions/hslColor" },
+        "input": { "$ref": "#/definitions/hslColor" },
+        "ring": { "$ref": "#/definitions/hslColor" },
+        "card": { "$ref": "#/definitions/hslColor" },
+        "card-foreground": { "$ref": "#/definitions/hslColor" },
+        "popover": { "$ref": "#/definitions/hslColor" },
+        "popover-foreground": { "$ref": "#/definitions/hslColor" }
+      }
+    },
+    "hslColor": {
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+)?\\s+\\d+(\\.\\d+)?%\\s+\\d+(\\.\\d+)?%$",
+      "description": "HSL color without hsl() wrapper, e.g., '220 14.3% 95.9%'"
+    },
+    "hslColorWithAlpha": {
+      "type": "string",
+      "pattern": "^\\d+(\\.\\d+)?\\s+\\d+(\\.\\d+)?%\\s+\\d+(\\.\\d+)?%\\s*/\\s*\\d+(\\.\\d+)?$",
+      "description": "HSL color with alpha, e.g., '220 14.3% 95.9% / 0.5'"
+    }
+  }
+}

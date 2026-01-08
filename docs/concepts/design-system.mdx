@@ -1,12 +1,19 @@
 ---
 title: Design System
-description: '30 curated themes with shadcn/ui integration'
+description: '31+ curated themes with shadcn/ui integration, V2 color scales, and multi-format export'
 icon: 'palette'
 ---
 
 ## Overview
 
-OMGKIT includes a complete design system with 30 curated themes that integrate seamlessly with shadcn/ui. Apply a theme during initialization or switch themes anytime with simple commands.
+OMGKIT includes a complete design system with 31+ curated themes that integrate seamlessly with shadcn/ui. The system supports both V1 (flat colors) and V2 (color scales, effects, animations) theme formats.
+
+**Key Features:**
+- 30+ curated themes across 5 categories
+- V2 schema with 12-step color scales (Radix-compatible)
+- Export to CSS, SCSS, Tailwind, Figma, and Style Dictionary
+- Automatic color replacement during rebuild
+- Full dark mode support
 
 ## Quick Start
 
@@ -37,7 +44,7 @@ omgkit init --with-design
   <Card title="Tech & AI" icon="microchip">
     Futuristic, cyberpunk-inspired themes
     - neo-tokyo
-    - electric-cyan
+    - electric-cyan (+ V2 version)
     - neural-dark
     - matrix-green
     - quantum-purple
@@ -81,24 +88,24 @@ omgkit init --with-design
   </Card>
 </CardGroup>
 
-## How It Works
+## Theme Versions
 
-OMGKIT provides CSS variables that shadcn/ui components consume automatically.
+OMGKIT supports two theme schema versions:
 
-```
-Your Project
-├── .omgkit/
-│   └── design/
-│       ├── theme.json    ← Theme configuration
-│       └── theme.css     ← CSS variables (:root + .dark)
-└── components/
-    └── ui/               ← shadcn components use theme.css
-```
+| Feature | V1 | V2 |
+|---------|----|----|
+| Flat colors | ✓ | ✓ |
+| 12-step color scales | - | ✓ |
+| $ref token references | - | ✓ |
+| Status colors (success/warning/info) | - | ✓ |
+| Effects (glass, glow, gradient) | - | ✓ |
+| Animations (keyframes) | - | ✓ |
+| Alpha variants | - | ✓ |
 
-### Generated Files
+### V1 Theme (Flat Colors)
 
-<Tabs>
-  <Tab title="theme.json">
+Traditional theme format with direct HSL values:
+
 ```json
 {
   "name": "Neo Tokyo",
@@ -108,45 +115,135 @@ Your Project
     "light": {
       "background": "0 0% 100%",
       "primary": "346.8 77.2% 49.8%",
-      ...
+      "primary-foreground": "355.7 100% 97.3%"
     },
-    "dark": {
-      "background": "240 10% 3.9%",
-      "primary": "346.8 77.2% 49.8%",
-      ...
-    }
+    "dark": { ... }
   },
   "radius": "0.5rem"
 }
 ```
-  </Tab>
-  <Tab title="theme.css">
-```css
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --primary: 346.8 77.2% 49.8%;
-    --primary-foreground: 355.7 100% 97.3%;
-    /* ... all 20+ color variables */
-    --radius: 0.5rem;
-  }
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    /* ... dark mode overrides */
+### V2 Theme (Color Scales + Effects)
+
+Advanced theme format with 12-step color scales, $ref references, and effects:
+
+```json
+{
+  "version": "2.0",
+  "name": "Electric Cyan V2",
+  "id": "electric-cyan-v2",
+  "category": "tech-ai",
+
+  "scales": {
+    "primary": {
+      "name": "cyan",
+      "steps": {
+        "light": {
+          "1": "185 60% 99%",
+          "9": "186 91% 42.7%",
+          "12": "186 95% 18%"
+        },
+        "dark": { ... }
+      },
+      "alpha": {
+        "light": { "1": "186 91% 42.7% / 0.05", ... }
+      }
+    }
+  },
+
+  "semanticTokens": {
+    "light": {
+      "primary": { "$ref": "scales.primary.steps.light.9" },
+      "primary-hover": { "$ref": "scales.primary.steps.light.10" }
+    }
+  },
+
+  "statusColors": {
+    "light": {
+      "success": "151 55% 42%",
+      "warning": "39 100% 50%",
+      "info": "206 100% 50%"
+    }
+  },
+
+  "effects": {
+    "glassMorphism": { "backdropBlur": "12px" },
+    "glow": { "default": "0 0 20px" }
+  },
+
+  "animations": {
+    "shimmer": {
+      "duration": "8s",
+      "easing": "ease-in-out",
+      "keyframes": { ... }
+    }
   }
 }
 ```
-  </Tab>
-</Tabs>
+
+## How It Works
+
+OMGKIT provides CSS variables that shadcn/ui components consume automatically.
+
+```
+Your Project
+├── .omgkit/
+│   └── design/
+│       ├── theme.json    ← Theme configuration
+│       ├── theme.css     ← CSS variables (:root + .dark)
+│       └── backups/      ← Theme backup history
+└── components/
+    └── ui/               ← shadcn components use theme.css
+```
+
+### Generated CSS (V2)
+
+```css
+/* V2 themes generate extended variables */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@layer base {
+  :root {
+    /* 12-step color scales */
+    --cyan-1: 185 60% 99%;
+    --cyan-9: 186 91% 42.7%;
+    --cyan-12: 186 95% 18%;
+
+    /* Semantic tokens */
+    --background: 0 0% 100%;
+    --primary: 186 91% 42.7%;
+    --primary-hover: 186 92% 38%;
+
+    /* Status colors */
+    --success: 151 55% 42%;
+    --warning: 39 100% 50%;
+    --info: 206 100% 50%;
+
+    /* Effects */
+    --glass-blur: 12px;
+    --glow: 0 0 20px;
+
+    /* Animations */
+    --animation-shimmer: shimmer 8s ease-in-out infinite;
+
+    /* Typography & spacing */
+    --radius: 0.5rem;
+    --font-sans: Inter, system-ui, sans-serif;
+    --font-mono: JetBrains Mono, monospace;
+  }
+
+  .dark { /* dark mode overrides */ }
+}
+```
 
 ## Design Commands
 
 | Command | Description |
 |---------|-------------|
-| `/design:themes` | List all 30 curated themes by category |
+| `/design:themes` | List all curated themes by category |
 | `/design:theme <id>` | Apply a theme to your project |
 | `/design:preview` | Preview current theme colors |
 | `/design:builder` | Build custom theme interactively |
@@ -157,10 +254,74 @@ Your Project
 | `/design:rebuild <id>` | Rebuild entire project with new theme |
 | `/design:scan` | Scan for non-compliant colors |
 | `/design:rollback` | Rollback to previous theme |
+| `/design:export <format>` | Export theme to CSS, SCSS, Figma, etc. |
+| `/design:validate` | Validate theme structure |
+
+## Theme Export
+
+Export your theme to various design tools and framework formats.
+
+### Available Formats
+
+| Format | Extension | Use Case |
+|--------|-----------|----------|
+| `css` | `.css` | Direct CSS variables |
+| `scss` | `.scss` | Sass variables, maps, mixins |
+| `tailwind` | `.js/.ts` | Tailwind CSS configuration |
+| `figma` | `.json` | Figma design tokens |
+| `style-dictionary` | `.json` | Style Dictionary tokens |
+
+### Export Examples
+
+<CodeGroup>
+```bash Single Format
+# Export CSS
+/design:export css
+
+# Export Figma tokens
+/design:export figma --output ./tokens/
+
+# Export Tailwind config
+/design:export tailwind
+```
+
+```bash All Formats
+# Export all formats at once
+/design:export --all
+
+# Export all to specific directory
+/design:export --all --output ./exports/
+```
+</CodeGroup>
+
+### Figma Tokens Output
+
+```json
+{
+  "$themes": [
+    { "id": "theme-light", "name": "Theme Light" },
+    { "id": "theme-dark", "name": "Theme Dark" }
+  ],
+  "global": {
+    "typography": { ... },
+    "spacing": { ... },
+    "borderRadius": { ... }
+  },
+  "light": {
+    "colors": {
+      "primary": { "value": "186 91% 42.7%", "type": "color" },
+      "cyan": {
+        "1": { "value": "185 60% 99%", "type": "color" },
+        "9": { "value": "186 91% 42.7%", "type": "color" }
+      }
+    }
+  }
+}
+```
 
 ## Theme Rebuild
 
-Change your project's entire design system with a single command. The rebuild feature scans all source files and replaces hardcoded colors with theme variables.
+Change your project's entire design system with a single command.
 
 ### Rebuild with New Theme
 
@@ -171,6 +332,11 @@ omgkit design:rebuild neo-tokyo
 
 ```bash Slash Command
 /design:rebuild neo-tokyo
+```
+
+```bash Preview Changes
+# Dry run to see what will change
+/design:rebuild neo-tokyo --dry
 ```
 </CodeGroup>
 
@@ -184,33 +350,31 @@ omgkit design:rebuild neo-tokyo
    - `tailwind.config.ts` color palette extended
 
 3. **Component Files**
-   - Hardcoded colors replaced with theme variables:
-     - `bg-blue-500` → `bg-primary`
-     - `text-gray-600` → `text-muted-foreground`
-     - `border-gray-200` → `border-border`
+   - Hardcoded colors replaced with theme variables
 
-### Scan for Issues
+### V2 Theme Features in Rebuild
 
-Find non-compliant hardcoded colors before rebuilding:
+When using V2 themes, you get additional CSS variables:
 
-```bash
-# Find non-compliant colors
-omgkit design:scan
+```css
+/* 12-step color scales */
+--teal-1 through --teal-12
+--teal-a1 through --teal-a12  /* Alpha variants */
 
-# Or use slash command
-/design:scan
-```
+/* Status colors */
+--success, --warning, --info
 
-### Rollback
+/* Extended tokens */
+--surface, --surface-hover
+--primary-hover, --accent-hover
+--panel, --overlay
 
-If something breaks, restore the previous theme:
+/* Effects */
+--glass-blur, --glow
 
-```bash
-# Rollback to previous theme
-omgkit design:rollback
-
-# List available backups
-omgkit design:backups
+/* Animations */
+@keyframes shimmer { ... }
+--animation-shimmer
 ```
 
 ### Color Mapping Reference
@@ -225,25 +389,71 @@ omgkit design:backups
 | `bg-red-500` | `bg-destructive` | Danger action |
 | `border-gray-200` | `border-border` | Standard border |
 
+### Scan for Issues
+
+```bash
+# Find non-compliant colors
+omgkit design:scan
+
+# Or use slash command
+/design:scan
+```
+
+### Rollback
+
+```bash
+# Rollback to previous theme
+omgkit design:rollback
+
+# List available backups
+omgkit design:backups
+```
+
+## Theme Validation
+
+Validate your theme structure before applying:
+
+<CodeGroup>
+```bash Basic Validation
+/design:validate
+```
+
+```bash Strict Mode
+# Warns about missing optional tokens
+/design:validate --strict
+```
+
+```bash Auto-fix
+# Attempt to fix issues automatically
+/design:validate --fix
+```
+</CodeGroup>
+
+### Validation Checks
+
+- Required fields (name, id, category)
+- ID format (kebab-case)
+- Valid category
+- Color format (HSL values)
+- V2: $ref resolution
+- V2: Color scale structure
+- V2: Circular reference detection
+
 ## Custom Theme Options
 
 ### Interactive Builder
-
-Build your own theme with the interactive builder:
 
 ```bash
 /design:builder
 ```
 
-You can customize:
+Customize:
 - Primary, secondary, accent colors
 - Background and foreground
 - Border radius
 - Typography (font families)
 
 ### Extract from Screenshot
-
-Have a design mockup? Extract its colors:
 
 ```bash
 /design:from-screenshot ./mockup.png
@@ -252,8 +462,6 @@ Have a design mockup? Extract its colors:
 Claude Vision analyzes the image and extracts a cohesive color palette.
 
 ### Extract from Website
-
-Love a website's design? Extract its theme:
 
 ```bash
 /design:from-url https://linear.app
@@ -279,12 +487,15 @@ Components use CSS variables from your theme:
 // Button automatically uses --primary from theme.css
 <Button>Click me</Button>
 
-// Cards use --card and --card-foreground
-<Card>
-  <CardHeader>
-    <CardTitle>Title</CardTitle>
-  </CardHeader>
-</Card>
+// V2 themes provide additional variants
+<Button className="hover:bg-primary-hover">
+  With hover state from V2 theme
+</Button>
+
+// Status colors
+<Alert className="bg-success text-success-foreground">
+  Success message
+</Alert>
 ```
 
 ## CLI Options
@@ -298,8 +509,7 @@ omgkit init --with-design
 
 # Apply specific theme directly
 omgkit init --theme neo-tokyo
-omgkit init --theme minimal-slate
-omgkit init --theme ocean-blue
+omgkit init --theme electric-cyan-v2  # V2 theme
 ```
 
 ## Best Practices
@@ -314,16 +524,33 @@ omgkit init --theme ocean-blue
 @tailwind utilities;
 ```
   </Accordion>
-  <Accordion title="Use Tailwind theme colors">
+  <Accordion title="Use V2 color scales">
 ```tsx
-// Use theme colors via Tailwind
-<div className="bg-primary text-primary-foreground">
-  Primary styled content
+// V2 themes provide 12-step scales
+<div className="bg-cyan-9 hover:bg-cyan-10">
+  Using 12-step color scale
 </div>
 
-<div className="bg-muted text-muted-foreground">
-  Muted styled content
+// Alpha variants for overlays
+<div className="bg-cyan-a5">
+  Semi-transparent cyan
 </div>
+```
+  </Accordion>
+  <Accordion title="Use status colors">
+```tsx
+// V2 themes include status colors
+<Badge className="bg-success text-success-foreground">
+  Active
+</Badge>
+
+<Badge className="bg-warning text-warning-foreground">
+  Pending
+</Badge>
+
+<Badge className="bg-info text-info-foreground">
+  Info
+</Badge>
 ```
   </Accordion>
   <Accordion title="Dark mode support">
@@ -332,6 +559,24 @@ Your theme includes both light and dark mode. Add dark mode toggle:
 ```tsx
 // Toggle dark class on html element
 document.documentElement.classList.toggle('dark');
+```
+  </Accordion>
+  <Accordion title="Use effects (V2)">
+```tsx
+// Glassmorphism
+<div style={{
+  backdropFilter: 'blur(var(--glass-blur))',
+  background: 'hsl(var(--panel-translucent))'
+}}>
+  Frosted glass effect
+</div>
+
+// Glow effect
+<button style={{
+  boxShadow: 'var(--glow) hsl(var(--glow-color))'
+}}>
+  Glowing button
+</button>
 ```
   </Accordion>
 </AccordionGroup>
@@ -344,5 +589,11 @@ document.documentElement.classList.toggle('dark');
   </Card>
   <Card title="Tailwind CSS" icon="wind" href="https://tailwindcss.com">
     Tailwind CSS documentation
+  </Card>
+  <Card title="Radix Colors" icon="palette" href="https://www.radix-ui.com/colors">
+    12-step color scale inspiration
+  </Card>
+  <Card title="Style Dictionary" icon="book" href="https://amzn.github.io/style-dictionary">
+    Design token transformation
   </Card>
 </CardGroup>

@@ -59,7 +59,7 @@ describe('Design System - Theme Files', () => {
     }
   });
 
-  it('should have exactly 6 themes per category (30 total)', () => {
+  it('should have at least 6 themes per category (at least 30 total)', () => {
     const categories = readdirSync(themesDir).filter(f =>
       statSync(join(themesDir, f)).isDirectory()
     );
@@ -70,11 +70,12 @@ describe('Design System - Theme Files', () => {
     for (const category of categories) {
       const categoryDir = join(themesDir, category);
       const themes = readdirSync(categoryDir).filter(f => f.endsWith('.json'));
-      expect(themes.length, `Category ${category} should have 6 themes`).toBe(6);
+      expect(themes.length, `Category ${category} should have at least 6 themes`).toBeGreaterThanOrEqual(6);
       totalThemes += themes.length;
     }
 
-    expect(totalThemes).toBe(30);
+    // Base 30 themes + V2 variants (currently 1: electric-cyan-v2)
+    expect(totalThemes).toBeGreaterThanOrEqual(30);
   });
 
   it('should have valid theme schema file', () => {
@@ -98,8 +99,9 @@ describe('Design System - Theme Content', () => {
   const themes = loadAllThemes();
   const allThemeIds = getAllThemeIds();
 
-  it('should load all 30 themes', () => {
-    expect(allThemeIds.length).toBe(30);
+  it('should load at least 30 themes', () => {
+    // Base 30 themes + V2 variants
+    expect(allThemeIds.length).toBeGreaterThanOrEqual(30);
   });
 
   it('should have unique theme IDs', () => {
@@ -116,8 +118,8 @@ describe('Design System - Theme Content', () => {
         expect(THEME_CATEGORIES[categoryId].emoji).toBeDefined();
       });
 
-      it(`should have 6 themes`, () => {
-        expect(categoryThemes.length).toBe(6);
+      it(`should have at least 6 themes`, () => {
+        expect(categoryThemes.length).toBeGreaterThanOrEqual(6);
       });
 
       // Validate each theme in the category

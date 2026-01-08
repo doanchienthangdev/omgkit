@@ -18,6 +18,8 @@ args:
 
 Rebuild the entire project's UI with a new theme, automatically converting hardcoded Tailwind colors to theme variables.
 
+Supports both **V1** (flat colors) and **V2** (color scales, effects, animations) themes.
+
 ## What This Command Does
 
 1. **Creates Backup**
@@ -138,12 +140,54 @@ omgkit design:rebuild neo-tokyo
 omgkit design:rebuild neo-tokyo --dry
 ```
 
+## V2 Theme Features
+
+When using V2 themes, you get additional features:
+
+### Color Scales (12-step)
+```css
+/* Generated CSS variables */
+--teal-1: 165 60% 99%;
+--teal-9: 170 80% 36%;
+--teal-12: 173 90% 16%;
+/* Plus alpha variants: --teal-a1 through --teal-a12 */
+```
+
+### Status Colors
+```css
+--success: 151 55% 42%;
+--warning: 39 100% 62%;
+--info: 206 100% 50%;
+```
+
+### Extended Tokens
+- Surface variants: `surface`, `surface-hover`, `surface-active`
+- Hover states: `primary-hover`, `accent-hover`, `border-hover`
+- UI elements: `panel`, `panel-translucent`, `overlay`
+
+### Effects
+```css
+--glass-blur: 12px;
+--glow: 0 0 20px;
+--gradient-primary-from: 170 80% 36%;
+```
+
+### Animations
+```css
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+--animation-shimmer: shimmer 8s ease-in-out infinite;
+```
+
 ## Best Practices
 
 1. **Always preview first**: Use `--dry` flag to see what will change
 2. **Review warnings**: Manually check files with unmapped colors
 3. **Test after rebuild**: Verify UI looks correct in both light and dark modes
 4. **Keep backups**: Don't delete `.omgkit/design/backups/` folder
+5. **Consider V2 themes**: Use V2 themes for color scales and advanced features
 
 ## Related Commands
 
@@ -151,3 +195,5 @@ omgkit design:rebuild neo-tokyo --dry
 - `/design:scan` - Scan for non-compliant colors without fixing
 - `/design:rollback` - Rollback to previous theme
 - `/design:preview` - Preview current theme
+- `/design:export` - Export theme to CSS, SCSS, Figma, etc.
+- `/design:validate` - Validate theme structure

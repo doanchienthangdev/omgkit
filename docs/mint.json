@@ -381,6 +381,7 @@
         "commands/builder",
         "commands/cro",
         "commands/enhance",
+        "commands/export",
         "commands/fast",
         "commands/from-screenshot",
         "commands/from-url",
@@ -391,7 +392,8 @@
         "commands/rollback",
         "commands/screenshot",
         "commands/theme",
-        "commands/themes"
+        "commands/themes",
+        "commands/validate"
       ]
     },
     {
@@ -493,7 +495,6 @@
         "commands/collect",
         "commands/label",
         "commands/split",
-        "commands/validate",
         "commands/version"
       ]
     },

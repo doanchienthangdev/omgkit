@@ -37,11 +37,11 @@ All coordinated through **Omega-level thinking** - a framework for finding break
 | Component | Count | Description |
 |-----------|-------|-------------|
 | **Agents** | 41 | Specialized AI team members with distinct roles |
-| **Commands** | 169 | Slash commands for every development task |
+| **Commands** | 174 | Slash commands for every development task |
 | **Workflows** | 69 | Complete development processes from idea to deploy |
-| **Skills** | 161 | Domain expertise modules across 24 categories |
+| **Skills** | 162 | Domain expertise modules across 24 categories |
 | **Modes** | 10 | Behavioral configurations for different contexts |
-| **Themes** | 30 | Curated design system themes for shadcn/ui |
+| **Themes** | 31 | Curated design system themes (V1 + V2 schemas) |
 | **Archetypes** | 14 | Project templates for autonomous development |
 
 ---
@@ -166,23 +166,38 @@ testing:
       target: 85
 ```
 
-### 6. Design System (New in 2.29.0)
+### 6. Design System (Enhanced in 2.30.0)
 
-OMGKIT includes a complete design system with 30 curated themes for shadcn/ui integration:
+OMGKIT includes a complete design system with 31 curated themes for shadcn/ui integration. Now supports both **V1** (flat colors) and **V2** (color scales, effects, animations) theme schemas.
 
 ```bash
 # Initialize with a theme (opt-in)
 omgkit init --theme neo-tokyo
 
+# Or use a V2 theme with advanced features
+omgkit init --theme electric-cyan-v2
+
 # Or explore themes first
 omgkit init --with-design
 ```
+
+#### Theme Schema Versions
+
+| Feature | V1 | V2 |
+|---------|----|----|
+| Flat colors | ✓ | ✓ |
+| 12-step color scales | - | ✓ |
+| $ref token references | - | ✓ |
+| Status colors (success/warning/info) | - | ✓ |
+| Effects (glass, glow, gradient) | - | ✓ |
+| Animations (keyframes) | - | ✓ |
+| Alpha variants | - | ✓ |
 
 #### 5 Theme Categories
 
 | Category | Themes | Description |
 |----------|--------|-------------|
-| **Tech & AI** | neo-tokyo, electric-cyan, neural-dark, matrix-green, quantum-purple, hologram | Futuristic, cyberpunk-inspired |
+| **Tech & AI** | neo-tokyo, electric-cyan, electric-cyan-v2, neural-dark, matrix-green, quantum-purple, hologram | Futuristic, cyberpunk-inspired |
 | **Minimal & Clean** | minimal-slate, paper, mono, zen, nordic, swiss | Simple, elegant, distraction-free |
 | **Corporate** | ocean-blue, corporate-indigo, finance, legal, healthcare, consulting | Professional, trustworthy |
 | **Creative & Bold** | coral-sunset, candy, neon, gradient-dream, retro, studio | Vibrant, expressive |
@@ -192,7 +207,7 @@ omgkit init --with-design
 
 | Command | Description |
 |---------|-------------|
-| `/design:themes` | List all 30 curated themes |
+| `/design:themes` | List all 31 curated themes |
 | `/design:theme <id>` | Apply a theme to your project |
 | `/design:preview` | Preview current theme colors |
 | `/design:builder` | Build custom theme interactively |
@@ -203,6 +218,25 @@ omgkit init --with-design
 | `/design:rebuild <id>` | Rebuild entire project with new theme |
 | `/design:scan` | Scan for non-compliant colors |
 | `/design:rollback` | Rollback to previous theme |
+| `/design:export <format>` | Export to CSS, SCSS, Tailwind, Figma, Style Dictionary |
+| `/design:validate` | Validate theme structure |
+
+#### Theme Export (New in 2.30.0)
+
+Export your theme to various design tools and framework formats:
+
+```bash
+# Export CSS
+/design:export css
+
+# Export Figma tokens
+/design:export figma --output ./tokens/
+
+# Export all formats
+/design:export --all
+```
+
+Supported formats: `css`, `scss`, `tailwind`, `figma`, `style-dictionary`
 
 #### Theme Rebuild
 
@@ -211,6 +245,9 @@ Rebuild your entire project's UI with a single command:
 ```bash
 # Rebuild with new theme (scans and fixes hardcoded colors)
 omgkit design:rebuild neo-tokyo
+
+# Use V2 theme for advanced features
+omgkit design:rebuild electric-cyan-v2
 
 # Scan for non-compliant colors
 omgkit design:scan
@@ -224,6 +261,27 @@ The rebuild feature:
 - Scans `app/`, `components/`, `src/`, `pages/` directories
 - Replaces hardcoded colors (`bg-blue-500`) with theme variables (`bg-primary`)
 - Reports unfixable patterns for manual review
+- V2 themes generate 12-step color scales and status colors
+
+#### V2 Theme Features
+
+V2 themes provide additional CSS variables:
+
+```css
+/* 12-step color scales */
+--cyan-1 through --cyan-12
+--cyan-a1 through --cyan-a12  /* Alpha variants */
+
+/* Status colors */
+--success, --warning, --info
+
+/* Effects */
+--glass-blur, --glow
+
+/* Animations */
+@keyframes shimmer { ... }
+--animation-shimmer
+```
 
 #### How It Works
 
@@ -370,7 +428,7 @@ Agents are specialized AI team members, each with distinct expertise and respons
 
 ---
 
-## Commands (160)
+## Commands (174)
 
 Commands are slash-prefixed actions organized by namespace.
 
@@ -635,7 +693,7 @@ Workflows are orchestrated sequences of agents, commands, and skills.
 
 ---
 
-## Skills (161)
+## Skills (162)
 
 Skills are domain expertise modules organized in 24 categories.
 
@@ -987,7 +1045,7 @@ If any sync issue is detected (missing pages, wrong counts, broken links), the v
 
 ## Validation & Testing
 
-OMGKIT has 7300+ automated tests ensuring system integrity.
+OMGKIT has 8200+ automated tests ensuring system integrity.
 
 ### Run Tests
 

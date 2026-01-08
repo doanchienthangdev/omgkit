@@ -1,0 +1,232 @@
+---
+name: export
+description: Export current theme to various formats (CSS, SCSS, Tailwind, Figma, Style Dictionary)
+usage: /design:export <format> [--output <path>] [--all]
+args:
+  - name: format
+    required: false
+    description: Export format (css, scss, tailwind, figma, style-dictionary)
+  - name: --output
+    required: false
+    description: Output directory (default current directory)
+  - name: --all
+    required: false
+    description: Export all formats at once
+---
+
+# Design Export
+
+Export your current theme to various design tool and framework formats.
+
+## Supported Formats
+
+| Format | Extension | Description |
+|--------|-----------|-------------|
+| `css` | `.css` | CSS variables with @layer base |
+| `scss` | `.scss` | Sass variables, maps, and mixins |
+| `tailwind` | `.js/.ts` | Tailwind CSS configuration |
+| `figma` | `.json` | Figma design tokens |
+| `style-dictionary` | `.json` | Style Dictionary tokens |
+
+## Usage Examples
+
+### Export Single Format
+
+```bash
+# Export CSS
+/design:export css
+
+# Export SCSS
+/design:export scss
+
+# Export Tailwind config
+/design:export tailwind
+
+# Export Figma tokens
+/design:export figma
+
+# Export Style Dictionary
+/design:export style-dictionary
+```
+
+### Export to Specific Directory
+
+```bash
+/design:export css --output ./exports/
+/design:export figma --output ./design-tokens/
+```
+
+### Export All Formats
+
+```bash
+/design:export --all
+/design:export --all --output ./exports/
+```
+
+## Output Files
+
+### CSS Export
+```css
+/* theme.css */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --primary: 170 80% 36%;
+    /* ... all color variables */
+  }
+  .dark { /* dark mode variables */ }
+}
+```
+
+### SCSS Export
+```scss
+// _theme.scss
+$theme-font-sans: Inter, system-ui, sans-serif;
+$theme-colors-light: (
+  'background': 0 0% 100%,
+  'primary': 170 80% 36%,
+  // ...
+);
+
+@mixin theme-bg($color) {
+  background-color: hsl(var(--#{$color}));
+}
+```
+
+### Tailwind Export
+```typescript
+// tailwind.config.ts
+const config: Config = {
+  theme: {
+    extend: {
+      colors: {
+        background: "hsl(var(--background))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        // ... V2 color scales
+        teal: {
+          "1": "hsl(var(--teal-1))",
+          "9": "hsl(var(--teal-9))",
+          // ... all 12 steps
+        }
+      }
+    }
+  }
+};
+```
+
+### Figma Export
+```json
+{
+  "$themes": [
+    { "id": "theme-light", "name": "Theme Light" },
+    { "id": "theme-dark", "name": "Theme Dark" }
+  ],
+  "global": {
+    "typography": { /* font tokens */ },
+    "spacing": { /* spacing tokens */ }
+  },
+  "light": {
+    "colors": { /* light mode colors */ }
+  },
+  "dark": {
+    "colors": { /* dark mode colors */ }
+  }
+}
+```
+
+### Style Dictionary Export
+```json
+{
+  "$meta": {
+    "generator": "OMGKIT Design System",
+    "themeId": "electric-cyan"
+  },
+  "color": {
+    "base": { "light": { ... }, "dark": { ... } },
+    "primary": { "light": { ... }, "dark": { ... } }
+  },
+  "font": { /* typography tokens */ },
+  "spacing": { /* spacing tokens */ }
+}
+```
+
+## V2 Theme Features
+
+For V2 themes, exports include additional features:
+
+- **12-step color scales** (e.g., teal-1 through teal-12)
+- **Alpha variants** (e.g., teal-a1 through teal-a12)
+- **Status colors** (success, warning, info)
+- **Extended tokens** (surface, panel, overlay)
+- **Effects** (glassmorphism, glow, gradients)
+- **Animations** (keyframes, duration, easing)
+
+## Example Output
+
+```
+🔮 Design Export
+━━━━━━━━━━━━━━━━
+
+📤 Exporting theme: electric-cyan (v2.0)
+
+Format: css
+  ✓ ./exports/theme.css (4.2KB)
+
+Format: scss
+  ✓ ./exports/_theme.scss (8.1KB)
+
+Format: tailwind
+  ✓ ./exports/tailwind.config.ts (5.6KB)
+
+Format: figma
+  ✓ ./exports/figma-tokens.json (12.3KB)
+
+Format: style-dictionary
+  ✓ ./exports/style-dictionary.json (18.7KB)
+
+✅ Export complete!
+```
+
+## Integration Tips
+
+### Figma Tokens
+1. Export with `/design:export figma`
+2. Install Figma Tokens plugin
+3. Import the JSON file
+4. Apply tokens to your designs
+
+### Style Dictionary
+1. Export with `/design:export style-dictionary`
+2. Create `style-dictionary.config.json`
+3. Run `style-dictionary build`
+4. Use generated outputs
+
+### SCSS
+```scss
+// In your main.scss
+@use 'theme' as *;
+
+.button {
+  @include theme-bg('primary');
+  @include theme-text('primary-foreground');
+}
+```
+
+## CLI Alternative
+
+```bash
+omgkit design:export css
+omgkit design:export figma --output ./tokens/
+omgkit design:export --all
+```
+
+## Related Commands
+
+- `/design:themes` - List available themes
+- `/design:rebuild` - Apply a new theme
+- `/design:validate` - Validate theme structure
+- `/design:preview` - Preview current theme
