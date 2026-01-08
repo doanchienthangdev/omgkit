@@ -1,0 +1,278 @@
+---
+title: Design System
+description: '30 curated themes with shadcn/ui integration'
+icon: 'palette'
+---
+
+## Overview
+
+OMGKIT includes a complete design system with 30 curated themes that integrate seamlessly with shadcn/ui. Apply a theme during initialization or switch themes anytime with simple commands.
+
+## Quick Start
+
+<CodeGroup>
+```bash Initialize with Theme
+# Apply theme during init
+omgkit init --theme neo-tokyo
+
+# Or explore themes first
+omgkit init --with-design
+```
+
+```bash Switch Theme Later
+# List all themes
+/design:themes
+
+# Apply a theme
+/design:theme neo-tokyo
+
+# Preview current theme
+/design:preview
+```
+</CodeGroup>
+
+## Theme Categories
+
+<CardGroup cols={2}>
+  <Card title="Tech & AI" icon="microchip">
+    Futuristic, cyberpunk-inspired themes
+    - neo-tokyo
+    - electric-cyan
+    - neural-dark
+    - matrix-green
+    - quantum-purple
+    - hologram
+  </Card>
+  <Card title="Minimal & Clean" icon="minimize">
+    Simple, elegant, distraction-free
+    - minimal-slate
+    - paper
+    - mono
+    - zen
+    - nordic
+    - swiss
+  </Card>
+  <Card title="Corporate" icon="building">
+    Professional, trustworthy themes
+    - ocean-blue
+    - corporate-indigo
+    - finance
+    - legal
+    - healthcare
+    - consulting
+  </Card>
+  <Card title="Creative & Bold" icon="paintbrush">
+    Vibrant, expressive themes
+    - coral-sunset
+    - candy
+    - neon
+    - gradient-dream
+    - retro
+    - studio
+  </Card>
+  <Card title="Nature & Organic" icon="leaf">
+    Earth tones, calming themes
+    - forest
+    - ocean
+    - desert
+    - lavender
+    - arctic
+    - autumn
+  </Card>
+</CardGroup>
+
+## How It Works
+
+OMGKIT provides CSS variables that shadcn/ui components consume automatically.
+
+```
+Your Project
+├── .omgkit/
+│   └── design/
+│       ├── theme.json    ← Theme configuration
+│       └── theme.css     ← CSS variables (:root + .dark)
+└── components/
+    └── ui/               ← shadcn components use theme.css
+```
+
+### Generated Files
+
+<Tabs>
+  <Tab title="theme.json">
+```json
+{
+  "name": "Neo Tokyo",
+  "id": "neo-tokyo",
+  "category": "tech-ai",
+  "colors": {
+    "light": {
+      "background": "0 0% 100%",
+      "primary": "346.8 77.2% 49.8%",
+      ...
+    },
+    "dark": {
+      "background": "240 10% 3.9%",
+      "primary": "346.8 77.2% 49.8%",
+      ...
+    }
+  },
+  "radius": "0.5rem"
+}
+```
+  </Tab>
+  <Tab title="theme.css">
+```css
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --primary: 346.8 77.2% 49.8%;
+    --primary-foreground: 355.7 100% 97.3%;
+    /* ... all 20+ color variables */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    /* ... dark mode overrides */
+  }
+}
+```
+  </Tab>
+</Tabs>
+
+## Design Commands
+
+| Command | Description |
+|---------|-------------|
+| `/design:themes` | List all 30 curated themes by category |
+| `/design:theme <id>` | Apply a theme to your project |
+| `/design:preview` | Preview current theme colors |
+| `/design:builder` | Build custom theme interactively |
+| `/design:from-screenshot` | Extract theme from image (Claude Vision) |
+| `/design:from-url` | Extract theme from webpage |
+| `/design:add <components>` | Add shadcn/ui components |
+| `/design:reset` | Reset to original theme |
+
+## Custom Theme Options
+
+### Interactive Builder
+
+Build your own theme with the interactive builder:
+
+```bash
+/design:builder
+```
+
+You can customize:
+- Primary, secondary, accent colors
+- Background and foreground
+- Border radius
+- Typography (font families)
+
+### Extract from Screenshot
+
+Have a design mockup? Extract its colors:
+
+```bash
+/design:from-screenshot ./mockup.png
+```
+
+Claude Vision analyzes the image and extracts a cohesive color palette.
+
+### Extract from Website
+
+Love a website's design? Extract its theme:
+
+```bash
+/design:from-url https://linear.app
+```
+
+OMGKIT fetches the page and extracts CSS variables or computed styles.
+
+## shadcn/ui Integration
+
+After applying a theme, add shadcn components that automatically use your colors:
+
+```bash
+# Add components
+/design:add button card input
+
+# Or manually
+npx shadcn@latest add button
+```
+
+Components use CSS variables from your theme:
+
+```tsx
+// Button automatically uses --primary from theme.css
+<Button>Click me</Button>
+
+// Cards use --card and --card-foreground
+<Card>
+  <CardHeader>
+    <CardTitle>Title</CardTitle>
+  </CardHeader>
+</Card>
+```
+
+## CLI Options
+
+```bash
+# Normal init (no design prompt)
+omgkit init
+
+# Show theme selection UI
+omgkit init --with-design
+
+# Apply specific theme directly
+omgkit init --theme neo-tokyo
+omgkit init --theme minimal-slate
+omgkit init --theme ocean-blue
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Import theme.css in globals.css">
+```css
+/* app/globals.css */
+@import '../.omgkit/design/theme.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+  </Accordion>
+  <Accordion title="Use Tailwind theme colors">
+```tsx
+// Use theme colors via Tailwind
+<div className="bg-primary text-primary-foreground">
+  Primary styled content
+</div>
+
+<div className="bg-muted text-muted-foreground">
+  Muted styled content
+</div>
+```
+  </Accordion>
+  <Accordion title="Dark mode support">
+Your theme includes both light and dark mode. Add dark mode toggle:
+
+```tsx
+// Toggle dark class on html element
+document.documentElement.classList.toggle('dark');
+```
+  </Accordion>
+</AccordionGroup>
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="shadcn/ui" icon="cube" href="https://ui.shadcn.com">
+    Official shadcn/ui documentation
+  </Card>
+  <Card title="Tailwind CSS" icon="wind" href="https://tailwindcss.com">
+    Tailwind CSS documentation
+  </Card>
+</CardGroup>
