@@ -1,0 +1,153 @@
+---
+name: rebuild
+description: Rebuild entire project UI with a new theme, replacing hardcoded colors
+usage: /design:rebuild <theme-id> [--dry] [--force]
+args:
+  - name: theme-id
+    required: true
+    description: Theme ID to apply (use /design:themes to see options)
+  - name: --dry
+    required: false
+    description: Preview changes without applying
+  - name: --force
+    required: false
+    description: Skip confirmation prompt
+---
+
+# Design Rebuild
+
+Rebuild the entire project's UI with a new theme, automatically converting hardcoded Tailwind colors to theme variables.
+
+## What This Command Does
+
+1. **Creates Backup**
+   - Saves current theme.json and theme.css
+   - Backs up tailwind.config.ts
+   - Creates rollback point in `.omgkit/design/backups/`
+
+2. **Applies New Theme**
+   - Updates `.omgkit/design/theme.json`
+   - Regenerates `.omgkit/design/theme.css` with CSS variables
+   - Updates `tailwind.config.ts` with theme colors
+   - Ensures `globals.css` imports theme.css
+
+3. **Scans & Fixes Components**
+   - Scans `app/`, `components/`, `src/`, `pages/` directories
+   - Finds hardcoded Tailwind colors (e.g., `bg-blue-500`)
+   - Replaces with theme variables (e.g., `bg-primary`)
+   - Reports unfixable patterns for manual review
+
+## Color Mapping
+
+The following hardcoded colors are automatically converted:
+
+| Hardcoded | Theme Variable |
+|-----------|---------------|
+| `bg-white` | `bg-background` |
+| `bg-gray-50/100` | `bg-muted` |
+| `text-gray-900` | `text-foreground` |
+| `text-gray-500/600` | `text-muted-foreground` |
+| `border-gray-200` | `border-border` |
+| `bg-blue-500/600` | `bg-primary` |
+| `text-blue-600` | `text-primary` |
+| `bg-red-500/600` | `bg-destructive` |
+
+## Usage Examples
+
+### Basic Rebuild
+```bash
+/design:rebuild neo-tokyo
+```
+
+### Preview Changes (Dry Run)
+```bash
+/design:rebuild neo-tokyo --dry
+```
+
+### Force Rebuild (No Confirmation)
+```bash
+/design:rebuild neo-tokyo --force
+```
+
+## Available Themes
+
+Run `/design:themes` to see all 30 curated themes:
+
+- **Tech & AI**: neo-tokyo, electric-cyan, neural-dark, matrix-green, quantum-purple, hologram
+- **Minimal & Clean**: minimal-slate, paper, mono, zen, nordic, swiss
+- **Corporate**: ocean-blue, corporate-indigo, finance, legal, healthcare, consulting
+- **Creative & Bold**: coral-sunset, candy, neon, gradient-dream, retro, studio
+- **Nature & Organic**: forest, ocean, desert, lavender, arctic, autumn
+
+## Example Output
+
+```
+🔮 Design Rebuild: neo-tokyo
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 Creating backup...
+   Backup ID: 2024-01-08T14-30-00-neo-tokyo
+
+🎨 Applying theme...
+   ✓ .omgkit/design/theme.json
+   ✓ .omgkit/design/theme.css
+   ✓ tailwind.config.ts
+   ✓ app/globals.css
+
+🔍 Scanning components...
+   Found 45 files with color references
+   Fixed 38 non-compliant patterns
+
+Fixed Colors:
+  components/Button.tsx
+    bg-blue-500 → bg-primary (3x)
+    text-white → text-primary-foreground (3x)
+
+  app/page.tsx
+    bg-gray-50 → bg-muted (2x)
+    text-gray-600 → text-muted-foreground (4x)
+
+⚠️  Warnings (manual review needed):
+   - components/legacy/OldCard.tsx:12 - bg-emerald-400 (manual review needed)
+
+✅ Rebuild complete!
+   To rollback: omgkit design:rollback
+```
+
+## Rollback
+
+If the rebuild causes issues:
+
+```bash
+# Rollback to previous theme
+omgkit design:rollback
+
+# Or use slash command
+/design:rollback
+
+# Specify specific backup
+omgkit design:rollback 2024-01-08T14-30-00-neo-tokyo
+```
+
+## CLI Alternative
+
+This command is also available as a CLI command:
+
+```bash
+omgkit design:rebuild neo-tokyo
+omgkit design:rebuild neo-tokyo --dry
+```
+
+## Best Practices
+
+1. **Always preview first**: Use `--dry` flag to see what will change
+2. **Review warnings**: Manually check files with unmapped colors
+3. **Test after rebuild**: Verify UI looks correct in both light and dark modes
+4. **Keep backups**: Don't delete `.omgkit/design/backups/` folder
+
+## Related Commands
+
+- `/design:themes` - List all available themes
+- `/design:scan` - Scan for non-compliant colors without fixing
+- `/design:rollback` - Rollback to previous theme
+- `/design:preview` - Preview current theme

@@ -385,7 +385,9 @@
         "commands/from-url",
         "commands/good",
         "commands/preview",
+        "commands/rebuild",
         "commands/reset",
+        "commands/rollback",
         "commands/screenshot",
         "commands/theme",
         "commands/themes"

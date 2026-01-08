@@ -34,6 +34,13 @@ import {
   log
 } from '../lib/cli.js';
 
+import {
+  scanProjectColors,
+  rebuildProjectTheme,
+  rollbackTheme,
+  listThemeBackups
+} from '../lib/theme.js';
+
 // Set package root for CLI context
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -69,6 +76,12 @@ ${COLORS.bright}CONFIG COMMANDS${COLORS.reset}
   ${COLORS.cyan}config list [section]${COLORS.reset} List all config or specific section
   ${COLORS.cyan}config reset <key>${COLORS.reset}    Reset config key to default
 
+${COLORS.bright}DESIGN SYSTEM COMMANDS${COLORS.reset}
+  ${COLORS.cyan}design:rebuild <theme>${COLORS.reset}  Rebuild project UI with new theme
+  ${COLORS.cyan}design:scan${COLORS.reset}             Scan for non-compliant colors
+  ${COLORS.cyan}design:rollback [id]${COLORS.reset}    Rollback to previous theme
+  ${COLORS.cyan}design:backups${COLORS.reset}          List available theme backups
+
 ${COLORS.bright}UPGRADE OPTIONS${COLORS.reset}
   --dry        Show what would change without applying
   --force      Skip confirmation prompts
@@ -90,6 +103,13 @@ ${COLORS.bright}CONFIG EXAMPLES${COLORS.reset}
   omgkit config get testing
   omgkit config list testing
   omgkit config reset testing.enforcement.level
+
+${COLORS.bright}DESIGN EXAMPLES${COLORS.reset}
+  omgkit design:rebuild neo-tokyo    # Rebuild with Neo Tokyo theme
+  omgkit design:rebuild --dry        # Preview what would change
+  omgkit design:scan                 # Scan for non-compliant colors
+  omgkit design:rollback             # Rollback to previous theme
+  omgkit design:backups              # List theme backups
 
 ${COLORS.bright}AFTER INSTALLATION${COLORS.reset}
   In Claude Code, type / to see all OMGKIT commands:
@@ -247,6 +267,164 @@ ${COLORS.bright}Examples:${COLORS.reset}
     }
     break;
   }
+  case 'design:rebuild': {
+    console.log(BANNER);
+    const themeId = args.find(a => !a.startsWith('--'));
+    const dryRun = args.includes('--dry');
+    const force = args.includes('--force');
+
+    if (!themeId) {
+      log.error('Usage: omgkit design:rebuild <theme-id> [--dry] [--force]');
+      log.info('Run /design:themes in Claude Code to see available themes');
+      log.info('Example: omgkit design:rebuild neo-tokyo');
+      process.exit(1);
+    }
+
+    console.log(`${COLORS.bright}🔮 Design Rebuild: ${themeId}${COLORS.reset}`);
+    console.log('━'.repeat(40));
+
+    if (dryRun) {
+      log.info('DRY RUN - No changes will be made\n');
+    }
+
+    const result = rebuildProjectTheme(process.cwd(), themeId, { dryRun, force });
+
+    if (!result.success) {
+      log.error(result.error);
+      process.exit(1);
+    }
+
+    if (!dryRun && result.backupId) {
+      console.log(`\n📦 ${COLORS.green}Backup created:${COLORS.reset} ${result.backupId}`);
+    }
+
+    console.log(`\n🎨 ${COLORS.bright}Theme Applied:${COLORS.reset} ${result.newTheme}`);
+
+    if (result.changedFiles.length > 0) {
+      console.log(`\n${COLORS.bright}Changed Files:${COLORS.reset}`);
+      for (const f of result.changedFiles) {
+        console.log(`  ${COLORS.green}✓${COLORS.reset} ${f}`);
+      }
+    }
+
+    if (result.fixedColors.length > 0) {
+      console.log(`\n${COLORS.bright}Fixed Colors:${COLORS.reset}`);
+      for (const fc of result.fixedColors) {
+        console.log(`  ${COLORS.cyan}${fc.file}${COLORS.reset}`);
+        for (const r of fc.replacements) {
+          if (r.count) {
+            console.log(`    ${r.from} → ${r.to} (${r.count}x)`);
+          } else {
+            console.log(`    ${r.from} → ${r.to}`);
+          }
+        }
+      }
+    }
+
+    if (result.warnings.length > 0) {
+      console.log(`\n${COLORS.yellow}⚠️  Warnings (manual review needed):${COLORS.reset}`);
+      for (const w of result.warnings.slice(0, 10)) {
+        console.log(`  ${w}`);
+      }
+      if (result.warnings.length > 10) {
+        console.log(`  ... and ${result.warnings.length - 10} more`);
+      }
+    }
+
+    if (dryRun) {
+      log.info('\nTo apply changes, run without --dry flag');
+    } else {
+      log.success('\nRebuild complete!');
+      log.info('To rollback: omgkit design:rollback');
+    }
+    break;
+  }
+
+  case 'design:scan': {
+    console.log(BANNER);
+    console.log(`${COLORS.bright}🔍 Scanning for non-compliant colors...${COLORS.reset}\n`);
+
+    const result = scanProjectColors(process.cwd());
+
+    console.log(`Scanned ${result.scannedFiles} files\n`);
+
+    if (result.nonCompliant.length === 0) {
+      log.success('All colors are theme-compliant!');
+    } else {
+      log.warn(`Found ${result.nonCompliant.length} non-compliant color references\n`);
+
+      // Group by file
+      const byFile = {};
+      for (const item of result.nonCompliant) {
+        if (!byFile[item.file]) byFile[item.file] = [];
+        byFile[item.file].push(item);
+      }
+
+      for (const [file, items] of Object.entries(byFile)) {
+        console.log(`${COLORS.cyan}📁 ${file}${COLORS.reset}`);
+        for (const item of items.slice(0, 5)) {
+          const suggestion = item.suggestion ? ` → ${COLORS.green}${item.suggestion}${COLORS.reset}` : ` ${COLORS.yellow}(manual review)${COLORS.reset}`;
+          console.log(`   Line ${item.line}: ${item.match}${suggestion}`);
+        }
+        if (items.length > 5) {
+          console.log(`   ... and ${items.length - 5} more`);
+        }
+        console.log();
+      }
+
+      console.log('━'.repeat(40));
+      console.log(`Total: ${result.nonCompliant.length} violations in ${Object.keys(byFile).length} files`);
+      console.log(`\nRun ${COLORS.cyan}omgkit design:rebuild <theme-id>${COLORS.reset} to auto-fix`);
+    }
+    break;
+  }
+
+  case 'design:rollback': {
+    console.log(BANNER);
+    const backupId = args[0];
+
+    console.log(`${COLORS.bright}🔄 Theme Rollback${COLORS.reset}\n`);
+
+    const result = rollbackTheme(process.cwd(), backupId);
+
+    if (!result.success) {
+      log.error(result.error);
+      if (result.error.includes('No theme backups')) {
+        log.info('No backups available. Rebuild a theme first to create backups.');
+      }
+      process.exit(1);
+    }
+
+    log.success(`Rolled back to: ${result.restoredTheme}`);
+    console.log(`\n${COLORS.bright}Restored Files:${COLORS.reset}`);
+    for (const f of result.restoredFiles) {
+      console.log(`  ${COLORS.green}✓${COLORS.reset} ${f}`);
+    }
+    console.log(`\nBackup used: ${result.backupUsed}`);
+    break;
+  }
+
+  case 'design:backups': {
+    console.log(BANNER);
+    console.log(`${COLORS.bright}📦 Theme Backups${COLORS.reset}\n`);
+
+    const backups = listThemeBackups(process.cwd());
+
+    if (backups.length === 0) {
+      log.info('No theme backups found');
+      log.info('Run omgkit design:rebuild <theme-id> to create backups');
+    } else {
+      for (const b of backups) {
+        console.log(`  ${COLORS.cyan}${b.id}${COLORS.reset}`);
+        console.log(`    ${b.previousTheme} → ${b.newTheme}`);
+        console.log(`    ${b.date} (${b.filesChanged} files)\n`);
+      }
+      console.log(`To rollback: ${COLORS.cyan}omgkit design:rollback${COLORS.reset}`);
+      console.log(`Or specify: ${COLORS.cyan}omgkit design:rollback <backup-id>${COLORS.reset}`);
+    }
+    break;
+  }
+
   case 'version':
   case '-v':
   case '--version': {

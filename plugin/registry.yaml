@@ -3,7 +3,7 @@
 # Version: 2.26.1
 # Updated: 2026-01-06
 
-version: "2.28.0"
+version: "2.29.0"
 
 # =============================================================================
 # OPTIMIZED ALIGNMENT PRINCIPLE (OAP)
@@ -446,6 +446,9 @@ agents:
       - /design:from-url
       - /design:builder
       - /design:reset
+      - /design:rebuild
+      - /design:scan
+      - /design:rollback
 
   api-designer:
     file: agents/api-designer.md

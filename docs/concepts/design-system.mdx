@@ -154,6 +154,76 @@ Your Project
 | `/design:from-url` | Extract theme from webpage |
 | `/design:add <components>` | Add shadcn/ui components |
 | `/design:reset` | Reset to original theme |
+| `/design:rebuild <id>` | Rebuild entire project with new theme |
+| `/design:scan` | Scan for non-compliant colors |
+| `/design:rollback` | Rollback to previous theme |
+
+## Theme Rebuild
+
+Change your project's entire design system with a single command. The rebuild feature scans all source files and replaces hardcoded colors with theme variables.
+
+### Rebuild with New Theme
+
+<CodeGroup>
+```bash CLI
+omgkit design:rebuild neo-tokyo
+```
+
+```bash Slash Command
+/design:rebuild neo-tokyo
+```
+</CodeGroup>
+
+### What Gets Updated
+
+1. **Theme Configuration**
+   - `.omgkit/design/theme.json` - Updated with new theme
+   - `.omgkit/design/theme.css` - Regenerated CSS variables
+
+2. **Tailwind Config**
+   - `tailwind.config.ts` color palette extended
+
+3. **Component Files**
+   - Hardcoded colors replaced with theme variables:
+     - `bg-blue-500` → `bg-primary`
+     - `text-gray-600` → `text-muted-foreground`
+     - `border-gray-200` → `border-border`
+
+### Scan for Issues
+
+Find non-compliant hardcoded colors before rebuilding:
+
+```bash
+# Find non-compliant colors
+omgkit design:scan
+
+# Or use slash command
+/design:scan
+```
+
+### Rollback
+
+If something breaks, restore the previous theme:
+
+```bash
+# Rollback to previous theme
+omgkit design:rollback
+
+# List available backups
+omgkit design:backups
+```
+
+### Color Mapping Reference
+
+| Hardcoded | Theme Variable | Context |
+|-----------|---------------|---------|
+| `bg-white` | `bg-background` | Page background |
+| `bg-gray-50` | `bg-muted` | Subtle background |
+| `text-gray-900` | `text-foreground` | Primary text |
+| `text-gray-600` | `text-muted-foreground` | Secondary text |
+| `bg-blue-500` | `bg-primary` | Primary action |
+| `bg-red-500` | `bg-destructive` | Danger action |
+| `border-gray-200` | `border-border` | Standard border |
 
 ## Custom Theme Options
 

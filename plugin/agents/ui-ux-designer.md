@@ -24,6 +24,9 @@ commands:
   - /design:from-url
   - /design:builder
   - /design:reset
+  - /design:rebuild
+  - /design:scan
+  - /design:rollback
 ---
 
 # 🎨 UI/UX Designer Agent
@@ -178,6 +181,9 @@ xl: 1280px  /* Large desktop */
 | `/design:from-url` | Extract from webpage |
 | `/design:add <comp>` | Add shadcn components |
 | `/design:reset` | Reset to original |
+| `/design:rebuild <id>` | Rebuild entire project with new theme |
+| `/design:scan` | Scan for non-compliant colors |
+| `/design:rollback` | Rollback to previous theme |
 
 ## Theme Categories
 

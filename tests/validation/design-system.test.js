@@ -270,7 +270,11 @@ describe('Design System - Commands', () => {
     'from-screenshot.md',
     'from-url.md',
     'builder.md',
-    'reset.md'
+    'reset.md',
+    // Theme rebuild commands
+    'rebuild.md',
+    'scan.md',
+    'rollback.md'
   ];
 
   it('should have design commands directory', () => {

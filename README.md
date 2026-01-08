@@ -200,6 +200,30 @@ omgkit init --with-design
 | `/design:from-url` | Extract theme from webpage |
 | `/design:add <comp>` | Add shadcn/ui components |
 | `/design:reset` | Reset to original theme |
+| `/design:rebuild <id>` | Rebuild entire project with new theme |
+| `/design:scan` | Scan for non-compliant colors |
+| `/design:rollback` | Rollback to previous theme |
+
+#### Theme Rebuild
+
+Rebuild your entire project's UI with a single command:
+
+```bash
+# Rebuild with new theme (scans and fixes hardcoded colors)
+omgkit design:rebuild neo-tokyo
+
+# Scan for non-compliant colors
+omgkit design:scan
+
+# Rollback if needed
+omgkit design:rollback
+```
+
+The rebuild feature:
+- Backs up current theme before changes
+- Scans `app/`, `components/`, `src/`, `pages/` directories
+- Replaces hardcoded colors (`bg-blue-500`) with theme variables (`bg-primary`)
+- Reports unfixable patterns for manual review
 
 #### How It Works
 
