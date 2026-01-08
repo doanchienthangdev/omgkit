@@ -103,7 +103,8 @@ const STATIC_NAVIGATION = [
       "concepts/alignment-principle",
       "concepts/sprint-management",
       "concepts/ai-team",
-      "concepts/artifacts"
+      "concepts/artifacts",
+      "concepts/design-system"
     ]
   },
   {
