@@ -59,7 +59,7 @@ describe('Design System - Theme Files', () => {
     }
   });
 
-  it('should have at least 6 themes per category (at least 30 total)', () => {
+  it('should have exactly 6 themes per category (30 total)', () => {
     const categories = readdirSync(themesDir).filter(f =>
       statSync(join(themesDir, f)).isDirectory()
     );
@@ -70,12 +70,24 @@ describe('Design System - Theme Files', () => {
     for (const category of categories) {
       const categoryDir = join(themesDir, category);
       const themes = readdirSync(categoryDir).filter(f => f.endsWith('.json'));
-      expect(themes.length, `Category ${category} should have at least 6 themes`).toBeGreaterThanOrEqual(6);
+      expect(themes.length, `Category ${category} should have exactly 6 themes`).toBe(6);
       totalThemes += themes.length;
     }
 
-    // Base 30 themes + V2 variants (currently 1: electric-cyan-v2)
-    expect(totalThemes).toBeGreaterThanOrEqual(30);
+    // All 30 themes are V2 format
+    expect(totalThemes).toBe(30);
+  });
+
+  it('should not have any -v2 suffix files (all themes are V2 now)', () => {
+    const categories = readdirSync(themesDir).filter(f =>
+      statSync(join(themesDir, f)).isDirectory()
+    );
+
+    for (const category of categories) {
+      const categoryDir = join(themesDir, category);
+      const v2Files = readdirSync(categoryDir).filter(f => f.includes('-v2'));
+      expect(v2Files.length, `Found -v2 files in ${category}: ${v2Files.join(', ')}`).toBe(0);
+    }
   });
 
   it('should have valid theme schema file', () => {
@@ -99,9 +111,9 @@ describe('Design System - Theme Content', () => {
   const themes = loadAllThemes();
   const allThemeIds = getAllThemeIds();
 
-  it('should load at least 30 themes', () => {
-    // Base 30 themes + V2 variants
-    expect(allThemeIds.length).toBeGreaterThanOrEqual(30);
+  it('should load exactly 30 themes', () => {
+    // All 30 themes are V2 format
+    expect(allThemeIds.length).toBe(30);
   });
 
   it('should have unique theme IDs', () => {
@@ -194,6 +206,111 @@ describe('Design System - Theme Content', () => {
         });
       }
     });
+  }
+});
+
+// =============================================================================
+// V2 SCHEMA VALIDATION
+// =============================================================================
+
+describe('Design System - V2 Schema', () => {
+  const themes = loadAllThemes();
+
+  for (const [categoryId, categoryThemes] of Object.entries(themes)) {
+    for (const theme of categoryThemes) {
+      describe(`V2 Schema: ${theme.id}`, () => {
+        it('should have version 2.0', () => {
+          expect(theme.version).toBe('2.0');
+        });
+
+        it('should have colorSystem', () => {
+          expect(theme.colorSystem).toBeDefined();
+          expect(theme.colorSystem.type).toBe('radix');
+          expect(theme.colorSystem.version).toBe('3.0');
+        });
+
+        it('should have scales with primary and neutral', () => {
+          expect(theme.scales).toBeDefined();
+          expect(theme.scales.primary).toBeDefined();
+          expect(theme.scales.neutral).toBeDefined();
+        });
+
+        it('should have 12-step primary color scale', () => {
+          expect(theme.scales.primary.steps).toBeDefined();
+          expect(theme.scales.primary.steps.light).toBeDefined();
+          expect(theme.scales.primary.steps.dark).toBeDefined();
+
+          // Check all 12 steps exist
+          for (let i = 1; i <= 12; i++) {
+            expect(
+              theme.scales.primary.steps.light[String(i)],
+              `Missing light step ${i}`
+            ).toBeDefined();
+            expect(
+              theme.scales.primary.steps.dark[String(i)],
+              `Missing dark step ${i}`
+            ).toBeDefined();
+          }
+        });
+
+        it('should have alpha variants', () => {
+          expect(theme.scales.primary.alpha).toBeDefined();
+          expect(theme.scales.primary.alpha.light).toBeDefined();
+          expect(theme.scales.primary.alpha.dark).toBeDefined();
+        });
+
+        it('should have semanticTokens', () => {
+          expect(theme.semanticTokens).toBeDefined();
+          expect(theme.semanticTokens.light).toBeDefined();
+          expect(theme.semanticTokens.dark).toBeDefined();
+        });
+
+        it('should have statusColors', () => {
+          expect(theme.statusColors).toBeDefined();
+          expect(theme.statusColors.light).toBeDefined();
+          expect(theme.statusColors.dark).toBeDefined();
+
+          // Check required status colors
+          const requiredStatus = ['destructive', 'success', 'warning', 'info'];
+          for (const status of requiredStatus) {
+            expect(
+              theme.statusColors.light[status],
+              `Missing light.${status}`
+            ).toBeDefined();
+          }
+        });
+
+        it('should have effects', () => {
+          expect(theme.effects).toBeDefined();
+          expect(theme.effects.glassMorphism).toBeDefined();
+          expect(theme.effects.glow).toBeDefined();
+          expect(theme.effects.gradient).toBeDefined();
+        });
+
+        it('should have animations', () => {
+          expect(theme.animations).toBeDefined();
+          expect(theme.animations.shimmer).toBeDefined();
+          expect(theme.animations['pulse-glow']).toBeDefined();
+          expect(theme.animations['fade-in']).toBeDefined();
+        });
+
+        it('should have backward-compatible colors block', () => {
+          expect(theme.colors).toBeDefined();
+          expect(theme.colors.light).toBeDefined();
+          expect(theme.colors.dark).toBeDefined();
+        });
+
+        it('should have typography', () => {
+          expect(theme.typography).toBeDefined();
+          expect(theme.typography.fontFamily).toBeDefined();
+        });
+
+        it('should have spacing', () => {
+          expect(theme.spacing).toBeDefined();
+          expect(theme.spacing.radius).toBeDefined();
+        });
+      });
+    }
   }
 });
 

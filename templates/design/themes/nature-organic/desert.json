@@ -1,8 +1,464 @@
 {
+  "version": "2.0",
   "name": "Desert",
   "id": "desert",
   "category": "nature-organic",
-  "description": "Warm earth tones inspired by southwest landscapes",
+  "description": "Warm earth tones inspired by southwest landscapes - featuring 12-step color scales, effects, and animations",
+  "colorSystem": {
+    "type": "radix",
+    "version": "3.0"
+  },
+  "scales": {
+    "primary": {
+      "name": "orange",
+      "hue": 25,
+      "saturation": {
+        "light": {
+          "low": 50,
+          "high": 85
+        },
+        "dark": {
+          "low": 40,
+          "high": 80
+        }
+      },
+      "steps": {
+        "light": {
+          "1": "25 50% 99%",
+          "2": "25 55% 97%",
+          "3": "25 60% 93%",
+          "4": "25 65% 88%",
+          "5": "25 70% 82%",
+          "6": "25 75% 74%",
+          "7": "25 80% 62%",
+          "8": "25 75% 50%",
+          "9": "25 85% 45%",
+          "10": "25 85% 40%",
+          "11": "25 85% 32%",
+          "12": "25 90% 18%"
+        },
+        "dark": {
+          "1": "25 40% 7%",
+          "2": "25 45% 10%",
+          "3": "25 50% 14%",
+          "4": "25 55% 18%",
+          "5": "25 60% 22%",
+          "6": "25 65% 28%",
+          "7": "25 70% 35%",
+          "8": "25 60% 42%",
+          "9": "25 80% 45%",
+          "10": "25 75% 52%",
+          "11": "25 65% 65%",
+          "12": "25 55% 80%"
+        }
+      },
+      "alpha": {
+        "light": {
+          "1": "25 80% 45% / 0.05",
+          "2": "25 80% 45% / 0.1",
+          "3": "25 80% 45% / 0.15",
+          "4": "25 80% 45% / 0.2",
+          "5": "25 80% 45% / 0.3",
+          "6": "25 80% 45% / 0.4",
+          "7": "25 80% 45% / 0.5",
+          "8": "25 80% 45% / 0.6",
+          "9": "25 80% 45% / 0.7",
+          "10": "25 80% 45% / 0.8",
+          "11": "25 80% 45% / 0.9",
+          "12": "25 80% 45% / 0.95"
+        },
+        "dark": {
+          "1": "25 80% 50% / 0.05",
+          "2": "25 80% 50% / 0.1",
+          "3": "25 80% 50% / 0.15",
+          "4": "25 80% 50% / 0.2",
+          "5": "25 80% 50% / 0.3",
+          "6": "25 80% 50% / 0.4",
+          "7": "25 80% 50% / 0.5",
+          "8": "25 80% 50% / 0.6",
+          "9": "25 80% 50% / 0.7",
+          "10": "25 80% 50% / 0.8",
+          "11": "25 80% 50% / 0.9",
+          "12": "25 80% 50% / 0.95"
+        }
+      }
+    },
+    "neutral": {
+      "name": "gray",
+      "hue": 25,
+      "steps": {
+        "light": {
+          "1": "15 40% 99%",
+          "2": "15 40% 98%",
+          "3": "15 35% 96%",
+          "4": "15 30% 94%",
+          "5": "15 25% 91%",
+          "6": "15 20% 86%",
+          "7": "15 18% 78%",
+          "8": "15 16% 65%",
+          "9": "15 14% 50%",
+          "10": "15 12% 40%",
+          "11": "25 47% 11%",
+          "12": "25 84% 5%"
+        },
+        "dark": {
+          "1": "25 84% 5%",
+          "2": "25 50% 8%",
+          "3": "20 33% 17%",
+          "4": "20 30% 22%",
+          "5": "20 28% 28%",
+          "6": "20 26% 35%",
+          "7": "20 22% 45%",
+          "8": "20 20% 55%",
+          "9": "18 20% 65%",
+          "10": "18 18% 75%",
+          "11": "15 35% 88%",
+          "12": "15 40% 98%"
+        }
+      }
+    }
+  },
+  "semanticTokens": {
+    "light": {
+      "background": "0 0% 100%",
+      "foreground": {
+        "$ref": "scales.neutral.steps.light.12"
+      },
+      "surface": {
+        "$ref": "scales.neutral.steps.light.2"
+      },
+      "surface-hover": {
+        "$ref": "scales.neutral.steps.light.3"
+      },
+      "surface-active": {
+        "$ref": "scales.neutral.steps.light.4"
+      },
+      "primary": {
+        "$ref": "scales.primary.steps.light.9"
+      },
+      "primary-hover": {
+        "$ref": "scales.primary.steps.light.10"
+      },
+      "primary-foreground": "210 40% 98%",
+      "secondary": {
+        "$ref": "scales.neutral.steps.light.3"
+      },
+      "secondary-hover": {
+        "$ref": "scales.neutral.steps.light.4"
+      },
+      "secondary-foreground": {
+        "$ref": "scales.neutral.steps.light.11"
+      },
+      "muted": {
+        "$ref": "scales.neutral.steps.light.3"
+      },
+      "muted-foreground": {
+        "$ref": "scales.neutral.steps.light.9"
+      },
+      "accent": {
+        "$ref": "scales.neutral.steps.light.3"
+      },
+      "accent-hover": {
+        "$ref": "scales.neutral.steps.light.4"
+      },
+      "accent-foreground": {
+        "$ref": "scales.neutral.steps.light.11"
+      },
+      "border": {
+        "$ref": "scales.neutral.steps.light.5"
+      },
+      "border-hover": {
+        "$ref": "scales.neutral.steps.light.6"
+      },
+      "input": {
+        "$ref": "scales.neutral.steps.light.5"
+      },
+      "input-hover": {
+        "$ref": "scales.neutral.steps.light.6"
+      },
+      "ring": {
+        "$ref": "scales.primary.steps.light.9"
+      },
+      "ring-offset": "0 0% 100%",
+      "card": "0 0% 100%",
+      "card-foreground": {
+        "$ref": "scales.neutral.steps.light.12"
+      },
+      "popover": "0 0% 100%",
+      "popover-foreground": {
+        "$ref": "scales.neutral.steps.light.12"
+      },
+      "panel": {
+        "$ref": "scales.neutral.steps.light.2"
+      },
+      "panel-translucent": "0 0% 100% / 0.9",
+      "overlay": "0 0% 0% / 0.4"
+    },
+    "dark": {
+      "background": {
+        "$ref": "scales.neutral.steps.dark.1"
+      },
+      "foreground": {
+        "$ref": "scales.neutral.steps.dark.12"
+      },
+      "surface": {
+        "$ref": "scales.neutral.steps.dark.2"
+      },
+      "surface-hover": {
+        "$ref": "scales.neutral.steps.dark.3"
+      },
+      "surface-active": {
+        "$ref": "scales.neutral.steps.dark.4"
+      },
+      "primary": {
+        "$ref": "scales.primary.steps.dark.9"
+      },
+      "primary-hover": {
+        "$ref": "scales.primary.steps.dark.10"
+      },
+      "primary-foreground": {
+        "$ref": "scales.neutral.steps.dark.1"
+      },
+      "secondary": {
+        "$ref": "scales.neutral.steps.dark.3"
+      },
+      "secondary-hover": {
+        "$ref": "scales.neutral.steps.dark.4"
+      },
+      "secondary-foreground": {
+        "$ref": "scales.neutral.steps.dark.12"
+      },
+      "muted": {
+        "$ref": "scales.neutral.steps.dark.3"
+      },
+      "muted-foreground": {
+        "$ref": "scales.neutral.steps.dark.9"
+      },
+      "accent": {
+        "$ref": "scales.neutral.steps.dark.3"
+      },
+      "accent-hover": {
+        "$ref": "scales.neutral.steps.dark.4"
+      },
+      "accent-foreground": {
+        "$ref": "scales.neutral.steps.dark.12"
+      },
+      "border": {
+        "$ref": "scales.neutral.steps.dark.3"
+      },
+      "border-hover": {
+        "$ref": "scales.neutral.steps.dark.4"
+      },
+      "input": {
+        "$ref": "scales.neutral.steps.dark.3"
+      },
+      "input-hover": {
+        "$ref": "scales.neutral.steps.dark.4"
+      },
+      "ring": {
+        "$ref": "scales.primary.steps.dark.9"
+      },
+      "ring-offset": {
+        "$ref": "scales.neutral.steps.dark.1"
+      },
+      "card": {
+        "$ref": "scales.neutral.steps.dark.1"
+      },
+      "card-foreground": {
+        "$ref": "scales.neutral.steps.dark.12"
+      },
+      "popover": {
+        "$ref": "scales.neutral.steps.dark.1"
+      },
+      "popover-foreground": {
+        "$ref": "scales.neutral.steps.dark.12"
+      },
+      "panel": {
+        "$ref": "scales.neutral.steps.dark.2"
+      },
+      "panel-translucent": "25 84% 5% / 0.9",
+      "overlay": "0 0% 0% / 0.6"
+    }
+  },
+  "statusColors": {
+    "light": {
+      "destructive": "0 84% 60%",
+      "destructive-foreground": "0 0% 98%",
+      "success": "151 55% 42%",
+      "success-foreground": "0 0% 100%",
+      "warning": "39 100% 50%",
+      "warning-foreground": "39 40% 15%",
+      "info": "206 100% 50%",
+      "info-foreground": "0 0% 100%"
+    },
+    "dark": {
+      "destructive": "0 63% 31%",
+      "destructive-foreground": "0 0% 98%",
+      "success": "151 50% 45%",
+      "success-foreground": "0 0% 100%",
+      "warning": "39 90% 55%",
+      "warning-foreground": "39 80% 10%",
+      "info": "206 90% 55%",
+      "info-foreground": "0 0% 100%"
+    }
+  },
+  "chartColors": {
+    "1": {
+      "$ref": "scales.primary.steps.light.9"
+    },
+    "2": "262 83% 58%",
+    "3": "25 95% 53%",
+    "4": "142 76% 36%",
+    "5": "347 77% 50%"
+  },
+  "sidebarTokens": {
+    "light": {
+      "background": "0 0% 98%",
+      "foreground": {
+        "$ref": "scales.neutral.steps.light.9"
+      },
+      "primary": {
+        "$ref": "scales.primary.steps.light.9"
+      },
+      "primary-foreground": "0 0% 98%",
+      "accent": {
+        "$ref": "scales.neutral.steps.light.3"
+      },
+      "accent-foreground": {
+        "$ref": "scales.neutral.steps.light.11"
+      },
+      "border": {
+        "$ref": "scales.neutral.steps.light.5"
+      },
+      "ring": {
+        "$ref": "scales.primary.steps.light.9"
+      }
+    },
+    "dark": {
+      "background": {
+        "$ref": "scales.neutral.steps.dark.1"
+      },
+      "foreground": {
+        "$ref": "scales.neutral.steps.dark.12"
+      },
+      "primary": {
+        "$ref": "scales.primary.steps.dark.9"
+      },
+      "primary-foreground": "0 0% 100%",
+      "accent": {
+        "$ref": "scales.neutral.steps.dark.3"
+      },
+      "accent-foreground": {
+        "$ref": "scales.neutral.steps.dark.12"
+      },
+      "border": {
+        "$ref": "scales.neutral.steps.dark.3"
+      },
+      "ring": {
+        "$ref": "scales.primary.steps.dark.9"
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": "Inter, system-ui, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "fontFeatureSettings": "\"rlig\" 1, \"calt\" 1"
+  },
+  "spacing": {
+    "radius": "0.375rem",
+    "radiusLg": "var(--radius)",
+    "radiusMd": "calc(var(--radius) - 2px)",
+    "radiusSm": "calc(var(--radius) - 4px)"
+  },
+  "effects": {
+    "glassMorphism": {
+      "background": {
+        "$ref": "scales.neutral.steps.light.1"
+      },
+      "backdropBlur": "12px"
+    },
+    "glow": {
+      "default": "0 0 20px",
+      "lg": "0 0 40px",
+      "color": {
+        "$ref": "scales.primary.steps.light.9"
+      }
+    },
+    "gradient": {
+      "primary": {
+        "from": {
+          "$ref": "scales.primary.steps.light.9"
+        },
+        "to": {
+          "$ref": "scales.primary.steps.light.11"
+        },
+        "direction": "135deg"
+      },
+      "surface": {
+        "from": "0 0% 100%",
+        "to": {
+          "$ref": "scales.neutral.steps.light.2"
+        },
+        "direction": "180deg"
+      }
+    }
+  },
+  "animations": {
+    "shimmer": {
+      "duration": "8s",
+      "easing": "ease-in-out",
+      "iteration": "infinite",
+      "keyframes": {
+        "0%": {
+          "backgroundPosition": "-200% 0"
+        },
+        "100%": {
+          "backgroundPosition": "200% 0"
+        }
+      }
+    },
+    "pulse-glow": {
+      "duration": "2s",
+      "easing": "ease-in-out",
+      "iteration": "infinite",
+      "keyframes": {
+        "0%, 100%": {
+          "boxShadow": "0 0 20px hsl(25 80% 45% / 0.3)"
+        },
+        "50%": {
+          "boxShadow": "0 0 40px hsl(25 80% 45% / 0.6)"
+        }
+      }
+    },
+    "fade-in": {
+      "duration": "0.3s",
+      "easing": "ease-out",
+      "keyframes": {
+        "from": {
+          "opacity": "0"
+        },
+        "to": {
+          "opacity": "1"
+        }
+      }
+    },
+    "slide-up": {
+      "duration": "0.4s",
+      "easing": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "keyframes": {
+        "from": {
+          "transform": "translateY(10px)",
+          "opacity": "0"
+        },
+        "to": {
+          "transform": "translateY(0)",
+          "opacity": "1"
+        }
+      }
+    }
+  },
   "colors": {
     "light": {
       "background": "35 40% 98%",

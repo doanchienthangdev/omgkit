@@ -1,16 +1,20 @@
 ---
 title: Design System
-description: '31+ curated themes with shadcn/ui integration, V2 color scales, and multi-format export'
+description: '30 curated V2 themes with shadcn/ui integration, 12-step color scales, and multi-format export'
 icon: 'palette'
 ---
 
 ## Overview
 
-OMGKIT includes a complete design system with 31+ curated themes that integrate seamlessly with shadcn/ui. The system supports both V1 (flat colors) and V2 (color scales, effects, animations) theme formats.
+OMGKIT includes a complete design system with **30 curated themes** that integrate seamlessly with shadcn/ui. All themes use the **V2 schema** with 12-step color scales, effects, and animations.
 
 **Key Features:**
-- 30+ curated themes across 5 categories
-- V2 schema with 12-step color scales (Radix-compatible)
+- 30 curated themes across 5 categories (all V2 format)
+- 12-step color scales (Radix-compatible)
+- Alpha variants for transparency effects
+- Status colors (success, warning, info)
+- Effects (glassmorphism, glow, gradients)
+- CSS animations (shimmer, pulse, fade)
 - Export to CSS, SCSS, Tailwind, Figma, and Style Dictionary
 - Automatic color replacement during rebuild
 - Full dark mode support
@@ -44,7 +48,7 @@ omgkit init --with-design
   <Card title="Tech & AI" icon="microchip">
     Futuristic, cyberpunk-inspired themes
     - neo-tokyo
-    - electric-cyan (+ V2 version)
+    - electric-cyan
     - neural-dark
     - matrix-green
     - quantum-purple
@@ -88,73 +92,59 @@ omgkit init --with-design
   </Card>
 </CardGroup>
 
-## Theme Versions
+## V2 Theme Schema
 
-OMGKIT supports two theme schema versions:
+All 30 themes use the V2 schema format with these features:
 
-| Feature | V1 | V2 |
-|---------|----|----|
-| Flat colors | ✓ | ✓ |
-| 12-step color scales | - | ✓ |
-| $ref token references | - | ✓ |
-| Status colors (success/warning/info) | - | ✓ |
-| Effects (glass, glow, gradient) | - | ✓ |
-| Animations (keyframes) | - | ✓ |
-| Alpha variants | - | ✓ |
+| Feature | Description |
+|---------|-------------|
+| 12-step color scales | `--primary-1` through `--primary-12` |
+| Alpha variants | `--primary-a1` through `--primary-a12` |
+| $ref token references | Semantic tokens reference scale values |
+| Status colors | `--success`, `--warning`, `--info`, `--destructive` |
+| Effects | glassMorphism, glow, gradients |
+| Animations | shimmer, pulse-glow, fade-in, slide-up |
+| Backward compatibility | Includes flat `colors` block for V1 compatibility |
 
-### V1 Theme (Flat Colors)
-
-Traditional theme format with direct HSL values:
-
-```json
-{
-  "name": "Neo Tokyo",
-  "id": "neo-tokyo",
-  "category": "tech-ai",
-  "colors": {
-    "light": {
-      "background": "0 0% 100%",
-      "primary": "346.8 77.2% 49.8%",
-      "primary-foreground": "355.7 100% 97.3%"
-    },
-    "dark": { ... }
-  },
-  "radius": "0.5rem"
-}
-```
-
-### V2 Theme (Color Scales + Effects)
-
-Advanced theme format with 12-step color scales, $ref references, and effects:
+### Theme Structure
 
 ```json
 {
   "version": "2.0",
-  "name": "Electric Cyan V2",
-  "id": "electric-cyan-v2",
+  "name": "Neo Tokyo",
+  "id": "neo-tokyo",
   "category": "tech-ai",
+  "description": "Cyberpunk-inspired with neon rose...",
+
+  "colorSystem": {
+    "type": "radix",
+    "version": "3.0"
+  },
 
   "scales": {
     "primary": {
-      "name": "cyan",
+      "name": "rose",
+      "hue": 347,
       "steps": {
         "light": {
-          "1": "185 60% 99%",
-          "9": "186 91% 42.7%",
-          "12": "186 95% 18%"
+          "1": "347 60% 99%",
+          "9": "347 77% 50%",
+          "12": "347 95% 18%"
         },
         "dark": { ... }
       },
       "alpha": {
-        "light": { "1": "186 91% 42.7% / 0.05", ... }
+        "light": { "1": "347 77% 50% / 0.05", ... }
       }
-    }
+    },
+    "neutral": { ... }
   },
 
   "semanticTokens": {
     "light": {
       "primary": { "$ref": "scales.primary.steps.light.9" },
-      "primary-hover": { "$ref": "scales.primary.steps.light.10" }
+      "primary-hover": { "$ref": "scales.primary.steps.light.10" },
+      "surface": { "$ref": "scales.neutral.steps.light.2" }
     }
   },
 
@@ -168,16 +158,19 @@ Advanced theme format with 12-step color scales, $ref references, and effects:
 
   "effects": {
     "glassMorphism": { "backdropBlur": "12px" },
-    "glow": { "default": "0 0 20px" }
+    "glow": { "default": "0 0 20px" },
+    "gradient": { "primary": { "from": "...", "to": "..." } }
   },
 
   "animations": {
-    "shimmer": {
-      "duration": "8s",
-      "easing": "ease-in-out",
-      "keyframes": { ... }
-    }
-  }
+    "shimmer": { "duration": "8s", "easing": "ease-in-out" },
+    "pulse-glow": { "duration": "2s" },
+    "fade-in": { "duration": "0.3s" }
+  },
+
+  "colors": { ... },  // Backward compatible flat colors
+  "radius": "0.5rem",
+  "fontFamily": { ... }
 }
 ```
 
@@ -189,17 +182,17 @@ OMGKIT provides CSS variables that shadcn/ui components consume automatically.
 Your Project
 ├── .omgkit/
 │   └── design/
-│       ├── theme.json    ← Theme configuration
+│       ├── theme.json    ← Theme configuration (V2)
 │       ├── theme.css     ← CSS variables (:root + .dark)
 │       └── backups/      ← Theme backup history
 └── components/
     └── ui/               ← shadcn components use theme.css
 ```
 
-### Generated CSS (V2)
+### Generated CSS
 
 ```css
-/* V2 themes generate extended variables */
+/* All themes generate V2 extended variables */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -208,14 +201,16 @@ Your Project
 @layer base {
   :root {
     /* 12-step color scales */
-    --cyan-1: 185 60% 99%;
-    --cyan-9: 186 91% 42.7%;
-    --cyan-12: 186 95% 18%;
+    --rose-1: 347 60% 99%;
+    --rose-9: 347 77% 50%;
+    --rose-12: 347 95% 18%;
+    --rose-a5: 347 77% 50% / 0.3;
 
     /* Semantic tokens */
     --background: 0 0% 100%;
-    --primary: 186 91% 42.7%;
-    --primary-hover: 186 92% 38%;
+    --primary: 347 77% 50%;
+    --primary-hover: 347 80% 45%;
+    --surface: 347 30% 98%;
 
     /* Status colors */
     --success: 151 55% 42%;
@@ -232,7 +227,6 @@ Your Project
     /* Typography & spacing */
     --radius: 0.5rem;
     --font-sans: Inter, system-ui, sans-serif;
-    --font-mono: JetBrains Mono, monospace;
   }
 
   .dark { /* dark mode overrides */ }
@@ -243,7 +237,7 @@ Your Project
 
 | Command | Description |
 |---------|-------------|
-| `/design:themes` | List all curated themes by category |
+| `/design:themes` | List all 30 curated themes by category |
 | `/design:theme <id>` | Apply a theme to your project |
 | `/design:preview` | Preview current theme colors |
 | `/design:builder` | Build custom theme interactively |
@@ -309,10 +303,10 @@ Export your theme to various design tools and framework formats.
   },
   "light": {
     "colors": {
-      "primary": { "value": "186 91% 42.7%", "type": "color" },
-      "cyan": {
-        "1": { "value": "185 60% 99%", "type": "color" },
-        "9": { "value": "186 91% 42.7%", "type": "color" }
+      "primary": { "value": "347 77% 50%", "type": "color" },
+      "rose": {
+        "1": { "value": "347 60% 99%", "type": "color" },
+        "9": { "value": "347 77% 50%", "type": "color" }
       }
     }
   }
@@ -354,12 +348,12 @@ omgkit design:rebuild neo-tokyo
 
 ### V2 Theme Features in Rebuild
 
-When using V2 themes, you get additional CSS variables:
+All themes generate these CSS variables:
 
 ```css
 /* 12-step color scales */
---teal-1 through --teal-12
---teal-a1 through --teal-a12  /* Alpha variants */
+--rose-1 through --rose-12
+--rose-a1 through --rose-a12  /* Alpha variants */
 
 /* Status colors */
 --success, --warning, --info
@@ -431,13 +425,14 @@ Validate your theme structure before applying:
 
 ### Validation Checks
 
-- Required fields (name, id, category)
+- Required fields (name, id, category, version)
+- Version must be "2.0"
 - ID format (kebab-case)
 - Valid category
 - Color format (HSL values)
-- V2: $ref resolution
-- V2: Color scale structure
-- V2: Circular reference detection
+- $ref resolution
+- Color scale structure (12 steps)
+- Circular reference detection
 
 ## Custom Theme Options
 
@@ -459,7 +454,7 @@ Customize:
 /design:from-screenshot ./mockup.png
 ```
 
-Claude Vision analyzes the image and extracts a cohesive color palette.
+Claude Vision analyzes the image and extracts a cohesive color palette, generating a full V2 theme.
 
 ### Extract from Website
 
@@ -467,7 +462,7 @@ Claude Vision analyzes the image and extracts a cohesive color palette.
 /design:from-url https://linear.app
 ```
 
-OMGKIT fetches the page and extracts CSS variables or computed styles.
+OMGKIT fetches the page and extracts CSS variables or computed styles into a V2 theme.
 
 ## shadcn/ui Integration
 
@@ -487,15 +482,20 @@ Components use CSS variables from your theme:
 // Button automatically uses --primary from theme.css
 <Button>Click me</Button>
 
-// V2 themes provide additional variants
+// All themes provide hover states
 <Button className="hover:bg-primary-hover">
-  With hover state from V2 theme
+  With hover state
 </Button>
 
-// Status colors
+// Status colors available in all themes
 <Alert className="bg-success text-success-foreground">
   Success message
 </Alert>
+
+// Use 12-step color scales
+<div className="bg-rose-9 hover:bg-rose-10">
+  Using color scale
+</div>
 ```
 
 ## CLI Options
@@ -509,7 +509,8 @@ omgkit init --with-design
 
 # Apply specific theme directly
 omgkit init --theme neo-tokyo
-omgkit init --theme electric-cyan-v2  # V2 theme
+omgkit init --theme electric-cyan
+omgkit init --theme neon
 ```
 
 ## Best Practices
@@ -524,22 +525,22 @@ omgkit init --theme electric-cyan-v2  # V2 theme
 @tailwind utilities;
 ```
   </Accordion>
-  <Accordion title="Use V2 color scales">
+  <Accordion title="Use 12-step color scales">
 ```tsx
-// V2 themes provide 12-step scales
-<div className="bg-cyan-9 hover:bg-cyan-10">
+// All themes provide 12-step scales
+<div className="bg-primary-9 hover:bg-primary-10">
   Using 12-step color scale
 </div>
 
 // Alpha variants for overlays
-<div className="bg-cyan-a5">
-  Semi-transparent cyan
+<div className="bg-primary-a5">
+  Semi-transparent primary
 </div>
 ```
   </Accordion>
   <Accordion title="Use status colors">
 ```tsx
-// V2 themes include status colors
+// All themes include status colors
 <Badge className="bg-success text-success-foreground">
   Active
 </Badge>
@@ -561,7 +562,7 @@ Your theme includes both light and dark mode. Add dark mode toggle:
 document.documentElement.classList.toggle('dark');
 ```
   </Accordion>
-  <Accordion title="Use effects (V2)">
+  <Accordion title="Use effects">
 ```tsx
 // Glassmorphism
 <div style={{
