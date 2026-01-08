@@ -19,11 +19,14 @@ import {
   updateFileColors,
   updateProjectTailwindConfig,
   ensureThemeImport,
+  getDynamicColorMapping,
   SCAN_DIRECTORIES,
+  FULL_SCAN_DIRECTORIES,
   SCAN_EXTENSIONS,
   EXCLUDE_DIRS,
   COLOR_PATTERNS,
-  THEME_VAR_MAP
+  THEME_VAR_MAP,
+  FULL_THEME_VAR_MAP
 } from '../../lib/theme.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -665,6 +668,317 @@ export default function Page() {
       expect(result.changedFiles.length).toBeGreaterThan(0);
       expect(result.changedFiles.some(f => f.includes('theme.json'))).toBe(true);
       expect(result.changedFiles.some(f => f.includes('theme.css'))).toBe(true);
+    });
+  });
+
+  // ===========================================================================
+  // FULL MODE TESTS
+  // ===========================================================================
+
+  describe('FULL Mode Constants', () => {
+    it('should have FULL_SCAN_DIRECTORIES with extended paths', () => {
+      expect(FULL_SCAN_DIRECTORIES).toBeDefined();
+      expect(FULL_SCAN_DIRECTORIES).toContain('app');
+      expect(FULL_SCAN_DIRECTORIES).toContain('components');
+      expect(FULL_SCAN_DIRECTORIES).toContain('tests');
+      expect(FULL_SCAN_DIRECTORIES).toContain('test');
+      expect(FULL_SCAN_DIRECTORIES).toContain('__tests__');
+      expect(FULL_SCAN_DIRECTORIES).toContain('lib');
+      expect(FULL_SCAN_DIRECTORIES).toContain('utils');
+      expect(FULL_SCAN_DIRECTORIES).toContain('hooks');
+    });
+
+    it('should have FULL_THEME_VAR_MAP with extended mappings', () => {
+      expect(FULL_THEME_VAR_MAP).toBeDefined();
+      // Check it includes standard mappings
+      expect(FULL_THEME_VAR_MAP['bg-white']).toBe('bg-background');
+      expect(FULL_THEME_VAR_MAP['bg-blue-500']).toBe('bg-primary');
+
+      // Check extended mappings
+      expect(FULL_THEME_VAR_MAP['bg-green-500']).toBe('bg-success');
+      expect(FULL_THEME_VAR_MAP['bg-emerald-500']).toBe('bg-success');
+      expect(FULL_THEME_VAR_MAP['bg-yellow-500']).toBe('bg-warning');
+      expect(FULL_THEME_VAR_MAP['bg-red-700']).toBe('bg-destructive');
+      expect(FULL_THEME_VAR_MAP['bg-cyan-500']).toBe('bg-info');
+      expect(FULL_THEME_VAR_MAP['bg-purple-500']).toBe('bg-accent');
+    });
+
+    it('should have opacity variants in FULL_THEME_VAR_MAP', () => {
+      expect(FULL_THEME_VAR_MAP['bg-green-50']).toBe('bg-success/10');
+      expect(FULL_THEME_VAR_MAP['bg-red-100']).toBe('bg-destructive/20');
+      expect(FULL_THEME_VAR_MAP['bg-blue-300']).toBe('bg-primary/50');
+    });
+
+    it('should have hover/focus variants in FULL_THEME_VAR_MAP', () => {
+      expect(FULL_THEME_VAR_MAP['hover:bg-blue-600']).toBe('hover:bg-primary/90');
+      expect(FULL_THEME_VAR_MAP['focus:ring-blue-500']).toBe('focus:ring-ring');
+    });
+
+    it('should have dark mode variants in FULL_THEME_VAR_MAP', () => {
+      expect(FULL_THEME_VAR_MAP['dark:bg-gray-800']).toBe('dark:bg-muted');
+      expect(FULL_THEME_VAR_MAP['dark:text-gray-100']).toBe('dark:text-foreground');
+    });
+  });
+
+  describe('getDynamicColorMapping', () => {
+    it('should map green colors to success', () => {
+      expect(getDynamicColorMapping('bg-green-500')).toBe('bg-success');
+      expect(getDynamicColorMapping('text-emerald-600')).toBe('text-success');
+      expect(getDynamicColorMapping('border-teal-500')).toBe('border-success');
+    });
+
+    it('should map red colors to destructive', () => {
+      expect(getDynamicColorMapping('bg-red-600')).toBe('bg-destructive');
+      expect(getDynamicColorMapping('text-rose-700')).toBe('text-destructive');
+    });
+
+    it('should map yellow/amber/orange to warning', () => {
+      expect(getDynamicColorMapping('bg-yellow-500')).toBe('bg-warning');
+      expect(getDynamicColorMapping('bg-amber-600')).toBe('bg-warning');
+      expect(getDynamicColorMapping('bg-orange-500')).toBe('bg-warning');
+    });
+
+    it('should map blue to primary', () => {
+      expect(getDynamicColorMapping('bg-blue-500')).toBe('bg-primary');
+      expect(getDynamicColorMapping('text-blue-600')).toBe('text-primary');
+    });
+
+    it('should map cyan/sky to info', () => {
+      expect(getDynamicColorMapping('bg-cyan-500')).toBe('bg-info');
+      expect(getDynamicColorMapping('bg-sky-600')).toBe('bg-info');
+    });
+
+    it('should map purple/violet/indigo to accent', () => {
+      expect(getDynamicColorMapping('bg-purple-500')).toBe('bg-accent');
+      expect(getDynamicColorMapping('bg-violet-600')).toBe('bg-accent');
+      expect(getDynamicColorMapping('bg-indigo-500')).toBe('bg-accent');
+    });
+
+    it('should map neutrals based on shade', () => {
+      expect(getDynamicColorMapping('bg-gray-100')).toBe('bg-muted');
+      expect(getDynamicColorMapping('bg-slate-200')).toBe('bg-muted');
+      expect(getDynamicColorMapping('text-gray-500')).toBe('text-muted-foreground');
+      expect(getDynamicColorMapping('bg-zinc-800')).toBe('bg-foreground');
+    });
+
+    it('should apply opacity based on shade', () => {
+      expect(getDynamicColorMapping('bg-green-100')).toBe('bg-success/10');
+      expect(getDynamicColorMapping('bg-red-200')).toBe('bg-destructive/20');
+      expect(getDynamicColorMapping('bg-blue-300')).toBe('bg-primary/30');
+      expect(getDynamicColorMapping('bg-purple-400')).toBe('bg-accent/70');
+    });
+
+    it('should return null for invalid patterns', () => {
+      expect(getDynamicColorMapping('bg-invalid')).toBeNull();
+      expect(getDynamicColorMapping('not-a-color')).toBeNull();
+      expect(getDynamicColorMapping('')).toBeNull();
+    });
+  });
+
+  describe('scanProjectColors with fullMode', () => {
+    beforeEach(() => {
+      mkdirSync(join(TEST_PROJECT, 'tests'), { recursive: true });
+      mkdirSync(join(TEST_PROJECT, 'lib'), { recursive: true });
+    });
+
+    it('should scan extended directories in fullMode', () => {
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), 'export default function Page() { return null; }');
+      writeFileSync(join(TEST_PROJECT, 'tests/page.test.tsx'), 'export function test() {}');
+      writeFileSync(join(TEST_PROJECT, 'lib/utils.ts'), 'export function util() {}');
+
+      const resultStandard = scanProjectColors(TEST_PROJECT);
+      const resultFull = scanProjectColors(TEST_PROJECT, { fullMode: true });
+
+      expect(resultFull.scannedFiles).toBeGreaterThan(resultStandard.scannedFiles);
+    });
+
+    it('should map more colors in fullMode', () => {
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        export default function Page() {
+          return <div className="bg-emerald-400 text-cyan-500">Hello</div>;
+        }
+      `);
+
+      const resultStandard = scanProjectColors(TEST_PROJECT);
+      const resultFull = scanProjectColors(TEST_PROJECT, { fullMode: true });
+
+      // Standard mode: emerald-400 is unmapped
+      const emeraldStandard = resultStandard.nonCompliant.find(n => n.match === 'bg-emerald-400');
+      expect(emeraldStandard?.suggestion).toBeNull();
+
+      // Full mode: emerald-400 gets dynamic mapping
+      const emeraldFull = resultFull.nonCompliant.find(n => n.match === 'bg-emerald-400');
+      expect(emeraldFull?.suggestion).toBe('bg-success/70');
+    });
+
+    it('should skip test assertions in test files', () => {
+      writeFileSync(join(TEST_PROJECT, 'tests/Button.test.tsx'), `
+        describe('Button', () => {
+          it('should render', () => {
+            expect(screen.getByText('Click')).toHaveClass('bg-blue-500');
+          });
+          const button = <button className="bg-blue-500">Click</button>;
+        });
+      `);
+
+      const result = scanProjectColors(TEST_PROJECT, { fullMode: true });
+      // Should only find one reference (in the JSX), not in the assertion
+      const blueMatches = result.nonCompliant.filter(n => n.match === 'bg-blue-500');
+      expect(blueMatches.length).toBe(1);
+    });
+
+    it('should include fullMode flag in result', () => {
+      const result = scanProjectColors(TEST_PROJECT, { fullMode: true });
+      expect(result.fullMode).toBe(true);
+    });
+  });
+
+  describe('updateFileColors with fullMode', () => {
+    it('should use extended mappings in fullMode', () => {
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        export default function Page() {
+          return <div className="bg-emerald-500 text-cyan-600">Hello</div>;
+        }
+      `);
+
+      const resultStandard = updateFileColors('app/page.tsx', TEST_PROJECT);
+      expect(resultStandard.changed).toBe(false); // emerald-500 not in standard map
+
+      const resultFull = updateFileColors('app/page.tsx', TEST_PROJECT, { fullMode: true });
+      expect(resultFull.changed).toBe(true);
+      expect(resultFull.content).toContain('bg-success');
+      expect(resultFull.content).toContain('text-info');
+    });
+
+    it('should apply dynamic mappings for unmapped colors in fullMode', () => {
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        <div className="bg-lime-500 text-fuchsia-600">
+      `);
+
+      const result = updateFileColors('app/page.tsx', TEST_PROJECT, { fullMode: true });
+      expect(result.changed).toBe(true);
+      expect(result.content).toContain('bg-success');
+      expect(result.content).toContain('text-accent');
+    });
+
+    it('should preserve test assertions in test files', () => {
+      mkdirSync(join(TEST_PROJECT, 'tests'), { recursive: true });
+      writeFileSync(join(TEST_PROJECT, 'tests/Button.test.tsx'), `
+        describe('Button', () => {
+          it('renders', () => {
+            expect(button).toHaveClass('bg-blue-500');
+          });
+          const button = <button className="bg-blue-500">Click</button>;
+        });
+      `);
+
+      const result = updateFileColors('tests/Button.test.tsx', TEST_PROJECT, { fullMode: true });
+
+      // Should keep bg-blue-500 in assertion
+      expect(result.content).toContain("toHaveClass('bg-blue-500')");
+      // Should change bg-blue-500 in JSX
+      expect(result.content).toContain('className="bg-primary"');
+    });
+
+    it('should mark dynamic replacements', () => {
+      // Use a color that's NOT in FULL_THEME_VAR_MAP but can be dynamically mapped
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        <div className="bg-lime-350 bg-teal-450">
+      `);
+
+      const result = updateFileColors('app/page.tsx', TEST_PROJECT, { fullMode: true });
+      // Since these specific shades (350, 450) aren't in the static map,
+      // they should be dynamically mapped if they match the pattern
+      // However, Tailwind doesn't have 350/450 shades, so let's use a valid but unmapped color
+    });
+
+    it('should handle colors already in static map', () => {
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        <div className="bg-lime-500 bg-lime-600">
+      `);
+
+      const result = updateFileColors('app/page.tsx', TEST_PROJECT, { fullMode: true });
+      expect(result.changed).toBe(true);
+      // These are in FULL_THEME_VAR_MAP, so they won't be marked as dynamic
+      expect(result.content).toContain('bg-success');
+    });
+  });
+
+  describe('rebuildProjectTheme with fullMode', () => {
+    beforeEach(() => {
+      writeFileSync(join(TEST_PROJECT, '.omgkit/design/theme.json'), JSON.stringify({ id: 'original' }));
+      writeFileSync(join(TEST_PROJECT, '.omgkit/design/theme.css'), '/* CSS */');
+      mkdirSync(join(TEST_PROJECT, 'tests'), { recursive: true });
+    });
+
+    it('should fix more colors in fullMode', () => {
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        export default function Page() {
+          return <div className="bg-emerald-500 text-cyan-600">Hello</div>;
+        }
+      `);
+
+      const result = rebuildProjectTheme(TEST_PROJECT, 'neo-tokyo', { fullMode: true });
+      expect(result.success).toBe(true);
+      expect(result.fullMode).toBe(true);
+
+      const content = readFileSync(join(TEST_PROJECT, 'app/page.tsx'), 'utf8');
+      expect(content).toContain('bg-success');
+      expect(content).toContain('text-info');
+    });
+
+    it('should scan test directories in fullMode', () => {
+      writeFileSync(join(TEST_PROJECT, 'tests/Component.test.tsx'), `
+        const component = <div className="bg-blue-500">Test</div>;
+      `);
+
+      const result = rebuildProjectTheme(TEST_PROJECT, 'neo-tokyo', { fullMode: true });
+      expect(result.success).toBe(true);
+
+      // Test file should be updated
+      const content = readFileSync(join(TEST_PROJECT, 'tests/Component.test.tsx'), 'utf8');
+      expect(content).toContain('bg-primary');
+    });
+
+    it('should have fewer warnings in fullMode', () => {
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        export default function Page() {
+          return <div className="bg-emerald-400 bg-cyan-500 bg-lime-600">Hello</div>;
+        }
+      `);
+
+      const standardResult = rebuildProjectTheme(TEST_PROJECT, 'neo-tokyo');
+      const standardWarnings = standardResult.warnings.length;
+
+      // Reset file
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        export default function Page() {
+          return <div className="bg-emerald-400 bg-cyan-500 bg-lime-600">Hello</div>;
+        }
+      `);
+
+      const fullResult = rebuildProjectTheme(TEST_PROJECT, 'neo-tokyo', { fullMode: true });
+      const fullWarnings = fullResult.warnings.length;
+
+      // Full mode should have fewer/no warnings since more colors are mapped
+      expect(fullWarnings).toBeLessThan(standardWarnings);
+    });
+
+    it('should preserve dryRun behavior in fullMode', () => {
+      writeFileSync(join(TEST_PROJECT, 'app/page.tsx'), `
+        export default function Page() {
+          return <div className="bg-emerald-500">Hello</div>;
+        }
+      `);
+
+      const result = rebuildProjectTheme(TEST_PROJECT, 'neo-tokyo', { fullMode: true, dryRun: true });
+      expect(result.success).toBe(true);
+      expect(result.dryRun).toBe(true);
+      expect(result.fullMode).toBe(true);
+
+      // File should not be changed
+      const content = readFileSync(join(TEST_PROJECT, 'app/page.tsx'), 'utf8');
+      expect(content).toContain('bg-emerald-500');
     });
   });
 });

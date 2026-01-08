@@ -1,6 +1,6 @@
 ---
 title: "/design:rebuild"
-description: "Skip confirmation prompt"
+description: "Full auto mode - scan ALL directories including tests, map ALL colors with AI, zero manual steps needed"
 icon: "palette"
 ---
 
@@ -12,7 +12,7 @@ icon: "palette"
 
 ## Overview
 
-Skip confirmation prompt
+Full auto mode - scan ALL directories including tests, map ALL colors with AI, zero manual steps needed
 
 ## Quick Start
 
@@ -76,6 +76,22 @@ The following hardcoded colors are automatically converted:
 ### Force Rebuild (No Confirmation)
 ```bash
 /design:rebuild neo-tokyo --force
+```
+
+### Full Auto Mode (Zero Manual Steps)
+```bash
+/design:rebuild neo-tokyo --full
+```
+
+Full mode provides:
+- **Extended scanning**: All directories (app/, components/, tests/, lib/, utils/, etc.)
+- **100% color conversion**: AI-driven mapping for ALL Tailwind colors
+- **Test files included**: Safely updates test files without breaking assertions
+- **Zero warnings**: All patterns converted automatically
+
+### Full Mode + Dry Run
+```bash
+/design:rebuild neo-tokyo --full --dry
 ```
 
 ## Available Themes

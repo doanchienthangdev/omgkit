@@ -1,7 +1,7 @@
 ---
 name: rebuild
 description: Rebuild entire project UI with a new theme, replacing hardcoded colors
-usage: /design:rebuild <theme-id> [--dry] [--force]
+usage: /design:rebuild <theme-id> [--dry] [--force] [--full]
 args:
   - name: theme-id
     required: true
@@ -12,6 +12,9 @@ args:
   - name: --force
     required: false
     description: Skip confirmation prompt
+  - name: --full
+    required: false
+    description: Full auto mode - scan ALL directories including tests, map ALL colors with AI, zero manual steps needed
 ---
 
 # Design Rebuild
@@ -69,6 +72,22 @@ The following hardcoded colors are automatically converted:
 ### Force Rebuild (No Confirmation)
 ```bash
 /design:rebuild neo-tokyo --force
+```
+
+### Full Auto Mode (Zero Manual Steps)
+```bash
+/design:rebuild neo-tokyo --full
+```
+
+Full mode provides:
+- **Extended scanning**: All directories (app/, components/, tests/, lib/, utils/, etc.)
+- **100% color conversion**: AI-driven mapping for ALL Tailwind colors
+- **Test files included**: Safely updates test files without breaking assertions
+- **Zero warnings**: All patterns converted automatically
+
+### Full Mode + Dry Run
+```bash
+/design:rebuild neo-tokyo --full --dry
 ```
 
 ## Available Themes
