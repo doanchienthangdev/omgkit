@@ -10,6 +10,7 @@ skills:
   - methodology/test-enforcement
   - languages/typescript
   - languages/javascript
+  - frontend/design-system-context
 commands:
   - /dev:feature
   - /dev:feature-tested

@@ -1,0 +1,252 @@
+---
+name: design-system-context
+description: Automatic design system context injection for UI consistency
+category: frontend
+level: foundational
+commands:
+  - /design:preview
+  - /design:themes
+---
+
+# Design System Context Injection
+
+This skill ensures all UI/UX work automatically follows the project's design system without explicit user specification.
+
+## Automatic Context Loading
+
+**CRITICAL**: Before ANY UI/component work, you MUST:
+
+1. Check if `.omgkit/design/theme.json` exists
+2. If exists, read it and use its colors
+3. If not exists, suggest running `/design:theme <id>` first
+
+```bash
+# Always check first
+if [ -f ".omgkit/design/theme.json" ]; then
+  # Read and use theme colors
+else
+  # Suggest: "No design system detected. Run /design:themes to select one."
+fi
+```
+
+## Theme Context Structure
+
+When theme.json exists, extract these key values:
+
+```json
+{
+  "name": "Theme Name",
+  "id": "theme-id",
+  "colors": {
+    "light": {
+      "background": "0 0% 100%",
+      "foreground": "240 10% 3.9%",
+      "primary": "346.8 77.2% 49.8%",
+      "primary-foreground": "355.7 100% 97.3%",
+      "secondary": "240 4.8% 95.9%",
+      "muted": "240 4.8% 95.9%",
+      "accent": "240 4.8% 95.9%",
+      "destructive": "0 84.2% 60.2%",
+      "border": "240 5.9% 90%",
+      "ring": "346.8 77.2% 49.8%"
+    }
+  },
+  "radius": "0.5rem"
+}
+```
+
+## Mandatory Color Usage
+
+**NEVER hardcode colors**. Always use CSS variables via Tailwind:
+
+### ✅ CORRECT - Use Theme Variables
+```tsx
+// Backgrounds
+<div className="bg-background">       // Main background
+<div className="bg-card">             // Card background
+<div className="bg-muted">            // Subtle background
+<div className="bg-primary">          // Primary action background
+<div className="bg-secondary">        // Secondary background
+<div className="bg-destructive">      // Error/danger background
+
+// Text
+<p className="text-foreground">       // Primary text
+<p className="text-muted-foreground"> // Secondary/subtle text
+<p className="text-primary">          // Accent text
+<p className="text-destructive">      // Error text
+
+// Borders
+<div className="border-border">       // Standard border
+<div className="border-input">        // Input border
+<div className="ring-ring">           // Focus ring
+
+// Interactive states
+<button className="bg-primary hover:bg-primary/90">
+<button className="bg-secondary hover:bg-secondary/80">
+```
+
+### ❌ WRONG - Never Hardcode
+```tsx
+// NEVER do this
+<div className="bg-[#E11D48]">        // Hardcoded hex
+<div className="bg-rose-500">         // Tailwind default color
+<div className="text-gray-900">       // Not from theme
+<div style={{ color: '#333' }}>       // Inline style
+```
+
+## Component Generation Rules
+
+When generating ANY UI component:
+
+### 1. Button Component
+```tsx
+// Always use theme colors
+<Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+  Primary Action
+</Button>
+
+<Button variant="secondary" className="bg-secondary text-secondary-foreground">
+  Secondary
+</Button>
+
+<Button variant="destructive" className="bg-destructive text-destructive-foreground">
+  Delete
+</Button>
+
+<Button variant="outline" className="border-border bg-background hover:bg-accent">
+  Outline
+</Button>
+```
+
+### 2. Card Component
+```tsx
+<Card className="bg-card text-card-foreground border-border">
+  <CardHeader>
+    <CardTitle className="text-foreground">Title</CardTitle>
+    <CardDescription className="text-muted-foreground">Description</CardDescription>
+  </CardHeader>
+  <CardContent>
+    Content with <span className="text-primary">accent</span> color
+  </CardContent>
+</Card>
+```
+
+### 3. Form Component
+```tsx
+<form className="space-y-4">
+  <div>
+    <Label className="text-foreground">Email</Label>
+    <Input
+      className="border-input bg-background focus:ring-ring"
+      placeholder="Enter email"
+    />
+  </div>
+  <Button className="bg-primary text-primary-foreground">
+    Submit
+  </Button>
+</form>
+```
+
+### 4. Navigation Component
+```tsx
+<nav className="bg-background border-b border-border">
+  <div className="flex items-center gap-4">
+    <a className="text-foreground hover:text-primary">Home</a>
+    <a className="text-muted-foreground hover:text-foreground">About</a>
+    <a className="text-muted-foreground hover:text-foreground">Contact</a>
+  </div>
+</nav>
+```
+
+### 5. Alert/Notification
+```tsx
+// Success - use primary or custom success color
+<Alert className="bg-primary/10 text-primary border-primary">
+  <CheckIcon className="text-primary" />
+  <AlertDescription>Success message</AlertDescription>
+</Alert>
+
+// Error - use destructive
+<Alert className="bg-destructive/10 text-destructive border-destructive">
+  <XIcon className="text-destructive" />
+  <AlertDescription>Error message</AlertDescription>
+</Alert>
+
+// Info - use muted
+<Alert className="bg-muted text-muted-foreground border-border">
+  <InfoIcon />
+  <AlertDescription>Info message</AlertDescription>
+</Alert>
+```
+
+## Dark Mode Handling
+
+Theme CSS includes `.dark` class overrides. Just ensure:
+
+```tsx
+// This automatically works - colors swap in dark mode
+<div className="bg-background text-foreground">
+  Content adapts to light/dark automatically
+</div>
+
+// For dark mode toggle
+<button onClick={() => document.documentElement.classList.toggle('dark')}>
+  Toggle Dark Mode
+</button>
+```
+
+## Border Radius Consistency
+
+Use theme's radius value via CSS variable:
+
+```tsx
+// These use --radius from theme
+<div className="rounded-lg">   // var(--radius)
+<div className="rounded-md">   // calc(var(--radius) - 2px)
+<div className="rounded-sm">   // calc(var(--radius) - 4px)
+```
+
+## Pre-Task Checklist
+
+Before generating ANY UI code, mentally check:
+
+- [ ] Read `.omgkit/design/theme.json` if exists
+- [ ] All colors use CSS variables (bg-primary, text-foreground, etc.)
+- [ ] No hardcoded hex values
+- [ ] No Tailwind default colors (gray-500, blue-600, etc.)
+- [ ] Border radius uses theme's radius
+- [ ] Dark mode compatible (no light-only or dark-only colors)
+
+## Error Prevention
+
+If you catch yourself writing:
+- `bg-blue-500` → Change to `bg-primary`
+- `text-gray-600` → Change to `text-muted-foreground`
+- `border-gray-200` → Change to `border-border`
+- `#E11D48` → Change to CSS variable reference
+
+## Integration with shadcn/ui
+
+shadcn/ui components automatically use CSS variables:
+
+```tsx
+// These already use theme colors
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+
+// Just use them - they read from theme.css
+<Button>Uses --primary automatically</Button>
+<Card>Uses --card automatically</Card>
+<Input />  // Uses --input, --border, --ring automatically
+```
+
+## Summary
+
+**The Golden Rule**: If you're writing a color class, it MUST be one of:
+- `bg-{background|foreground|card|popover|primary|secondary|muted|accent|destructive|border|input|ring}`
+- `text-{foreground|card-foreground|popover-foreground|primary-foreground|secondary-foreground|muted-foreground|accent-foreground|destructive-foreground}`
+- `border-{border|input|ring}`
+- Opacity variants like `bg-primary/90`, `text-muted-foreground/80`
+
+**NO EXCEPTIONS**.

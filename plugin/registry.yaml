@@ -431,6 +431,7 @@ agents:
       - frontend/accessibility
       - frontend/responsive
       - frontend/tailwindcss
+      - frontend/design-system-context
     commands:
       - /design:screenshot
       - /design:cro
