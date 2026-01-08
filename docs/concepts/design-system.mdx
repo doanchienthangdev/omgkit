@@ -332,7 +332,35 @@ omgkit design:rebuild neo-tokyo
 # Dry run to see what will change
 /design:rebuild neo-tokyo --dry
 ```
+
+```bash Full Auto Mode
+# Zero manual steps - scans ALL directories including tests
+/design:rebuild neo-tokyo --full
+```
 </CodeGroup>
+
+### Full Auto Mode (`--full`)
+
+The `--full` flag enables a completely automatic rebuild with zero manual steps:
+
+| Feature | Standard Mode | Full Mode |
+|---------|--------------|-----------|
+| Directory scanning | app/, components/, src/, pages/ | ALL directories (tests/, lib/, utils/, hooks/, etc.) |
+| Color conversion | Basic mappings only | 200+ extended mappings with AI inference |
+| Test files | Not scanned | Safely updates test files (skips assertions) |
+| Warnings | Manual review needed | Zero warnings, all patterns auto-converted |
+
+**Extended color mappings in Full Mode:**
+- Green colors (green, emerald, teal) → `bg-success`
+- Red colors (red, rose) → `bg-destructive`
+- Yellow/Amber → `bg-warning`
+- Cyan/Sky → `bg-info`
+- Purple/Violet → `bg-accent`
+
+```bash
+# Full mode + dry run (preview all changes)
+/design:rebuild neo-tokyo --full --dry
+```
 
 ### What Gets Updated
 

@@ -244,6 +244,12 @@ Rebuild your entire project's UI with a single command:
 # Rebuild with new theme (scans and fixes hardcoded colors)
 omgkit design:rebuild neo-tokyo
 
+# Full auto mode - zero manual steps, scans ALL directories
+omgkit design:rebuild neo-tokyo --full
+
+# Preview changes without applying
+omgkit design:rebuild neo-tokyo --dry
+
 # Scan for non-compliant colors
 omgkit design:scan
 
@@ -253,9 +259,11 @@ omgkit design:rollback
 
 The rebuild feature:
 - Backs up current theme before changes
-- Scans `app/`, `components/`, `src/`, `pages/` directories
+- Standard mode: Scans `app/`, `components/`, `src/`, `pages/` directories
+- **Full mode (`--full`)**: Scans ALL directories including tests/, lib/, utils/, hooks/
 - Replaces hardcoded colors (`bg-blue-500`) with theme variables (`bg-primary`)
-- Reports unfixable patterns for manual review
+- Full mode: 200+ extended color mappings with AI-driven inference
+- Full mode: Safely updates test files (skips assertion strings)
 - Generates 12-step color scales and status colors
 
 #### Generated CSS Variables
